@@ -27,7 +27,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "javac -cp \".:target/dependency/*\" src/main/java/com/poissonnerie/**/*.java && java -cp \".:target/dependency/*\" --module-path target/dependency --add-modules javafx.controls,javafx.fxml com.poissonnerie.Main"
+args = "mvn compile exec:java -Dexec.mainClass=com.poissonnerie.Main"
 
 [deployment]
-run = ["sh", "-c", "javac -cp \".:target/dependency/*\" src/main/java/com/poissonnerie/**/*.java && java -cp \".:target/dependency/*\" --module-path target/dependency --add-modules javafx.controls,javafx.fxml com.poissonnerie.Main"]
+run = ["sh", "-c", "mvn compile exec:java -Dexec.mainClass=com.poissonnerie.Main"]
