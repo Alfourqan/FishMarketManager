@@ -1,0 +1,16 @@
+com/poissonnerie/model/Produit.class
+com/poissonnerie/util/DatabaseManager.class
+com/poissonnerie/view/ClientView$1.class
+com/poissonnerie/model/Vente.class
+com/poissonnerie/controller/ClientController.class
+com/poissonnerie/view/ProduitView.class
+com/poissonnerie/controller/ProduitController.class
+com/poissonnerie/Main.class
+com/poissonnerie/view/MainView.class
+com/poissonnerie/view/ProduitView$1.class
+com/poissonnerie/model/Client.class
+com/poissonnerie/model/Vente$LigneVente.class
+com/poissonnerie/controller/VenteController.class
+com/poissonnerie/util/PDFGenerator.class
+com/poissonnerie/view/VenteView.class
+com/poissonnerie/view/ClientView.class

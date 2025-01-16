@@ -1,4 +1,4 @@
-modules = ["java", "java-17"]
+modules = ["java", "java-17", "java-21"]
 
 [nix]
 channel = "stable-24_05"
@@ -27,7 +27,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "mvn compile exec:java -Dexec.mainClass=com.poissonnerie.Main"
+args = "mvn clean javafx:run"
 
 [deployment]
-run = ["sh", "-c", "mvn compile exec:java -Dexec.mainClass=com.poissonnerie.Main"]
+run = ["sh", "-c", "mvn clean javafx:run"]
