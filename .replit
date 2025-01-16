@@ -1,0 +1,33 @@
+modules = ["java"]
+
+[nix]
+channel = "stable-24_05"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Java Application"
+
+[[workflows.workflow]]
+name = "Java Application"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "javac -cp \".:target/dependency/*\" src/main/java/com/poissonnerie/**/*.java && java -cp \".:target/dependency/*\" --module-path target/dependency --add-modules javafx.controls,javafx.fxml com.poissonnerie.Main"
+
+[deployment]
+run = ["sh", "-c", "javac -cp \".:target/dependency/*\" src/main/java/com/poissonnerie/**/*.java && java -cp \".:target/dependency/*\" --module-path target/dependency --add-modules javafx.controls,javafx.fxml com.poissonnerie.Main"]
