@@ -20,7 +20,7 @@ public class ProduitViewSwing {
         controller = new ProduitController();
 
         // Création du modèle de table avec icône de statut
-        String[] columnNames = {"", "Nom", "Catégorie", "Prix", "Stock", "Seuil d'alerte"};
+        String[] columnNames = {"", "Nom", "Catégorie", "Prix Achat", "Prix Vente", "Marge (%)", "Stock", "Seuil d'alerte"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -139,22 +139,25 @@ public class ProduitViewSwing {
         // Style moderne pour les champs
         JTextField nomField = createStyledTextField();
         JComboBox<String> categorieCombo = new JComboBox<>(new String[]{"Frais", "Surgelé", "Transformé"});
-        JTextField prixField = createStyledTextField();
+        JTextField prixAchatField = createStyledTextField();
+        JTextField prixVenteField = createStyledTextField();
         JTextField stockField = createStyledTextField();
         JTextField seuilField = createStyledTextField();
 
         // Layout
         addFormField(panel, gbc, "Nom:", nomField, 0);
         addFormField(panel, gbc, "Catégorie:", categorieCombo, 1);
-        addFormField(panel, gbc, "Prix:", prixField, 2);
-        addFormField(panel, gbc, "Stock:", stockField, 3);
-        addFormField(panel, gbc, "Seuil d'alerte:", seuilField, 4);
+        addFormField(panel, gbc, "Prix d'achat (€):", prixAchatField, 2);
+        addFormField(panel, gbc, "Prix de vente (€):", prixVenteField, 3);
+        addFormField(panel, gbc, "Stock:", stockField, 4);
+        addFormField(panel, gbc, "Seuil d'alerte:", seuilField, 5);
 
         // Pré-remplissage si modification
         if (produit != null) {
             nomField.setText(produit.getNom());
             categorieCombo.setSelectedItem(produit.getCategorie());
-            prixField.setText(String.valueOf(produit.getPrix()));
+            prixAchatField.setText(String.format("%.2f", produit.getPrixAchat()));
+            prixVenteField.setText(String.format("%.2f", produit.getPrixVente()));
             stockField.setText(String.valueOf(produit.getStock()));
             seuilField.setText(String.valueOf(produit.getSeuilAlerte()));
         }
@@ -167,7 +170,7 @@ public class ProduitViewSwing {
         // Gestionnaires d'événements
         okButton.addActionListener(evt -> {
             try {
-                validateAndSaveProduit(produit, nomField, categorieCombo, prixField, stockField, seuilField);
+                validateAndSaveProduit(produit, nomField, categorieCombo, prixAchatField, prixVenteField, stockField, seuilField);
                 dialog.dispose();
             } catch (Exception e) {
                 showErrorMessage(e.getMessage());
@@ -212,18 +215,24 @@ public class ProduitViewSwing {
     }
 
     private void validateAndSaveProduit(Produit produit, JTextField nomField, JComboBox<String> categorieCombo,
-                                      JTextField prixField, JTextField stockField, JTextField seuilField) {
+                                     JTextField prixAchatField, JTextField prixVenteField,
+                                     JTextField stockField, JTextField seuilField) {
         String nom = nomField.getText().trim();
         String categorie = (String) categorieCombo.getSelectedItem();
-        String prixText = prixField.getText().trim().replace(",", ".");
+        String prixAchatText = prixAchatField.getText().trim().replace(",", ".");
+        String prixVenteText = prixVenteField.getText().trim().replace(",", ".");
         String stockText = stockField.getText().trim();
         String seuilText = seuilField.getText().trim();
 
         // Validation
         if (nom.isEmpty()) throw new IllegalArgumentException("Le nom est obligatoire");
 
-        double prix = validateDouble(prixText, "Prix invalide");
-        if (prix <= 0) throw new IllegalArgumentException("Le prix doit être positif");
+        double prixAchat = validateDouble(prixAchatText, "Prix d'achat invalide");
+        if (prixAchat < 0) throw new IllegalArgumentException("Le prix d'achat ne peut pas être négatif");
+
+        double prixVente = validateDouble(prixVenteText, "Prix de vente invalide");
+        if (prixVente < 0) throw new IllegalArgumentException("Le prix de vente ne peut pas être négatif");
+        if (prixVente < prixAchat) throw new IllegalArgumentException("Le prix de vente doit être supérieur au prix d'achat");
 
         int stock = validateInt(stockText, "Stock invalide");
         if (stock < 0) throw new IllegalArgumentException("Le stock ne peut pas être négatif");
@@ -233,11 +242,12 @@ public class ProduitViewSwing {
 
         // Sauvegarde
         if (produit == null) {
-            controller.ajouterProduit(new Produit(0, nom, categorie, prix, stock, seuil));
+            controller.ajouterProduit(new Produit(0, nom, categorie, prixAchat, prixVente, stock, seuil));
         } else {
             produit.setNom(nom);
             produit.setCategorie(categorie);
-            produit.setPrix(prix);
+            produit.setPrixAchat(prixAchat);
+            produit.setPrixVente(prixVente);
             produit.setStock(stock);
             produit.setSeuilAlerte(seuil);
             controller.mettreAJourProduit(produit);
@@ -294,7 +304,9 @@ public class ProduitViewSwing {
                 icon,
                 produit.getNom(),
                 produit.getCategorie(),
-                String.format("%.2f €", produit.getPrix()),
+                String.format("%.2f €", produit.getPrixAchat()),
+                String.format("%.2f €", produit.getPrixVente()),
+                String.format("%.1f%%", produit.getTauxMarge()),
                 produit.getStock(),
                 produit.getSeuilAlerte()
             });

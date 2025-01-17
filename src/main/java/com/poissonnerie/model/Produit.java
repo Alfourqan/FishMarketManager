@@ -4,20 +4,22 @@ public class Produit {
     private int id;
     private String nom;
     private String categorie;
-    private double prix;
+    private double prixAchat;
+    private double prixVente;
     private int stock;
     private int seuilAlerte;
 
-    public Produit(int id, String nom, String categorie, double prix, int stock, int seuilAlerte) {
+    public Produit(int id, String nom, String categorie, double prixAchat, double prixVente, int stock, int seuilAlerte) {
         this.id = id;
         this.nom = nom;
         this.categorie = categorie;
-        this.prix = prix;
+        this.prixAchat = prixAchat;
+        this.prixVente = prixVente;
         this.stock = stock;
         this.seuilAlerte = seuilAlerte;
     }
 
-    // Getters et setters existants
+    // Getters et setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -27,8 +29,14 @@ public class Produit {
     public String getCategorie() { return categorie; }
     public void setCategorie(String categorie) { this.categorie = categorie; }
 
-    public double getPrix() { return prix; }
-    public void setPrix(double prix) { this.prix = prix; }
+    public double getPrixAchat() { return prixAchat; }
+    public void setPrixAchat(double prixAchat) { this.prixAchat = prixAchat; }
+
+    public double getPrixVente() { return prixVente; }
+    public void setPrixVente(double prixVente) { this.prixVente = prixVente; }
+
+    public double getMarge() { return prixVente - prixAchat; }
+    public double getTauxMarge() { return prixAchat > 0 ? ((prixVente - prixAchat) / prixAchat) * 100 : 0; }
 
     public int getStock() { return stock; }
     public void setStock(int stock) { this.stock = stock; }
@@ -74,9 +82,10 @@ public class Produit {
 
     @Override
     public String toString() {
-        return String.format("%s - %.2f€ (%s) %s",
+        return String.format("%s - Achat: %.2f€, Vente: %.2f€ (%s) %s",
             nom,
-            prix,
+            prixAchat,
+            prixVente,
             categorie,
             getStatutStockFormatted());
     }

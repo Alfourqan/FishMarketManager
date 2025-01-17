@@ -283,7 +283,7 @@ public class VenteViewSwing {
                     }
                     ligne.setQuantite(nouvelleQuantite);
                 } else {
-                    Vente.LigneVente ligne = new Vente.LigneVente(produit, quantite, produit.getPrix());
+                    Vente.LigneVente ligne = new Vente.LigneVente(produit, quantite, produit.getPrixVente());
                     panier.add(ligne);
                 }
 
@@ -548,7 +548,7 @@ public class VenteViewSwing {
 
                     value = String.format("%s • %.2f € • %s",
                         produit.getNom(),
-                        produit.getPrix(),
+                        produit.getPrixVente(),
                         stockInfo
                     );
 

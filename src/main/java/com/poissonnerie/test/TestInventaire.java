@@ -44,7 +44,7 @@ public class TestInventaire {
         System.out.println("\n=== Test de gestion des stocks ===");
 
         // Test 1: Produit avec stock normal
-        Produit saumon = new Produit(1, "Saumon frais", "Poisson", 25.99, 10, 5);
+        Produit saumon = new Produit(1, "Saumon frais", "Poisson", 20.0, 25.99, 10, 5);
         System.out.println("\n1. État initial du saumon:");
         System.out.println(saumon);
 

@@ -26,7 +26,8 @@ public class ProduitController {
                     rs.getInt("id"),
                     rs.getString("nom"),
                     rs.getString("categorie"),
-                    rs.getDouble("prix"),
+                    rs.getDouble("prix_achat"),
+                    rs.getDouble("prix_vente"),
                     rs.getInt("stock"),
                     rs.getInt("seuil_alerte")
                 );
@@ -38,7 +39,7 @@ public class ProduitController {
     }
 
     public void ajouterProduit(Produit produit) {
-        String sql = "INSERT INTO produits (nom, categorie, prix, stock, seuil_alerte) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO produits (nom, categorie, prix_achat, prix_vente, stock, seuil_alerte) VALUES (?, ?, ?, ?, ?, ?)";
         String getIdSql = "SELECT last_insert_rowid() as id";
 
         try (Connection conn = DatabaseManager.getConnection()) {
@@ -46,9 +47,10 @@ public class ProduitController {
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, produit.getNom());
                 pstmt.setString(2, produit.getCategorie());
-                pstmt.setDouble(3, produit.getPrix());
-                pstmt.setInt(4, produit.getStock());
-                pstmt.setInt(5, produit.getSeuilAlerte());
+                pstmt.setDouble(3, produit.getPrixAchat());
+                pstmt.setDouble(4, produit.getPrixVente());
+                pstmt.setInt(5, produit.getStock());
+                pstmt.setInt(6, produit.getSeuilAlerte());
                 pstmt.executeUpdate();
 
                 // Récupérer l'ID généré
@@ -71,17 +73,18 @@ public class ProduitController {
     }
 
     public void mettreAJourProduit(Produit produit) {
-        String sql = "UPDATE produits SET nom = ?, categorie = ?, prix = ?, stock = ?, seuil_alerte = ? WHERE id = ?";
+        String sql = "UPDATE produits SET nom = ?, categorie = ?, prix_achat = ?, prix_vente = ?, stock = ?, seuil_alerte = ? WHERE id = ?";
 
         try (Connection conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, produit.getNom());
                 pstmt.setString(2, produit.getCategorie());
-                pstmt.setDouble(3, produit.getPrix());
-                pstmt.setInt(4, produit.getStock());
-                pstmt.setInt(5, produit.getSeuilAlerte());
-                pstmt.setInt(6, produit.getId());
+                pstmt.setDouble(3, produit.getPrixAchat());
+                pstmt.setDouble(4, produit.getPrixVente());
+                pstmt.setInt(5, produit.getStock());
+                pstmt.setInt(6, produit.getSeuilAlerte());
+                pstmt.setInt(7, produit.getId());
 
                 int rowsUpdated = pstmt.executeUpdate();
                 if (rowsUpdated > 0) {
@@ -100,6 +103,7 @@ public class ProduitController {
         }
     }
 
+    // Méthodes existantes inchangées
     public boolean produitUtiliseDansVentes(int produitId) {
         String sql = "SELECT COUNT(*) as count FROM lignes_vente WHERE produit_id = ?";
 

@@ -1,9 +1,7 @@
 com/poissonnerie/view/CaisseViewSwing.class
 com/poissonnerie/controller/CaisseController$1.class
-com/poissonnerie/view/VenteViewSwing$1.class
 com/poissonnerie/model/Vente.class
 com/poissonnerie/view/ClientViewSwing.class
-com/poissonnerie/view/VenteViewSwing$3.class
 com/poissonnerie/controller/ClientController.class
 com/poissonnerie/view/ClientViewSwing$1.class
 com/poissonnerie/view/InventaireViewSwing.class
@@ -19,10 +17,8 @@ com/poissonnerie/view/InventaireViewSwing$ButtonEditor.class
 com/poissonnerie/view/InventaireViewSwing$ButtonRenderer.class
 com/poissonnerie/view/ConfigurationViewSwing.class
 com/poissonnerie/controller/CaisseController.class
-com/poissonnerie/view/VenteViewSwing$4.class
 com/poissonnerie/model/Produit.class
 com/poissonnerie/util/DatabaseManager.class
-com/poissonnerie/view/VenteViewSwing$2.class
 com/poissonnerie/view/ProduitViewSwing$1.class
 com/poissonnerie/model/InventaireManager.class
 com/poissonnerie/model/MouvementCaisse$TypeMouvement.class
@@ -30,9 +26,6 @@ com/poissonnerie/Main.class
 com/poissonnerie/view/MainViewSwing.class
 com/poissonnerie/view/InventaireViewSwing$1.class
 com/poissonnerie/model/Vente$LigneVente.class
-com/poissonnerie/controller/VenteController.class
 com/poissonnerie/test/TestInventaire.class
 com/poissonnerie/view/CaisseViewSwing$1.class
-com/poissonnerie/view/VenteViewSwing.class
-com/poissonnerie/util/PDFGenerator.class
 com/poissonnerie/model/InventaireManager$InventaireObserver.class
