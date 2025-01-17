@@ -1,6 +1,5 @@
 com/poissonnerie/view/CaisseViewSwing.class
 com/poissonnerie/controller/CaisseController$1.class
-com/poissonnerie/view/VenteViewSwing$3.class
 com/poissonnerie/controller/ClientController.class
 com/poissonnerie/controller/FournisseurController.class
 com/poissonnerie/view/ClientViewSwing$1.class
@@ -35,7 +34,6 @@ com/poissonnerie/view/ReportViewSwing$2.class
 com/poissonnerie/view/ProduitViewSwing.class
 com/poissonnerie/model/ConfigurationParam.class
 com/poissonnerie/view/ConfigurationViewSwing.class
-com/poissonnerie/view/VenteViewSwing$4.class
 com/poissonnerie/view/FournisseurViewSwing.class
 com/poissonnerie/view/VenteViewSwing$2.class
 com/poissonnerie/model/Fournisseur.class
@@ -45,7 +43,6 @@ com/poissonnerie/view/ProduitViewSwing$3.class
 com/poissonnerie/view/ReportViewSwing$1.class
 com/poissonnerie/view/ReportViewSwing.class
 com/poissonnerie/view/ConfigurationViewSwing$1.class
-com/poissonnerie/view/VenteViewSwing$5.class
 com/poissonnerie/model/Vente$LigneVente.class
 com/poissonnerie/view/InventaireViewSwing$1.class
 com/poissonnerie/test/TestInventaire.class
