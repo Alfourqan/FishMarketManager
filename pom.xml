@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.poissonnerie</groupId>
@@ -22,6 +23,34 @@
       <artifactId>sqlite-jdbc</artifactId>
       <version>3.44.1.0</version>
       <type>jar</type>
+    </dependency>
+    <!-- FlatLaf Look and Feel -->
+    <dependency>
+        <groupId>com.formdev</groupId>
+        <artifactId>flatlaf</artifactId>
+        <version>3.2.1</version>
+    </dependency>
+    <!-- FlatLaf IntelliJ Themes -->
+    <dependency>
+        <groupId>com.formdev</groupId>
+        <artifactId>flatlaf-intellij-themes</artifactId>
+        <version>3.2.1</version>
+    </dependency>
+    <!-- Material Design Icons -->
+    <dependency>
+        <groupId>org.kordamp.ikonli</groupId>
+        <artifactId>ikonli-core</artifactId>
+        <version>12.3.1</version>
+    </dependency>
+    <dependency>
+        <groupId>org.kordamp.ikonli</groupId>
+        <artifactId>ikonli-swing</artifactId>
+        <version>12.3.1</version>
+    </dependency>
+    <dependency>
+        <groupId>org.kordamp.ikonli</groupId>
+        <artifactId>ikonli-material-pack</artifactId>
+        <version>12.3.1</version>
     </dependency>
   </dependencies>
 

@@ -2,6 +2,8 @@ package com.poissonnerie.view;
 
 import javax.swing.*;
 import java.awt.*;
+import org.kordamp.ikonli.materialdesign.MaterialDesign;
+import org.kordamp.ikonli.swing.FontIcon;
 
 public class MainViewSwing {
     private final JPanel mainPanel;
@@ -19,11 +21,20 @@ public class MainViewSwing {
         JMenuBar menuBar = createMenuBar();
         mainPanel.add(menuBar, BorderLayout.NORTH);
 
-        // Tabs
-        tabbedPane.addTab("Produits", new ProduitViewSwing().getMainPanel());
-        tabbedPane.addTab("Ventes", new VenteViewSwing().getMainPanel());
-        tabbedPane.addTab("Clients", new ClientViewSwing().getMainPanel());
-        tabbedPane.addTab("Caisse", new CaisseViewSwing().getMainPanel());
+        // Tabs avec icônes
+        FontIcon productsIcon = FontIcon.of(MaterialDesign.MDI_PACKAGE_VARIANT);
+        productsIcon.setIconSize(20);
+        FontIcon salesIcon = FontIcon.of(MaterialDesign.MDI_CART);
+        salesIcon.setIconSize(20);
+        FontIcon clientsIcon = FontIcon.of(MaterialDesign.MDI_ACCOUNT_GROUP);
+        clientsIcon.setIconSize(20);
+        FontIcon cashIcon = FontIcon.of(MaterialDesign.MDI_CASH_REGISTER);
+        cashIcon.setIconSize(20);
+
+        tabbedPane.addTab("Produits", productsIcon, new ProduitViewSwing().getMainPanel());
+        tabbedPane.addTab("Ventes", salesIcon, new VenteViewSwing().getMainPanel());
+        tabbedPane.addTab("Clients", clientsIcon, new ClientViewSwing().getMainPanel());
+        tabbedPane.addTab("Caisse", cashIcon, new CaisseViewSwing().getMainPanel());
 
         mainPanel.add(tabbedPane, BorderLayout.CENTER);
     }
@@ -33,9 +44,12 @@ public class MainViewSwing {
 
         // Menu Fichier
         JMenu fichierMenu = new JMenu("Fichier");
-        JMenuItem parametresMenuItem = new JMenuItem("Paramètres");
-        JMenuItem exporterMenuItem = new JMenuItem("Exporter les données");
-        JMenuItem quitterMenuItem = new JMenuItem("Quitter");
+        JMenuItem parametresMenuItem = new JMenuItem("Paramètres", 
+            FontIcon.of(MaterialDesign.MDI_COG, 16));
+        JMenuItem exporterMenuItem = new JMenuItem("Exporter les données", 
+            FontIcon.of(MaterialDesign.MDI_EXPORT, 16));
+        JMenuItem quitterMenuItem = new JMenuItem("Quitter", 
+            FontIcon.of(MaterialDesign.MDI_EXIT_TO_APP, 16));
 
         parametresMenuItem.addActionListener(e -> showParametres());
         quitterMenuItem.addActionListener(e -> System.exit(0));
@@ -45,12 +59,16 @@ public class MainViewSwing {
         fichierMenu.addSeparator();
         fichierMenu.add(quitterMenuItem);
 
-        // Menu Rapports
+        // Menu Rapports avec icônes
         JMenu rapportsMenu = new JMenu("Rapports");
-        JMenuItem ventesJourMenuItem = new JMenuItem("Ventes du jour");
-        JMenuItem stocksMenuItem = new JMenuItem("État des stocks");
-        JMenuItem creancesMenuItem = new JMenuItem("État des créances");
-        JMenuItem caisseMenuItem = new JMenuItem("Journal de caisse");
+        JMenuItem ventesJourMenuItem = new JMenuItem("Ventes du jour", 
+            FontIcon.of(MaterialDesign.MDI_CHART_BAR, 16));
+        JMenuItem stocksMenuItem = new JMenuItem("État des stocks", 
+            FontIcon.of(MaterialDesign.MDI_CLIPBOARD_LIST, 16));
+        JMenuItem creancesMenuItem = new JMenuItem("État des créances", 
+            FontIcon.of(MaterialDesign.MDI_CREDIT_CARD_CLOCK, 16));
+        JMenuItem caisseMenuItem = new JMenuItem("Journal de caisse", 
+            FontIcon.of(MaterialDesign.MDI_CASH, 16));
 
         rapportsMenu.add(ventesJourMenuItem);
         rapportsMenu.add(stocksMenuItem);

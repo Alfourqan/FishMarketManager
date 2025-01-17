@@ -509,8 +509,8 @@ public class VenteViewSwing {
         clientCombo.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value,
-                                                        int index, boolean isSelected,
-                                                        boolean cellHasFocus) {
+                                                       int index, boolean isSelected,
+                                                       boolean cellHasFocus) {
                 if (value == null) {
                     value = "⚪ Sélectionner un client";
                 } else if (value instanceof Client) {
@@ -528,8 +528,8 @@ public class VenteViewSwing {
         produitCombo.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value,
-                                                        int index, boolean isSelected,
-                                                        boolean cellHasFocus) {
+                                                       int index, boolean isSelected,
+                                                       boolean cellHasFocus) {
                 if (value == null) {
                     value = "⚪ Sélectionner un produit";
                 } else if (value instanceof String && ((String) value).startsWith("━━━")) {

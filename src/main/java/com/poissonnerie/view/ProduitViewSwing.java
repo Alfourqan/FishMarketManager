@@ -5,6 +5,9 @@ import com.poissonnerie.model.Produit;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import org.kordamp.ikonli.materialdesign.MaterialDesign;
+import org.kordamp.ikonli.Ikon;
+import org.kordamp.ikonli.swing.FontIcon;
 
 public class ProduitViewSwing {
     private final JPanel mainPanel;
@@ -16,15 +19,22 @@ public class ProduitViewSwing {
         mainPanel = new JPanel(new BorderLayout(10, 10));
         controller = new ProduitController();
 
-        // Création du modèle de table
-        String[] columnNames = {"Nom", "Catégorie", "Prix", "Stock", "Seuil d'alerte"};
+        // Création du modèle de table avec icône de statut
+        String[] columnNames = {"", "Nom", "Catégorie", "Prix", "Stock", "Seuil d'alerte"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
             }
+
+            @Override
+            public Class<?> getColumnClass(int column) {
+                return column == 0 ? Icon.class : Object.class;
+            }
         };
         tableProduits = new JTable(tableModel);
+        tableProduits.getColumnModel().getColumn(0).setMaxWidth(30);
+        tableProduits.setRowHeight(25);
 
         initializeComponents();
         loadData();
@@ -33,19 +43,30 @@ public class ProduitViewSwing {
     private void initializeComponents() {
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Boutons d'action
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton ajouterBtn = new JButton("Ajouter");
-        JButton modifierBtn = new JButton("Modifier");
-        JButton supprimerBtn = new JButton("Supprimer");
+        // Boutons d'action avec icônes
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        buttonPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY),
+            BorderFactory.createEmptyBorder(5, 5, 10, 5)
+        ));
+
+        JButton ajouterBtn = createStyledButton("Ajouter", MaterialDesign.MDI_PLUS_BOX);
+        JButton modifierBtn = createStyledButton("Modifier", MaterialDesign.MDI_PENCIL);
+        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesign.MDI_MINUS_BOX);
+        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH);
 
         buttonPanel.add(ajouterBtn);
         buttonPanel.add(modifierBtn);
         buttonPanel.add(supprimerBtn);
+        buttonPanel.add(actualiserBtn);
 
         // Table avec scroll
         JScrollPane scrollPane = new JScrollPane(tableProduits);
         tableProduits.setFillsViewportHeight(true);
+
+        // Style de la table
+        tableProduits.setShowGrid(false);
+        tableProduits.setIntercellSpacing(new Dimension(0, 0));
 
         // Gestionnaires d'événements
         ajouterBtn.addActionListener(e -> showProduitDialog(null));
@@ -90,8 +111,55 @@ public class ProduitViewSwing {
             }
         });
 
+        actualiserBtn.addActionListener(e -> {
+            loadData();
+        });
+
         mainPanel.add(buttonPanel, BorderLayout.NORTH);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
+    }
+
+    private JButton createStyledButton(String text, Ikon iconCode) {
+        FontIcon icon = FontIcon.of(iconCode);
+        icon.setIconSize(16);
+        JButton button = new JButton(text, icon);
+        button.setMargin(new Insets(5, 10, 5, 10));
+        return button;
+    }
+
+    private void loadData() {
+        try {
+            controller.chargerProduits();
+            refreshTable();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(mainPanel,
+                "Erreur lors du chargement des produits : " + e.getMessage(),
+                "Erreur",
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void refreshTable() {
+        tableModel.setRowCount(0);
+        for (Produit produit : controller.getProduits()) {
+            FontIcon icon;
+            if (produit.getStock() <= produit.getSeuilAlerte()) {
+                icon = FontIcon.of(MaterialDesign.MDI_ALERT);
+                icon.setIconColor(new Color(220, 53, 69)); // Rouge pour stock bas
+            } else {
+                icon = FontIcon.of(MaterialDesign.MDI_PACKAGE);
+                icon.setIconColor(new Color(40, 167, 69)); // Vert pour stock normal
+            }
+
+            tableModel.addRow(new Object[]{
+                icon,
+                produit.getNom(),
+                produit.getCategorie(),
+                String.format("%.2f €", produit.getPrix()),
+                produit.getStock(),
+                produit.getSeuilAlerte()
+            });
+        }
     }
 
     private void showProduitDialog(Produit produit) {
@@ -230,31 +298,6 @@ public class ProduitViewSwing {
         dialog.pack();
         dialog.setLocationRelativeTo(mainPanel);
         dialog.setVisible(true);
-    }
-
-    private void loadData() {
-        try {
-            controller.chargerProduits();
-            refreshTable();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(mainPanel,
-                "Erreur lors du chargement des produits : " + e.getMessage(),
-                "Erreur",
-                JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void refreshTable() {
-        tableModel.setRowCount(0);
-        for (Produit produit : controller.getProduits()) {
-            tableModel.addRow(new Object[]{
-                produit.getNom(),
-                produit.getCategorie(),
-                String.format("%.2f €", produit.getPrix()),
-                produit.getStock(),
-                produit.getSeuilAlerte()
-            });
-        }
     }
 
     public JPanel getMainPanel() {

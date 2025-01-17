@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import com.poissonnerie.util.DatabaseManager;
 import com.poissonnerie.view.MainViewSwing;
+import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialLighterIJTheme;
 
 public class Main {
     public static void main(String[] args) {
@@ -13,7 +15,11 @@ public class Main {
                 System.out.println("Démarrage de l'application...");
 
                 // Set Look and Feel
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                FlatMaterialLighterIJTheme.setup();
+                UIManager.put("Button.arc", 10);
+                UIManager.put("Component.arc", 10);
+                UIManager.put("ProgressBar.arc", 10);
+                UIManager.put("TextComponent.arc", 10);
                 System.out.println("Look and Feel configuré.");
 
                 // Initialisation de la base de données

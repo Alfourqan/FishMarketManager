@@ -6,7 +6,9 @@ import com.poissonnerie.util.PDFGenerator;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
+import org.kordamp.ikonli.materialdesign.MaterialDesign;
+import org.kordamp.ikonli.Ikon;
+import org.kordamp.ikonli.swing.FontIcon;
 
 public class ClientViewSwing {
     private final JPanel mainPanel;
@@ -19,14 +21,21 @@ public class ClientViewSwing {
         controller = new ClientController();
 
         // Création du modèle de table
-        String[] columnNames = {"Nom", "Téléphone", "Adresse", "Solde"};
+        String[] columnNames = {"", "Nom", "Téléphone", "Adresse", "Solde"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
             }
+
+            @Override
+            public Class<?> getColumnClass(int column) {
+                return column == 0 ? Icon.class : Object.class;
+            }
         };
         tableClients = new JTable(tableModel);
+        tableClients.getColumnModel().getColumn(0).setMaxWidth(30);
+        tableClients.setRowHeight(25);
 
         initializeComponents();
         loadData();
@@ -35,14 +44,19 @@ public class ClientViewSwing {
     private void initializeComponents() {
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Boutons d'action
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton ajouterBtn = new JButton("Ajouter");
-        JButton modifierBtn = new JButton("Modifier");
-        JButton supprimerBtn = new JButton("Supprimer");
-        JButton reglerCreanceBtn = new JButton("Régler créance");
-        JButton actualiserBtn = new JButton("Actualiser");
-        actualiserBtn.setIcon(UIManager.getIcon("Table.refreshIcon"));
+        // Boutons d'action avec icônes
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        buttonPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY),
+            BorderFactory.createEmptyBorder(5, 5, 10, 5)
+        ));
+
+        // Création des boutons avec icônes
+        JButton ajouterBtn = createStyledButton("Ajouter", MaterialDesign.MDI_ACCOUNT_PLUS);
+        JButton modifierBtn = createStyledButton("Modifier", MaterialDesign.MDI_ACCOUNT_EDIT);
+        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesign.MDI_ACCOUNT_REMOVE);
+        JButton reglerCreanceBtn = createStyledButton("Régler créance", MaterialDesign.MDI_CREDIT_CARD_CHECK);
+        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH);
 
         buttonPanel.add(ajouterBtn);
         buttonPanel.add(modifierBtn);
@@ -53,6 +67,10 @@ public class ClientViewSwing {
         // Table avec scroll
         JScrollPane scrollPane = new JScrollPane(tableClients);
         tableClients.setFillsViewportHeight(true);
+
+        // Style de la table
+        tableClients.setShowGrid(false);
+        tableClients.setIntercellSpacing(new Dimension(0, 0));
 
         // Gestionnaires d'événements
         ajouterBtn.addActionListener(e -> showClientDialog(null));
@@ -142,6 +160,36 @@ public class ClientViewSwing {
 
         mainPanel.add(buttonPanel, BorderLayout.NORTH);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
+    }
+
+    private JButton createStyledButton(String text, Ikon iconCode) {
+        FontIcon icon = FontIcon.of(iconCode);
+        icon.setIconSize(16);
+        JButton button = new JButton(text, icon);
+        button.setMargin(new Insets(5, 10, 5, 10));
+        return button;
+    }
+
+    private void refreshTable() {
+        tableModel.setRowCount(0);
+        for (Client client : controller.getClients()) {
+            FontIcon icon;
+            if (client.getSolde() > 0) {
+                icon = FontIcon.of(MaterialDesign.MDI_ALERT);
+                icon.setIconColor(new Color(220, 53, 69)); // Rouge pour les créances
+            } else {
+                icon = FontIcon.of(MaterialDesign.MDI_ACCOUNT);
+                icon.setIconColor(new Color(40, 167, 69)); // Vert pour les comptes à jour
+            }
+
+            tableModel.addRow(new Object[]{
+                icon,
+                client.getNom(),
+                client.getTelephone(),
+                client.getAdresse(),
+                String.format("%.2f €", client.getSolde())
+            });
+        }
     }
 
     private void showReglerCreanceDialog(Client client) {
@@ -395,18 +443,6 @@ public class ClientViewSwing {
                 "Erreur lors du chargement des clients : " + e.getMessage(),
                 "Erreur",
                 JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void refreshTable() {
-        tableModel.setRowCount(0);
-        for (Client client : controller.getClients()) {
-            tableModel.addRow(new Object[]{
-                client.getNom(),
-                client.getTelephone(),
-                client.getAdresse(),
-                String.format("%.2f €", client.getSolde())
-            });
         }
     }
 
