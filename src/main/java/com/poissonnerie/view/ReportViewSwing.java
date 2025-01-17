@@ -26,11 +26,11 @@ public class ReportViewSwing {
     public ReportViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-        
+
         venteController = new VenteController();
         produitController = new ProduitController();
         fournisseurController = new FournisseurController();
-        
+
         dateDebut = LocalDate.now().minusMonths(1);
         dateFin = LocalDate.now();
 
@@ -46,13 +46,13 @@ public class ReportViewSwing {
 
         // Panel gauche pour les boutons de génération de rapports
         JPanel leftPanel = createLeftPanel();
-        
+
         // Panel droit pour l'affichage des graphiques/statistiques
         JPanel rightPanel = createRightPanel();
-        
+
         splitPane.setLeftComponent(leftPanel);
         splitPane.setRightComponent(rightPanel);
-        
+
         mainPanel.add(splitPane, BorderLayout.CENTER);
     }
 
@@ -66,29 +66,29 @@ public class ReportViewSwing {
         JPanel periodPanel = new JPanel(new GridLayout(4, 1, 5, 5));
         periodPanel.setBackground(panel.getBackground());
         periodPanel.setBorder(BorderFactory.createTitledBorder("Période"));
-        
-        JButton aujourd'huiBtn = createPeriodButton("Aujourd'hui", () -> {
+
+        JButton aujourdhuiBtn = createPeriodButton("Aujourd'hui", () -> {
             dateDebut = LocalDate.now();
             dateFin = LocalDate.now();
             updateCharts();
         });
-        
+
         JButton semaineBtn = createPeriodButton("Cette semaine", () -> {
             dateDebut = LocalDate.now().minusWeeks(1);
             dateFin = LocalDate.now();
             updateCharts();
         });
-        
+
         JButton moisBtn = createPeriodButton("Ce mois", () -> {
             dateDebut = LocalDate.now().minusMonths(1);
             dateFin = LocalDate.now();
             updateCharts();
         });
-        
-        periodPanel.add(aujourd'huiBtn);
+
+        periodPanel.add(aujourdhuiBtn);
         periodPanel.add(semaineBtn);
         periodPanel.add(moisBtn);
-        
+
         // Boutons de génération de rapports
         JButton ventesBtn = createReportButton("Rapport des ventes", MaterialDesign.MDI_CART);
         JButton stocksBtn = createReportButton("Rapport des stocks", MaterialDesign.MDI_PACKAGE_VARIANT);
@@ -118,19 +118,19 @@ public class ReportViewSwing {
     private JPanel createRightPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(Color.WHITE);
-        
+
         // Titre du panel
         JLabel titleLabel = new JLabel("Statistiques et graphiques", SwingConstants.CENTER);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-        
+
         // Panel pour les graphiques
         chartPanel = new JPanel();
         chartPanel.setBackground(Color.WHITE);
-        
+
         panel.add(titleLabel, BorderLayout.NORTH);
         panel.add(chartPanel, BorderLayout.CENTER);
-        
+
         return panel;
     }
 
@@ -139,14 +139,14 @@ public class ReportViewSwing {
         FontIcon icon = FontIcon.of(iconCode);
         icon.setIconSize(18);
         button.setIcon(icon);
-        
+
         button.setAlignmentX(Component.LEFT_ALIGNMENT);
         button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
         button.setMargin(new Insets(8, 15, 8, 15));
         button.setFocusPainted(false);
         button.setHorizontalAlignment(SwingConstants.LEFT);
         button.setIconTextGap(10);
-        
+
         return button;
     }
 
@@ -161,12 +161,12 @@ public class ReportViewSwing {
         try {
             venteController.chargerVentes();
             String nomFichier = "rapport_ventes_" + LocalDate.now() + ".pdf";
-            
+
             List<Vente> ventesFiltered = venteController.getVentes().stream()
                 .filter(v -> !v.getDate().toLocalDate().isBefore(dateDebut) && 
                            !v.getDate().toLocalDate().isAfter(dateFin))
                 .collect(Collectors.toList());
-            
+
             PDFGenerator.genererRapportVentes(ventesFiltered, nomFichier);
             afficherMessageSuccess("Rapport généré", 
                 "Le rapport des ventes a été généré dans le fichier : " + nomFichier);
@@ -206,13 +206,13 @@ public class ReportViewSwing {
         // Mise à jour des statistiques dans le panel de droite
         chartPanel.removeAll();
         chartPanel.setLayout(new GridLayout(2, 2, 10, 10));
-        
+
         // Exemple de statistiques (à remplacer par de vrais graphiques)
         addStatPanel("Ventes du jour", "15 commandes\n2500 €");
         addStatPanel("Produits en stock", "150 produits\n25 en alerte");
         addStatPanel("Fournisseurs actifs", "8 fournisseurs\n3 commandes en cours");
         addStatPanel("Chiffre d'affaires", "Mensuel: 45000 €\nAnnuel: 520000 €");
-        
+
         chartPanel.revalidate();
         chartPanel.repaint();
     }
@@ -225,21 +225,21 @@ public class ReportViewSwing {
             BorderFactory.createEmptyBorder(10, 10, 10, 10)
         ));
         panel.setBackground(new Color(250, 250, 250));
-        
+
         JLabel titleLabel = new JLabel(title);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        
+
         JTextArea contentArea = new JTextArea(content);
         contentArea.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         contentArea.setEditable(false);
         contentArea.setBackground(panel.getBackground());
         contentArea.setAlignmentX(Component.CENTER_ALIGNMENT);
-        
+
         panel.add(titleLabel);
         panel.add(Box.createVerticalStrut(10));
         panel.add(contentArea);
-        
+
         chartPanel.add(panel);
     }
 
