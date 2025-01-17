@@ -9,7 +9,7 @@ import java.io.FileOutputStream;
 import java.time.format.DateTimeFormatter;
 
 public class PDFGenerator {
-    private static final float TICKET_WIDTH = 226.77f; // 8 cm en points
+    private static final float TICKET_WIDTH = 170.079f; // 6 cm en points
     private static final float MARGIN = 14.17f; // 5mm en points
 
     public static String genererPreviewTicket(Vente vente) {
@@ -44,12 +44,9 @@ public class PDFGenerator {
             preview.append(repeatChar('-', 40)).append("\n");
         }
 
-        // En-tête articles
-        preview.append(String.format("%-20s %6s %6s %6s\n", "Article", "Qté", "P.U.", "Total"));
-        preview.append(repeatChar('=', 40)).append("\n");
-
         // Articles
         double totalHT = 0;
+        int totalArticles = 0;
         for (Vente.LigneVente ligne : vente.getLignes()) {
             String nom = ligne.getProduit().getNom();
             if (nom.length() > 20) {
@@ -60,26 +57,35 @@ public class PDFGenerator {
             preview.append(String.format("%20s %3d x %6.2f %6.2f\n", 
                 "", ligne.getQuantite(), ligne.getPrixUnitaire(), sousTotal));
             totalHT += sousTotal;
+            totalArticles += ligne.getQuantite();
         }
 
         // Séparateur avant totaux
-        preview.append(repeatChar('=', 40)).append("\n");
+        preview.append("\n").append(repeatChar('=', 40)).append("\n");
 
         // Totaux et TVA
+        preview.append(String.format("SOUS-TOTAL HT%27.2f€\n", totalHT));
         double tva = totalHT * (Double.parseDouble(tauxTVA) / 100);
-        preview.append(String.format("%28s %10.2f€\n", "Total HT:", totalHT));
-        preview.append(String.format("%28s %10.2f€\n", "TVA " + tauxTVA + "%:", tva));
+        preview.append(String.format("TVA %s%%%29.2f€\n", tauxTVA, tva));
         preview.append(repeatChar('-', 40)).append("\n");
-        preview.append(String.format("%28s %10.2f€\n", "Total TTC:", totalHT + tva));
-        preview.append(repeatChar('=', 40)).append("\n\n");
+        preview.append(String.format("TOTAL TTC%30.2f€\n", totalHT + tva));
+        preview.append(repeatChar('=', 40)).append("\n");
+        preview.append(String.format("Nombre d'articles: %d\n", totalArticles));
+        preview.append("\n");
 
         // Mode de paiement
-        preview.append(centerText(vente.isCredit() ? "*** VENTE À CRÉDIT ***" : "*** PAIEMENT COMPTANT ***", 40)).append("\n");
+        String modeReglement = vente.isCredit() ? "*** VENTE À CRÉDIT ***" : "*** PAIEMENT COMPTANT ***";
+        preview.append(centerText(modeReglement, 40)).append("\n");
+        if (vente.isCredit() && vente.getClient() != null) {
+            preview.append(String.format("Solde après achat: %.2f€\n", 
+                vente.getClient().getSolde() + vente.getTotal()));
+        }
         preview.append(repeatChar('-', 40)).append("\n\n");
 
         // Pied de page
         String piedPage = configController.getValeur("PIED_PAGE_RECU");
         preview.append(centerText(piedPage, 40)).append("\n");
+        preview.append(centerText("* * *", 40)).append("\n");
         preview.append("\n");  // Espace final
 
         return preview.toString();
@@ -102,7 +108,7 @@ public class PDFGenerator {
             String preview = genererPreviewTicket(vente);
             for (String line : preview.split("\n")) {
                 Font currentFont = normalFont;
-                if (line.startsWith("===")) {
+                if (line.matches(".*TOTAL TTC.*|.*SOUS-TOTAL HT.*|.*TVA.*") || line.startsWith("===")) {
                     currentFont = boldFont;
                 } else if (line.equals(line.toUpperCase()) && !line.startsWith("---")) {
                     currentFont = titleFont;
@@ -110,7 +116,7 @@ public class PDFGenerator {
 
                 Paragraph p = new Paragraph(line, currentFont);
                 p.setAlignment(Element.ALIGN_LEFT);
-                if (line.startsWith("Total TTC:")) {
+                if (line.matches(".*TOTAL TTC.*")) {
                     p.setSpacingBefore(5);
                     p.setSpacingAfter(5);
                 }

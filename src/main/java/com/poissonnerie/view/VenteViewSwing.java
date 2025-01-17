@@ -67,25 +67,37 @@ public class VenteViewSwing {
             // Sauvegarder la sélection actuelle
             int selectedRow = tableVentes.getSelectedRow();
 
-            // Charger les données
-            produitController.chargerProduits();
-            System.out.println("Produits chargés");
+            // Désactiver les contrôles pendant le chargement
+            setControlsEnabled(false);
+            mainPanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-            clientController.chargerClients();
-            System.out.println("Clients chargés");
+            try {
+                // Charger les données
+                produitController.chargerProduits();
+                System.out.println("Produits chargés");
 
-            venteController.chargerVentes();
-            System.out.println("Ventes chargées: " + venteController.getVentes().size() + " ventes");
+                clientController.chargerClients();
+                System.out.println("Clients chargés");
 
-            refreshComboBoxes();
-            refreshVentesTable();
+                venteController.chargerVentes();
+                System.out.println("Ventes chargées: " + venteController.getVentes().size() + " ventes");
 
-            // Restaurer la sélection si possible
-            if (selectedRow >= 0 && selectedRow < tableVentes.getRowCount()) {
-                tableVentes.setRowSelectionInterval(selectedRow, selectedRow);
+                // Mettre à jour l'interface
+                refreshComboBoxes();
+                refreshVentesTable();
+
+                // Restaurer la sélection si possible
+                if (selectedRow >= 0 && selectedRow < tableVentes.getRowCount()) {
+                    tableVentes.setRowSelectionInterval(selectedRow, selectedRow);
+                }
+
+                System.out.println("Données chargées avec succès");
+            } finally {
+                // Réactiver les contrôles
+                setControlsEnabled(true);
+                mainPanel.setCursor(Cursor.getDefaultCursor());
             }
 
-            System.out.println("Données chargées avec succès");
         } catch (Exception e) {
             System.err.println("Erreur lors du chargement des données: " + e.getMessage());
             e.printStackTrace();
@@ -94,6 +106,14 @@ public class VenteViewSwing {
                 "Erreur",
                 JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private void setControlsEnabled(boolean enabled) {
+        clientCombo.setEnabled(enabled && creditCheck.isSelected());
+        produitCombo.setEnabled(enabled);
+        creditCheck.setEnabled(enabled);
+        actualiserBtn.setEnabled(enabled);
+        // Désactiver les autres contrôles si nécessaire
     }
 
     private void initializeComponents() {
@@ -127,6 +147,7 @@ public class VenteViewSwing {
             // Sauvegarder l'état actuel
             int selectedRow = tableVentes.getSelectedRow();
 
+            // Recharger les données
             loadData();
 
             // Restaurer la sélection

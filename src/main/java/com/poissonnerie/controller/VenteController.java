@@ -14,66 +14,89 @@ public class VenteController {
     private final List<Vente> ventes = new ArrayList<>();
 
     public List<Vente> getVentes() {
-        return ventes;
+        return new ArrayList<>(ventes); // Retourne une copie pour éviter les modifications externes
     }
 
     public void chargerVentes() {
         ventes.clear();
+        Connection conn = null;
+        try {
+            conn = DatabaseManager.getConnection();
+            conn.setAutoCommit(false); // Début de la transaction
 
-        String sql = "SELECT v.*, c.* FROM ventes v LEFT JOIN clients c ON v.client_id = c.id ORDER BY v.date DESC";
+            System.out.println("Chargement des ventes en cours...");
+            String sql = "SELECT v.*, c.* FROM ventes v LEFT JOIN clients c ON v.client_id = c.id ORDER BY v.date DESC";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql);
-             ResultSet rs = pstmt.executeQuery()) {
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery(sql)) {
 
-            while (rs.next()) {
-                Client client = null;
-                if (rs.getObject("client_id") != null) {
-                    client = new Client(
-                        rs.getInt("client_id"),
-                        rs.getString("nom"),
-                        rs.getString("telephone"),
-                        rs.getString("adresse"),
-                        rs.getDouble("solde")
+                while (rs.next()) {
+                    Client client = null;
+                    if (rs.getObject("client_id") != null) {
+                        client = new Client(
+                            rs.getInt("client_id"),
+                            rs.getString("nom"),
+                            rs.getString("telephone"),
+                            rs.getString("adresse"),
+                            rs.getDouble("solde")
+                        );
+                    }
+
+                    long timestamp = rs.getLong("date");
+                    LocalDateTime date = LocalDateTime.ofInstant(
+                        Instant.ofEpochMilli(timestamp),
+                        java.time.ZoneId.systemDefault()
                     );
+
+                    Vente vente = new Vente(
+                        rs.getInt("id"),
+                        date,
+                        client,
+                        rs.getBoolean("credit"),
+                        rs.getDouble("total")
+                    );
+
+                    // Charger les lignes de vente
+                    chargerLignesVente(conn, vente);
+                    ventes.add(vente);
                 }
-
-                long timestamp = rs.getLong("date");
-                LocalDateTime date = LocalDateTime.ofInstant(
-                    Instant.ofEpochMilli(timestamp),
-                    java.time.ZoneId.systemDefault()
-                );
-
-                Vente vente = new Vente(
-                    rs.getInt("id"),
-                    date,
-                    client,
-                    rs.getBoolean("credit"),
-                    rs.getDouble("total")
-                );
-
-                chargerLignesVente(vente);
-                ventes.add(vente);
             }
+
+            conn.commit();
             System.out.println("Ventes chargées avec succès: " + ventes.size() + " ventes");
 
         } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                    System.err.println("Transaction annulée suite à une erreur");
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
             e.printStackTrace();
             System.err.println("Erreur lors du chargement des ventes: " + e.getMessage());
             throw new RuntimeException("Erreur lors du chargement des ventes", e);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
-    private void chargerLignesVente(Vente vente) {
+    private void chargerLignesVente(Connection conn, Vente vente) throws SQLException {
         String sql = "SELECT l.*, p.* FROM lignes_vente l " +
                     "JOIN produits p ON l.produit_id = p.id " +
                     "WHERE l.vente_id = ?";
 
         List<Vente.LigneVente> lignes = new ArrayList<>();
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, vente.getId());
 
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -99,11 +122,6 @@ public class VenteController {
 
             vente.setLignes(lignes);
             System.out.println("Lignes de vente chargées pour la vente " + vente.getId() + ": " + lignes.size() + " lignes");
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            System.err.println("Erreur lors du chargement des lignes de vente: " + e.getMessage());
-            throw new RuntimeException("Erreur lors du chargement des lignes de vente", e);
         }
     }
 
@@ -114,9 +132,8 @@ public class VenteController {
             conn.setAutoCommit(false);
             System.out.println("Début de l'enregistrement de la vente...");
 
+            // Insérer la vente
             String sqlVente = "INSERT INTO ventes (date, client_id, credit, total) VALUES (?, ?, ?, ?)";
-            int venteId;
-
             try (PreparedStatement pstmt = conn.prepareStatement(sqlVente)) {
                 long timestamp = vente.getDate().atZone(java.time.ZoneId.systemDefault())
                     .toInstant().toEpochMilli();
@@ -132,10 +149,11 @@ public class VenteController {
 
                 pstmt.executeUpdate();
 
+                // Récupérer l'ID généré avec last_insert_rowid()
                 try (Statement stmt = conn.createStatement();
                      ResultSet rs = stmt.executeQuery("SELECT last_insert_rowid() as id")) {
                     if (rs.next()) {
-                        venteId = rs.getInt("id");
+                        int venteId = rs.getInt("id");
                         vente.setId(venteId);
                         System.out.println("ID de vente généré: " + venteId);
                     } else {
@@ -144,28 +162,36 @@ public class VenteController {
                 }
             }
 
-            String sqlLigne = "INSERT INTO lignes_vente (vente_id, produit_id, quantite, prix_unitaire) VALUES (?, ?, ?, ?)";
-            try (PreparedStatement pstmt = conn.prepareStatement(sqlLigne)) {
-                for (Vente.LigneVente ligne : vente.getLignes()) {
+            // Insérer les lignes de vente et mettre à jour les stocks
+            for (Vente.LigneVente ligne : vente.getLignes()) {
+                // Insérer la ligne de vente
+                try (PreparedStatement pstmt = conn.prepareStatement(
+                        "INSERT INTO lignes_vente (vente_id, produit_id, quantite, prix_unitaire) VALUES (?, ?, ?, ?)")) {
                     pstmt.setInt(1, vente.getId());
                     pstmt.setInt(2, ligne.getProduit().getId());
                     pstmt.setInt(3, ligne.getQuantite());
                     pstmt.setDouble(4, ligne.getPrixUnitaire());
                     pstmt.executeUpdate();
+                }
 
-                    String sqlStock = "UPDATE produits SET stock = stock - ? WHERE id = ?";
-                    try (PreparedStatement pstmtStock = conn.prepareStatement(sqlStock)) {
-                        pstmtStock.setInt(1, ligne.getQuantite());
-                        pstmtStock.setInt(2, ligne.getProduit().getId());
-                        pstmtStock.executeUpdate();
-                        System.out.println("Stock mis à jour pour le produit " + ligne.getProduit().getId());
+                // Mettre à jour le stock
+                try (PreparedStatement pstmt = conn.prepareStatement(
+                        "UPDATE produits SET stock = stock - ? WHERE id = ? AND stock >= ?")) {
+                    pstmt.setInt(1, ligne.getQuantite());
+                    pstmt.setInt(2, ligne.getProduit().getId());
+                    pstmt.setInt(3, ligne.getQuantite());
+                    int updated = pstmt.executeUpdate();
+                    if (updated == 0) {
+                        throw new SQLException("Stock insuffisant pour le produit: " + ligne.getProduit().getNom());
                     }
+                    System.out.println("Stock mis à jour pour le produit " + ligne.getProduit().getId());
                 }
             }
 
+            // Mettre à jour le solde client si vente à crédit
             if (vente.isCredit() && vente.getClient() != null) {
-                String sqlSolde = "UPDATE clients SET solde = solde + ? WHERE id = ?";
-                try (PreparedStatement pstmt = conn.prepareStatement(sqlSolde)) {
+                try (PreparedStatement pstmt = conn.prepareStatement(
+                        "UPDATE clients SET solde = solde + ? WHERE id = ?")) {
                     pstmt.setDouble(1, vente.getTotal());
                     pstmt.setInt(2, vente.getClient().getId());
                     pstmt.executeUpdate();
@@ -184,7 +210,6 @@ public class VenteController {
                     System.err.println("Transaction annulée suite à une erreur");
                 } catch (SQLException ex) {
                     ex.printStackTrace();
-                    System.err.println("Erreur lors du rollback: " + ex.getMessage());
                 }
             }
             e.printStackTrace();
@@ -197,7 +222,6 @@ public class VenteController {
                     conn.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
-                    System.err.println("Erreur lors de la fermeture de la connexion: " + e.getMessage());
                 }
             }
         }
