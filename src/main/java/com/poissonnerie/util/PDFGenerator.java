@@ -23,72 +23,73 @@ public class PDFGenerator {
         String nomEntreprise = configController.getValeur("NOM_ENTREPRISE");
         String adresse = configController.getValeur("ADRESSE_ENTREPRISE");
         String telephone = configController.getValeur("TELEPHONE_ENTREPRISE");
+        String siret = configController.getValeur("SIRET_ENTREPRISE");
         String tauxTVA = configController.getValeur("TAUX_TVA");
 
         preview.append("\n");  // Espace en haut
         preview.append(centerText(nomEntreprise.toUpperCase(), 40)).append("\n");
         preview.append(centerText(adresse, 40)).append("\n");
-        preview.append(centerText(telephone, 40)).append("\n\n");
-        preview.append(repeatChar('=', 40)).append("\n");
+        preview.append(centerText("Tél : " + telephone, 40)).append("\n");
+        preview.append(centerText("SIRET : " + siret, 40)).append("\n");
+        preview.append(repeatChar('=', 40)).append("\n\n");
 
         // Informations de la facture
         preview.append(String.format("Ticket N°: %d\n", vente.getId()));
         preview.append(String.format("Date: %s\n", 
             vente.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))));
-        preview.append(repeatChar('-', 40)).append("\n");
-
-        // Client si vente à crédit
         if (vente.isCredit() && vente.getClient() != null) {
             preview.append(String.format("Client: %s\n", vente.getClient().getNom()));
             if (vente.getClient().getTelephone() != null && !vente.getClient().getTelephone().isEmpty()) {
                 preview.append(String.format("Tél: %s\n", vente.getClient().getTelephone()));
             }
-            preview.append(repeatChar('-', 40)).append("\n");
         }
+        preview.append(repeatChar('-', 40)).append("\n");
 
         // Articles
+        preview.append(String.format("%-3s %-20s %7s %7s\n", "Qté", "Article", "P.U.", "Total"));
+        preview.append(repeatChar('-', 40)).append("\n");
+
         double totalHT = 0;
         int totalArticles = 0;
+
         for (Vente.LigneVente ligne : vente.getLignes()) {
             String nom = ligne.getProduit().getNom();
             if (nom.length() > 20) {
                 nom = nom.substring(0, 17) + "...";
             }
-            preview.append(String.format("%-20s\n", nom));
-            double sousTotal = ligne.getQuantite() * ligne.getPrixUnitaire();
-            preview.append(String.format("%20s %3d x %6.2f %6.2f\n", 
-                "", ligne.getQuantite(), ligne.getPrixUnitaire(), sousTotal));
-            totalHT += sousTotal;
+            preview.append(String.format("%3d %-20s %7.2f %7.2f\n",
+                ligne.getQuantite(),
+                nom,
+                ligne.getPrixUnitaire(),
+                ligne.getQuantite() * ligne.getPrixUnitaire()));
+            totalHT += ligne.getQuantite() * ligne.getPrixUnitaire();
             totalArticles += ligne.getQuantite();
         }
 
-        // Séparateur avant totaux
-        preview.append("\n").append(repeatChar('=', 40)).append("\n");
-
         // Totaux et TVA
-        preview.append(String.format("SOUS-TOTAL HT%27.2f€\n", totalHT));
+        preview.append("\n").append(repeatChar('=', 40)).append("\n");
+        preview.append(String.format("TOTAL HT%32.2f€\n", totalHT));
         double tva = totalHT * (Double.parseDouble(tauxTVA) / 100);
-        preview.append(String.format("TVA %s%%%29.2f€\n", tauxTVA, tva));
+        preview.append(String.format("TVA %s%%%32.2f€\n", tauxTVA, tva));
         preview.append(repeatChar('-', 40)).append("\n");
         preview.append(String.format("TOTAL TTC%30.2f€\n", totalHT + tva));
         preview.append(repeatChar('=', 40)).append("\n");
         preview.append(String.format("Nombre d'articles: %d\n", totalArticles));
-        preview.append("\n");
 
         // Mode de paiement
         String modeReglement = vente.isCredit() ? "*** VENTE À CRÉDIT ***" : "*** PAIEMENT COMPTANT ***";
-        preview.append(centerText(modeReglement, 40)).append("\n");
+        preview.append("\n").append(centerText(modeReglement, 40)).append("\n");
         if (vente.isCredit() && vente.getClient() != null) {
             preview.append(String.format("Solde après achat: %.2f€\n", 
                 vente.getClient().getSolde() + vente.getTotal()));
         }
-        preview.append(repeatChar('-', 40)).append("\n\n");
 
         // Pied de page
+        preview.append(repeatChar('-', 40)).append("\n\n");
         String piedPage = configController.getValeur("PIED_PAGE_RECU");
         preview.append(centerText(piedPage, 40)).append("\n");
-        preview.append(centerText("* * *", 40)).append("\n");
-        preview.append("\n");  // Espace final
+        preview.append(centerText("Merci de votre visite", 40)).append("\n");
+        preview.append(centerText("* * *", 40)).append("\n\n");
 
         return preview.toString();
     }
@@ -201,7 +202,7 @@ public class PDFGenerator {
             String preview = genererPreviewTicket(vente);
             for (String line : preview.split("\n")) {
                 Font currentFont = normalFont;
-                if (line.matches(".*TOTAL TTC.*|.*SOUS-TOTAL HT.*|.*TVA.*") || line.startsWith("===")) {
+                if (line.matches(".*TOTAL TTC.*|.*TOTAL HT.*|.*TVA.*") || line.startsWith("===")) {
                     currentFont = boldFont;
                 } else if (line.equals(line.toUpperCase()) && !line.startsWith("---")) {
                     currentFont = titleFont;
