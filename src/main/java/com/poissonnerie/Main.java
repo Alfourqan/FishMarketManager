@@ -23,11 +23,26 @@ public class Main {
                 UIManager.put("ProgressBar.arc", 10);
                 UIManager.put("TextComponent.arc", 10);
 
-                // Couleurs modernes
-                UIManager.put("Button.background", new Color(63, 81, 181));
-                UIManager.put("Button.foreground", Color.WHITE);
-                UIManager.put("Button.hoverBackground", new Color(92, 107, 192));
-                UIManager.put("Button.pressedBackground", new Color(48, 63, 159));
+                // Couleurs modernes avec meilleur contraste
+                Color primaryColor = new Color(25, 118, 210); // Bleu plus foncé
+                Color primaryLightColor = new Color(64, 196, 255); // Bleu clair pour hover
+                Color primaryTextColor = Color.WHITE;
+
+                // Configuration des boutons
+                UIManager.put("Button.background", primaryColor);
+                UIManager.put("Button.foreground", primaryTextColor);
+                UIManager.put("Button.hoverBackground", primaryLightColor);
+                UIManager.put("Button.focusedBackground", primaryLightColor);
+                UIManager.put("Button.pressedBackground", primaryColor.darker());
+                UIManager.put("Button.selectedBackground", primaryColor.darker());
+                UIManager.put("Button.default.background", primaryColor);
+                UIManager.put("Button.default.foreground", primaryTextColor);
+
+                // Couleurs des textes et composants
+                UIManager.put("Label.foreground", new Color(33, 33, 33)); // Texte foncé
+                UIManager.put("TextField.foreground", new Color(33, 33, 33));
+                UIManager.put("ComboBox.foreground", new Color(33, 33, 33));
+                UIManager.put("TextArea.foreground", new Color(33, 33, 33));
 
                 // Marges et padding
                 UIManager.put("Button.margin", new Insets(8, 16, 8, 16));
@@ -38,8 +53,10 @@ public class Main {
                 UIManager.put("Table.showHorizontalLines", true);
                 UIManager.put("Table.showVerticalLines", true);
                 UIManager.put("Table.gridColor", new Color(224, 224, 224));
-                UIManager.put("Table.selectionBackground", new Color(197, 202, 233));
+                UIManager.put("Table.selectionBackground", new Color(232, 240, 254));
                 UIManager.put("Table.selectionForeground", new Color(33, 33, 33));
+                UIManager.put("TableHeader.background", new Color(245, 246, 247));
+                UIManager.put("TableHeader.foreground", new Color(33, 33, 33));
 
                 System.out.println("Look and Feel configuré.");
 
