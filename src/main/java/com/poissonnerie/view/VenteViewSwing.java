@@ -134,7 +134,8 @@ public class VenteViewSwing {
     }
 
     private JPanel createActionPanel() {
-        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        // Changement de l'alignement de LEFT à RIGHT
+        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         actionPanel.setOpaque(false);
 
         // Création du bouton d'actualisation avec style moderne
