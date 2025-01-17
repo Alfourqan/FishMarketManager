@@ -162,7 +162,7 @@ public class FournisseurViewSwing {
         JButton modifierBtn = createStyledButton("Modifier", MaterialDesignI.PENCIL, new Color(33, 150, 243));
         JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesignI.MINUS_BOX, new Color(244, 67, 54));
         JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesignI.REFRESH, new Color(156, 39, 176));
-        JButton rapportBtn = createStyledButton("Rapport", MaterialDesignI.FILE_PDF, new Color(63, 81, 181));
+        JButton rapportBtn = createStyledButton("Rapport", MaterialDesignI.FILE_PDF_BOX, new Color(63, 81, 181));
 
         // Ajout des gestionnaires d'événements
         ajouterBtn.addActionListener(e -> showFournisseurDialog(null));

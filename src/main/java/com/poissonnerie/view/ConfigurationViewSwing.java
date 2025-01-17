@@ -43,7 +43,7 @@ public class ConfigurationViewSwing {
         // Section TVA avec style moderne
         contentPanel.add(createSectionPanel("Configuration TVA", new String[][]{
             {ConfigurationParam.CLE_TAUX_TVA, "Taux de TVA (%)", "20.0"}
-        }, MaterialDesignI.PERCENT_OUTLINE));
+        }, MaterialDesignI.PERCENT));
 
         // Section Informations Entreprise
         contentPanel.add(Box.createVerticalStrut(15));
@@ -51,13 +51,13 @@ public class ConfigurationViewSwing {
             {ConfigurationParam.CLE_NOM_ENTREPRISE, "Nom de l'entreprise", ""},
             {ConfigurationParam.CLE_ADRESSE_ENTREPRISE, "Adresse", ""},
             {ConfigurationParam.CLE_TELEPHONE_ENTREPRISE, "Téléphone", ""}
-        }, MaterialDesignI.DOMAIN));
+        }, MaterialDesignI.OFFICE_BUILDING));
 
         // Section Personnalisation Reçus
         contentPanel.add(Box.createVerticalStrut(15));
         contentPanel.add(createSectionPanel("Personnalisation des reçus", new String[][]{
             {ConfigurationParam.CLE_PIED_PAGE_RECU, "Message de pied de page", "Merci de votre visite !"}
-        }, MaterialDesignI.RECEIPT_OUTLINE));
+        }, MaterialDesignI.RECEIPT));
 
         JScrollPane scrollPane = new JScrollPane(contentPanel);
         scrollPane.setBorder(null);
