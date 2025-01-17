@@ -18,6 +18,23 @@ public class PDFGenerator {
     private static final float TICKET_WIDTH = 170.079f; // 6 cm en points
     private static final float MARGIN = 14.17f; // 5mm en points
 
+    // Utility methods
+    private static String truncateString(String str, int length) {
+        if (str.length() <= length) return str;
+        return str.substring(0, length - 3) + "...";
+    }
+
+    private static String centerText(String text, int width) {
+        if (text == null || text.isEmpty()) return repeatChar(' ', width);
+        int padding = (width - text.length()) / 2;
+        return repeatChar(' ', padding) + text + repeatChar(' ', width - text.length() - padding);
+    }
+
+    private static String repeatChar(char c, int count) {
+        return new String(new char[count]).replace('\0', c);
+    }
+
+    // Main methods for generating tickets and reports
     public static void genererTicket(Vente vente, String cheminFichier) {
         try {
             Document document = new Document(new Rectangle(TICKET_WIDTH, PageSize.A4.getHeight()));
@@ -202,21 +219,6 @@ public class PDFGenerator {
         }
     }
 
-    private static String truncateString(String str, int length) {
-        if (str.length() <= length) return str;
-        return str.substring(0, length - 3) + "...";
-    }
-
-    private static String centerText(String text, int width) {
-        if (text == null || text.isEmpty()) return repeatChar(' ', width);
-        int padding = (width - text.length()) / 2;
-        return repeatChar(' ', padding) + text + repeatChar(' ', width - text.length() - padding);
-    }
-
-    private static String repeatChar(char c, int count) {
-        return new String(new char[count]).replace('\0', c);
-    }
-
     public static String genererPreviewTicket(Vente vente) {
         StringBuilder preview = new StringBuilder();
         ConfigurationController configController = new ConfigurationController();
@@ -364,46 +366,6 @@ public class PDFGenerator {
         return preview.toString();
     }
 
-    public static void genererReglementCreance(Client client, double montant, double nouveauSolde, String cheminFichier) {
-        try {
-            Document document = new Document(new Rectangle(TICKET_WIDTH, PageSize.A4.getHeight()));
-            document.setMargins(MARGIN, MARGIN, MARGIN, MARGIN);
-            PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
-            document.open();
-
-            // Police monospace pour meilleur alignement
-            BaseFont baseFont = BaseFont.createFont(BaseFont.COURIER, BaseFont.CP1252, BaseFont.EMBEDDED);
-            Font normalFont = new Font(baseFont, 8);
-            Font boldFont = new Font(baseFont, 8, Font.BOLD);
-            Font titleFont = new Font(baseFont, 10, Font.BOLD);
-
-            // Convertir le preview en PDF
-            String preview = genererPreviewReglementCreance(client, montant, nouveauSolde);
-            for (String line : preview.split("\n")) {
-                Font currentFont = normalFont;
-                if (line.matches(".*TOTAL.*|.*DÉTAILS DU RÈGLEMENT.*") || line.startsWith("===")) {
-                    currentFont = boldFont;
-                } else if (line.equals(line.toUpperCase()) && !line.startsWith("---")) {
-                    currentFont = titleFont;
-                }
-
-                Paragraph p = new Paragraph(line, currentFont);
-                p.setAlignment(Element.ALIGN_LEFT);
-                if (line.matches(".*Nouveau solde:.*")) {
-                    p.setSpacingBefore(5);
-                    p.setSpacingAfter(5);
-                }
-                document.add(p);
-            }
-
-            document.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Erreur lors de la génération du reçu: " + e.getMessage());
-        }
-    }
-
-
     public static void genererRapportVentes(List<Vente> ventes, String cheminFichier) {
         try {
             Document document = new Document(PageSize.A4);
@@ -469,6 +431,44 @@ public class PDFGenerator {
         }
     }
 
+    public static void genererReglementCreance(Client client, double montant, double nouveauSolde, String cheminFichier) {
+        try {
+            Document document = new Document(new Rectangle(TICKET_WIDTH, PageSize.A4.getHeight()));
+            document.setMargins(MARGIN, MARGIN, MARGIN, MARGIN);
+            PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
+            document.open();
+
+            // Police monospace pour meilleur alignement
+            BaseFont baseFont = BaseFont.createFont(BaseFont.COURIER, BaseFont.CP1252, BaseFont.EMBEDDED);
+            Font normalFont = new Font(baseFont, 8);
+            Font boldFont = new Font(baseFont, 8, Font.BOLD);
+            Font titleFont = new Font(baseFont, 10, Font.BOLD);
+
+            // Convertir le preview en PDF
+            String preview = genererPreviewReglementCreance(client, montant, nouveauSolde);
+            for (String line : preview.split("\n")) {
+                Font currentFont = normalFont;
+                if (line.matches(".*TOTAL.*|.*DÉTAILS DU RÈGLEMENT.*") || line.startsWith("===")) {
+                    currentFont = boldFont;
+                } else if (line.equals(line.toUpperCase()) && !line.startsWith("---")) {
+                    currentFont = titleFont;
+                }
+
+                Paragraph p = new Paragraph(line, currentFont);
+                p.setAlignment(Element.ALIGN_LEFT);
+                if (line.matches(".*Nouveau solde:.*")) {
+                    p.setSpacingBefore(5);
+                    p.setSpacingAfter(5);
+                }
+                document.add(p);
+            }
+
+            document.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Erreur lors de la génération du reçu: " + e.getMessage());
+        }
+    }
     public static void genererRapportStocks(List<Produit> produits, String cheminFichier) {
         try {
             Document document = new Document(PageSize.A4);
@@ -739,160 +739,5 @@ public class PDFGenerator {
             throw new RuntimeException("Erreur lors de la génération du rapport des fournisseurs: " +
                 e.getMessage());
         }
-    }
-
-    public static void genererRapportCaisse(List<MouvementCaisse> mouvements, String cheminFichier) {
-        try {
-            Document document = new Document(PageSize.A4);
-            PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
-            document.open();
-
-            // En-tête
-            Font titleFont = new Font(Font.FontFamily.HELVETICA, 16, Font.BOLD);
-            Font normalFont = new Font(Font.FontFamily.HELVETICA, 12);
-            Font headerFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
-
-            Paragraph title = new Paragraph("Journal de Caisse", titleFont);
-            title.setAlignment(Element.ALIGN_CENTER);
-            title.setSpacingAfter(20);
-            document.add(title);
-
-            // Date du rapport
-            Paragraph date = new Paragraph("Date du rapport: " +
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")), normalFont);
-            date.setSpacingAfter(20);
-            document.add(date);
-
-            // Tableau des mouvements
-            PdfPTable table = new PdfPTable(new float[]{2, 3, 2, 2});
-            table.setWidthPercentage(100);
-
-            // En-têtes
-            Stream.of("Date", "Description", "Type", "Montant")
-                .forEach(columnTitle -> {
-                    Phrase phrase = new Phrase(columnTitle, headerFont);
-                    table.addCell(phrase);
-                });
-
-            // Données
-            double totalEntrees = 0;
-            double totalSorties = 0;
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-
-            for (MouvementCaisse mouvement : mouvements) {
-                table.addCell(mouvement.getDate().format(formatter));
-                table.addCell(mouvement.getDescription());
-                table.addCell(mouvement.getType().toString());
-                table.addCell(String.format("%.2f €", mouvement.getMontant()));
-
-                if (mouvement.getType() == MouvementCaisse.TypeMouvement.ENTREE) {
-                    totalEntrees += mouvement.getMontant();
-                } else {
-                    totalSorties += mouvement.getMontant();
-                }
-            }
-
-            document.add(table);
-
-            // Résumé
-            Paragraph resume = new Paragraph("\nRésumé des mouvements:", headerFont);
-            resume.setSpacingBefore(20);
-            document.add(resume);
-
-            document.add(new Paragraph(String.format("Total des entrées: %.2f €", totalEntrees), normalFont));
-            document.add(new Paragraph(String.format("Total des sorties: %.2f €", totalSorties), normalFont));
-            document.add(new Paragraph(String.format("Solde: %.2f €", totalEntrees - totalSorties), normalFont));
-
-            document.close();
-        } catch (Exception e) {
-            throw new RuntimeException("Erreur lors de la génération du journal de caisse: " + e.getMessage());
-        }
-    }
-
-    public static void genererRapportFournisseurs(List<Fournisseur> fournisseurs, String cheminFichier) {
-        try {
-            Document document = new Document(PageSize.A4);
-            PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
-            document.open();
-
-            // En-tête
-            Font titleFont = new Font(Font.FontFamily.HELVETICA, 16, Font.BOLD);
-            Font normalFont = new Font(Font.FontFamily.HELVETICA, 12);
-            Font headerFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
-
-            Paragraph title = new Paragraph("Liste des Fournisseurs", titleFont);
-            title.setAlignment(Element.ALIGN_CENTER);
-            title.setSpacingAfter(20);
-            document.add(title);
-
-            // Date du rapport
-            Paragraph date = new Paragraph("Date du rapport: " +
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")), normalFont);
-            date.setSpacingAfter(20);
-            document.add(date);
-
-            // Tableau des fournisseurs
-            PdfPTable table = new PdfPTable(new float[]{3, 2, 3, 2});
-            table.setWidthPercentage(100);
-
-            // En-têtes
-            Stream.of("Nom", "Téléphone", "Adresse", "Statut")
-                .forEach(columnTitle -> {
-                    Phrase phrase = new Phrase(columnTitle, headerFont);
-                    table.addCell(phrase);
-                });
-
-            // Données
-            for (Fournisseur fournisseur : fournisseurs) {
-                table.addCell(fournisseur.getNom());
-                table.addCell(fournisseur.getTelephone() != null ? fournisseur.getTelephone() : "");
-                table.addCell(fournisseur.getAdresse() != null ? fournisseur.getAdresse() : "");
-                table.addCell(fournisseur.getStatut());
-            }
-
-            document.add(table);
-
-            // Résumé
-            Paragraph resume = new Paragraph("\nRésumé:", headerFont);
-            resume.setSpacingBefore(20);
-            document.add(resume);
-            document.add(new Paragraph(String.format("Nombre total de fournisseurs: %d", fournisseurs.size()),
-                normalFont));
-
-            Map<String, Long> statutCount = fournisseurs.stream()
-                .collect(Collectors.groupingBy(
-                    Fournisseur::getStatut,
-                    Collectors.counting()
-                ));
-
-            statutCount.forEach((statut, count) -> {
-                try {
-                    document.add(new Paragraph(String.format("Fournisseurs %s: %d",
-                        statut.toLowerCase(), count), normalFont));
-                } catch (DocumentException e) {
-                    e.printStackTrace();
-                }
-            });
-
-            document.close();
-        } catch (Exception e) {
-            throw new RuntimeException("Erreur lors de la génération du rapport des fournisseurs: " +
-                e.getMessage());
-        }
-    }
-
-    private static String centerText(String text, int width) {
-        if (text == null || text.isEmpty()) return repeatChar(' ', width);
-        int padding = (width - text.length()) / 2;
-        return repeatChar(' ', padding) + text + repeatChar(' ', width - text.length() - padding);
-    }
-
-    private static String repeatChar(char c, int count) {
-        return new String(new char[count]).replace('\0', c);
-    }
-
-    private static String truncateString(String str, int length) {
-        if (str.length() <= length) return str;
-        return str.substring(0, length - 3) + "...";
     }
 }

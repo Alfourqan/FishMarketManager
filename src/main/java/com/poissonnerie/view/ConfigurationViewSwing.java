@@ -3,6 +3,8 @@ package com.poissonnerie.view;
 import com.poissonnerie.controller.ConfigurationController;
 import com.poissonnerie.model.ConfigurationParam;
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import javax.swing.border.Border;
 import java.awt.*;
 import java.util.Map;
 import java.util.HashMap;
@@ -20,6 +22,7 @@ public class ConfigurationViewSwing {
     private final Font titreFont = new Font("Segoe UI", Font.BOLD, 24);
     private final Font sousTitreFont = new Font("Segoe UI", Font.BOLD, 16);
     private final Font texteNormalFont = new Font("Segoe UI", Font.PLAIN, 14);
+    private JPanel previewPanel;
 
     public ConfigurationViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -34,35 +37,135 @@ public class ConfigurationViewSwing {
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         mainPanel.setBackground(couleurFond);
 
+        // Panel principal avec scroll pour les configurations
+        JPanel configPanel = new JPanel();
+        configPanel.setLayout(new BoxLayout(configPanel, BoxLayout.Y_AXIS));
+        configPanel.setOpaque(false);
+
         // En-tête avec titre
         JPanel headerPanel = createHeaderPanel();
 
-        // Panel principal avec scroll
-        JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
-        contentPanel.setOpaque(false);
+        // Sections de configuration
+        configPanel.add(createTVASection());
+        configPanel.add(Box.createVerticalStrut(15));
+        configPanel.add(createEntrepriseSection());
+        configPanel.add(Box.createVerticalStrut(15));
+        configPanel.add(createRecusSection());
 
-        // Section TVA
-        contentPanel.add(createTVASection());
-        contentPanel.add(Box.createVerticalStrut(15));
+        // Panel de prévisualisation
+        previewPanel = createPreviewPanel();
 
-        // Section Informations Entreprise
-        contentPanel.add(createEntrepriseSection());
-        contentPanel.add(Box.createVerticalStrut(15));
-
-        // Section Personnalisation des Reçus
-        contentPanel.add(createRecusSection());
-
-        JScrollPane scrollPane = new JScrollPane(contentPanel);
-        scrollPane.setBorder(null);
-        scrollPane.getViewport().setBackground(couleurFond);
+        // Split pane pour avoir la configuration à gauche et la prévisualisation à droite
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+            new JScrollPane(configPanel),
+            previewPanel);
+        splitPane.setResizeWeight(0.6);
+        splitPane.setBorder(null);
 
         // Panel des boutons
         JPanel buttonPanel = createButtonPanel();
 
         mainPanel.add(headerPanel, BorderLayout.NORTH);
-        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        mainPanel.add(splitPane, BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    private JPanel createPreviewPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        Border titledBorder = BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            "Prévisualisation du reçu",
+            TitledBorder.LEFT,
+            TitledBorder.TOP,
+            sousTitreFont
+        );
+        panel.setBorder(titledBorder);
+        panel.setBackground(Color.WHITE);
+
+        JTextArea previewArea = new JTextArea();
+        previewArea.setFont(new Font("Monospace", Font.PLAIN, 12));
+        previewArea.setEditable(false);
+        previewArea.setMargin(new Insets(10, 10, 10, 10));
+
+        // Exemple de reçu
+        StringBuilder preview = new StringBuilder();
+        preview.append("================================\n");
+        preview.append("       POISSONNERIE XYZ         \n");
+        preview.append("================================\n");
+        preview.append("123 Rue de la Mer\n");
+        preview.append("75001 Paris\n");
+        preview.append("Tel: 01.23.45.67.89\n");
+        preview.append("SIRET: 123 456 789 00001\n");
+        preview.append("--------------------------------\n");
+        preview.append("Article 1            10.00 EUR\n");
+        preview.append("Article 2            15.00 EUR\n");
+        preview.append("--------------------------------\n");
+        preview.append("Sous-total:          25.00 EUR\n");
+        preview.append("TVA (20%):            5.00 EUR\n");
+        preview.append("TOTAL:               30.00 EUR\n");
+        preview.append("================================\n");
+        preview.append("Merci de votre visite !\n");
+        preview.append("================================\n");
+
+        previewArea.setText(preview.toString());
+        panel.add(new JScrollPane(previewArea), BorderLayout.CENTER);
+
+        // Bouton de mise à jour de la prévisualisation
+        JButton updatePreviewButton = createStyledButton("Mettre à jour la prévisualisation", 
+            MaterialDesign.MDI_REFRESH, new Color(76, 175, 80));
+        updatePreviewButton.addActionListener(e -> updatePreview());
+        panel.add(updatePreviewButton, BorderLayout.SOUTH);
+
+        return panel;
+    }
+
+    private void updatePreview() {
+        // Mise à jour de la prévisualisation avec les valeurs actuelles
+        JTextArea previewArea = (JTextArea) ((JScrollPane) previewPanel.getComponent(0)).getViewport().getView();
+        StringBuilder preview = new StringBuilder();
+
+        // En-tête
+        String nomEntreprise = ((JTextField) champsSaisie.get(ConfigurationParam.CLE_NOM_ENTREPRISE)).getText();
+        preview.append("================================\n");
+        preview.append(String.format("%s%s%s\n",
+            " ".repeat(3),
+            nomEntreprise,
+            " ".repeat(3)));
+        preview.append("================================\n");
+
+        // Informations entreprise
+        String adresse = ((JTextField) champsSaisie.get(ConfigurationParam.CLE_ADRESSE_ENTREPRISE)).getText();
+        String telephone = ((JTextField) champsSaisie.get(ConfigurationParam.CLE_TELEPHONE_ENTREPRISE)).getText();
+        String siret = ((JTextField) champsSaisie.get(ConfigurationParam.CLE_SIRET_ENTREPRISE)).getText();
+
+        preview.append(adresse + "\n");
+        preview.append("Tel: " + telephone + "\n");
+        preview.append("SIRET: " + siret + "\n");
+        preview.append("--------------------------------\n");
+
+        // Exemple d'articles avec TVA
+        boolean tvaEnabled = ((JCheckBox) champsSaisie.get(ConfigurationParam.CLE_TVA_ENABLED)).isSelected();
+        double tauxTva = (double) ((JSpinner) champsSaisie.get(ConfigurationParam.CLE_TAUX_TVA)).getValue();
+
+        double sousTotal = 25.00;
+        preview.append(String.format("Sous-total:%14.2f EUR\n", sousTotal));
+
+        if (tvaEnabled) {
+            double montantTva = sousTotal * (tauxTva / 100);
+            preview.append(String.format("TVA (%.1f%%):%13.2f EUR\n", tauxTva, montantTva));
+            preview.append(String.format("TOTAL:%18.2f EUR\n", sousTotal + montantTva));
+        } else {
+            preview.append(String.format("TOTAL:%18.2f EUR\n", sousTotal));
+        }
+
+        preview.append("================================\n");
+
+        // Pied de page
+        String piedPage = ((JTextArea) champsSaisie.get(ConfigurationParam.CLE_PIED_PAGE_RECU)).getText();
+        preview.append(piedPage + "\n");
+        preview.append("================================\n");
+
+        previewArea.setText(preview.toString());
     }
 
     private JPanel createHeaderPanel() {
@@ -289,6 +392,7 @@ public class ConfigurationViewSwing {
             mainPanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             loadData();
             showSuccessMessage("Configurations actualisées avec succès");
+            updatePreview(); // Update preview after loading data
         } catch (Exception ex) {
             showErrorMessage("Erreur lors de l'actualisation : " + ex.getMessage());
         } finally {
@@ -323,6 +427,7 @@ public class ConfigurationViewSwing {
             }
 
             System.out.println("Configurations chargées avec succès");
+            updatePreview(); // Update preview after loading data
         } catch (Exception e) {
             System.err.println("Erreur lors du chargement des configurations: " + e.getMessage());
             showErrorMessage("Erreur lors du chargement des configurations : " + e.getMessage());

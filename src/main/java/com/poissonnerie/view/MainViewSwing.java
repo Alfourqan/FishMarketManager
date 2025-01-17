@@ -139,11 +139,11 @@ public class MainViewSwing {
         // Ajouter les nouvelles vues
         contentPanel.add(new FournisseurViewSwing().getMainPanel(), "Fournisseurs");
         contentPanel.add(new ReportViewSwing().getMainPanel(), "Report");
+        contentPanel.add(new ConfigurationViewSwing().getMainPanel(), "Réglages");
 
         // Ajouter des panels temporaires pour les autres vues
         contentPanel.add(createTemporaryPanel("Factures"), "Factures");
         contentPanel.add(createTemporaryPanel("Catégories"), "Catégories");
-        contentPanel.add(createTemporaryPanel("Réglages"), "Réglages");
     }
 
     private JPanel createTemporaryPanel(String name) {
