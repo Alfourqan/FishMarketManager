@@ -23,6 +23,7 @@ public class MainViewSwing {
         tabbedPane.addTab("Produits", new ProduitViewSwing().getMainPanel());
         tabbedPane.addTab("Ventes", new VenteViewSwing().getMainPanel());
         tabbedPane.addTab("Clients", new ClientViewSwing().getMainPanel());
+        tabbedPane.addTab("Caisse", new CaisseViewSwing().getMainPanel());
 
         mainPanel.add(tabbedPane, BorderLayout.CENTER);
     }
@@ -49,12 +50,22 @@ public class MainViewSwing {
         JMenuItem ventesJourMenuItem = new JMenuItem("Ventes du jour");
         JMenuItem stocksMenuItem = new JMenuItem("État des stocks");
         JMenuItem creancesMenuItem = new JMenuItem("État des créances");
+        JMenuItem caisseMenuItem = new JMenuItem("Journal de caisse");
+
         rapportsMenu.add(ventesJourMenuItem);
         rapportsMenu.add(stocksMenuItem);
         rapportsMenu.add(creancesMenuItem);
+        rapportsMenu.add(caisseMenuItem);
 
         menuBar.add(fichierMenu);
         menuBar.add(rapportsMenu);
+
+        // Gestionnaires d'événements pour les rapports
+        caisseMenuItem.addActionListener(e -> {
+            tabbedPane.setSelectedComponent(
+                tabbedPane.getComponentAt(tabbedPane.indexOfTab("Caisse"))
+            );
+        });
 
         return menuBar;
     }
