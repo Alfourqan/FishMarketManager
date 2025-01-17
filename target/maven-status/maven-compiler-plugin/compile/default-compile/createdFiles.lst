@@ -24,6 +24,7 @@ com/poissonnerie/controller/VenteController.class
 com/poissonnerie/view/ProduitViewSwing$2.class
 com/poissonnerie/model/InventaireManager$InventaireObserver.class
 com/poissonnerie/view/FournisseurViewSwing$1.class
+com/poissonnerie/view/InventaireViewSwing$3.class
 com/poissonnerie/view/MainViewSwing$1.class
 com/poissonnerie/model/Vente.class
 com/poissonnerie/view/VenteViewSwing$1.class
