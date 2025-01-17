@@ -35,63 +35,169 @@ public class MainViewSwing {
     }
 
     private void initializeComponents() {
-        // Menu Bar
-        JMenuBar menuBar = createMenuBar();
-        mainPanel.add(menuBar, BorderLayout.NORTH);
+        // En-tête vert avec "HOME"
+        JPanel headerPanel = createHeader();
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
 
-        // Panel de navigation vertical à gauche avec plus d'espace
+        // Panel de navigation vertical à gauche (barre latérale sombre)
+        JPanel navigationPanel = createNavigationPanel();
+        mainPanel.add(navigationPanel, BorderLayout.WEST);
+
+        // Contenu principal
+        mainPanel.add(contentPanel, BorderLayout.CENTER);
+
+        // Ajouter les vues
+        addViews();
+    }
+
+    private JPanel createHeader() {
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(new Color(76, 175, 80)); // Vert
+        headerPanel.setPreferredSize(new Dimension(0, 50));
+
+        JLabel titleLabel = new JLabel("HOME");
+        titleLabel.setForeground(Color.WHITE);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
+
+        headerPanel.add(titleLabel, BorderLayout.WEST);
+        return headerPanel;
+    }
+
+    private JPanel createNavigationPanel() {
         JPanel navigationPanel = new JPanel();
         navigationPanel.setLayout(new BoxLayout(navigationPanel, BoxLayout.Y_AXIS));
-        navigationPanel.setBackground(new Color(220, 224, 228));
-        navigationPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(200, 200, 200)),
-            BorderFactory.createEmptyBorder(15, 15, 15, 15)
-        ));
-        navigationPanel.setPreferredSize(new Dimension(160, 0));
+        navigationPanel.setBackground(new Color(33, 37, 41)); // Couleur sombre
+        navigationPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        navigationPanel.setPreferredSize(new Dimension(200, 0));
 
-        JPanel[] views = {
-            new ProduitViewSwing().getMainPanel(),
-            new VenteViewSwing().getMainPanel(),
-            new ClientViewSwing().getMainPanel(),
-            new CaisseViewSwing().getMainPanel(),
-            new InventaireViewSwing().getMainPanel()
+        // Définir les éléments de navigation
+        String[] viewNames = {
+            "Produits", "Ventes", "Clients", "Factures", 
+            "Fournisseurs", "Catégories", "Inventaire", "Caisse", 
+            "Report", "Réglages", "Déconnexion"
         };
 
-        String[] viewNames = {"Produits", "Ventes", "Clients", "Caisse", "Inventaire"};
         MaterialDesign[] icons = {
             MaterialDesign.MDI_PACKAGE_VARIANT,
             MaterialDesign.MDI_CART,
             MaterialDesign.MDI_ACCOUNT_MULTIPLE,
+            MaterialDesign.MDI_FILE_DOCUMENT,
+            MaterialDesign.MDI_TRUCK_DELIVERY,
+            MaterialDesign.MDI_TAG_MULTIPLE,
+            MaterialDesign.MDI_CLIPBOARD_TEXT,
             MaterialDesign.MDI_CASH_MULTIPLE,
-            MaterialDesign.MDI_CLIPBOARD_TEXT
+            MaterialDesign.MDI_CHART_BAR,
+            MaterialDesign.MDI_SETTINGS,
+            MaterialDesign.MDI_LOGOUT
         };
 
         ButtonGroup buttonGroup = new ButtonGroup();
-        navigationPanel.add(Box.createVerticalStrut(5));
+        navigationPanel.add(Box.createVerticalStrut(10));
 
         for (int i = 0; i < viewNames.length; i++) {
             JToggleButton navButton = createNavigationButton(viewNames[i], icons[i]);
             final String cardName = viewNames[i];
-            final int index = i;
 
-            navButton.addActionListener(e -> cardLayout.show(contentPanel, cardName));
+            if (i < viewNames.length - 1) { // Tous sauf Déconnexion
+                navButton.addActionListener(e -> cardLayout.show(contentPanel, cardName));
+            } else { // Bouton Déconnexion
+                navButton.addActionListener(e -> handleLogout());
+            }
+
             buttonGroup.add(navButton);
             navigationPanel.add(navButton);
             navigationPanel.add(Box.createVerticalStrut(5));
-
-            contentPanel.add(views[index], cardName);
 
             if (i == 0) {
                 navButton.setSelected(true);
             }
         }
 
-        navigationPanel.add(Box.createVerticalStrut(5));
-
-        mainPanel.add(navigationPanel, BorderLayout.WEST);
-        mainPanel.add(contentPanel, BorderLayout.CENTER);
+        return navigationPanel;
     }
 
+    private void addViews() {
+        // Ajouter les vues existantes
+        contentPanel.add(new ProduitViewSwing().getMainPanel(), "Produits");
+        contentPanel.add(new VenteViewSwing().getMainPanel(), "Ventes");
+        contentPanel.add(new ClientViewSwing().getMainPanel(), "Clients");
+        contentPanel.add(new CaisseViewSwing().getMainPanel(), "Caisse");
+        contentPanel.add(new InventaireViewSwing().getMainPanel(), "Inventaire");
+
+        // Ajouter des panels temporaires pour les nouvelles vues
+        contentPanel.add(createTemporaryPanel("Factures"), "Factures");
+        contentPanel.add(createTemporaryPanel("Fournisseurs"), "Fournisseurs");
+        contentPanel.add(createTemporaryPanel("Catégories"), "Catégories");
+        contentPanel.add(createTemporaryPanel("Report"), "Report");
+        contentPanel.add(createTemporaryPanel("Réglages"), "Réglages");
+    }
+
+    private JPanel createTemporaryPanel(String name) {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        JLabel label = new JLabel("Vue " + name + " en construction", SwingConstants.CENTER);
+        label.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        panel.add(label, BorderLayout.CENTER);
+        return panel;
+    }
+
+    private JToggleButton createNavigationButton(String text, MaterialDesign iconCode) {
+        JToggleButton button = new JToggleButton(text);
+
+        FontIcon icon = FontIcon.of(iconCode);
+        icon.setIconSize(18);
+        icon.setIconColor(Color.WHITE);
+        button.setIcon(icon);
+
+        button.setHorizontalAlignment(SwingConstants.LEFT);
+        button.setIconTextGap(15);
+        button.setMargin(new Insets(8, 15, 8, 15));
+        button.setFocusPainted(false);
+        button.setPreferredSize(new Dimension(170, 40));
+        button.setMaximumSize(new Dimension(170, 40));
+        button.setMinimumSize(new Dimension(170, 40));
+        button.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        button.setForeground(Color.WHITE);
+        button.setBackground(new Color(33, 37, 41));
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+
+        // Style au survol et à la sélection
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                if (!button.isSelected()) {
+                    button.setBackground(new Color(44, 49, 54));
+                }
+            }
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                if (!button.isSelected()) {
+                    button.setBackground(new Color(33, 37, 41));
+                }
+            }
+        });
+
+        return button;
+    }
+
+    private void handleLogout() {
+        int response = JOptionPane.showConfirmDialog(
+            mainPanel,
+            "Voulez-vous vraiment vous déconnecter ?",
+            "Confirmation",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.QUESTION_MESSAGE
+        );
+
+        if (response == JOptionPane.YES_OPTION) {
+            Window window = SwingUtilities.getWindowAncestor(mainPanel);
+            if (window != null) {
+                window.dispose();
+            }
+            System.exit(0);
+        }
+    }
     private JMenuBar createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
 
@@ -225,26 +331,6 @@ public class MainViewSwing {
 
     private void afficherMessageErreur(String titre, String message) {
         JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.ERROR_MESSAGE);
-    }
-
-    private JToggleButton createNavigationButton(String text, MaterialDesign iconCode) {
-        JToggleButton button = new JToggleButton(text);
-
-        FontIcon icon = FontIcon.of(iconCode);
-        icon.setIconSize(18);
-        button.setIcon(icon);
-
-        button.setHorizontalAlignment(SwingConstants.LEFT);
-        button.setIconTextGap(10);
-        button.setMargin(new Insets(6, 10, 6, 10));
-        button.setFocusPainted(false);
-        button.setPreferredSize(new Dimension(130, 32));
-        button.setMaximumSize(new Dimension(130, 32));
-        button.setMinimumSize(new Dimension(130, 32));
-        button.setFont(new Font(button.getFont().getName(), Font.BOLD, 12));
-        button.setForeground(new Color(50, 50, 50));
-
-        return button;
     }
 
     private FontIcon createLargeIcon(MaterialDesign iconCode) {
