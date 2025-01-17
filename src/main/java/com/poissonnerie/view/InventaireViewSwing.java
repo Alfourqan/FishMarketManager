@@ -12,7 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import org.kordamp.ikonli.materialdesign.MaterialDesign;
+import org.kordamp.ikonli.materialdesign2.MaterialDesignI;
 import org.kordamp.ikonli.swing.FontIcon;
 
 public class InventaireViewSwing {
@@ -21,7 +21,7 @@ public class InventaireViewSwing {
     private final InventaireManager inventaireManager;
     private final JTable tableInventaire;
     private final DefaultTableModel tableModel;
-    private JLabel statusLabel; // Removed final modifier
+    private JLabel statusLabel; 
 
     public InventaireViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -80,7 +80,7 @@ public class InventaireViewSwing {
         
         // Panel des boutons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton refreshBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH);
+        JButton refreshBtn = createStyledButton("Actualiser", MaterialDesignI.MDI_REFRESH);
         buttonPanel.add(refreshBtn);
 
         // Label de statut
@@ -167,7 +167,7 @@ public class InventaireViewSwing {
         dialog.setVisible(true);
     }
 
-    private JButton createStyledButton(String text, MaterialDesign icon) {
+    private JButton createStyledButton(String text, MaterialDesignI icon) {
         FontIcon fontIcon = FontIcon.of(icon);
         fontIcon.setIconSize(18);
         JButton button = new JButton(text, fontIcon);
@@ -187,13 +187,13 @@ public class InventaireViewSwing {
             // Icône d'état
             FontIcon icon;
             if (produit.getStock() == 0) {
-                icon = FontIcon.of(MaterialDesign.MDI_ALERT);
+                icon = FontIcon.of(MaterialDesignI.MDI_ALERT);
                 icon.setIconColor(new Color(220, 53, 69)); // Rouge pour rupture
             } else if (produit.getStock() <= produit.getSeuilAlerte()) {
-                icon = FontIcon.of(MaterialDesign.MDI_ALERT_CIRCLE);
+                icon = FontIcon.of(MaterialDesignI.MDI_ALERT_CIRCLE);
                 icon.setIconColor(new Color(255, 193, 7)); // Jaune pour stock bas
             } else {
-                icon = FontIcon.of(MaterialDesign.MDI_CHECKBOX_MARKED_CIRCLE);
+                icon = FontIcon.of(MaterialDesignI.MDI_CHECKBOX_MARKED_CIRCLE);
                 icon.setIconColor(new Color(40, 167, 69)); // Vert pour stock normal
             }
 

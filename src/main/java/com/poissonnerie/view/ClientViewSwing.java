@@ -6,7 +6,7 @@ import com.poissonnerie.util.PDFGenerator;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import org.kordamp.ikonli.materialdesign.MaterialDesign;
+import org.kordamp.ikonli.materialdesign2.MaterialDesignI;
 import org.kordamp.ikonli.Ikon;
 import org.kordamp.ikonli.swing.FontIcon;
 
@@ -42,7 +42,7 @@ public class ClientViewSwing {
         loadData();
     }
 
-    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
+    private JButton createStyledButton(String text, MaterialDesignI iconCode, Color color) {
         FontIcon icon = FontIcon.of(iconCode);
         icon.setIconSize(18);
         icon.setIconColor(Color.WHITE);
@@ -83,11 +83,11 @@ public class ClientViewSwing {
         buttonPanel.setBackground(new Color(236, 239, 241));
 
         // Création des boutons avec icônes
-        JButton ajouterBtn = createStyledButton("Ajouter", MaterialDesign.MDI_ACCOUNT_PLUS, new Color(76, 175, 80));
-        JButton modifierBtn = createStyledButton("Modifier", MaterialDesign.MDI_PENCIL, new Color(33, 150, 243));
-        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesign.MDI_ACCOUNT_REMOVE, new Color(244, 67, 54));
-        JButton reglerCreanceBtn = createStyledButton("Régler créance", MaterialDesign.MDI_CREDIT_CARD, new Color(255, 152, 0));
-        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH, new Color(156, 39, 176));
+        JButton ajouterBtn = createStyledButton("Ajouter", MaterialDesignI.ACCOUNT_PLUS, new Color(76, 175, 80));
+        JButton modifierBtn = createStyledButton("Modifier", MaterialDesignI.PENCIL, new Color(33, 150, 243));
+        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesignI.ACCOUNT_REMOVE, new Color(244, 67, 54));
+        JButton reglerCreanceBtn = createStyledButton("Régler créance", MaterialDesignI.CREDIT_CARD, new Color(255, 152, 0));
+        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesignI.REFRESH, new Color(156, 39, 176));
 
         buttonPanel.add(ajouterBtn);
         buttonPanel.add(modifierBtn);
@@ -204,10 +204,10 @@ public class ClientViewSwing {
         for (Client client : controller.getClients()) {
             FontIcon icon;
             if (client.getSolde() > 0) {
-                icon = FontIcon.of(MaterialDesign.MDI_ALERT);
+                icon = FontIcon.of(MaterialDesignI.ALERT);
                 icon.setIconColor(new Color(220, 53, 69)); // Rouge pour les créances
             } else {
-                icon = FontIcon.of(MaterialDesign.MDI_ACCOUNT);
+                icon = FontIcon.of(MaterialDesignI.ACCOUNT);
                 icon.setIconColor(new Color(40, 167, 69)); // Vert pour les comptes à jour
             }
 
