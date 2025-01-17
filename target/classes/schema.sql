@@ -25,6 +25,17 @@ CREATE TABLE IF NOT EXISTS clients (
     solde REAL DEFAULT 0
 );
 
+CREATE TABLE IF NOT EXISTS fournisseurs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nom TEXT NOT NULL,
+    contact TEXT,
+    telephone TEXT,
+    email TEXT,
+    adresse TEXT,
+    statut TEXT DEFAULT 'Actif',
+    supprime BOOLEAN DEFAULT false
+);
+
 CREATE TABLE IF NOT EXISTS ventes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     date INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000),

@@ -9,22 +9,23 @@ import java.awt.*;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import org.kordamp.ikonli.materialdesign.MaterialDesign;
 import org.kordamp.ikonli.swing.FontIcon;
 import java.awt.Desktop;
-
 
 public class FournisseurViewSwing {
     private final JPanel mainPanel;
     private final FournisseurController controller;
     private final JTable tableFournisseurs;
     private final DefaultTableModel tableModel;
+    private JTextField searchField;
 
     public FournisseurViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
         controller = new FournisseurController();
 
-        // Création du modèle de table
+        // Création du modèle de table avec style moderne
         String[] columnNames = {"ID", "Nom", "Contact", "Téléphone", "Email", "Adresse", "Statut"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
@@ -33,105 +34,179 @@ public class FournisseurViewSwing {
             }
         };
         tableFournisseurs = new JTable(tableModel);
-        tableFournisseurs.getColumnModel().getColumn(0).setMaxWidth(50);
-        tableFournisseurs.setRowHeight(35);
-        tableFournisseurs.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        tableFournisseurs.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 13));
+        setupTableStyle();
 
         initializeComponents();
         loadData();
     }
 
-    private void initializeComponents() {
-        mainPanel.setBackground(new Color(245, 245, 245));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-
-        // En-tête avec titre
-        JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(new Color(255, 255, 255));
-        headerPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(230, 230, 230)),
-            BorderFactory.createEmptyBorder(15, 20, 15, 20)
-        ));
-
-        JLabel titleLabel = new JLabel("Gestion des Fournisseurs");
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
-        titleLabel.setForeground(new Color(33, 33, 33));
-        headerPanel.add(titleLabel, BorderLayout.WEST);
-
-        // Panel des boutons avec style moderne
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 0));
-        buttonPanel.setOpaque(false);
-
-        // Création des boutons avec icônes
-        JButton ajouterBtn = createStyledButton("Ajouter", MaterialDesign.MDI_PLUS_BOX, new Color(76, 175, 80));
-        JButton modifierBtn = createStyledButton("Modifier", MaterialDesign.MDI_PENCIL_BOX, new Color(33, 150, 243));
-        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesign.MDI_MINUS_BOX, new Color(244, 67, 54));
-        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH, new Color(156, 39, 176));
-        JButton rapportBtn = createReportButton();
-
-        headerPanel.add(buttonPanel, BorderLayout.EAST);
-        buttonPanel.add(ajouterBtn);
-        buttonPanel.add(modifierBtn);
-        buttonPanel.add(supprimerBtn);
-        buttonPanel.add(actualiserBtn);
-        buttonPanel.add(rapportBtn);
-
+    private void setupTableStyle() {
         // Style moderne pour la table
-        JScrollPane scrollPane = new JScrollPane(tableFournisseurs);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.setBackground(Color.WHITE);
-
-        // Style du tableau
         tableFournisseurs.setShowGrid(true);
-        tableFournisseurs.setGridColor(new Color(240, 240, 240));
+        tableFournisseurs.setGridColor(new Color(230, 230, 230));
         tableFournisseurs.setBackground(Color.WHITE);
         tableFournisseurs.setSelectionBackground(new Color(232, 240, 254));
         tableFournisseurs.setSelectionForeground(new Color(33, 33, 33));
         tableFournisseurs.getTableHeader().setBackground(new Color(245, 246, 247));
         tableFournisseurs.getTableHeader().setForeground(new Color(66, 66, 66));
-        tableFournisseurs.setIntercellSpacing(new Dimension(0, 0));
-        tableFournisseurs.setRowMargin(0);
+        tableFournisseurs.setRowHeight(40);
+        tableFournisseurs.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        tableFournisseurs.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
 
-        // Conteneur principal avec espacement
-        JPanel contentPanel = new JPanel(new BorderLayout(0, 15));
-        contentPanel.setOpaque(false);
-        contentPanel.add(headerPanel, BorderLayout.NORTH);
-        contentPanel.add(scrollPane, BorderLayout.CENTER);
-
-        // Gestionnaires d'événements
-        ajouterBtn.addActionListener(e -> showFournisseurDialog(null));
-        modifierBtn.addActionListener(e -> {
-            int selectedRow = tableFournisseurs.getSelectedRow();
-            if (selectedRow >= 0) {
-                showFournisseurDialog(controller.getFournisseurs().get(selectedRow));
-            } else {
-                showWarningMessage("Veuillez sélectionner un fournisseur à modifier");
-            }
-        });
-
-        supprimerBtn.addActionListener(e -> {
-            int selectedRow = tableFournisseurs.getSelectedRow();
-            if (selectedRow >= 0) {
-                if (showConfirmDialog("Êtes-vous sûr de vouloir supprimer ce fournisseur ?")) {
-                    try {
-                        controller.supprimerFournisseur(controller.getFournisseurs().get(selectedRow));
-                        refreshTable();
-                        showSuccessMessage("Fournisseur supprimé avec succès");
-                    } catch (Exception ex) {
-                        showErrorMessage(ex.getMessage());
-                    }
-                }
-            } else {
-                showWarningMessage("Veuillez sélectionner un fournisseur à supprimer");
-            }
-        });
-
-        actualiserBtn.addActionListener(e -> loadData());
-
-        mainPanel.add(contentPanel, BorderLayout.CENTER);
+        // Ajustement des colonnes
+        tableFournisseurs.getColumnModel().getColumn(0).setMaxWidth(60);
+        tableFournisseurs.getColumnModel().getColumn(0).setMinWidth(60);
     }
+
+    private void initializeComponents() {
+        mainPanel.setBackground(new Color(245, 245, 245));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Panel d'en-tête avec titre et recherche
+        JPanel headerPanel = createHeaderPanel();
+
+        // Panel des boutons d'action
+        JPanel actionPanel = createActionPanel();
+
+        // Conteneur principal
+        JPanel contentPanel = new JPanel(new BorderLayout(0, 20));
+        contentPanel.setOpaque(false);
+
+        // Ajout des composants au conteneur principal
+        contentPanel.add(headerPanel, BorderLayout.NORTH);
+        contentPanel.add(actionPanel, BorderLayout.CENTER);
+
+        // ScrollPane pour la table avec style moderne
+        JScrollPane scrollPane = new JScrollPane(tableFournisseurs);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getViewport().setBackground(Color.WHITE);
+
+        // Ajout final au panel principal
+        mainPanel.add(contentPanel, BorderLayout.NORTH);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+    }
+
+    private JPanel createHeaderPanel() {
+        JPanel headerPanel = new JPanel(new BorderLayout(15, 0));
+        headerPanel.setOpaque(false);
+
+        // Titre avec icône
+        JLabel titleLabel = new JLabel("Gestion des Fournisseurs");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        titleLabel.setForeground(new Color(33, 33, 33));
+
+        // Barre de recherche
+        searchField = createSearchField();
+
+        headerPanel.add(titleLabel, BorderLayout.WEST);
+        headerPanel.add(searchField, BorderLayout.EAST);
+
+        return headerPanel;
+    }
+
+    private JTextField createSearchField() {
+        JTextField field = new JTextField(20);
+        field.setPreferredSize(new Dimension(250, 35));
+        field.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
+        field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+
+        // Placeholder et style
+        field.setText("Rechercher un fournisseur...");
+        field.setForeground(Color.GRAY);
+
+        // Gestionnaire d'événements pour le placeholder
+        field.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                if (field.getText().equals("Rechercher un fournisseur...")) {
+                    field.setText("");
+                    field.setForeground(Color.BLACK);
+                }
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                if (field.getText().isEmpty()) {
+                    field.setText("Rechercher un fournisseur...");
+                    field.setForeground(Color.GRAY);
+                }
+            }
+        });
+
+        // Événement de recherche
+        field.addActionListener(e -> {
+            String searchTerm = field.getText();
+            if (!searchTerm.equals("Rechercher un fournisseur...")) {
+                updateTableWithSearch(searchTerm);
+            }
+        });
+
+        return field;
+    }
+
+    private void updateTableWithSearch(String searchTerm) {
+        try {
+            List<Fournisseur> resultats = controller.rechercherFournisseurs(searchTerm);
+            refreshTable(resultats);
+        } catch (Exception e) {
+            showErrorMessage("Erreur lors de la recherche : " + e.getMessage());
+        }
+    }
+
+    private JPanel createActionPanel() {
+        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        actionPanel.setOpaque(false);
+
+        // Création des boutons avec style moderne
+        JButton ajouterBtn = createStyledButton("Nouveau", MaterialDesign.MDI_PLUS_BOX, new Color(76, 175, 80));
+        JButton modifierBtn = createStyledButton("Modifier", MaterialDesign.MDI_PENCIL_BOX, new Color(33, 150, 243));
+        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesign.MDI_MINUS_BOX, new Color(244, 67, 54));
+        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH, new Color(156, 39, 176));
+        JButton rapportBtn = createStyledButton("Rapport", MaterialDesign.MDI_FILE_PDF, new Color(63, 81, 181));
+
+        // Ajout des gestionnaires d'événements
+        ajouterBtn.addActionListener(e -> showFournisseurDialog(null));
+        modifierBtn.addActionListener(e -> modifierFournisseurSelectionne());
+        supprimerBtn.addActionListener(e -> supprimerFournisseurSelectionne());
+        actualiserBtn.addActionListener(e -> loadData());
+        rapportBtn.addActionListener(e -> genererRapport());
+
+        // Ajout des boutons au panel
+        actionPanel.add(ajouterBtn);
+        actionPanel.add(modifierBtn);
+        actionPanel.add(supprimerBtn);
+        actionPanel.add(actualiserBtn);
+        actionPanel.add(rapportBtn);
+
+        return actionPanel;
+    }
+
+    private void modifierFournisseurSelectionne() {
+        int selectedRow = tableFournisseurs.getSelectedRow();
+        if (selectedRow >= 0) {
+            showFournisseurDialog(controller.getFournisseurs().get(selectedRow));
+        } else {
+            showWarningMessage("Veuillez sélectionner un fournisseur à modifier");
+        }
+    }
+
+    private void supprimerFournisseurSelectionne() {
+        int selectedRow = tableFournisseurs.getSelectedRow();
+        if (selectedRow >= 0) {
+            if (showConfirmDialog("Êtes-vous sûr de vouloir supprimer ce fournisseur ?")) {
+                try {
+                    controller.supprimerFournisseur(controller.getFournisseurs().get(selectedRow));
+                    refreshTable();
+                    showSuccessMessage("Fournisseur supprimé avec succès");
+                } catch (Exception ex) {
+                    showErrorMessage(ex.getMessage());
+                }
+            }
+        } else {
+            showWarningMessage("Veuillez sélectionner un fournisseur à supprimer");
+        }
+    }
+
 
     private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
         FontIcon icon = FontIcon.of(iconCode);
@@ -335,6 +410,20 @@ public class FournisseurViewSwing {
             });
         }
     }
+    private void refreshTable(List<Fournisseur> fournisseurs) {
+        tableModel.setRowCount(0);
+        for (Fournisseur fournisseur : fournisseurs) {
+            tableModel.addRow(new Object[]{
+                fournisseur.getId(),
+                fournisseur.getNom(),
+                fournisseur.getContact(),
+                fournisseur.getTelephone(),
+                fournisseur.getEmail(),
+                fournisseur.getAdresse(),
+                fournisseur.getStatut()
+            });
+        }
+    }
 
     private void loadData() {
         try {
@@ -345,14 +434,7 @@ public class FournisseurViewSwing {
         }
     }
 
-    // Ajout du bouton de rapport dans le panneau des boutons
-    private JButton createReportButton() {
-        JButton rapportBtn = createStyledButton("Générer Rapport", MaterialDesign.MDI_FILE_PDF, new Color(63, 81, 181));
-        rapportBtn.addActionListener(e -> genererRapport());
-        return rapportBtn;
-    }
 
-    // Méthode pour générer le rapport
     private void genererRapport() {
         try {
             String nomFichier = "rapport_fournisseurs_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".pdf";
@@ -373,7 +455,6 @@ public class FournisseurViewSwing {
             showErrorMessage("Erreur lors de la génération du rapport : " + e.getMessage());
         }
     }
-
 
     public JPanel getMainPanel() {
         return mainPanel;

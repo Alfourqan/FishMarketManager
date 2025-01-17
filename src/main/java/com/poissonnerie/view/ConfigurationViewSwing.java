@@ -6,6 +6,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Map;
 import java.util.HashMap;
+import org.kordamp.ikonli.materialdesign.MaterialDesign;
+import org.kordamp.ikonli.swing.FontIcon;
 
 public class ConfigurationViewSwing {
     private final JPanel mainPanel;
@@ -22,55 +24,62 @@ public class ConfigurationViewSwing {
     }
 
     private void initializeComponents() {
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        mainPanel.setBackground(new Color(245, 245, 245));
+
+        // En-tête avec titre
+        JPanel headerPanel = new JPanel(new BorderLayout(15, 0));
+        headerPanel.setOpaque(false);
+        JLabel titleLabel = new JLabel("Paramètres de l'Application");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        titleLabel.setForeground(new Color(33, 33, 33));
+        headerPanel.add(titleLabel, BorderLayout.WEST);
 
         // Panel principal avec scroll
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setOpaque(false);
 
-        // Section TVA
+        // Section TVA avec style moderne
         contentPanel.add(createSectionPanel("Configuration TVA", new String[][]{
             {ConfigurationParam.CLE_TAUX_TVA, "Taux de TVA (%)", "20.0"}
-        }));
+        }, MaterialDesign.MDI_PERCENT));
 
         // Section Informations Entreprise
-        contentPanel.add(Box.createVerticalStrut(10));
+        contentPanel.add(Box.createVerticalStrut(15));
         contentPanel.add(createSectionPanel("Informations de l'entreprise", new String[][]{
             {ConfigurationParam.CLE_NOM_ENTREPRISE, "Nom de l'entreprise", ""},
             {ConfigurationParam.CLE_ADRESSE_ENTREPRISE, "Adresse", ""},
             {ConfigurationParam.CLE_TELEPHONE_ENTREPRISE, "Téléphone", ""}
-        }));
+        }, MaterialDesign.MDI_DOMAIN)); // Utilisation de MDI_DOMAIN au lieu de MDI_OFFICE_BUILDING
 
         // Section Personnalisation Reçus
-        contentPanel.add(Box.createVerticalStrut(10));
+        contentPanel.add(Box.createVerticalStrut(15));
         contentPanel.add(createSectionPanel("Personnalisation des reçus", new String[][]{
             {ConfigurationParam.CLE_PIED_PAGE_RECU, "Message de pied de page", "Merci de votre visite !"}
-        }));
+        }, MaterialDesign.MDI_RECEIPT));
 
         JScrollPane scrollPane = new JScrollPane(contentPanel);
         scrollPane.setBorder(null);
+        scrollPane.getViewport().setBackground(new Color(245, 245, 245));
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Boutons
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton actualiserBtn = new JButton("Actualiser");
-        actualiserBtn.setIcon(UIManager.getIcon("Table.refreshIcon")); // Icône standard
-        JButton reinitialiserBtn = new JButton("Réinitialiser");
-        JButton sauvegarderBtn = new JButton("Sauvegarder");
+        // Panel des boutons avec style moderne
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        buttonPanel.setOpaque(false);
+
+        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH, new Color(33, 150, 243));
+        JButton reinitialiserBtn = createStyledButton("Réinitialiser", MaterialDesign.MDI_RESTORE, new Color(244, 67, 54));
+        JButton sauvegarderBtn = createStyledButton("Sauvegarder", MaterialDesign.MDI_CONTENT_SAVE, new Color(76, 175, 80));
 
         actualiserBtn.addActionListener(e -> {
             try {
                 mainPanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                 loadData();
-                JOptionPane.showMessageDialog(mainPanel,
-                    "Configurations actualisées avec succès",
-                    "Succès",
-                    JOptionPane.INFORMATION_MESSAGE);
+                showSuccessMessage("Configurations actualisées avec succès");
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(mainPanel,
-                    "Erreur lors de l'actualisation : " + ex.getMessage(),
-                    "Erreur",
-                    JOptionPane.ERROR_MESSAGE);
+                showErrorMessage("Erreur lors de l'actualisation : " + ex.getMessage());
             } finally {
                 mainPanel.setCursor(Cursor.getDefaultCursor());
             }
@@ -85,42 +94,99 @@ public class ConfigurationViewSwing {
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    private JPanel createSectionPanel(String titre, String[][] champs) {
+    private JPanel createSectionPanel(String titre, String[][] champs, MaterialDesign icon) {
         JPanel panel = new JPanel();
         panel.setLayout(new GridBagLayout());
+        panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createTitledBorder(titre),
-            BorderFactory.createEmptyBorder(5, 5, 5, 5)
+            BorderFactory.createEmptyBorder(5, 5, 5, 5),
+            BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                BorderFactory.createEmptyBorder(15, 15, 15, 15)
+            )
         ));
+
+        // En-tête de section avec icône
+        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        headerPanel.setBackground(Color.WHITE);
+        FontIcon fontIcon = FontIcon.of(icon);
+        fontIcon.setIconSize(20);
+        fontIcon.setIconColor(new Color(33, 150, 243));
+        JLabel iconLabel = new JLabel(fontIcon);
+        JLabel titleLabel = new JLabel(titre);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        headerPanel.add(iconLabel);
+        headerPanel.add(titleLabel);
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
+        gbc.gridwidth = 2;
         gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new Insets(2, 5, 2, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(0, 0, 15, 0);
+        panel.add(headerPanel, gbc);
+
+        gbc.gridwidth = 1;
+        gbc.gridy = 1;
+        gbc.insets = new Insets(5, 5, 5, 5);
 
         for (String[] champ : champs) {
             JLabel label = new JLabel(champ[1] + ":");
+            label.setFont(new Font("Segoe UI", Font.PLAIN, 14));
             label.setPreferredSize(new Dimension(150, label.getPreferredSize().height));
 
             JTextField textField = new JTextField(30);
             textField.setName(champ[0]);
+            textField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+            textField.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200)),
+                BorderFactory.createEmptyBorder(8, 10, 8, 10)
+            ));
             champsSaisie.put(champ[0], textField);
 
             gbc.gridx = 0;
+            gbc.weightx = 0;
+            gbc.fill = GridBagConstraints.NONE;
             panel.add(label, gbc);
 
             gbc.gridx = 1;
-            gbc.weightx = 1.0;
+            gbc.weightx = 1;
             gbc.fill = GridBagConstraints.HORIZONTAL;
             panel.add(textField, gbc);
 
             gbc.gridy++;
-            gbc.weightx = 0.0;
-            gbc.fill = GridBagConstraints.NONE;
         }
 
         return panel;
+    }
+
+    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
+        FontIcon icon = FontIcon.of(iconCode);
+        icon.setIconSize(18);
+        icon.setIconColor(Color.WHITE);
+
+        JButton button = new JButton(text);
+        button.setIcon(icon);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        button.setBackground(color);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setMargin(new Insets(8, 16, 8, 16));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Effet de survol
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(color.darker());
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(color);
+            }
+        });
+
+        return button;
     }
 
     private void loadData() {
@@ -136,10 +202,7 @@ public class ConfigurationViewSwing {
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Erreur lors du chargement des configurations: " + e.getMessage());
-            JOptionPane.showMessageDialog(mainPanel,
-                "Erreur lors du chargement des configurations : " + e.getMessage(),
-                "Erreur",
-                JOptionPane.ERROR_MESSAGE);
+            showErrorMessage("Erreur lors du chargement des configurations : " + e.getMessage());
         }
     }
 
@@ -149,27 +212,18 @@ public class ConfigurationViewSwing {
         try {
             double tva = Double.parseDouble(tauxTVA);
             if (tva < 0 || tva > 100) {
-                JOptionPane.showMessageDialog(mainPanel,
-                    "Le taux de TVA doit être un nombre entre 0 et 100",
-                    "Erreur de validation",
-                    JOptionPane.ERROR_MESSAGE);
+                showErrorMessage("Le taux de TVA doit être un nombre entre 0 et 100");
                 return false;
             }
         } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(mainPanel,
-                "Le taux de TVA doit être un nombre valide",
-                "Erreur de validation",
-                JOptionPane.ERROR_MESSAGE);
+            showErrorMessage("Le taux de TVA doit être un nombre valide");
             return false;
         }
 
         // Validation du numéro de téléphone
         String telephone = champsSaisie.get(ConfigurationParam.CLE_TELEPHONE_ENTREPRISE).getText().trim();
         if (!telephone.isEmpty() && !telephone.matches("^[0-9+\\-\\s]*$")) {
-            JOptionPane.showMessageDialog(mainPanel,
-                "Le numéro de téléphone contient des caractères invalides",
-                "Erreur de validation",
-                JOptionPane.ERROR_MESSAGE);
+            showErrorMessage("Le numéro de téléphone contient des caractères invalides");
             return false;
         }
 
@@ -199,10 +253,7 @@ public class ConfigurationViewSwing {
 
             if (hasChanges) {
                 System.out.println("Configurations sauvegardées avec succès");
-                JOptionPane.showMessageDialog(mainPanel,
-                    "Les paramètres ont été sauvegardés avec succès",
-                    "Succès",
-                    JOptionPane.INFORMATION_MESSAGE);
+                showSuccessMessage("Les paramètres ont été sauvegardés avec succès");
                 loadData(); // Recharger les données pour refléter les changements
             } else {
                 System.out.println("Aucun changement à sauvegarder");
@@ -210,37 +261,39 @@ public class ConfigurationViewSwing {
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Erreur lors de la sauvegarde: " + e.getMessage());
-            JOptionPane.showMessageDialog(mainPanel,
-                "Erreur lors de la sauvegarde : " + e.getMessage(),
-                "Erreur",
-                JOptionPane.ERROR_MESSAGE);
+            showErrorMessage("Erreur lors de la sauvegarde : " + e.getMessage());
         }
     }
 
     private void reinitialiserConfigurations() {
-        if (JOptionPane.showConfirmDialog(mainPanel,
-            "Êtes-vous sûr de vouloir réinitialiser tous les paramètres ?",
-            "Confirmation",
-            JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-
+        if (showConfirmDialog("Êtes-vous sûr de vouloir réinitialiser tous les paramètres ?")) {
             try {
                 System.out.println("Réinitialisation des configurations...");
                 controller.reinitialiserConfigurations();
                 loadData(); // Recharger les données après la réinitialisation
                 System.out.println("Configurations réinitialisées avec succès");
-                JOptionPane.showMessageDialog(mainPanel,
-                    "Les paramètres ont été réinitialisés avec succès",
-                    "Succès",
-                    JOptionPane.INFORMATION_MESSAGE);
+                showSuccessMessage("Les paramètres ont été réinitialisés avec succès");
             } catch (Exception e) {
                 e.printStackTrace();
                 System.err.println("Erreur lors de la réinitialisation: " + e.getMessage());
-                JOptionPane.showMessageDialog(mainPanel,
-                    "Erreur lors de la réinitialisation : " + e.getMessage(),
-                    "Erreur",
-                    JOptionPane.ERROR_MESSAGE);
+                showErrorMessage("Erreur lors de la réinitialisation : " + e.getMessage());
             }
         }
+    }
+
+    private void showSuccessMessage(String message) {
+        JOptionPane.showMessageDialog(mainPanel, message, "Succès",
+            JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void showErrorMessage(String message) {
+        JOptionPane.showMessageDialog(mainPanel, message, "Erreur",
+            JOptionPane.ERROR_MESSAGE);
+    }
+
+    private boolean showConfirmDialog(String message) {
+        return JOptionPane.showConfirmDialog(mainPanel, message, "Confirmation",
+            JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
     }
 
     public JPanel getMainPanel() {

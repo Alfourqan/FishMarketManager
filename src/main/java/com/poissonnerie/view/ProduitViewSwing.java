@@ -14,6 +14,7 @@ public class ProduitViewSwing {
     private final ProduitController controller;
     private final JTable tableProduits;
     private final DefaultTableModel tableModel;
+    private JTextField searchField;
 
     public ProduitViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -33,99 +34,202 @@ public class ProduitViewSwing {
             }
         };
         tableProduits = new JTable(tableModel);
-        tableProduits.getColumnModel().getColumn(0).setMaxWidth(30);
-        tableProduits.setRowHeight(30);
-        tableProduits.setFont(new Font(tableProduits.getFont().getName(), Font.PLAIN, 13));
+        setupTableStyle();
 
         initializeComponents();
         loadData();
     }
 
-    private void initializeComponents() {
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-
-        // Panel des boutons avec style moderne
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
-        buttonPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(200, 200, 200)),
-            BorderFactory.createEmptyBorder(5, 5, 15, 5)
-        ));
-        buttonPanel.setBackground(new Color(236, 239, 241));
-
-        // Création des boutons avec icônes et style moderne
-        JButton ajouterBtn = createStyledButton("Ajouter", MaterialDesign.MDI_PLUS_BOX);
-        JButton modifierBtn = createStyledButton("Modifier", MaterialDesign.MDI_PENCIL_BOX);
-        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesign.MDI_MINUS_BOX);
-        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH);
-
-        buttonPanel.add(ajouterBtn);
-        buttonPanel.add(modifierBtn);
-        buttonPanel.add(supprimerBtn);
-        buttonPanel.add(actualiserBtn);
-
+    private void setupTableStyle() {
         // Style moderne pour la table
-        JScrollPane scrollPane = new JScrollPane(tableProduits);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.setBackground(new Color(236, 239, 241));
-        scrollPane.getViewport().setBackground(new Color(236, 239, 241));
-
-        // Mise à jour des colonnes pour inclure prix d'achat et prix de vente
-        String[] columnNames = {"", "Nom", "Catégorie", "Prix Achat (€)", "Prix Vente (€)", "Marge (%)", "Stock", "Seuil d'alerte"};
-        tableModel.setColumnIdentifiers(columnNames);
-
-
         tableProduits.setShowGrid(true);
-        tableProduits.setGridColor(new Color(200, 200, 200));
-        tableProduits.setBackground(new Color(245, 246, 247));
-        tableProduits.setSelectionBackground(new Color(197, 202, 233));
+        tableProduits.setGridColor(new Color(230, 230, 230));
+        tableProduits.setBackground(Color.WHITE);
+        tableProduits.setSelectionBackground(new Color(232, 240, 254));
         tableProduits.setSelectionForeground(new Color(33, 33, 33));
-        tableProduits.setIntercellSpacing(new Dimension(0, 0));
-        tableProduits.getTableHeader().setBackground(new Color(220, 224, 228));
-        tableProduits.getTableHeader().setFont(tableProduits.getTableHeader().getFont().deriveFont(Font.BOLD));
+        tableProduits.getTableHeader().setBackground(new Color(245, 246, 247));
+        tableProduits.getTableHeader().setForeground(new Color(66, 66, 66));
+        tableProduits.setRowHeight(40);
+        tableProduits.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        tableProduits.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
 
-        // Gestionnaires d'événements
-        ajouterBtn.addActionListener(e -> showProduitDialog(null));
-        modifierBtn.addActionListener(e -> {
-            int selectedRow = tableProduits.getSelectedRow();
-            if (selectedRow >= 0) {
-                showProduitDialog(controller.getProduits().get(selectedRow));
-            } else {
-                showWarningMessage("Veuillez sélectionner un produit à modifier");
-            }
-        });
-
-        supprimerBtn.addActionListener(e -> {
-            int selectedRow = tableProduits.getSelectedRow();
-            if (selectedRow >= 0) {
-                if (showConfirmDialog("Êtes-vous sûr de vouloir supprimer ce produit ?")) {
-                    try {
-                        controller.supprimerProduit(controller.getProduits().get(selectedRow));
-                        refreshTable();
-                        showSuccessMessage("Produit supprimé avec succès");
-                    } catch (Exception ex) {
-                        showErrorMessage(ex.getMessage());
-                    }
-                }
-            } else {
-                showWarningMessage("Veuillez sélectionner un produit à supprimer");
-            }
-        });
-
-        actualiserBtn.addActionListener(e -> loadData());
-
-        mainPanel.setBackground(new Color(236, 239, 241));
-        mainPanel.add(buttonPanel, BorderLayout.NORTH);
-        mainPanel.add(new JScrollPane(tableProduits), BorderLayout.CENTER);
+        // Ajustement des colonnes
+        tableProduits.getColumnModel().getColumn(0).setMaxWidth(30);
+        tableProduits.getColumnModel().getColumn(0).setMinWidth(30);
     }
 
-    private JButton createStyledButton(String text, Ikon iconCode) {
+    private void initializeComponents() {
+        mainPanel.setBackground(new Color(245, 245, 245));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Panel d'en-tête avec titre et recherche
+        JPanel headerPanel = createHeaderPanel();
+
+        // Panel des boutons d'action
+        JPanel actionPanel = createActionPanel();
+
+        // Conteneur principal
+        JPanel contentPanel = new JPanel(new BorderLayout(0, 20));
+        contentPanel.setOpaque(false);
+        contentPanel.add(headerPanel, BorderLayout.NORTH);
+        contentPanel.add(actionPanel, BorderLayout.CENTER);
+
+        // ScrollPane pour la table avec style moderne
+        JScrollPane scrollPane = new JScrollPane(tableProduits);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getViewport().setBackground(Color.WHITE);
+
+        mainPanel.add(contentPanel, BorderLayout.NORTH);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+    }
+
+    private JPanel createHeaderPanel() {
+        JPanel headerPanel = new JPanel(new BorderLayout(15, 0));
+        headerPanel.setOpaque(false);
+
+        // Titre avec icône
+        JLabel titleLabel = new JLabel("Gestion des Produits");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        titleLabel.setForeground(new Color(33, 33, 33));
+
+        // Barre de recherche
+        searchField = createSearchField();
+
+        headerPanel.add(titleLabel, BorderLayout.WEST);
+        headerPanel.add(searchField, BorderLayout.EAST);
+
+        return headerPanel;
+    }
+
+    private JTextField createSearchField() {
+        JTextField field = new JTextField(20);
+        field.setPreferredSize(new Dimension(250, 35));
+        field.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
+        field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+
+        // Placeholder et style
+        field.setText("Rechercher un produit...");
+        field.setForeground(Color.GRAY);
+
+        // Gestionnaire d'événements pour le placeholder
+        field.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                if (field.getText().equals("Rechercher un produit...")) {
+                    field.setText("");
+                    field.setForeground(Color.BLACK);
+                }
+            }
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                if (field.getText().isEmpty()) {
+                    field.setText("Rechercher un produit...");
+                    field.setForeground(Color.GRAY);
+                }
+            }
+        });
+
+        // Événement de recherche (à implémenter)
+        field.addActionListener(e -> {
+            String searchTerm = field.getText();
+            if (!searchTerm.equals("Rechercher un produit...")) {
+                // TODO: Implémenter la recherche
+                // updateTableWithSearch(searchTerm);
+            }
+        });
+
+        return field;
+    }
+
+    private JPanel createActionPanel() {
+        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        actionPanel.setOpaque(false);
+
+        // Création des boutons avec style moderne
+        JButton ajouterBtn = createStyledButton("Nouveau", MaterialDesign.MDI_PLUS_BOX, new Color(76, 175, 80));
+        JButton modifierBtn = createStyledButton("Modifier", MaterialDesign.MDI_PENCIL_BOX, new Color(33, 150, 243));
+        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesign.MDI_MINUS_BOX, new Color(244, 67, 54));
+        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH, new Color(156, 39, 176));
+
+        // Ajout des gestionnaires d'événements
+        ajouterBtn.addActionListener(e -> showProduitDialog(null));
+        modifierBtn.addActionListener(e -> modifierProduitSelectionne());
+        supprimerBtn.addActionListener(e -> supprimerProduitSelectionne());
+        actualiserBtn.addActionListener(e -> loadData());
+
+        // Ajout des boutons au panel
+        actionPanel.add(ajouterBtn);
+        actionPanel.add(modifierBtn);
+        actionPanel.add(supprimerBtn);
+        actionPanel.add(actualiserBtn);
+
+        return actionPanel;
+    }
+
+    private void modifierProduitSelectionne() {
+        int selectedRow = tableProduits.getSelectedRow();
+        if (selectedRow >= 0) {
+            showProduitDialog(controller.getProduits().get(selectedRow));
+        } else {
+            showWarningMessage("Veuillez sélectionner un produit à modifier");
+        }
+    }
+
+    private void supprimerProduitSelectionne() {
+        int selectedRow = tableProduits.getSelectedRow();
+        if (selectedRow >= 0) {
+            if (showConfirmDialog("Êtes-vous sûr de vouloir supprimer ce produit ?")) {
+                try {
+                    controller.supprimerProduit(controller.getProduits().get(selectedRow));
+                    refreshTable();
+                    showSuccessMessage("Produit supprimé avec succès");
+                } catch (Exception ex) {
+                    showErrorMessage(ex.getMessage());
+                }
+            }
+        } else {
+            showWarningMessage("Veuillez sélectionner un produit à supprimer");
+        }
+    }
+
+    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
         FontIcon icon = FontIcon.of(iconCode);
         icon.setIconSize(18);
-        JButton button = new JButton(text, icon);
-        button.setMargin(new Insets(8, 16, 8, 16));
+        icon.setIconColor(Color.WHITE);
+
+        JButton button = new JButton(text);
+        button.setIcon(icon);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        button.setBackground(color);
+        button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setMargin(new Insets(8, 16, 8, 16));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Effet de survol
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(color.darker());
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(color);
+            }
+        });
+
         return button;
+    }
+
+    private JTextField createStyledTextField() {
+        JTextField field = new JTextField(20);
+        field.setPreferredSize(new Dimension(250, 30));
+        field.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(5, 8, 5, 8)
+        ));
+        field.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        return field;
     }
 
     private void showProduitDialog(Produit produit) {
@@ -134,14 +238,13 @@ public class ProduitViewSwing {
                                   true);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
-        // Panel principal avec padding
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Style moderne pour les champs
+        // Champs du formulaire avec style moderne
         JTextField nomField = createStyledTextField();
         JComboBox<String> categorieCombo = new JComboBox<>(new String[]{"Frais", "Surgelé", "Transformé"});
         JTextField prixAchatField = createStyledTextField();
@@ -169,13 +272,14 @@ public class ProduitViewSwing {
 
         // Boutons avec style moderne
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
-        JButton okButton = new JButton("OK");
-        JButton cancelButton = new JButton("Annuler");
+        JButton okButton = createStyledButton("Enregistrer", MaterialDesign.MDI_CONTENT_SAVE, new Color(76, 175, 80));
+        JButton cancelButton = createStyledButton("Annuler", MaterialDesign.MDI_CLOSE, new Color(158, 158, 158));
 
         // Gestionnaires d'événements
         okButton.addActionListener(evt -> {
             try {
-                validateAndSaveProduit(produit, nomField, categorieCombo, prixAchatField, prixVenteField, stockField, seuilField);
+                validateAndSaveProduit(produit, nomField, categorieCombo, prixAchatField,
+                                    prixVenteField, stockField, seuilField);
                 dialog.dispose();
             } catch (Exception e) {
                 showErrorMessage(e.getMessage());
@@ -200,17 +304,13 @@ public class ProduitViewSwing {
         dialog.setVisible(true);
     }
 
-    private JTextField createStyledTextField() {
-        JTextField field = new JTextField(20);
-        field.setPreferredSize(new Dimension(200, 30));
-        return field;
-    }
-
-    private void addFormField(JPanel panel, GridBagConstraints gbc, String labelText, JComponent field, int row) {
+    private void addFormField(JPanel panel, GridBagConstraints gbc, String labelText,
+                            JComponent field, int row) {
         gbc.gridx = 0;
         gbc.gridy = row;
         gbc.weightx = 0;
         JLabel label = new JLabel(labelText);
+        label.setFont(new Font("Segoe UI", Font.BOLD, 13));
         label.setHorizontalAlignment(SwingConstants.RIGHT);
         panel.add(label, gbc);
 
@@ -219,9 +319,10 @@ public class ProduitViewSwing {
         panel.add(field, gbc);
     }
 
-    private void validateAndSaveProduit(Produit produit, JTextField nomField, JComboBox<String> categorieCombo,
-                                      JTextField prixAchatField, JTextField prixVenteField,
-                                      JTextField stockField, JTextField seuilField) {
+    private void validateAndSaveProduit(Produit produit, JTextField nomField,
+                                      JComboBox<String> categorieCombo, JTextField prixAchatField,
+                                      JTextField prixVenteField, JTextField stockField,
+                                      JTextField seuilField) {
         String nom = nomField.getText().trim();
         String categorie = (String) categorieCombo.getSelectedItem();
         String prixAchatText = prixAchatField.getText().trim().replace(",", ".");
@@ -277,15 +378,18 @@ public class ProduitViewSwing {
     }
 
     private void showWarningMessage(String message) {
-        JOptionPane.showMessageDialog(mainPanel, message, "Attention", JOptionPane.WARNING_MESSAGE);
+        JOptionPane.showMessageDialog(mainPanel, message, "Attention",
+            JOptionPane.WARNING_MESSAGE);
     }
 
     private void showErrorMessage(String message) {
-        JOptionPane.showMessageDialog(mainPanel, message, "Erreur", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(mainPanel, message, "Erreur",
+            JOptionPane.ERROR_MESSAGE);
     }
 
     private void showSuccessMessage(String message) {
-        JOptionPane.showMessageDialog(mainPanel, message, "Succès", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(mainPanel, message, "Succès",
+            JOptionPane.INFORMATION_MESSAGE);
     }
 
     private boolean showConfirmDialog(String message) {
@@ -305,7 +409,6 @@ public class ProduitViewSwing {
                 icon.setIconColor(new Color(40, 167, 69)); // Vert pour stock normal
             }
 
-            // Mise à jour pour afficher les prix d'achat et de vente
             tableModel.addRow(new Object[]{
                 icon,
                 produit.getNom(),
