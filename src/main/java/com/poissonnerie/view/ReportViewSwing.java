@@ -136,7 +136,7 @@ public class ReportViewSwing {
         JButton ventesBtn = createStyledButton("Rapport des ventes", MaterialDesignI.CART_OUTLINE, new Color(76, 175, 80));
         JButton stocksBtn = createStyledButton("Rapport des stocks", MaterialDesignI.PACKAGE_VARIANT_OUTLINE, new Color(33, 150, 243));
         JButton fournisseursBtn = createStyledButton("Rapport fournisseurs", MaterialDesignI.TRUCK_DELIVERY_OUTLINE, new Color(255, 152, 0));
-        JButton statistiquesBtn = createStyledButton("Statistiques", MaterialDesignI.CHART_BAR_STACKED, new Color(156, 39, 176));
+        JButton statistiquesBtn = createStyledButton("Statistiques", MaterialDesignI.CHART_BAR_STACKED_OUTLINE, new Color(156, 39, 176));
 
         // Gestionnaires d'événements
         ventesBtn.addActionListener(e -> genererRapportVentes());
