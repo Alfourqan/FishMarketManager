@@ -6,7 +6,7 @@ import com.poissonnerie.util.PDFGenerator;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import org.kordamp.ikonli.materialdesign2.MaterialDesignI;
+import org.kordamp.ikonli.materialdesign.MaterialDesign;
 import org.kordamp.ikonli.Ikon;
 import org.kordamp.ikonli.swing.FontIcon;
 
@@ -42,34 +42,6 @@ public class ClientViewSwing {
         loadData();
     }
 
-    private JButton createStyledButton(String text, MaterialDesignI iconCode, Color color) {
-        FontIcon icon = FontIcon.of(iconCode);
-        icon.setIconSize(18);
-        icon.setIconColor(Color.WHITE);
-
-        JButton button = new JButton(text);
-        button.setIcon(icon);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        button.setBackground(color);
-        button.setForeground(Color.WHITE);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setMargin(new Insets(8, 16, 8, 16));
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        // Effet de survol
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(color.darker());
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(color);
-            }
-        });
-
-        return button;
-    }
-
     private void initializeComponents() {
         mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
         mainPanel.setBackground(new Color(236, 239, 241));
@@ -83,11 +55,11 @@ public class ClientViewSwing {
         buttonPanel.setBackground(new Color(236, 239, 241));
 
         // Création des boutons avec icônes
-        JButton ajouterBtn = createStyledButton("Ajouter", MaterialDesignI.ACCOUNT_PLUS, new Color(76, 175, 80));
-        JButton modifierBtn = createStyledButton("Modifier", MaterialDesignI.PENCIL, new Color(33, 150, 243));
-        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesignI.ACCOUNT_MINUS, new Color(244, 67, 54));
-        JButton reglerCreanceBtn = createStyledButton("Régler créance", MaterialDesignI.CURRENCY_USD, new Color(255, 152, 0));
-        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesignI.REFRESH, new Color(156, 39, 176));
+        JButton ajouterBtn = createStyledButton("Ajouter", MaterialDesign.MDI_ACCOUNT_PLUS);
+        JButton modifierBtn = createStyledButton("Modifier", MaterialDesign.MDI_PENCIL);
+        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesign.MDI_ACCOUNT_REMOVE);
+        JButton reglerCreanceBtn = createStyledButton("Régler créance", MaterialDesign.MDI_CREDIT_CARD);
+        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH);
 
         buttonPanel.add(ajouterBtn);
         buttonPanel.add(modifierBtn);
@@ -199,15 +171,24 @@ public class ClientViewSwing {
         });
     }
 
+    private JButton createStyledButton(String text, Ikon iconCode) {
+        FontIcon icon = FontIcon.of(iconCode);
+        icon.setIconSize(16);
+        JButton button = new JButton(text, icon);
+        button.setMargin(new Insets(8, 16, 8, 16));
+        button.setFocusPainted(false);
+        return button;
+    }
+
     private void refreshTable() {
         tableModel.setRowCount(0);
         for (Client client : controller.getClients()) {
             FontIcon icon;
             if (client.getSolde() > 0) {
-                icon = FontIcon.of(MaterialDesignI.ALERT);
+                icon = FontIcon.of(MaterialDesign.MDI_ALERT);
                 icon.setIconColor(new Color(220, 53, 69)); // Rouge pour les créances
             } else {
-                icon = FontIcon.of(MaterialDesignI.CHECK);
+                icon = FontIcon.of(MaterialDesign.MDI_ACCOUNT);
                 icon.setIconColor(new Color(40, 167, 69)); // Vert pour les comptes à jour
             }
 

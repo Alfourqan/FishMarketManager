@@ -2,7 +2,7 @@ package com.poissonnerie.view;
 
 import javax.swing.*;
 import java.awt.*;
-import org.kordamp.ikonli.materialdesign2.MaterialDesignI;
+import org.kordamp.ikonli.materialdesign.MaterialDesign;
 import org.kordamp.ikonli.swing.FontIcon;
 import com.poissonnerie.util.PDFGenerator;
 import java.time.LocalDate;
@@ -52,34 +52,6 @@ public class ReportViewSwing {
         mainPanel.add(splitPane, BorderLayout.CENTER);
     }
 
-    private JButton createStyledButton(String text, MaterialDesignI iconCode, Color color) {
-        FontIcon icon = FontIcon.of(iconCode);
-        icon.setIconSize(18);
-        icon.setIconColor(Color.WHITE);
-
-        JButton button = new JButton(text);
-        button.setIcon(icon);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        button.setBackground(color);
-        button.setForeground(Color.WHITE);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setMargin(new Insets(8, 16, 8, 16));
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        // Effet de survol
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(color.darker());
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(color);
-            }
-        });
-
-        return button;
-    }
-
     private JPanel createLeftPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -98,6 +70,28 @@ public class ReportViewSwing {
             new Color(0, 135, 136)
         ));
 
+        JButton aujourdhuiBtn = createPeriodButton("Aujourd'hui", () -> {
+            dateDebut = LocalDate.now();
+            dateFin = LocalDate.now();
+            updateCharts();
+        });
+
+        JButton semaineBtn = createPeriodButton("Cette semaine", () -> {
+            dateDebut = LocalDate.now().minusWeeks(1);
+            dateFin = LocalDate.now();
+            updateCharts();
+        });
+
+        JButton moisBtn = createPeriodButton("Ce mois", () -> {
+            dateDebut = LocalDate.now().minusMonths(1);
+            dateFin = LocalDate.now();
+            updateCharts();
+        });
+
+        periodPanel.add(aujourdhuiBtn);
+        periodPanel.add(semaineBtn);
+        periodPanel.add(moisBtn);
+
         // Boutons de génération de rapports avec style moderne
         JPanel reportButtonsPanel = new JPanel();
         reportButtonsPanel.setLayout(new BoxLayout(reportButtonsPanel, BoxLayout.Y_AXIS));
@@ -111,10 +105,10 @@ public class ReportViewSwing {
             new Color(0, 135, 136)
         ));
 
-        JButton ventesBtn = createStyledButton("Rapport des ventes", MaterialDesignI.CART_VARIANT, new Color(76, 175, 80));
-        JButton stocksBtn = createStyledButton("Rapport des stocks", MaterialDesignI.PACKAGE_VARIANT, new Color(33, 150, 243));
-        JButton fournisseursBtn = createStyledButton("Rapport fournisseurs", MaterialDesignI.ACCOUNT_CIRCLE, new Color(255, 152, 0));
-        JButton statistiquesBtn = createStyledButton("Statistiques", MaterialDesignI.CHART_LINE, new Color(156, 39, 176));
+        JButton ventesBtn = createReportButton("Rapport des ventes", MaterialDesign.MDI_CART);
+        JButton stocksBtn = createReportButton("Rapport des stocks", MaterialDesign.MDI_PACKAGE_VARIANT);
+        JButton fournisseursBtn = createReportButton("Rapport fournisseurs", MaterialDesign.MDI_TRUCK_DELIVERY);
+        JButton statistiquesBtn = createReportButton("Statistiques", MaterialDesign.MDI_CHART_BAR);
 
         // Gestionnaires d'événements
         ventesBtn.addActionListener(e -> genererRapportVentes());
@@ -166,7 +160,7 @@ public class ReportViewSwing {
         return panel;
     }
 
-    private JButton createReportButton(String text, MaterialDesignI iconCode) {
+    private JButton createReportButton(String text, MaterialDesign iconCode) {
         JButton button = new JButton(text);
         FontIcon icon = FontIcon.of(iconCode);
         icon.setIconSize(18);

@@ -1,23 +1,21 @@
 package com.poissonnerie.view;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.DefaultTableCellRenderer;
-
-import org.kordamp.ikonli.materialdesign2.MaterialDesignI;
-import org.kordamp.ikonli.swing.FontIcon;
-
-import com.poissonnerie.controller.*;
+import com.poissonnerie.controller.VenteController;
+import com.poissonnerie.controller.ProduitController;
+import com.poissonnerie.controller.ClientController;
 import com.poissonnerie.model.*;
 import com.poissonnerie.util.PDFGenerator;
 
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.kordamp.ikonli.materialdesign.MaterialDesign;
+import org.kordamp.ikonli.swing.FontIcon;
 
 public class VenteViewSwing {
     private final JPanel mainPanel;
@@ -139,11 +137,11 @@ public class VenteViewSwing {
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         actionPanel.setOpaque(false);
 
-        // Création des boutons avec style moderne
-        JButton ajouterBtn = createStyledButton("Nouveau", MaterialDesignI.PLUS_BOX_OUTLINE, new Color(76, 175, 80));
-        JButton modifierBtn = createStyledButton("Modifier", MaterialDesignI.PENCIL_OUTLINE, new Color(33, 150, 243));
-        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesignI.MINUS_BOX_OUTLINE, new Color(244, 67, 54));
-        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesignI.REFRESH, new Color(156, 39, 176));
+        // Création des boutons avec style moderne comme dans ProduitViewSwing
+        JButton ajouterBtn = createStyledButton("Nouveau", MaterialDesign.MDI_PLUS_BOX, new Color(76, 175, 80));
+        JButton modifierBtn = createStyledButton("Modifier", MaterialDesign.MDI_PENCIL_BOX, new Color(33, 150, 243));
+        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesign.MDI_MINUS_BOX, new Color(244, 67, 54));
+        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH, new Color(156, 39, 176));
 
         // Ajout des gestionnaires d'événements
         ajouterBtn.addActionListener(e -> {/* TODO */});
@@ -160,7 +158,7 @@ public class VenteViewSwing {
         return actionPanel;
     }
 
-    private JButton createStyledButton(String text, MaterialDesignI iconCode, Color color) {
+    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
         FontIcon icon = FontIcon.of(iconCode);
         icon.setIconSize(18);
         icon.setIconColor(Color.WHITE);

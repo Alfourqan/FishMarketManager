@@ -9,7 +9,6 @@
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <ikonli.version>12.3.1</ikonli.version>
   </properties>
 
   <dependencies>
@@ -47,17 +46,17 @@
     <dependency>
         <groupId>org.kordamp.ikonli</groupId>
         <artifactId>ikonli-core</artifactId>
-        <version>${ikonli.version}</version>
+        <version>12.3.1</version>
     </dependency>
     <dependency>
         <groupId>org.kordamp.ikonli</groupId>
         <artifactId>ikonli-swing</artifactId>
-        <version>${ikonli.version}</version>
+        <version>12.3.1</version>
     </dependency>
     <dependency>
         <groupId>org.kordamp.ikonli</groupId>
-        <artifactId>ikonli-materialdesign2-pack</artifactId>
-        <version>${ikonli.version}</version>
+        <artifactId>ikonli-materialdesign-pack</artifactId>
+        <version>12.3.1</version>
     </dependency>
   </dependencies>
 

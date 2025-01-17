@@ -5,7 +5,7 @@ import com.poissonnerie.model.Produit;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import org.kordamp.ikonli.materialdesign2.MaterialDesignI;
+import org.kordamp.ikonli.materialdesign.MaterialDesign;
 import org.kordamp.ikonli.Ikon;
 import org.kordamp.ikonli.swing.FontIcon;
 
@@ -147,10 +147,10 @@ public class ProduitViewSwing {
         actionPanel.setOpaque(false);
 
         // Création des boutons avec style moderne
-        JButton ajouterBtn = createStyledButton("Nouveau", MaterialDesignI.PLUS, new Color(76, 175, 80));
-        JButton modifierBtn = createStyledButton("Modifier", MaterialDesignI.PENCIL_BOX, new Color(33, 150, 243));
-        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesignI.MINUS, new Color(244, 67, 54));
-        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesignI.REFRESH, new Color(156, 39, 176));
+        JButton ajouterBtn = createStyledButton("Nouveau", MaterialDesign.MDI_PLUS_BOX, new Color(76, 175, 80));
+        JButton modifierBtn = createStyledButton("Modifier", MaterialDesign.MDI_PENCIL_BOX, new Color(33, 150, 243));
+        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesign.MDI_MINUS_BOX, new Color(244, 67, 54));
+        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH, new Color(156, 39, 176));
 
         // Ajout des gestionnaires d'événements
         ajouterBtn.addActionListener(e -> showProduitDialog(null));
@@ -193,7 +193,7 @@ public class ProduitViewSwing {
         }
     }
 
-    private JButton createStyledButton(String text, MaterialDesignI iconCode, Color color) {
+    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
         FontIcon icon = FontIcon.of(iconCode);
         icon.setIconSize(18);
         icon.setIconColor(Color.WHITE);
@@ -272,8 +272,8 @@ public class ProduitViewSwing {
 
         // Boutons avec style moderne
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
-        JButton okButton = createStyledButton("Enregistrer", MaterialDesignI.CHECK, new Color(76, 175, 80));
-        JButton cancelButton = createStyledButton("Annuler", MaterialDesignI.CLOSE, new Color(158, 158, 158));
+        JButton okButton = createStyledButton("Enregistrer", MaterialDesign.MDI_CONTENT_SAVE, new Color(76, 175, 80));
+        JButton cancelButton = createStyledButton("Annuler", MaterialDesign.MDI_CLOSE, new Color(158, 158, 158));
 
         // Gestionnaires d'événements
         okButton.addActionListener(evt -> {
@@ -402,10 +402,10 @@ public class ProduitViewSwing {
         for (Produit produit : controller.getProduits()) {
             FontIcon icon;
             if (produit.getStock() <= produit.getSeuilAlerte()) {
-                icon = FontIcon.of(MaterialDesignI.ALERT_CIRCLE);
+                icon = FontIcon.of(MaterialDesign.MDI_ALERT_CIRCLE);
                 icon.setIconColor(new Color(220, 53, 69)); // Rouge pour stock bas
             } else {
-                icon = FontIcon.of(MaterialDesignI.CHECK_CIRCLE);
+                icon = FontIcon.of(MaterialDesign.MDI_PACKAGE_VARIANT);
                 icon.setIconColor(new Color(40, 167, 69)); // Vert pour stock normal
             }
 

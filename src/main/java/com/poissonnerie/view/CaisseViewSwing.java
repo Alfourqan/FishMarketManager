@@ -2,8 +2,6 @@ package com.poissonnerie.view;
 
 import com.poissonnerie.controller.CaisseController;
 import com.poissonnerie.model.MouvementCaisse;
-import org.kordamp.ikonli.materialdesign2.MaterialDesignI;
-import org.kordamp.ikonli.swing.FontIcon;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -47,34 +45,6 @@ public class CaisseViewSwing {
         updateCaisseState();
     }
 
-    private JButton createStyledButton(String text, MaterialDesignI iconCode, Color color) {
-        FontIcon icon = FontIcon.of(iconCode);
-        icon.setIconSize(18);
-        icon.setIconColor(Color.WHITE);
-
-        JButton button = new JButton(text);
-        button.setIcon(icon);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        button.setBackground(color);
-        button.setForeground(Color.WHITE);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setMargin(new Insets(8, 16, 8, 16));
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        // Effet de survol
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(color.darker());
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(color);
-            }
-        });
-
-        return button;
-    }
-
     private void initializeComponents() {
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
@@ -82,11 +52,11 @@ public class CaisseViewSwing {
         JPanel topPanel = new JPanel(new BorderLayout());
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-        // Boutons de gestion de la caisse avec le nouveau style
-        ouvrirBtn = createStyledButton("Ouvrir la caisse", MaterialDesignI.CURRENCY_EUR, new Color(76, 175, 80));
-        cloturerBtn = createStyledButton("Clôturer la caisse", MaterialDesignI.LOGOUT_VARIANT, new Color(244, 67, 54));
-        ajouterBtn = createStyledButton("Nouveau mouvement", MaterialDesignI.PACKAGE_VARIANT, new Color(33, 150, 243));
-        exporterBtn = createStyledButton("Exporter (CSV)", MaterialDesignI.FILE, new Color(156, 39, 176));
+        // Boutons de gestion de la caisse
+        ouvrirBtn = new JButton("Ouvrir la caisse");
+        cloturerBtn = new JButton("Clôturer la caisse");
+        ajouterBtn = new JButton("Nouveau mouvement");
+        exporterBtn = new JButton("Exporter (CSV)");
 
         actionPanel.add(ouvrirBtn);
         actionPanel.add(cloturerBtn);

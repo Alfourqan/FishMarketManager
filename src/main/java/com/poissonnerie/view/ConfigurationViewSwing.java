@@ -6,7 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Map;
 import java.util.HashMap;
-import org.kordamp.ikonli.materialdesign2.MaterialDesignI;
+import org.kordamp.ikonli.materialdesign.MaterialDesign;
 import org.kordamp.ikonli.swing.FontIcon;
 
 public class ConfigurationViewSwing {
@@ -43,7 +43,7 @@ public class ConfigurationViewSwing {
         // Section TVA avec style moderne
         contentPanel.add(createSectionPanel("Configuration TVA", new String[][]{
             {ConfigurationParam.CLE_TAUX_TVA, "Taux de TVA (%)", "20.0"}
-        }, MaterialDesignI.CURRENCY_EUR));
+        }, MaterialDesign.MDI_PERCENT));
 
         // Section Informations Entreprise
         contentPanel.add(Box.createVerticalStrut(15));
@@ -51,13 +51,13 @@ public class ConfigurationViewSwing {
             {ConfigurationParam.CLE_NOM_ENTREPRISE, "Nom de l'entreprise", ""},
             {ConfigurationParam.CLE_ADRESSE_ENTREPRISE, "Adresse", ""},
             {ConfigurationParam.CLE_TELEPHONE_ENTREPRISE, "Téléphone", ""}
-        }, MaterialDesignI.ACCOUNT_CIRCLE));
+        }, MaterialDesign.MDI_DOMAIN)); // Utilisation de MDI_DOMAIN au lieu de MDI_OFFICE_BUILDING
 
         // Section Personnalisation Reçus
         contentPanel.add(Box.createVerticalStrut(15));
         contentPanel.add(createSectionPanel("Personnalisation des reçus", new String[][]{
             {ConfigurationParam.CLE_PIED_PAGE_RECU, "Message de pied de page", "Merci de votre visite !"}
-        }, MaterialDesignI.FILE));
+        }, MaterialDesign.MDI_RECEIPT));
 
         JScrollPane scrollPane = new JScrollPane(contentPanel);
         scrollPane.setBorder(null);
@@ -69,9 +69,9 @@ public class ConfigurationViewSwing {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonPanel.setOpaque(false);
 
-        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesignI.REFRESH, new Color(33, 150, 243));
-        JButton reinitialiserBtn = createStyledButton("Réinitialiser", MaterialDesignI.DELETE, new Color(244, 67, 54));
-        JButton sauvegarderBtn = createStyledButton("Sauvegarder", MaterialDesignI.CONTENT_SAVE, new Color(76, 175, 80));
+        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH, new Color(33, 150, 243));
+        JButton reinitialiserBtn = createStyledButton("Réinitialiser", MaterialDesign.MDI_RESTORE, new Color(244, 67, 54));
+        JButton sauvegarderBtn = createStyledButton("Sauvegarder", MaterialDesign.MDI_CONTENT_SAVE, new Color(76, 175, 80));
 
         actualiserBtn.addActionListener(e -> {
             try {
@@ -94,7 +94,7 @@ public class ConfigurationViewSwing {
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    private JPanel createSectionPanel(String titre, String[][] champs, MaterialDesignI icon) {
+    private JPanel createSectionPanel(String titre, String[][] champs, MaterialDesign icon) {
         JPanel panel = new JPanel();
         panel.setLayout(new GridBagLayout());
         panel.setBackground(Color.WHITE);
@@ -161,7 +161,7 @@ public class ConfigurationViewSwing {
         return panel;
     }
 
-    private JButton createStyledButton(String text, MaterialDesignI iconCode, Color color) {
+    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
         FontIcon icon = FontIcon.of(iconCode);
         icon.setIconSize(18);
         icon.setIconColor(Color.WHITE);
