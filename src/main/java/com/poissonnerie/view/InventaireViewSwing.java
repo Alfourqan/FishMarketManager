@@ -77,16 +77,16 @@ public class InventaireViewSwing {
 
         // Panel du haut avec titre et boutons
         JPanel topPanel = new JPanel(new BorderLayout());
-        
+
         // Panel des boutons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton refreshBtn = createStyledButton("Actualiser", MaterialDesignI.MDI_REFRESH);
+        JButton refreshBtn = createStyledButton("Actualiser", MaterialDesignI.REFRESH);
         buttonPanel.add(refreshBtn);
 
         // Label de statut
         statusLabel = new JLabel("Prêt");
         statusLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
-        
+
         topPanel.add(buttonPanel, BorderLayout.WEST);
         topPanel.add(statusLabel, BorderLayout.EAST);
 
@@ -182,18 +182,18 @@ public class InventaireViewSwing {
 
     private void refreshTable() {
         tableModel.setRowCount(0);
-        
+
         for (Produit produit : produitController.getProduits()) {
             // Icône d'état
             FontIcon icon;
             if (produit.getStock() == 0) {
-                icon = FontIcon.of(MaterialDesignI.MDI_ALERT);
+                icon = FontIcon.of(MaterialDesignI.ALERT_CIRCLE);
                 icon.setIconColor(new Color(220, 53, 69)); // Rouge pour rupture
             } else if (produit.getStock() <= produit.getSeuilAlerte()) {
-                icon = FontIcon.of(MaterialDesignI.MDI_ALERT_CIRCLE);
+                icon = FontIcon.of(MaterialDesignI.ALERT_CIRCLE_OUTLINE);
                 icon.setIconColor(new Color(255, 193, 7)); // Jaune pour stock bas
             } else {
-                icon = FontIcon.of(MaterialDesignI.MDI_CHECKBOX_MARKED_CIRCLE);
+                icon = FontIcon.of(MaterialDesignI.CHECK_CIRCLE_OUTLINE);
                 icon.setIconColor(new Color(40, 167, 69)); // Vert pour stock normal
             }
 

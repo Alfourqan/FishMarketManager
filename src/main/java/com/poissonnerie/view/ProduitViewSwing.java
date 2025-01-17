@@ -147,9 +147,9 @@ public class ProduitViewSwing {
         actionPanel.setOpaque(false);
 
         // Création des boutons avec style moderne
-        JButton ajouterBtn = createStyledButton("Nouveau", MaterialDesignI.PLUS_BOX, new Color(76, 175, 80));
-        JButton modifierBtn = createStyledButton("Modifier", MaterialDesignI.PENCIL, new Color(33, 150, 243));
-        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesignI.MINUS_BOX, new Color(244, 67, 54));
+        JButton ajouterBtn = createStyledButton("Nouveau", MaterialDesignI.PLUS_BOX_OUTLINE, new Color(76, 175, 80));
+        JButton modifierBtn = createStyledButton("Modifier", MaterialDesignI.PENCIL_OUTLINE, new Color(33, 150, 243));
+        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesignI.MINUS_BOX_OUTLINE, new Color(244, 67, 54));
         JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesignI.REFRESH, new Color(156, 39, 176));
 
         // Ajout des gestionnaires d'événements
@@ -272,8 +272,8 @@ public class ProduitViewSwing {
 
         // Boutons avec style moderne
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
-        JButton okButton = createStyledButton("Enregistrer", MaterialDesignI.CONTENT_SAVE, new Color(76, 175, 80));
-        JButton cancelButton = createStyledButton("Annuler", MaterialDesignI.CLOSE, new Color(158, 158, 158));
+        JButton okButton = createStyledButton("Enregistrer", MaterialDesignI.CONTENT_SAVE_OUTLINE, new Color(76, 175, 80));
+        JButton cancelButton = createStyledButton("Annuler", MaterialDesignI.CLOSE_CIRCLE_OUTLINE, new Color(158, 158, 158));
 
         // Gestionnaires d'événements
         okButton.addActionListener(evt -> {
@@ -402,10 +402,10 @@ public class ProduitViewSwing {
         for (Produit produit : controller.getProduits()) {
             FontIcon icon;
             if (produit.getStock() <= produit.getSeuilAlerte()) {
-                icon = FontIcon.of(MaterialDesignI.ALERT_CIRCLE);
+                icon = FontIcon.of(MaterialDesignI.ALERT_CIRCLE_OUTLINE);
                 icon.setIconColor(new Color(220, 53, 69)); // Rouge pour stock bas
             } else {
-                icon = FontIcon.of(MaterialDesignI.PACKAGE_VARIANT);
+                icon = FontIcon.of(MaterialDesignI.PACKAGE_VARIANT_OUTLINE);
                 icon.setIconColor(new Color(40, 167, 69)); // Vert pour stock normal
             }
 

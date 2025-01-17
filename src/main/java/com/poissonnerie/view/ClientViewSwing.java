@@ -87,7 +87,7 @@ public class ClientViewSwing {
         JButton modifierBtn = createStyledButton("Modifier", MaterialDesignI.PENCIL_OUTLINE, new Color(33, 150, 243));
         JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesignI.ACCOUNT_REMOVE_OUTLINE, new Color(244, 67, 54));
         JButton reglerCreanceBtn = createStyledButton("Régler créance", MaterialDesignI.CREDIT_CARD_OUTLINE, new Color(255, 152, 0));
-        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesignI.REFRESH, new Color(156, 39, 176));
+        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesignI.REFRESH_OUTLINE, new Color(156, 39, 176));
 
         buttonPanel.add(ajouterBtn);
         buttonPanel.add(modifierBtn);

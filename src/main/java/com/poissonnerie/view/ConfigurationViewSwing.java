@@ -51,13 +51,13 @@ public class ConfigurationViewSwing {
             {ConfigurationParam.CLE_NOM_ENTREPRISE, "Nom de l'entreprise", ""},
             {ConfigurationParam.CLE_ADRESSE_ENTREPRISE, "Adresse", ""},
             {ConfigurationParam.CLE_TELEPHONE_ENTREPRISE, "Téléphone", ""}
-        }, MaterialDesignI.OFFICE_BUILDING));
+        }, MaterialDesignI.OFFICE_BUILDING_OUTLINE));
 
         // Section Personnalisation Reçus
         contentPanel.add(Box.createVerticalStrut(15));
         contentPanel.add(createSectionPanel("Personnalisation des reçus", new String[][]{
             {ConfigurationParam.CLE_PIED_PAGE_RECU, "Message de pied de page", "Merci de votre visite !"}
-        }, MaterialDesignI.RECEIPT));
+        }, MaterialDesignI.FILE_DOCUMENT_OUTLINE));
 
         JScrollPane scrollPane = new JScrollPane(contentPanel);
         scrollPane.setBorder(null);
@@ -69,9 +69,9 @@ public class ConfigurationViewSwing {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonPanel.setOpaque(false);
 
-        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesignI.REFRESH, new Color(33, 150, 243));
-        JButton reinitialiserBtn = createStyledButton("Réinitialiser", MaterialDesignI.RESTORE, new Color(244, 67, 54));
-        JButton sauvegarderBtn = createStyledButton("Sauvegarder", MaterialDesignI.CONTENT_SAVE, new Color(76, 175, 80));
+        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesignI.REFRESH_OUTLINE, new Color(33, 150, 243));
+        JButton reinitialiserBtn = createStyledButton("Réinitialiser", MaterialDesignI.RESTART_OUTLINE, new Color(244, 67, 54));
+        JButton sauvegarderBtn = createStyledButton("Sauvegarder", MaterialDesignI.CONTENT_SAVE_OUTLINE, new Color(76, 175, 80));
 
         actualiserBtn.addActionListener(e -> {
             try {

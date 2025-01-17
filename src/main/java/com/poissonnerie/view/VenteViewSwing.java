@@ -140,9 +140,9 @@ public class VenteViewSwing {
         actionPanel.setOpaque(false);
 
         // Création des boutons avec style moderne
-        JButton ajouterBtn = createStyledButton("Nouveau", MaterialDesignI.PLUS_BOX, new Color(76, 175, 80));
-        JButton modifierBtn = createStyledButton("Modifier", MaterialDesignI.PENCIL, new Color(33, 150, 243));
-        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesignI.MINUS_BOX, new Color(244, 67, 54));
+        JButton ajouterBtn = createStyledButton("Nouveau", MaterialDesignI.PLUS_BOX_OUTLINE, new Color(76, 175, 80));
+        JButton modifierBtn = createStyledButton("Modifier", MaterialDesignI.PENCIL_OUTLINE, new Color(33, 150, 243));
+        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesignI.MINUS_BOX_OUTLINE, new Color(244, 67, 54));
         JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesignI.REFRESH, new Color(156, 39, 176));
 
         // Ajout des gestionnaires d'événements

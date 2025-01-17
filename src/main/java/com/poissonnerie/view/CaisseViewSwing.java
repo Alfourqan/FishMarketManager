@@ -83,10 +83,10 @@ public class CaisseViewSwing {
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
         // Boutons de gestion de la caisse avec le nouveau style
-        ouvrirBtn = createStyledButton("Ouvrir la caisse", MaterialDesignI.CASH_REGISTER, new Color(76, 175, 80));
-        cloturerBtn = createStyledButton("Clôturer la caisse", MaterialDesignI.CASH_LOCK, new Color(244, 67, 54));
-        ajouterBtn = createStyledButton("Nouveau mouvement", MaterialDesignI.CASH_PLUS, new Color(33, 150, 243));
-        exporterBtn = createStyledButton("Exporter (CSV)", MaterialDesignI.EXPORT, new Color(156, 39, 176));
+        ouvrirBtn = createStyledButton("Ouvrir la caisse", MaterialDesignI.CASH_MULTIPLE_OUTLINE, new Color(76, 175, 80));
+        cloturerBtn = createStyledButton("Clôturer la caisse", MaterialDesignI.LOCK_OUTLINE, new Color(244, 67, 54));
+        ajouterBtn = createStyledButton("Nouveau mouvement", MaterialDesignI.PLUS_CIRCLE_OUTLINE, new Color(33, 150, 243));
+        exporterBtn = createStyledButton("Exporter (CSV)", MaterialDesignI.EXPORT_VARIANT_OUTLINE, new Color(156, 39, 176));
 
         actionPanel.add(ouvrirBtn);
         actionPanel.add(cloturerBtn);
