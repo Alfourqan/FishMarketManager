@@ -53,9 +53,9 @@ public class ClientViewSwing {
 
         // Création des boutons avec icônes
         JButton ajouterBtn = createStyledButton("Ajouter", MaterialDesign.MDI_ACCOUNT_PLUS);
-        JButton modifierBtn = createStyledButton("Modifier", MaterialDesign.MDI_ACCOUNT_EDIT);
+        JButton modifierBtn = createStyledButton("Modifier", MaterialDesign.MDI_PENCIL);
         JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesign.MDI_ACCOUNT_REMOVE);
-        JButton reglerCreanceBtn = createStyledButton("Régler créance", MaterialDesign.MDI_CREDIT_CARD_CHECK);
+        JButton reglerCreanceBtn = createStyledButton("Régler créance", MaterialDesign.MDI_CREDIT_CARD);
         JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH);
 
         buttonPanel.add(ajouterBtn);

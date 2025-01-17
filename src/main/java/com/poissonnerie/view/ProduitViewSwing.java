@@ -51,7 +51,7 @@ public class ProduitViewSwing {
         ));
 
         JButton ajouterBtn = createStyledButton("Ajouter", MaterialDesign.MDI_PLUS_BOX);
-        JButton modifierBtn = createStyledButton("Modifier", MaterialDesign.MDI_PENCIL);
+        JButton modifierBtn = createStyledButton("Modifier", MaterialDesign.MDI_PENCIL_BOX);
         JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesign.MDI_MINUS_BOX);
         JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH);
 
@@ -144,10 +144,10 @@ public class ProduitViewSwing {
         for (Produit produit : controller.getProduits()) {
             FontIcon icon;
             if (produit.getStock() <= produit.getSeuilAlerte()) {
-                icon = FontIcon.of(MaterialDesign.MDI_ALERT);
+                icon = FontIcon.of(MaterialDesign.MDI_ALERT_CIRCLE);
                 icon.setIconColor(new Color(220, 53, 69)); // Rouge pour stock bas
             } else {
-                icon = FontIcon.of(MaterialDesign.MDI_PACKAGE);
+                icon = FontIcon.of(MaterialDesign.MDI_PACKAGE_VARIANT);
                 icon.setIconColor(new Color(40, 167, 69)); // Vert pour stock normal
             }
 

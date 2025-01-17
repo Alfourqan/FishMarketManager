@@ -22,13 +22,13 @@ public class MainViewSwing {
         mainPanel.add(menuBar, BorderLayout.NORTH);
 
         // Tabs avec icônes
-        FontIcon productsIcon = FontIcon.of(MaterialDesign.MDI_PACKAGE_VARIANT);
+        FontIcon productsIcon = FontIcon.of(MaterialDesign.MDI_PACKAGE);
         productsIcon.setIconSize(20);
         FontIcon salesIcon = FontIcon.of(MaterialDesign.MDI_CART);
         salesIcon.setIconSize(20);
-        FontIcon clientsIcon = FontIcon.of(MaterialDesign.MDI_ACCOUNT_GROUP);
+        FontIcon clientsIcon = FontIcon.of(MaterialDesign.MDI_ACCOUNT_MULTIPLE);
         clientsIcon.setIconSize(20);
-        FontIcon cashIcon = FontIcon.of(MaterialDesign.MDI_CASH_REGISTER);
+        FontIcon cashIcon = FontIcon.of(MaterialDesign.MDI_CASH_100);
         cashIcon.setIconSize(20);
 
         tabbedPane.addTab("Produits", productsIcon, new ProduitViewSwing().getMainPanel());
@@ -45,7 +45,7 @@ public class MainViewSwing {
         // Menu Fichier
         JMenu fichierMenu = new JMenu("Fichier");
         JMenuItem parametresMenuItem = new JMenuItem("Paramètres", 
-            FontIcon.of(MaterialDesign.MDI_COG, 16));
+            FontIcon.of(MaterialDesign.MDI_SETTINGS, 16));
         JMenuItem exporterMenuItem = new JMenuItem("Exporter les données", 
             FontIcon.of(MaterialDesign.MDI_EXPORT, 16));
         JMenuItem quitterMenuItem = new JMenuItem("Quitter", 
@@ -64,9 +64,9 @@ public class MainViewSwing {
         JMenuItem ventesJourMenuItem = new JMenuItem("Ventes du jour", 
             FontIcon.of(MaterialDesign.MDI_CHART_BAR, 16));
         JMenuItem stocksMenuItem = new JMenuItem("État des stocks", 
-            FontIcon.of(MaterialDesign.MDI_CLIPBOARD_LIST, 16));
+            FontIcon.of(MaterialDesign.MDI_CLIPBOARD_TEXT, 16));
         JMenuItem creancesMenuItem = new JMenuItem("État des créances", 
-            FontIcon.of(MaterialDesign.MDI_CREDIT_CARD_CLOCK, 16));
+            FontIcon.of(MaterialDesign.MDI_WALLET_MEMBERSHIP, 16));
         JMenuItem caisseMenuItem = new JMenuItem("Journal de caisse", 
             FontIcon.of(MaterialDesign.MDI_CASH, 16));
 
