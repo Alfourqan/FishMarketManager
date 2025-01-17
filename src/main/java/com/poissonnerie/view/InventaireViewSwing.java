@@ -21,7 +21,7 @@ public class InventaireViewSwing {
     private final InventaireManager inventaireManager;
     private final JTable tableInventaire;
     private final DefaultTableModel tableModel;
-    private JLabel statusLabel; // Removed final modifier
+    private JLabel statusLabel; 
 
     public InventaireViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -77,18 +77,21 @@ public class InventaireViewSwing {
 
         // Panel du haut avec titre et boutons
         JPanel topPanel = new JPanel(new BorderLayout());
-        
-        // Panel des boutons
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton refreshBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH);
+
+        // Panel des boutons aligné à droite
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        buttonPanel.setOpaque(false);
+
+        // Création des boutons avec style moderne
+        JButton refreshBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH, new Color(156, 39, 176));
         buttonPanel.add(refreshBtn);
 
         // Label de statut
         statusLabel = new JLabel("Prêt");
         statusLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
-        
-        topPanel.add(buttonPanel, BorderLayout.WEST);
-        topPanel.add(statusLabel, BorderLayout.EAST);
+
+        topPanel.add(statusLabel, BorderLayout.WEST);
+        topPanel.add(buttonPanel, BorderLayout.EAST);
 
         // Configuration de la table
         JScrollPane scrollPane = new JScrollPane(tableInventaire);
@@ -115,7 +118,7 @@ public class InventaireViewSwing {
         // Informations actuelles
         JLabel stockActuelLabel = new JLabel("Stock actuel: " + produit.getStock());
         JLabel seuilLabel = new JLabel("Seuil d'alerte: " + produit.getSeuilAlerte());
-        
+
         // Champ de saisie
         JTextField quantiteField = new JTextField(10);
         JLabel quantiteLabel = new JLabel("Quantité à ajouter/retirer:");
@@ -130,10 +133,10 @@ public class InventaireViewSwing {
         gbc.gridy = 3;
         formPanel.add(quantiteField, gbc);
 
-        // Boutons
+        // Boutons avec style moderne
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton okButton = new JButton("Valider");
-        JButton cancelButton = new JButton("Annuler");
+        JButton okButton = createStyledButton("Valider", MaterialDesign.MDI_CHECK_CIRCLE, new Color(76, 175, 80));
+        JButton cancelButton = createStyledButton("Annuler", MaterialDesign.MDI_CLOSE_CIRCLE, new Color(244, 67, 54));
 
         okButton.addActionListener(e -> {
             try {
@@ -167,11 +170,31 @@ public class InventaireViewSwing {
         dialog.setVisible(true);
     }
 
-    private JButton createStyledButton(String text, MaterialDesign icon) {
-        FontIcon fontIcon = FontIcon.of(icon);
-        fontIcon.setIconSize(18);
-        JButton button = new JButton(text, fontIcon);
+    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
+        FontIcon icon = FontIcon.of(iconCode);
+        icon.setIconSize(18);
+        icon.setIconColor(Color.WHITE);
+
+        JButton button = new JButton(text);
+        button.setIcon(icon);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        button.setBackground(color);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
         button.setMargin(new Insets(8, 16, 8, 16));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Effet de survol
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(color.darker());
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(color);
+            }
+        });
+
         return button;
     }
 
@@ -182,7 +205,7 @@ public class InventaireViewSwing {
 
     private void refreshTable() {
         tableModel.setRowCount(0);
-        
+
         for (Produit produit : produitController.getProduits()) {
             // Icône d'état
             FontIcon icon;
@@ -198,7 +221,7 @@ public class InventaireViewSwing {
             }
 
             // Bouton d'ajustement
-            JButton ajusterBtn = new JButton("Ajuster");
+            JButton ajusterBtn = createStyledButton("Ajuster", MaterialDesign.MDI_PENCIL, new Color(255,165,0));
             ajusterBtn.addActionListener(e -> showAjustementDialog(produit));
 
             tableModel.addRow(new Object[]{
@@ -244,6 +267,9 @@ public class InventaireViewSwing {
             if (value instanceof JButton) {
                 JButton btn = (JButton) value;
                 setText(btn.getText());
+                setIcon(btn.getIcon());
+                setBackground(btn.getBackground());
+                setForeground(btn.getForeground());
             }
             return this;
         }
@@ -265,6 +291,9 @@ public class InventaireViewSwing {
             if (value instanceof JButton) {
                 JButton btn = (JButton) value;
                 button.setText(btn.getText());
+                button.setIcon(btn.getIcon());
+                button.setBackground(btn.getBackground());
+                button.setForeground(btn.getForeground());
                 ActionListener[] listeners = btn.getActionListeners();
                 if (listeners.length > 0) {
                     button.addActionListener(listeners[0]);
