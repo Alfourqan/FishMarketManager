@@ -10,9 +10,9 @@ public class MouvementCaisse {
     private String description;
 
     public enum TypeMouvement {
-        OUVERTURE("OUVERTURE"),
         ENTREE("ENTREE"),
         SORTIE("SORTIE"),
+        OUVERTURE("OUVERTURE"),
         CLOTURE("CLOTURE");
 
         private final String value;
@@ -71,7 +71,7 @@ public class MouvementCaisse {
     public String toString() {
         return String.format("%s - %s: %.2f € - %s",
             date.toString(),
-            type.toString(),
+            type.getValue(),
             montant,
             description);
     }

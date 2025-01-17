@@ -12,6 +12,7 @@ import java.util.List;
 public class CaisseController {
     private final List<MouvementCaisse> mouvements = new ArrayList<>();
     private double soldeCaisse = 0.0;
+    private boolean caisseOuverte = false;
 
     public List<MouvementCaisse> getMouvements() {
         return new ArrayList<>(mouvements);
@@ -21,9 +22,15 @@ public class CaisseController {
         return soldeCaisse;
     }
 
+    public boolean isCaisseOuverte() {
+        return caisseOuverte;
+    }
+
     public void chargerMouvements() {
         mouvements.clear();
+        soldeCaisse = 0.0;
         String sql = "SELECT * FROM mouvements_caisse ORDER BY date DESC";
+        System.out.println("Chargement des mouvements de caisse...");
 
         try (Connection conn = DatabaseManager.getConnection();
              Statement stmt = conn.createStatement();
@@ -42,21 +49,40 @@ public class CaisseController {
                 );
                 mouvements.add(mouvement);
 
-                // Mettre à jour le solde
-                if (mouvement.getType() == MouvementCaisse.TypeMouvement.ENTREE) {
-                    soldeCaisse += mouvement.getMontant();
-                } else {
-                    soldeCaisse -= mouvement.getMontant();
-                }
+                // Mettre à jour le solde et l'état de la caisse
+                updateSoldeAndState(mouvement);
             }
             System.out.println("Mouvements de caisse chargés avec succès: " + mouvements.size() + " mouvements");
+            System.out.println("État actuel de la caisse - Solde: " + soldeCaisse + "€, Ouverte: " + caisseOuverte);
         } catch (SQLException e) {
             System.err.println("Erreur lors du chargement des mouvements: " + e.getMessage());
             throw new RuntimeException("Erreur lors du chargement des mouvements", e);
         }
     }
 
+    private void updateSoldeAndState(MouvementCaisse mouvement) {
+        switch (mouvement.getType()) {
+            case OUVERTURE:
+                caisseOuverte = true;
+                soldeCaisse = mouvement.getMontant();
+                break;
+            case CLOTURE:
+                caisseOuverte = false;
+                soldeCaisse = 0.0;
+                break;
+            case ENTREE:
+                soldeCaisse += mouvement.getMontant();
+                break;
+            case SORTIE:
+                soldeCaisse -= mouvement.getMontant();
+                break;
+        }
+    }
+
     public void ajouterMouvement(MouvementCaisse mouvement) {
+        System.out.println("Ajout d'un nouveau mouvement: Type=" + mouvement.getType() + 
+                          ", Montant=" + mouvement.getMontant() + "€");
+
         String sql = "INSERT INTO mouvements_caisse (date, type, montant, description) VALUES (datetime('now', 'localtime'), ?, ?, ?)";
         String getIdSql = "SELECT last_insert_rowid() as id";
 
@@ -74,17 +100,12 @@ public class CaisseController {
                     if (rs.next()) {
                         mouvement.setId(rs.getInt("id"));
                         mouvements.add(0, mouvement); // Ajouter au début de la liste
-
-                        // Mettre à jour le solde
-                        if (mouvement.getType() == MouvementCaisse.TypeMouvement.ENTREE) {
-                            soldeCaisse += mouvement.getMontant();
-                        } else {
-                            soldeCaisse -= mouvement.getMontant();
-                        }
+                        updateSoldeAndState(mouvement);
                     }
                 }
                 conn.commit();
                 System.out.println("Mouvement de caisse ajouté avec succès: " + mouvement);
+                System.out.println("Nouvel état de la caisse - Solde: " + soldeCaisse + "€, Ouverte: " + caisseOuverte);
             } catch (SQLException e) {
                 conn.rollback();
                 System.err.println("Erreur lors de l'ajout du mouvement: " + e.getMessage());
@@ -99,7 +120,7 @@ public class CaisseController {
     public String exporterMouvementsCSV(LocalDateTime debut, LocalDateTime fin) {
         StringBuilder csv = new StringBuilder();
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-        
+
         // En-tête CSV
         csv.append("Date,Type,Montant,Description\n");
 
