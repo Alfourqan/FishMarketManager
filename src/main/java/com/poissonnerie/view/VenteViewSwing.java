@@ -11,13 +11,12 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.*;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
+import javax.swing.plaf.basic.BasicComboBoxRenderer;
 
 public class VenteViewSwing {
     private final JPanel mainPanel;
@@ -332,16 +331,35 @@ public class VenteViewSwing {
         // Mise à jour ComboBox produits
         DefaultComboBoxModel<Produit> produitModel = new DefaultComboBoxModel<>();
         produitModel.addElement(null); // Option vide
+
+        // Trier les produits par catégorie puis par nom
         List<Produit> produits = new ArrayList<>(produitController.getProduits());
-        Collections.sort(produits, Comparator.comparing(Produit::getNom));
+        Map<String, List<Produit>> produitsParCategorie = new TreeMap<>();
+
         for (Produit produit : produits) {
-            if (produit.getStock() > 0) { // N'afficher que les produits en stock
+            if (produit.getStock() > 0) { // Ne garder que les produits en stock
+                produitsParCategorie.computeIfAbsent(produit.getCategorie(), k -> new ArrayList<>()).add(produit);
+            }
+        }
+
+        // Ajouter les produits par catégorie
+        for (Map.Entry<String, List<Produit>> entry : produitsParCategorie.entrySet()) {
+            // Trier les produits de la catégorie par nom
+            List<Produit> produitsCategorie = entry.getValue();
+            Collections.sort(produitsCategorie, Comparator.comparing(Produit::getNom));
+
+            // Ajouter un séparateur avec le nom de la catégorie
+            produitModel.addElement(new ProduitSeparator(entry.getKey()));
+
+            // Ajouter les produits de la catégorie
+            for (Produit produit : produitsCategorie) {
                 produitModel.addElement(produit);
             }
         }
+
         produitCombo.setModel(produitModel);
 
-        // Mise à jour des renderers pour un meilleur affichage
+        // Configuration des renderers personnalisés
         clientCombo.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
@@ -352,15 +370,56 @@ public class VenteViewSwing {
             }
         });
 
-        produitCombo.setRenderer(new DefaultListCellRenderer() {
+        produitCombo.setRenderer(new BasicComboBoxRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 if (value == null) {
                     value = "-- Sélectionner un produit --";
+                } else if (value instanceof ProduitSeparator) {
+                    ProduitSeparator separator = (ProduitSeparator) value;
+                    JLabel label = new JLabel(separator.getCategorie());
+                    label.setBackground(new Color(240, 240, 240));
+                    label.setForeground(Color.DARK_GRAY);
+                    label.setFont(label.getFont().deriveFont(Font.BOLD));
+                    label.setOpaque(true);
+                    return label;
                 }
-                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+                Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (c instanceof JLabel && value instanceof Produit) {
+                    Produit produit = (Produit) value;
+                    if (produit.getStock() <= produit.getSeuilAlerte()) {
+                        setForeground(Color.RED);
+                    }
+                }
+                return c;
             }
         });
+
+        // Empêcher la sélection des séparateurs
+        produitCombo.addActionListener(e -> {
+            if (produitCombo.getSelectedItem() instanceof ProduitSeparator) {
+                produitCombo.setSelectedItem(null);
+            }
+        });
+    }
+
+    // Classe interne pour les séparateurs de catégories
+    private static class ProduitSeparator {
+        private final String categorie;
+
+        public ProduitSeparator(String categorie) {
+            this.categorie = "=== " + categorie + " ===";
+        }
+
+        public String getCategorie() {
+            return categorie;
+        }
+
+        @Override
+        public String toString() {
+            return categorie;
+        }
     }
 
     public JPanel getMainPanel() {

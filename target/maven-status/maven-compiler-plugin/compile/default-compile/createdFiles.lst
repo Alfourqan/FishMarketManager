@@ -1,11 +1,8 @@
 com/poissonnerie/model/Produit.class
 com/poissonnerie/util/DatabaseManager.class
-com/poissonnerie/view/VenteViewSwing$2.class
 com/poissonnerie/view/ProduitViewSwing$1.class
-com/poissonnerie/view/VenteViewSwing$1.class
 com/poissonnerie/model/Vente.class
 com/poissonnerie/view/ClientViewSwing.class
-com/poissonnerie/view/VenteViewSwing$3.class
 com/poissonnerie/controller/ClientController.class
 com/poissonnerie/view/ClientViewSwing$1.class
 com/poissonnerie/controller/ProduitController.class
@@ -16,8 +13,5 @@ com/poissonnerie/model/Vente$LigneVente.class
 com/poissonnerie/controller/VenteController.class
 com/poissonnerie/controller/ConfigurationController.class
 com/poissonnerie/view/ProduitViewSwing.class
-com/poissonnerie/view/VenteViewSwing.class
 com/poissonnerie/model/ConfigurationParam.class
-com/poissonnerie/util/PDFGenerator.class
 com/poissonnerie/view/ConfigurationViewSwing.class
-com/poissonnerie/view/VenteViewSwing$4.class

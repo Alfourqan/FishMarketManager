@@ -34,12 +34,17 @@ public class Client {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(nom);
+
+        // Ajoute le téléphone s'il existe
         if (telephone != null && !telephone.isEmpty()) {
-            sb.append(" - Tél: ").append(telephone);
+            sb.append(" (Tél: ").append(telephone).append(")");
         }
+
+        // Ajoute le solde s'il est positif
         if (solde > 0) {
-            sb.append(" (Crédit: ").append(String.format("%.2f€)", solde));
+            sb.append(" - Crédit: ").append(String.format("%.2f€", solde));
         }
+
         return sb.toString();
     }
 }

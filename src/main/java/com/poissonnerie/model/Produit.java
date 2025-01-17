@@ -38,11 +38,21 @@ public class Produit {
 
     @Override
     public String toString() {
-        return String.format("%s - %s (%.2f€) %s", 
-            nom, 
-            categorie, 
-            prix,
-            stock <= seuilAlerte ? String.format("[Stock bas: %d]", stock) : ""
-        ).trim();
+        StringBuilder sb = new StringBuilder();
+        sb.append(nom)
+          .append(" - ")
+          .append(String.format("%.2f€", prix))
+          .append(" (")
+          .append(categorie)
+          .append(")");
+
+        // Ajoute l'état du stock
+        if (stock <= seuilAlerte) {
+            sb.append(" ⚠️ Stock bas: ").append(stock);
+        } else {
+            sb.append(" - Stock: ").append(stock);
+        }
+
+        return sb.toString();
     }
 }

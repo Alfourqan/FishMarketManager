@@ -66,40 +66,82 @@ public class ProduitController {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new RuntimeException("Erreur lors de l'ajout du produit", e);
         }
     }
 
     public void mettreAJourProduit(Produit produit) {
         String sql = "UPDATE produits SET nom = ?, categorie = ?, prix = ?, stock = ?, seuil_alerte = ? WHERE id = ?";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, produit.getNom());
+                pstmt.setString(2, produit.getCategorie());
+                pstmt.setDouble(3, produit.getPrix());
+                pstmt.setInt(4, produit.getStock());
+                pstmt.setInt(5, produit.getSeuilAlerte());
+                pstmt.setInt(6, produit.getId());
 
-            pstmt.setString(1, produit.getNom());
-            pstmt.setString(2, produit.getCategorie());
-            pstmt.setDouble(3, produit.getPrix());
-            pstmt.setInt(4, produit.getStock());
-            pstmt.setInt(5, produit.getSeuilAlerte());
-            pstmt.setInt(6, produit.getId());
-
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void supprimerProduit(Produit produit) {
-        String sql = "DELETE FROM produits WHERE id = ?";
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setInt(1, produit.getId());
-            if (pstmt.executeUpdate() > 0) {
-                produits.remove(produit);
+                int rowsUpdated = pstmt.executeUpdate();
+                if (rowsUpdated > 0) {
+                    conn.commit();
+                } else {
+                    conn.rollback();
+                    throw new SQLException("Aucun produit trouvé avec l'ID: " + produit.getId());
+                }
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new RuntimeException("Erreur lors de la mise à jour du produit", e);
+        }
+    }
+
+    public boolean produitUtiliseDansVentes(int produitId) {
+        String sql = "SELECT COUNT(*) as count FROM lignes_vente WHERE produit_id = ?";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setInt(1, produitId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("count") > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public void supprimerProduit(Produit produit) throws SQLException {
+        if (produitUtiliseDansVentes(produit.getId())) {
+            throw new SQLException("Impossible de supprimer ce produit car il est utilisé dans des ventes existantes.");
+        }
+
+        String sql = "DELETE FROM produits WHERE id = ?";
+
+        try (Connection conn = DatabaseManager.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setInt(1, produit.getId());
+                int rowsDeleted = pstmt.executeUpdate();
+
+                if (rowsDeleted > 0) {
+                    produits.remove(produit);
+                    conn.commit();
+                } else {
+                    conn.rollback();
+                    throw new SQLException("Aucun produit trouvé avec l'ID: " + produit.getId());
+                }
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
+            }
         }
     }
 }

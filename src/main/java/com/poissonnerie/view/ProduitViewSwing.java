@@ -5,7 +5,6 @@ import com.poissonnerie.model.Produit;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 
 public class ProduitViewSwing {
     private final JPanel mainPanel;
@@ -18,7 +17,7 @@ public class ProduitViewSwing {
         controller = new ProduitController();
 
         // Création du modèle de table
-        String[] columnNames = {"Nom", "Catégorie", "Prix", "Stock"};
+        String[] columnNames = {"Nom", "Catégorie", "Prix", "Stock", "Seuil d'alerte"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -54,8 +53,14 @@ public class ProduitViewSwing {
             int selectedRow = tableProduits.getSelectedRow();
             if (selectedRow >= 0) {
                 showProduitDialog(controller.getProduits().get(selectedRow));
+            } else {
+                JOptionPane.showMessageDialog(mainPanel,
+                    "Veuillez sélectionner un produit à modifier",
+                    "Aucune sélection",
+                    JOptionPane.INFORMATION_MESSAGE);
             }
         });
+
         supprimerBtn.addActionListener(e -> {
             int selectedRow = tableProduits.getSelectedRow();
             if (selectedRow >= 0) {
@@ -63,9 +68,25 @@ public class ProduitViewSwing {
                     "Êtes-vous sûr de vouloir supprimer ce produit ?",
                     "Confirmation de suppression",
                     JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                    controller.supprimerProduit(controller.getProduits().get(selectedRow));
-                    refreshTable();
+                    try {
+                        controller.supprimerProduit(controller.getProduits().get(selectedRow));
+                        refreshTable();
+                        JOptionPane.showMessageDialog(mainPanel,
+                            "Produit supprimé avec succès",
+                            "Succès",
+                            JOptionPane.INFORMATION_MESSAGE);
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(mainPanel,
+                            ex.getMessage(),
+                            "Erreur",
+                            JOptionPane.ERROR_MESSAGE);
+                    }
                 }
+            } else {
+                JOptionPane.showMessageDialog(mainPanel,
+                    "Veuillez sélectionner un produit à supprimer",
+                    "Aucune sélection",
+                    JOptionPane.INFORMATION_MESSAGE);
             }
         });
 
@@ -77,6 +98,8 @@ public class ProduitViewSwing {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel),
                                    produit == null ? "Nouveau produit" : "Modifier produit",
                                    true);
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
@@ -133,13 +156,42 @@ public class ProduitViewSwing {
             try {
                 String nom = nomField.getText().trim();
                 String categorie = (String) categorieCombo.getSelectedItem();
-                double prix = Double.parseDouble(prixField.getText());
-                int stock = Integer.parseInt(stockField.getText());
-                int seuil = Integer.parseInt(seuilField.getText());
+                String prixText = prixField.getText().trim().replace(",", ".");
+                String stockText = stockField.getText().trim();
+                String seuilText = seuilField.getText().trim();
 
                 if (nom.isEmpty()) {
-                    JOptionPane.showMessageDialog(dialog, "Le nom est obligatoire");
-                    return;
+                    throw new IllegalArgumentException("Le nom est obligatoire");
+                }
+
+                double prix;
+                try {
+                    prix = Double.parseDouble(prixText);
+                    if (prix <= 0) {
+                        throw new IllegalArgumentException("Le prix doit être positif");
+                    }
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Prix invalide");
+                }
+
+                int stock;
+                try {
+                    stock = Integer.parseInt(stockText);
+                    if (stock < 0) {
+                        throw new IllegalArgumentException("Le stock ne peut pas être négatif");
+                    }
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Stock invalide");
+                }
+
+                int seuil;
+                try {
+                    seuil = Integer.parseInt(seuilText);
+                    if (seuil < 0) {
+                        throw new IllegalArgumentException("Le seuil d'alerte ne peut pas être négatif");
+                    }
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Seuil d'alerte invalide");
                 }
 
                 if (produit == null) {
@@ -155,9 +207,11 @@ public class ProduitViewSwing {
                 }
                 refreshTable();
                 dialog.dispose();
-            } catch (NumberFormatException ex) {
+            } catch (Exception e) {
                 JOptionPane.showMessageDialog(dialog,
-                    "Veuillez entrer des valeurs numériques valides pour le prix, le stock et le seuil");
+                    e.getMessage(),
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -179,8 +233,15 @@ public class ProduitViewSwing {
     }
 
     private void loadData() {
-        controller.chargerProduits();
-        refreshTable();
+        try {
+            controller.chargerProduits();
+            refreshTable();
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(mainPanel,
+                "Erreur lors du chargement des produits : " + e.getMessage(),
+                "Erreur",
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void refreshTable() {
@@ -190,7 +251,8 @@ public class ProduitViewSwing {
                 produit.getNom(),
                 produit.getCategorie(),
                 String.format("%.2f €", produit.getPrix()),
-                produit.getStock()
+                produit.getStock(),
+                produit.getSeuilAlerte()
             });
         }
     }

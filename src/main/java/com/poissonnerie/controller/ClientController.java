@@ -2,6 +2,7 @@ package com.poissonnerie.controller;
 
 import com.poissonnerie.model.Client;
 import com.poissonnerie.util.DatabaseManager;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +16,7 @@ public class ClientController {
 
     public void chargerClients() {
         clients.clear();
-        String sql = "SELECT * FROM clients";
+        String sql = "SELECT * FROM clients ORDER BY nom";
 
         try (Connection conn = DatabaseManager.getConnection();
              Statement stmt = conn.createStatement();
@@ -146,28 +147,30 @@ public class ClientController {
         try (Connection conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(false);
             try {
-                String sql = "UPDATE clients SET solde = solde - ? WHERE id = ? AND solde >= ?";
-                try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                // Mise à jour du solde du client
+                String sqlUpdateClient = "UPDATE clients SET solde = solde - ? WHERE id = ? AND solde >= ?";
+                try (PreparedStatement pstmt = conn.prepareStatement(sqlUpdateClient)) {
                     pstmt.setDouble(1, montant);
                     pstmt.setInt(2, client.getId());
                     pstmt.setDouble(3, montant);
 
                     int rowsUpdated = pstmt.executeUpdate();
                     if (rowsUpdated > 0) {
-                        // Mise à jour du modèle local
-                        client.setSolde(client.getSolde() - montant);
-
                         // Enregistrer le mouvement de caisse
-                        String sqlMouvement = "INSERT INTO mouvements_caisse (type, montant, description) VALUES ('ENTREE', ?, ?)";
+                        String sqlMouvement = "INSERT INTO mouvements_caisse (type, montant, description) VALUES (?, ?, ?)";
                         try (PreparedStatement pstmtMvt = conn.prepareStatement(sqlMouvement)) {
-                            pstmtMvt.setDouble(1, montant);
-                            pstmtMvt.setString(2, "Règlement créance - Client: " + client.getNom());
+                            pstmtMvt.setString(1, "ENTREE");
+                            pstmtMvt.setDouble(2, montant);
+                            pstmtMvt.setString(3, "Règlement créance - Client: " + client.getNom());
                             pstmtMvt.executeUpdate();
                         }
 
+                        // Mise à jour du modèle local
+                        client.setSolde(client.getSolde() - montant);
+
                         conn.commit();
                         System.out.println("Créance réglée avec succès pour le client " + client.getNom() + 
-                                         " - Montant: " + montant + "€");
+                                        " - Montant: " + montant + "€");
                     } else {
                         conn.rollback();
                         throw new SQLException("Impossible de régler la créance. Vérifiez le solde du client.");
@@ -203,7 +206,7 @@ public class ClientController {
                         client.setSolde(client.getSolde() + montant);
                         conn.commit();
                         System.out.println("Créance ajoutée avec succès pour le client " + client.getNom() + 
-                                         " - Montant: " + montant + "€");
+                                        " - Montant: " + montant + "€");
                     } else {
                         conn.rollback();
                         throw new SQLException("Impossible d'ajouter la créance. Client non trouvé.");

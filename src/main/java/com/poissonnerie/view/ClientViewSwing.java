@@ -122,74 +122,106 @@ public class ClientViewSwing {
 
     private void showReglerCreanceDialog(Client client) {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel),
-                                   "Régler créance",
-                                   true);
+                               "Régler créance",
+                               true);
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Affichage des informations du client
-        JLabel clientLabel = new JLabel("Client: " + client.getNom());
-        JLabel soldeLabel = new JLabel(String.format("Solde actuel: %.2f €", client.getSolde()));
-        JTextField montantField = new JTextField(10);
+        // En-tête avec les informations du client
+        JPanel headerPanel = new JPanel(new BorderLayout(5, 5));
+        headerPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 1, 0, Color.GRAY),
+            BorderFactory.createEmptyBorder(0, 0, 10, 0)
+        ));
 
+        JLabel clientLabel = new JLabel("<html><b>Client:</b> " + client.getNom() + "</html>");
+        JLabel soldeLabel = new JLabel(String.format("<html><b>Solde actuel:</b> <font color='red'>%.2f €</font></html>", 
+            client.getSolde()));
+
+        headerPanel.add(clientLabel, BorderLayout.NORTH);
+        headerPanel.add(soldeLabel, BorderLayout.CENTER);
+
+        // Panneau de saisie du montant
+        JPanel inputPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JLabel montantLabel = new JLabel("Montant à régler:");
+        JTextField montantField = new JTextField(10);
+        JButton montantTotalBtn = new JButton("Régler tout");
+
+        inputPanel.add(montantLabel);
+        inputPanel.add(montantField);
+        inputPanel.add(montantTotalBtn);
+
+        // Configuration des composants
+        montantTotalBtn.addActionListener(e -> {
+            montantField.setText(String.format("%.2f", client.getSolde()));
+            montantField.selectAll();
+            montantField.requestFocus();
+        });
+
+        // Ajout des composants au panneau principal
         gbc.gridwidth = 2;
         gbc.gridx = 0; gbc.gridy = 0;
-        panel.add(clientLabel, gbc);
+        panel.add(headerPanel, gbc);
 
         gbc.gridy = 1;
-        panel.add(soldeLabel, gbc);
+        panel.add(inputPanel, gbc);
 
-        gbc.gridwidth = 1;
-        gbc.gridx = 0; gbc.gridy = 2;
-        panel.add(new JLabel("Montant à régler:"), gbc);
-        gbc.gridx = 1;
-        panel.add(montantField, gbc);
-
+        // Boutons d'action
         JPanel buttonPanel = new JPanel();
-        JButton okButton = new JButton("OK");
+        JButton okButton = new JButton("Valider");
         JButton cancelButton = new JButton("Annuler");
 
         okButton.addActionListener(e -> {
             try {
                 String montantText = montantField.getText().trim().replace(",", ".");
                 if (montantText.isEmpty()) {
-                    throw new NumberFormatException("Veuillez entrer un montant");
+                    throw new IllegalArgumentException("Veuillez entrer un montant");
                 }
 
-                double montant = Double.parseDouble(montantText);
+                double montant;
+                try {
+                    montant = Double.parseDouble(montantText);
+                } catch (NumberFormatException ex) {
+                    throw new IllegalArgumentException("Montant invalide");
+                }
 
                 if (montant <= 0) {
                     throw new IllegalArgumentException("Le montant doit être positif");
                 }
 
                 if (montant > client.getSolde()) {
-                    throw new IllegalArgumentException("Le montant ne peut pas être supérieur au solde dû");
+                    throw new IllegalArgumentException(
+                        String.format("Le montant ne peut pas dépasser le solde actuel (%.2f €)", 
+                        client.getSolde())
+                    );
                 }
 
+                // Tentative de règlement
                 controller.reglerCreance(client, montant);
+
+                // Rafraîchir l'affichage
                 refreshTable();
+
+                // Fermer le dialogue
                 dialog.dispose();
 
+                // Afficher confirmation
                 JOptionPane.showMessageDialog(mainPanel,
-                    String.format("Règlement de %.2f € effectué avec succès", montant),
+                    String.format("<html>" +
+                        "<div style='margin-bottom: 10px'>Règlement effectué avec succès</div>" +
+                        "<table>" +
+                        "<tr><td><b>Montant réglé:</b></td><td style='padding-left: 10px'>%.2f €</td></tr>" +
+                        "<tr><td><b>Nouveau solde:</b></td><td style='padding-left: 10px'>%.2f €</td></tr>" +
+                        "</table></html>",
+                        montant, client.getSolde()),
                     "Succès",
                     JOptionPane.INFORMATION_MESSAGE);
 
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(dialog,
-                    "Veuillez entrer un montant valide",
-                    "Erreur de saisie",
-                    JOptionPane.ERROR_MESSAGE);
-            } catch (IllegalArgumentException ex) {
-                JOptionPane.showMessageDialog(dialog,
-                    ex.getMessage(),
-                    "Erreur de validation",
-                    JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(dialog,
-                    "Erreur lors du règlement : " + ex.getMessage(),
+                    ex.getMessage(),
                     "Erreur",
                     JOptionPane.ERROR_MESSAGE);
             }
@@ -197,9 +229,12 @@ public class ClientViewSwing {
 
         cancelButton.addActionListener(e -> dialog.dispose());
 
+        // Style des boutons
+        okButton.setPreferredSize(cancelButton.getPreferredSize());
         buttonPanel.add(okButton);
         buttonPanel.add(cancelButton);
 
+        // Finalisation du dialogue
         JPanel contentPane = new JPanel(new BorderLayout(10, 10));
         contentPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         contentPane.add(panel, BorderLayout.CENTER);
@@ -208,6 +243,14 @@ public class ClientViewSwing {
         dialog.setContentPane(contentPane);
         dialog.pack();
         dialog.setLocationRelativeTo(mainPanel);
+        dialog.setResizable(false);
+
+        // Sélectionner le champ de montant au démarrage
+        SwingUtilities.invokeLater(() -> {
+            montantField.requestFocusInWindow();
+            montantField.selectAll();
+        });
+
         dialog.setVisible(true);
     }
 
