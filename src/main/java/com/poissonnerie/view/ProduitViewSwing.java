@@ -20,7 +20,7 @@ public class ProduitViewSwing {
         controller = new ProduitController();
 
         // Création du modèle de table avec icône de statut
-        String[] columnNames = {"", "Nom", "Catégorie", "Prix Achat", "Prix Vente", "Marge (%)", "Stock", "Seuil d'alerte"};
+        String[] columnNames = {"", "Nom", "Catégorie", "Prix Achat (€)", "Prix Vente (€)", "Marge (%)", "Stock", "Seuil d'alerte"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -70,6 +70,11 @@ public class ProduitViewSwing {
         scrollPane.setBackground(new Color(236, 239, 241));
         scrollPane.getViewport().setBackground(new Color(236, 239, 241));
 
+        // Mise à jour des colonnes pour inclure prix d'achat et prix de vente
+        String[] columnNames = {"", "Nom", "Catégorie", "Prix Achat (€)", "Prix Vente (€)", "Marge (%)", "Stock", "Seuil d'alerte"};
+        tableModel.setColumnIdentifiers(columnNames);
+
+
         tableProduits.setShowGrid(true);
         tableProduits.setGridColor(new Color(200, 200, 200));
         tableProduits.setBackground(new Color(245, 246, 247));
@@ -111,7 +116,7 @@ public class ProduitViewSwing {
 
         mainPanel.setBackground(new Color(236, 239, 241));
         mainPanel.add(buttonPanel, BorderLayout.NORTH);
-        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        mainPanel.add(new JScrollPane(tableProduits), BorderLayout.CENTER);
     }
 
     private JButton createStyledButton(String text, Ikon iconCode) {
@@ -215,8 +220,8 @@ public class ProduitViewSwing {
     }
 
     private void validateAndSaveProduit(Produit produit, JTextField nomField, JComboBox<String> categorieCombo,
-                                     JTextField prixAchatField, JTextField prixVenteField,
-                                     JTextField stockField, JTextField seuilField) {
+                                      JTextField prixAchatField, JTextField prixVenteField,
+                                      JTextField stockField, JTextField seuilField) {
         String nom = nomField.getText().trim();
         String categorie = (String) categorieCombo.getSelectedItem();
         String prixAchatText = prixAchatField.getText().trim().replace(",", ".");
@@ -300,6 +305,7 @@ public class ProduitViewSwing {
                 icon.setIconColor(new Color(40, 167, 69)); // Vert pour stock normal
             }
 
+            // Mise à jour pour afficher les prix d'achat et de vente
             tableModel.addRow(new Object[]{
                 icon,
                 produit.getNom(),

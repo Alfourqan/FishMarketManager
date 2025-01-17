@@ -83,7 +83,8 @@ public class VenteController {
                         rs.getInt("produit_id"),
                         rs.getString("nom"),
                         rs.getString("categorie"),
-                        rs.getDouble("prix"),
+                        rs.getDouble("prix_achat"),
+                        rs.getDouble("prix_vente"),
                         rs.getInt("stock"),
                         rs.getInt("seuil_alerte")
                     );

@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS produits (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nom TEXT NOT NULL,
     categorie TEXT NOT NULL,
-    prix REAL NOT NULL,
+    prix_achat REAL NOT NULL,
+    prix_vente REAL NOT NULL,
     stock INTEGER NOT NULL,
     seuil_alerte INTEGER NOT NULL
 );
