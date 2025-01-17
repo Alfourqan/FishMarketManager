@@ -139,23 +139,22 @@ public class MainViewSwing {
     private void genererRapportVentesJour() {
         try {
             venteController.chargerVentes();
-            LocalDate aujourd'hui = LocalDate.now();
+            LocalDate aujourdhui = LocalDate.now();
 
             List<Vente> ventesJour = venteController.getVentes().stream()
-                .filter(v -> v.getDate().toLocalDate().equals(aujourd'hui))
+                .filter(v -> v.getDate().toLocalDate().equals(aujourdhui))
                 .collect(Collectors.toList());
 
-            String nomFichier = "rapport_ventes_" + aujourd'hui + ".pdf";
+            String nomFichier = "rapport_ventes_" + aujourdhui + ".pdf";
             PDFGenerator.genererRapportVentes(ventesJour, nomFichier);
 
-            afficherMessageSuccess("Rapport généré avec succès", 
-                "Le rapport des ventes a été généré dans le fichier : " + nomFichier);
+            afficherMessageSuccess("Rapport genere avec succes", 
+                "Le rapport des ventes a ete genere dans le fichier : " + nomFichier);
 
-            // Ouvrir le fichier
             ouvrirFichierPDF(nomFichier);
 
         } catch (Exception e) {
-            afficherMessageErreur("Erreur lors de la génération du rapport", e.getMessage());
+            afficherMessageErreur("Erreur lors de la generation du rapport", e.getMessage());
         }
     }
 
@@ -165,14 +164,13 @@ public class MainViewSwing {
             String nomFichier = "rapport_stocks_" + LocalDate.now() + ".pdf";
             PDFGenerator.genererRapportStocks(produitController.getProduits(), nomFichier);
 
-            afficherMessageSuccess("Rapport généré avec succès", 
-                "Le rapport des stocks a été généré dans le fichier : " + nomFichier);
+            afficherMessageSuccess("Rapport genere avec succes", 
+                "Le rapport des stocks a ete genere dans le fichier : " + nomFichier);
 
-            // Ouvrir le fichier
             ouvrirFichierPDF(nomFichier);
 
         } catch (Exception e) {
-            afficherMessageErreur("Erreur lors de la génération du rapport", e.getMessage());
+            afficherMessageErreur("Erreur lors de la generation du rapport", e.getMessage());
         }
     }
 
@@ -182,14 +180,13 @@ public class MainViewSwing {
             String nomFichier = "rapport_creances_" + LocalDate.now() + ".pdf";
             PDFGenerator.genererRapportCreances(clientController.getClients(), nomFichier);
 
-            afficherMessageSuccess("Rapport généré avec succès", 
-                "Le rapport des créances a été généré dans le fichier : " + nomFichier);
+            afficherMessageSuccess("Rapport genere avec succes", 
+                "Le rapport des creances a ete genere dans le fichier : " + nomFichier);
 
-            // Ouvrir le fichier
             ouvrirFichierPDF(nomFichier);
 
         } catch (Exception e) {
-            afficherMessageErreur("Erreur lors de la génération du rapport", e.getMessage());
+            afficherMessageErreur("Erreur lors de la generation du rapport", e.getMessage());
         }
     }
 
@@ -199,14 +196,13 @@ public class MainViewSwing {
             String nomFichier = "rapport_caisse_" + LocalDate.now() + ".pdf";
             PDFGenerator.genererRapportCaisse(caisseController.getMouvements(), nomFichier);
 
-            afficherMessageSuccess("Rapport généré avec succès", 
-                "Le rapport de caisse a été généré dans le fichier : " + nomFichier);
+            afficherMessageSuccess("Rapport genere avec succes", 
+                "Le rapport de caisse a ete genere dans le fichier : " + nomFichier);
 
-            // Ouvrir le fichier
             ouvrirFichierPDF(nomFichier);
 
         } catch (Exception e) {
-            afficherMessageErreur("Erreur lors de la génération du rapport", e.getMessage());
+            afficherMessageErreur("Erreur lors de la generation du rapport", e.getMessage());
         }
     }
 
