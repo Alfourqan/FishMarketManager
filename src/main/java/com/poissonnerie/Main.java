@@ -27,6 +27,7 @@ public class Main {
                 Color primaryColor = new Color(25, 118, 210); // Bleu plus foncé
                 Color primaryLightColor = new Color(64, 196, 255); // Bleu clair pour hover
                 Color primaryTextColor = Color.WHITE;
+                Color darkTextColor = new Color(33, 33, 33); // Texte foncé pour meilleur contraste
 
                 // Configuration des boutons
                 UIManager.put("Button.background", primaryColor);
@@ -38,11 +39,29 @@ public class Main {
                 UIManager.put("Button.default.background", primaryColor);
                 UIManager.put("Button.default.foreground", primaryTextColor);
 
+                // Configuration des onglets
+                UIManager.put("TabbedPane.foreground", darkTextColor);
+                UIManager.put("TabbedPane.selectedForeground", primaryColor);
+                UIManager.put("TabbedPane.selectedBackground", new Color(232, 240, 254));
+                UIManager.put("TabbedPane.unselectedBackground", new Color(245, 246, 247));
+                UIManager.put("TabbedPane.contentAreaColor", Color.WHITE);
+                UIManager.put("TabbedPane.focus", primaryColor);
+
+                // Configuration des menus
+                UIManager.put("MenuBar.foreground", darkTextColor);
+                UIManager.put("MenuBar.background", Color.WHITE);
+                UIManager.put("Menu.foreground", darkTextColor);
+                UIManager.put("Menu.selectionBackground", primaryColor);
+                UIManager.put("Menu.selectionForeground", Color.WHITE);
+                UIManager.put("MenuItem.foreground", darkTextColor);
+                UIManager.put("MenuItem.selectionBackground", primaryColor);
+                UIManager.put("MenuItem.selectionForeground", Color.WHITE);
+
                 // Couleurs des textes et composants
-                UIManager.put("Label.foreground", new Color(33, 33, 33)); // Texte foncé
-                UIManager.put("TextField.foreground", new Color(33, 33, 33));
-                UIManager.put("ComboBox.foreground", new Color(33, 33, 33));
-                UIManager.put("TextArea.foreground", new Color(33, 33, 33));
+                UIManager.put("Label.foreground", darkTextColor);
+                UIManager.put("TextField.foreground", darkTextColor);
+                UIManager.put("ComboBox.foreground", darkTextColor);
+                UIManager.put("TextArea.foreground", darkTextColor);
 
                 // Marges et padding
                 UIManager.put("Button.margin", new Insets(8, 16, 8, 16));
@@ -54,9 +73,9 @@ public class Main {
                 UIManager.put("Table.showVerticalLines", true);
                 UIManager.put("Table.gridColor", new Color(224, 224, 224));
                 UIManager.put("Table.selectionBackground", new Color(232, 240, 254));
-                UIManager.put("Table.selectionForeground", new Color(33, 33, 33));
+                UIManager.put("Table.selectionForeground", darkTextColor);
                 UIManager.put("TableHeader.background", new Color(245, 246, 247));
-                UIManager.put("TableHeader.foreground", new Color(33, 33, 33));
+                UIManager.put("TableHeader.foreground", darkTextColor);
 
                 System.out.println("Look and Feel configuré.");
 
