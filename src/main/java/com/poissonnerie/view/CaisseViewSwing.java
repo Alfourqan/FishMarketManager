@@ -12,8 +12,17 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import org.kordamp.ikonli.materialdesign.MaterialDesign;
 import org.kordamp.ikonli.swing.FontIcon;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class CaisseViewSwing {
+    private static final Logger LOGGER = Logger.getLogger(CaisseViewSwing.class.getName());
+    private static final String MSG_ERREUR_MONTANT = "Le montant doit être un nombre positif";
+    private static final String MSG_ERREUR_DESCRIPTION = "La description est obligatoire";
+    private static final String MSG_ERREUR_CAISSE_FERMEE = "La caisse doit être ouverte pour effectuer des mouvements";
+    private static final double MONTANT_MAX = 99999.99;
+
     private final JPanel mainPanel;
     private final CaisseController controller;
     private final JTable tableMouvements;
@@ -24,7 +33,7 @@ public class CaisseViewSwing {
     private JButton cloturerBtn;
     private JButton ajouterBtn;
     private JButton exporterBtn;
-    private boolean caisseOuverte = false;
+    private final AtomicBoolean caisseOuverte = new AtomicBoolean(false);
 
     public CaisseViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -109,10 +118,10 @@ public class CaisseViewSwing {
     }
 
     private void ouvrirCaisse() {
-        if (!caisseOuverte) {
+        if (!caisseOuverte.get()) {
             try {
                 double montantInitial = getMontantInitial();
-                if (montantInitial > 0) {
+                if (montantInitial > 0 && montantInitial <= MONTANT_MAX) {
                     MouvementCaisse mouvement = new MouvementCaisse(
                         0,
                         LocalDateTime.now(),
@@ -121,15 +130,23 @@ public class CaisseViewSwing {
                         "Ouverture de caisse"
                     );
                     controller.ajouterMouvement(mouvement);
-                    caisseOuverte = true;
+                    caisseOuverte.set(true);
+                    LOGGER.log(Level.INFO, "Ouverture de caisse avec montant initial: {0}", montantInitial);
                     updateCaisseState();
                     refreshTable();
                     JOptionPane.showMessageDialog(mainPanel,
                         "La caisse a été ouverte avec succès",
                         "Succès",
                         JOptionPane.INFORMATION_MESSAGE);
+                } else {
+                    LOGGER.log(Level.WARNING, "Tentative d'ouverture avec montant invalide: {0}", montantInitial);
+                    JOptionPane.showMessageDialog(mainPanel,
+                        "Le montant initial doit être compris entre 0 et " + MONTANT_MAX,
+                        "Erreur",
+                        JOptionPane.ERROR_MESSAGE);
                 }
             } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Erreur lors de l'ouverture de la caisse", e);
                 JOptionPane.showMessageDialog(mainPanel,
                     "Erreur lors de l'ouverture de la caisse : " + e.getMessage(),
                     "Erreur",
@@ -149,14 +166,15 @@ public class CaisseViewSwing {
         }
 
         try {
-            double montant = Double.parseDouble(montantStr.replace(",", "."));
-            if (montant <= 0) {
-                throw new IllegalArgumentException("Le montant doit être positif");
+            double montant = Double.parseDouble(montantStr.replace(",", ".").trim());
+            if (montant <= 0 || montant > MONTANT_MAX) {
+                throw new IllegalArgumentException("Le montant doit être compris entre 0 et " + MONTANT_MAX);
             }
             return montant;
         } catch (NumberFormatException e) {
+            LOGGER.log(Level.WARNING, "Tentative de saisie d'un montant invalide: {0}", montantStr);
             JOptionPane.showMessageDialog(mainPanel,
-                "Montant invalide",
+                MSG_ERREUR_MONTANT,
                 "Erreur",
                 JOptionPane.ERROR_MESSAGE);
             return 0;
@@ -164,7 +182,7 @@ public class CaisseViewSwing {
     }
 
     private void cloturerCaisse() {
-        if (caisseOuverte) {
+        if (caisseOuverte.get()) {
             int confirmation = JOptionPane.showConfirmDialog(mainPanel,
                 "Êtes-vous sûr de vouloir clôturer la caisse ?",
                 "Confirmation",
@@ -181,7 +199,8 @@ public class CaisseViewSwing {
                         "Clôture de caisse"
                     );
                     controller.ajouterMouvement(mouvement);
-                    caisseOuverte = false;
+                    caisseOuverte.set(false);
+                    LOGGER.log(Level.INFO, "Clôture de caisse avec solde final: {0}", soldeFinal);
                     updateCaisseState();
                     refreshTable();
 
@@ -191,6 +210,7 @@ public class CaisseViewSwing {
                         "Succès",
                         JOptionPane.INFORMATION_MESSAGE);
                 } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors de la clôture de la caisse", e);
                     JOptionPane.showMessageDialog(mainPanel,
                         "Erreur lors de la clôture de la caisse : " + e.getMessage(),
                         "Erreur",
@@ -200,23 +220,30 @@ public class CaisseViewSwing {
         }
     }
 
-    private void updateCaisseState() {
-        // Mettre à jour l'état des boutons en fonction de l'état de la caisse
-        ouvrirBtn.setEnabled(!caisseOuverte);
-        cloturerBtn.setEnabled(caisseOuverte);
-        ajouterBtn.setEnabled(caisseOuverte);
-
-        // Vérifier le dernier mouvement pour déterminer l'état de la caisse
+    private synchronized void updateCaisseState() {
+        boolean etatPrecedent = caisseOuverte.get();
         if (controller.getMouvements().size() > 0) {
             MouvementCaisse dernierMouvement = controller.getMouvements().get(controller.getMouvements().size() - 1);
-            caisseOuverte = dernierMouvement.getType() != MouvementCaisse.TypeMouvement.CLOTURE;
+            caisseOuverte.set(dernierMouvement.getType() != MouvementCaisse.TypeMouvement.CLOTURE);
+        }
+
+        // Mettre à jour l'état des boutons de manière thread-safe
+        SwingUtilities.invokeLater(() -> {
+            ouvrirBtn.setEnabled(!caisseOuverte.get());
+            cloturerBtn.setEnabled(caisseOuverte.get());
+            ajouterBtn.setEnabled(caisseOuverte.get());
+        });
+
+        if (etatPrecedent != caisseOuverte.get()) {
+            LOGGER.log(Level.INFO, "État de la caisse modifié: {0}", 
+                caisseOuverte.get() ? "ouverte" : "fermée");
         }
     }
 
     private void showMouvementDialog() {
-        if (!caisseOuverte) {
+        if (!caisseOuverte.get()) {
             JOptionPane.showMessageDialog(mainPanel,
-                "La caisse doit être ouverte pour effectuer des mouvements",
+                MSG_ERREUR_CAISSE_FERMEE,
                 "Caisse fermée",
                 JOptionPane.WARNING_MESSAGE);
             return;
@@ -231,7 +258,7 @@ public class CaisseViewSwing {
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Champs du formulaire
+        // Champs du formulaire avec validation renforcée
         typeCombo = new JComboBox<>(new MouvementCaisse.TypeMouvement[]{
             MouvementCaisse.TypeMouvement.ENTREE,
             MouvementCaisse.TypeMouvement.SORTIE
@@ -255,31 +282,28 @@ public class CaisseViewSwing {
         gbc.gridx = 1;
         panel.add(descriptionField, gbc);
 
-        // Boutons
-        JPanel buttonPanel = new JPanel();
+        // Validation renforcée lors de la soumission
         JButton okButton = new JButton("OK");
-        JButton cancelButton = new JButton("Annuler");
-
         okButton.addActionListener(evt -> {
             try {
                 String montantText = montantField.getText().trim().replace(",", ".");
                 String description = descriptionField.getText().trim();
 
                 if (montantText.isEmpty()) {
-                    throw new IllegalArgumentException("Le montant est obligatoire");
+                    throw new IllegalArgumentException(MSG_ERREUR_MONTANT);
                 }
                 if (description.isEmpty()) {
-                    throw new IllegalArgumentException("La description est obligatoire");
+                    throw new IllegalArgumentException(MSG_ERREUR_DESCRIPTION);
                 }
 
                 double montant;
                 try {
                     montant = Double.parseDouble(montantText);
-                    if (montant <= 0) {
-                        throw new IllegalArgumentException("Le montant doit être positif");
+                    if (montant <= 0 || montant > MONTANT_MAX) {
+                        throw new IllegalArgumentException("Le montant doit être compris entre 0 et " + MONTANT_MAX);
                     }
                 } catch (NumberFormatException e) {
-                    throw new IllegalArgumentException("Montant invalide");
+                    throw new IllegalArgumentException(MSG_ERREUR_MONTANT);
                 }
 
                 MouvementCaisse mouvement = new MouvementCaisse(
@@ -291,10 +315,12 @@ public class CaisseViewSwing {
                 );
 
                 controller.ajouterMouvement(mouvement);
+                LOGGER.log(Level.INFO, "Nouveau mouvement de caisse ajouté: {0}", mouvement);
                 refreshTable();
                 dialog.dispose();
 
             } catch (Exception e) {
+                LOGGER.log(Level.WARNING, "Erreur lors de l'ajout d'un mouvement", e);
                 JOptionPane.showMessageDialog(dialog,
                     e.getMessage(),
                     "Erreur",
@@ -302,8 +328,10 @@ public class CaisseViewSwing {
             }
         });
 
+        JButton cancelButton = new JButton("Annuler");
         cancelButton.addActionListener(evt -> dialog.dispose());
 
+        JPanel buttonPanel = new JPanel();
         buttonPanel.add(okButton);
         buttonPanel.add(cancelButton);
 
@@ -350,6 +378,7 @@ public class CaisseViewSwing {
                     JOptionPane.INFORMATION_MESSAGE);
 
             } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Erreur lors de l'export", e);
                 JOptionPane.showMessageDialog(mainPanel,
                     "Erreur lors de l'export: " + e.getMessage(),
                     "Erreur",
@@ -363,6 +392,7 @@ public class CaisseViewSwing {
             controller.chargerMouvements();
             refreshTable();
         } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors du chargement des mouvements", e);
             JOptionPane.showMessageDialog(mainPanel,
                 "Erreur lors du chargement des mouvements : " + e.getMessage(),
                 "Erreur",

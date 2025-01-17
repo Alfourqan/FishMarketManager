@@ -24,9 +24,27 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import javax.swing.SpinnerNumberModel;
-
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class ReportViewSwing {
+    private static final Logger LOGGER = Logger.getLogger(ReportViewSwing.class.getName());
+
+    // Constantes UI
+    private static final Color PRIMARY_COLOR = new Color(0, 135, 136);
+    private static final Color SUCCESS_COLOR = new Color(76, 175, 80);
+    private static final Color WARNING_COLOR = new Color(255, 152, 0);
+    private static final Color ERROR_COLOR = new Color(244, 67, 54);
+    private static final Color INFO_COLOR = new Color(33, 150, 243);
+    private static final Font TITLE_FONT = new Font("Segoe UI", Font.BOLD, 20);
+    private static final Font SUBTITLE_FONT = new Font("Segoe UI", Font.BOLD, 16);
+    private static final Font REGULAR_FONT = new Font("Segoe UI", Font.PLAIN, 14);
+
+    // Messages d'erreur
+    private static final String MSG_ERREUR_GENERATION = "Erreur lors de la génération du rapport : ";
+    private static final String MSG_ERREUR_CHARGEMENT = "Erreur lors du chargement des données : ";
+    private static final String MSG_SUCCES_GENERATION = "Le rapport a été généré dans le fichier : ";
+
     private final JPanel mainPanel;
     private final VenteController venteController;
     private final ProduitController produitController;
@@ -47,6 +65,7 @@ public class ReportViewSwing {
         dateFin = LocalDate.now();
 
         initializeComponents();
+        LOGGER.info("ReportViewSwing initialisé avec succès");
     }
 
     private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
@@ -56,7 +75,7 @@ public class ReportViewSwing {
 
         JButton button = new JButton(text);
         button.setIcon(icon);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        button.setFont(REGULAR_FONT);
         button.setBackground(color);
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
@@ -64,7 +83,6 @@ public class ReportViewSwing {
         button.setMargin(new Insets(8, 16, 8, 16));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // Effet de survol
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(color.darker());
@@ -78,7 +96,7 @@ public class ReportViewSwing {
     }
 
     private JButton createReportButton(String text, MaterialDesign iconCode) {
-        return createStyledButton(text, iconCode, new Color(0, 135, 136));
+        return createStyledButton(text, iconCode, PRIMARY_COLOR);
     }
 
     private void initializeComponents() {
@@ -106,12 +124,12 @@ public class ReportViewSwing {
         JPanel periodPanel = new JPanel(new GridLayout(4, 1, 5, 5));
         periodPanel.setBackground(panel.getBackground());
         periodPanel.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(new Color(0, 135, 136), 1),
+            BorderFactory.createLineBorder(PRIMARY_COLOR, 1),
             "Période",
             javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
             javax.swing.border.TitledBorder.DEFAULT_POSITION,
             new Font("Segoe UI", Font.BOLD, 12),
-            new Color(0, 135, 136)
+            PRIMARY_COLOR
         ));
 
         JButton aujourdhuiBtn = createPeriodButton("Aujourd'hui", () -> {
@@ -141,24 +159,27 @@ public class ReportViewSwing {
         reportButtonsPanel.setLayout(new BoxLayout(reportButtonsPanel, BoxLayout.Y_AXIS));
         reportButtonsPanel.setBackground(panel.getBackground());
         reportButtonsPanel.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(new Color(0, 135, 136), 1),
+            BorderFactory.createLineBorder(PRIMARY_COLOR, 1),
             "Rapports",
             javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
             javax.swing.border.TitledBorder.DEFAULT_POSITION,
             new Font("Segoe UI", Font.BOLD, 12),
-            new Color(0, 135, 136)
+            PRIMARY_COLOR
         ));
 
-        JButton ventesBtn = createStyledButton("Rapport des ventes", MaterialDesign.MDI_CART, new Color(33, 150, 243));
-        JButton stocksBtn = createStyledButton("Rapport des stocks", MaterialDesign.MDI_PACKAGE_VARIANT, new Color(76, 175, 80));
-        JButton fournisseursBtn = createStyledButton("Rapport fournisseurs", MaterialDesign.MDI_TRUCK_DELIVERY, new Color(255, 152, 0));
+        JButton ventesBtn = createReportButton("Rapport des ventes", MaterialDesign.MDI_CART);
+        JButton stocksBtn = createStyledButton("Rapport des stocks", MaterialDesign.MDI_PACKAGE_VARIANT, SUCCESS_COLOR);
+        JButton fournisseursBtn = createStyledButton("Rapport fournisseurs", MaterialDesign.MDI_TRUCK_DELIVERY, WARNING_COLOR);
         JButton statistiquesBtn = createStyledButton("Statistiques", MaterialDesign.MDI_CHART_BAR, new Color(156, 39, 176));
         JButton creancesBtn = createStyledButton("État des créances", MaterialDesign.MDI_CASH_MULTIPLE, new Color(233, 30, 99));
 
         // Gestionnaires d'événements
-        ventesBtn.addActionListener(e -> genererRapportVentes());
-        stocksBtn.addActionListener(e -> genererRapportStocks());
-        fournisseursBtn.addActionListener(e -> genererRapportFournisseurs());
+        ventesBtn.addActionListener(e -> genererRapport("ventes", venteController.getVentes().stream()
+                .filter(v -> !v.getDate().toLocalDate().isBefore(dateDebut) &&
+                        !v.getDate().toLocalDate().isAfter(dateFin))
+                .collect(Collectors.toList()), "rapport_ventes_" + LocalDate.now() + ".pdf"));
+        stocksBtn.addActionListener(e -> genererRapport("stocks", produitController.getProduits(), "rapport_stocks_" + LocalDate.now() + ".pdf"));
+        fournisseursBtn.addActionListener(e -> genererRapport("fournisseurs", fournisseurController.getFournisseurs(), "rapport_fournisseurs_" + LocalDate.now() + ".pdf"));
         statistiquesBtn.addActionListener(e -> afficherStatistiques());
         creancesBtn.addActionListener(e -> afficherEtatCreances());
 
@@ -192,7 +213,7 @@ public class ReportViewSwing {
         headerPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(220, 220, 220)));
 
         JLabel titleLabel = new JLabel("Tableau de bord", SwingConstants.LEFT);
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        titleLabel.setFont(TITLE_FONT);
         titleLabel.setForeground(new Color(33, 33, 33));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
@@ -212,7 +233,7 @@ public class ReportViewSwing {
     private JButton createPeriodButton(String text, Runnable action) {
         JButton button = new JButton(text);
         button.setFocusPainted(false);
-        button.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        button.setFont(REGULAR_FONT);
         button.setBackground(Color.WHITE);
         button.setForeground(new Color(33, 33, 33));
         button.setBorder(BorderFactory.createCompoundBorder(
@@ -235,50 +256,33 @@ public class ReportViewSwing {
         return button;
     }
 
-    private void genererRapportVentes() {
+    private void genererRapport(String type, List<?> donnees, String nomFichier) {
         try {
-            venteController.chargerVentes();
-            String nomFichier = "rapport_ventes_" + LocalDate.now() + ".pdf";
-
-            List<Vente> ventesFiltered = venteController.getVentes().stream()
-                .filter(v -> !v.getDate().toLocalDate().isBefore(dateDebut) && 
-                           !v.getDate().toLocalDate().isAfter(dateFin))
-                .collect(Collectors.toList());
-
-            PDFGenerator.genererRapportVentes(ventesFiltered, nomFichier);
-            afficherMessageSuccess("Rapport généré", 
-                "Le rapport des ventes a été généré dans le fichier : " + nomFichier);
+            switch (type) {
+                case "ventes":
+                    PDFGenerator.genererRapportVentes((List<Vente>) donnees, nomFichier);
+                    break;
+                case "stocks":
+                    PDFGenerator.genererRapportStocks((List<Produit>) donnees, nomFichier);
+                    break;
+                case "fournisseurs":
+                    PDFGenerator.genererRapportFournisseurs((List<Fournisseur>) donnees, nomFichier);
+                    break;
+                case "creances":
+                    PDFGenerator.genererRapportCreances((List<Client>) donnees, nomFichier);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Type de rapport inconnu: " + type);
+            }
+            LOGGER.info("Rapport généré avec succès: " + nomFichier);
+            afficherMessageSuccess("Rapport généré", MSG_SUCCES_GENERATION + nomFichier);
             ouvrirFichierPDF(nomFichier);
         } catch (Exception e) {
-            afficherMessageErreur("Erreur", "Erreur lors de la génération du rapport : " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport", e);
+            afficherMessageErreur("Erreur", MSG_ERREUR_GENERATION + e.getMessage());
         }
     }
 
-    private void genererRapportStocks() {
-        try {
-            produitController.chargerProduits();
-            String nomFichier = "rapport_stocks_" + LocalDate.now() + ".pdf";
-            PDFGenerator.genererRapportStocks(produitController.getProduits(), nomFichier);
-            afficherMessageSuccess("Rapport généré", 
-                "Le rapport des stocks a été généré dans le fichier : " + nomFichier);
-            ouvrirFichierPDF(nomFichier);
-        } catch (Exception e) {
-            afficherMessageErreur("Erreur", "Erreur lors de la génération du rapport : " + e.getMessage());
-        }
-    }
-
-    private void genererRapportFournisseurs() {
-        try {
-            fournisseurController.chargerFournisseurs();
-            String nomFichier = "rapport_fournisseurs_" + LocalDate.now() + ".pdf";
-            PDFGenerator.genererRapportFournisseurs(fournisseurController.getFournisseurs(), nomFichier);
-            afficherMessageSuccess("Rapport généré", 
-                "Le rapport des fournisseurs a été généré dans le fichier : " + nomFichier);
-            ouvrirFichierPDF(nomFichier);
-        } catch (Exception e) {
-            afficherMessageErreur("Erreur", "Erreur lors de la génération du rapport : " + e.getMessage());
-        }
-    }
 
     private void afficherStatistiques() {
         chartPanel.removeAll();
@@ -324,14 +328,16 @@ public class ReportViewSwing {
         panel.setBackground(Color.WHITE);
 
         JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        titleLabel.setFont(SUBTITLE_FONT);
         titleLabel.setForeground(new Color(33, 33, 33));
 
         JTextArea contentArea = new JTextArea(content);
-        contentArea.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        contentArea.setFont(REGULAR_FONT);
         contentArea.setEditable(false);
         contentArea.setBackground(panel.getBackground());
         contentArea.setBorder(null);
+        contentArea.setLineWrap(true);
+        contentArea.setWrapStyleWord(true);
 
         panel.add(titleLabel, BorderLayout.NORTH);
         panel.add(contentArea, BorderLayout.CENTER);
@@ -349,6 +355,7 @@ public class ReportViewSwing {
                 .mapToDouble(Vente::getMontantTotal)
                 .sum();
         } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors du calcul du total des ventes", e);
             return 0.0;
         }
     }
@@ -358,6 +365,7 @@ public class ReportViewSwing {
             produitController.chargerProduits();
             return produitController.getProduits().size();
         } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors du chargement des produits", e);
             return 0;
         }
     }
@@ -369,6 +377,7 @@ public class ReportViewSwing {
                 .filter(p -> p.getQuantite() <= p.getSeuilAlerte())
                 .count();
         } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors du calcul des produits en alerte", e);
             return 0;
         }
     }
@@ -380,6 +389,7 @@ public class ReportViewSwing {
                 .mapToDouble(p -> p.getPrixAchat() * p.getQuantite())
                 .sum();
         } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors du calcul de la valeur totale du stock", e);
             return 0.0;
         }
     }
@@ -389,6 +399,7 @@ public class ReportViewSwing {
             fournisseurController.chargerFournisseurs();
             return fournisseurController.getFournisseurs().size();
         } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors du chargement des fournisseurs", e);
             return 0;
         }
     }
@@ -419,6 +430,7 @@ public class ReportViewSwing {
                 Desktop.getDesktop().open(file);
             }
         } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Impossible d'ouvrir le fichier PDF", e);
             System.err.println("Impossible d'ouvrir le fichier : " + e.getMessage());
         }
     }
@@ -431,18 +443,12 @@ public class ReportViewSwing {
         JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.ERROR_MESSAGE);
     }
 
-    public JPanel getMainPanel() {
-        return mainPanel;
-    }
-
     private void afficherEtatCreances() {
         try {
-            // Charger les clients
             ClientController clientController = new ClientController();
             clientController.chargerClients();
             List<Client> clients = clientController.getClients();
 
-            // Filtrer uniquement les clients avec des créances
             List<Client> clientsAvecCreances = clients.stream()
                 .filter(c -> c.getSolde() > 0)
                 .collect(Collectors.toList());
@@ -452,139 +458,132 @@ public class ReportViewSwing {
                 return;
             }
 
-            // Créer la fenêtre de détail des créances
-            JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel), 
-                "État des créances", true);
-            dialog.setLayout(new BorderLayout(10, 10));
-            dialog.setSize(800, 600);
-            dialog.setLocationRelativeTo(null);
-
-            // Panel de recherche
-            JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-            searchPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 10));
-            JTextField searchField = new JTextField(20);
-            searchPanel.add(new JLabel("Rechercher: "));
-            searchPanel.add(searchField);
-
-            // Tableau des créances
-            String[] colonnes = {"Client", "Téléphone", "Solde", "Actions"};
-            Object[][] donnees = new Object[clientsAvecCreances.size()][4];
-
-            for (int i = 0; i < clientsAvecCreances.size(); i++) {
-                Client client = clientsAvecCreances.get(i);
-                donnees[i][0] = client.getNom();
-                donnees[i][1] = client.getTelephone();
-                donnees[i][2] = String.format("%.2f €", client.getSolde());
-                donnees[i][3] = client; // Changed to store the Client object
-            }
-
-            JTable table = new JTable(donnees, colonnes) {
-                @Override
-                public boolean isCellEditable(int row, int column) {
-                    return column == 3;
-                }
-            };
-
-            // Configuration du tri
-            TableRowSorter<javax.swing.table.TableModel> sorter = new TableRowSorter<>(table.getModel());
-            table.setRowSorter(sorter);
-
-            // Recherche en temps réel
-            searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-                public void changedUpdate(javax.swing.event.DocumentEvent e) { filter(); }
-                public void removeUpdate(javax.swing.event.DocumentEvent e) { filter(); }
-                public void insertUpdate(javax.swing.event.DocumentEvent e) { filter(); }
-
-                private void filter() {
-                    String text = searchField.getText();
-                    if (text.trim().isEmpty()) {
-                        sorter.setRowFilter(null);
-                    } else {
-                        sorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
-                    }
-                }
-            });
-
-            // Style du tableau
-            table.setRowHeight(30);
-            table.setIntercellSpacing(new Dimension(10, 5));
-            table.setShowGrid(false);
-            table.setShowHorizontalLines(true);
-            table.setGridColor(new Color(230, 230, 230));
-
-            // En-têtes du tableau
-            table.getTableHeader().setBackground(new Color(240, 240, 240));
-            table.getTableHeader().setForeground(new Color(33, 33, 33));
-            table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-            table.getTableHeader().setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(200, 200, 200)));
-
-            // Renderer personnalisé pour la colonne Actions
-            table.getColumnModel().getColumn(3).setCellRenderer((TableCellRenderer) (table1, value, isSelected, hasFocus, row, column) -> {
-                JButton button = new JButton("Détails");
-                button.setBackground(new Color(33, 150, 243));
-                button.setForeground(Color.WHITE);
-                button.setFocusPainted(false);
-                button.setBorderPainted(false);
-                return button;
-            });
-
-            // Editor personnalisé pour la colonne Actions
-            table.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(new JCheckBox()) {
-                @Override
-                public Component getTableCellEditorComponent(JTable table, Object value,
-                        boolean isSelected, int row, int col) {
-                    JButton button = new JButton("Détails");
-                    button.setBackground(new Color(33, 150, 243));
-                    button.setForeground(Color.WHITE);
-                    button.setFocusPainted(false);
-                    button.setBorderPainted(false);
-
-                    button.addActionListener(e -> {
-                        Client client = (Client) value; // Retrieve Client object
-                        afficherDetailCreancesClient(client);
-                        fireEditingStopped();
-                    });
-
-                    return button;
-                }
-            });
-
-            // Ajustement des colonnes
-            table.getColumnModel().getColumn(0).setPreferredWidth(200);
-            table.getColumnModel().getColumn(1).setPreferredWidth(150);
-            table.getColumnModel().getColumn(2).setPreferredWidth(100);
-            table.getColumnModel().getColumn(3).setPreferredWidth(100);
-
-            // Boutons d'action globaux
-            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-            buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 10, 10));
-            JButton rapportGlobalBtn = createStyledButton("Rapport global des créances",
-                MaterialDesign.MDI_FILE_DOCUMENT, new Color(33, 150, 243));
-            rapportGlobalBtn.addActionListener(e -> {
-                genererRapportCreances(clientsAvecCreances,
-                    "rapport_creances_global_" + LocalDate.now() + ".pdf");
-                dialog.dispose();
-            });
-            buttonPanel.add(rapportGlobalBtn);
-
-            // ScrollPane avec style
-            JScrollPane scrollPane = new JScrollPane(table);
-            scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
-            scrollPane.getViewport().setBackground(Color.WHITE);
-
-            // Assembly
-            JPanel contentPanel = new JPanel(new BorderLayout());
-            contentPanel.add(searchPanel, BorderLayout.NORTH);
-            contentPanel.add(scrollPane, BorderLayout.CENTER);
-            contentPanel.add(buttonPanel, BorderLayout.SOUTH);
-            contentPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-
-            dialog.add(contentPanel);
+            JDialog dialog = createCreancesDialog(clientsAvecCreances);
             dialog.setVisible(true);
 
         } catch (Exception e) {
-            showErrorMessage("Erreur", "Erreur lors de l'affichage des créances : " + e.getMessage());
+            handleError("affichage des créances", e);
         }
+    }
+
+    private JDialog createCreancesDialog(List<Client> clientsAvecCreances) {
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel), 
+            "État des créances", true);
+        dialog.setLayout(new BorderLayout(10, 10));
+        dialog.setSize(800, 600);
+        dialog.setLocationRelativeTo(null);
+
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        searchPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 10));
+        JTextField searchField = new JTextField(20);
+        searchPanel.add(new JLabel("Rechercher: "));
+        searchPanel.add(searchField);
+
+
+        String[] colonnes = {"Client", "Téléphone", "Solde", "Actions"};
+        Object[][] donnees = new Object[clientsAvecCreances.size()][4];
+
+        for (int i = 0; i < clientsAvecCreances.size(); i++) {
+            Client client = clientsAvecCreances.get(i);
+            donnees[i][0] = client.getNom();
+            donnees[i][1] = client.getTelephone();
+            donnees[i][2] = String.format("%.2f €", client.getSolde());
+            donnees[i][3] = client; 
+        }
+
+        JTable table = new JTable(donnees, colonnes) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column == 3;
+            }
+        };
+
+        TableRowSorter<javax.swing.table.TableModel> sorter = new TableRowSorter<>(table.getModel());
+        table.setRowSorter(sorter);
+
+        searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { filter(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { filter(); }
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { filter(); }
+
+            private void filter() {
+                String text = searchField.getText();
+                if (text.trim().isEmpty()) {
+                    sorter.setRowFilter(null);
+                } else {
+                    sorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
+                }
+            }
+        });
+
+        table.setRowHeight(30);
+        table.setIntercellSpacing(new Dimension(10, 5));
+        table.setShowGrid(false);
+        table.setShowHorizontalLines(true);
+        table.setGridColor(new Color(230, 230, 230));
+
+        table.getTableHeader().setBackground(new Color(240, 240, 240));
+        table.getTableHeader().setForeground(new Color(33, 33, 33));
+        table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+        table.getTableHeader().setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(200, 200, 200)));
+
+        table.getColumnModel().getColumn(3).setCellRenderer((TableCellRenderer) (table1, value, isSelected, hasFocus, row, column) -> {
+            JButton button = new JButton("Détails");
+            button.setBackground(INFO_COLOR);
+            button.setForeground(Color.WHITE);
+            button.setFocusPainted(false);
+            button.setBorderPainted(false);
+            return button;
+        });
+
+        table.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(new JCheckBox()) {
+            @Override
+            public Component getTableCellEditorComponent(JTable table, Object value,
+                    boolean isSelected, int row, int col) {
+                JButton button = new JButton("Détails");
+                button.setBackground(INFO_COLOR);
+                button.setForeground(Color.WHITE);
+                button.setFocusPainted(false);
+                button.setBorderPainted(false);
+
+                button.addActionListener(e -> {
+                    Client client = (Client) value;
+                    afficherDetailCreancesClient(client);
+                    fireEditingStopped();
+                });
+
+                return button;
+            }
+        });
+
+        table.getColumnModel().getColumn(0).setPreferredWidth(200);
+        table.getColumnModel().getColumn(1).setPreferredWidth(150);
+        table.getColumnModel().getColumn(2).setPreferredWidth(100);
+        table.getColumnModel().getColumn(3).setPreferredWidth(100);
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 10, 10));
+        JButton rapportGlobalBtn = createStyledButton("Rapport global des créances",
+            MaterialDesign.MDI_FILE_DOCUMENT, INFO_COLOR);
+        rapportGlobalBtn.addActionListener(e -> {
+            genererRapport("creances", clientsAvecCreances,
+                "rapport_creances_global_" + LocalDate.now() + ".pdf");
+            dialog.dispose();
+        });
+        buttonPanel.add(rapportGlobalBtn);
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
+        scrollPane.getViewport().setBackground(Color.WHITE);
+
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.add(searchPanel, BorderLayout.NORTH);
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
+        contentPanel.add(buttonPanel, BorderLayout.SOUTH);
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+
+        dialog.add(contentPanel, BorderLayout.CENTER);
+        return dialog;
     }
 
     private void genererRapportCreanceClient(Client client) {
@@ -595,23 +594,17 @@ public class ReportViewSwing {
             List<Client> clientSeul = new ArrayList<>();
             clientSeul.add(client);
 
-            PDFGenerator.genererRapportCreances(clientSeul, nomFichier);
-            showSuccessMessage("Rapport généré",
-                "Le rapport de créance pour " + client.getNom() + " a été généré dans le fichier : " + nomFichier);
-            ouvrirFichierPDF(nomFichier);
+            genererRapport("creances", clientSeul, nomFichier);
         } catch (Exception e) {
-            showErrorMessage("Erreur", "Erreur lors de la génération du rapport : " + e.getMessage());
+            handleError("génération du rapport de créance client", e);
         }
     }
 
     private void genererRapportCreances(List<Client> clients, String nomFichier) {
         try {
-            PDFGenerator.genererRapportCreances(clients, nomFichier);
-            showSuccessMessage("Rapport généré", 
-                "Le rapport global des créances a été généré dans le fichier : " + nomFichier);
-            ouvrirFichierPDF(nomFichier);
+            genererRapport("creances", clients, nomFichier);
         } catch (Exception e) {
-            showErrorMessage("Erreur", "Erreur lors de la génération du rapport : " + e.getMessage());
+            handleError("génération du rapport global de créances", e);
         }
     }
 
@@ -627,27 +620,39 @@ public class ReportViewSwing {
         JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.INFORMATION_MESSAGE);
     }
     
-    // New methods added here
-    private void afficherDetailCreancesClient(Client client) {
+    private JDialog createDetailDialog(Client client) {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel), 
             "Détail des créances - " + client.getNom(), true);
         dialog.setLayout(new BorderLayout(10, 10));
         dialog.setSize(600, 400);
         dialog.setLocationRelativeTo(null);
 
-        // Panel principal
-        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        JPanel mainPanel = createDetailMainPanel(client);
+        dialog.add(mainPanel);
 
-        // Informations client
+        return dialog;
+    }
+
+    private JPanel createDetailMainPanel(Client client) {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+        panel.add(createInfoPanel(client), BorderLayout.NORTH);
+        panel.add(createHistoriquePanel(), BorderLayout.CENTER);
+        panel.add(createButtonPanel(client), BorderLayout.SOUTH);
+
+        return panel;
+    }
+
+    private JPanel createInfoPanel(Client client) {
         JPanel infoPanel = new JPanel(new GridLayout(3, 2, 5, 5));
         infoPanel.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(new Color(76, 175, 80)),
+            BorderFactory.createLineBorder(SUCCESS_COLOR),
             "Informations client",
             TitledBorder.DEFAULT_JUSTIFICATION,
             TitledBorder.DEFAULT_POSITION,
             new Font("Segoe UI", Font.BOLD, 12),
-            new Color(76, 175, 80)
+            SUCCESS_COLOR
         ));
 
         infoPanel.add(new JLabel("Nom:"));
@@ -656,41 +661,22 @@ public class ReportViewSwing {
         infoPanel.add(new JLabel(client.getTelephone()));
         infoPanel.add(new JLabel("Solde actuel:"));
         infoPanel.add(new JLabel(String.format("%.2f €", client.getSolde())));
+        return infoPanel;
+    }
 
-        // Boutons d'action
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton genererRapportBtn = createStyledButton("Générer rapport détaillé",
-            MaterialDesign.MDI_FILE_DOCUMENT, new Color(33, 150, 243));
-        JButton reglerCreanceBtn = createStyledButton("Régler créance",
-            MaterialDesign.MDI_CASH, new Color(76, 175, 80));
-
-        genererRapportBtn.addActionListener(e -> {
-            genererRapportCreanceClient(client);
-            dialog.dispose();
-        });
-
-        reglerCreanceBtn.addActionListener(e -> {
-            afficherDialogueReglement(client);
-            dialog.dispose();
-        });
-
-        buttonPanel.add(genererRapportBtn);
-        buttonPanel.add(reglerCreanceBtn);
-
-        // Historique des transactions
+    private JPanel createHistoriquePanel() {
         JPanel historiquePanel = new JPanel(new BorderLayout());
         historiquePanel.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(new Color(33, 150, 243)),
+            BorderFactory.createLineBorder(INFO_COLOR),
             "Historique des transactions",
             TitledBorder.DEFAULT_JUSTIFICATION,
             TitledBorder.DEFAULT_POSITION,
             new Font("Segoe UI", Font.BOLD, 12),
-            new Color(33, 150, 243)
+            INFO_COLOR
         ));
 
-        // Table des transactions
         String[] columns = {"Date", "Type", "Montant", "Solde après"};
-        Object[][] data = new Object[0][4]; // À remplir avec les vraies données
+        Object[][] data = new Object[0][4]; 
 
         JTable table = new JTable(data, columns);
         table.setFillsViewportHeight(true);
@@ -698,14 +684,29 @@ public class ReportViewSwing {
         table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
 
         historiquePanel.add(new JScrollPane(table), BorderLayout.CENTER);
+        return historiquePanel;
+    }
 
-        // Assembly
-        mainPanel.add(infoPanel, BorderLayout.NORTH);
-        mainPanel.add(historiquePanel, BorderLayout.CENTER);
-        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+    private JPanel createButtonPanel(Client client) {
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton genererRapportBtn = createStyledButton("Générer rapport détaillé",
+            MaterialDesign.MDI_FILE_DOCUMENT, INFO_COLOR);
+        JButton reglerCreanceBtn = createStyledButton("Régler créance",
+            MaterialDesign.MDI_CASH, SUCCESS_COLOR);
 
-        dialog.add(mainPanel);
-        dialog.setVisible(true);
+        genererRapportBtn.addActionListener(e -> {
+            genererRapportCreanceClient(client);
+            ((JDialog)((JButton)e.getSource()).getTopLevelAncestor()).dispose();
+        });
+
+        reglerCreanceBtn.addActionListener(e -> {
+            afficherDialogueReglement(client);
+            ((JDialog)((JButton)e.getSource()).getTopLevelAncestor()).dispose();
+        });
+
+        buttonPanel.add(genererRapportBtn);
+        buttonPanel.add(reglerCreanceBtn);
+        return buttonPanel;
     }
 
     private void afficherDialogueReglement(Client client) {
@@ -722,7 +723,6 @@ public class ReportViewSwing {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        // Informations actuelles
         gbc.gridx = 0;
         gbc.gridy = 0;
         panel.add(new JLabel("Solde actuel:"), gbc);
@@ -730,7 +730,6 @@ public class ReportViewSwing {
         gbc.gridx = 1;
         panel.add(new JLabel(String.format("%.2f €", client.getSolde())), gbc);
 
-        // Montant à régler
         gbc.gridx = 0;
         gbc.gridy = 1;
         panel.add(new JLabel("Montant à régler:"), gbc);
@@ -739,10 +738,9 @@ public class ReportViewSwing {
         JSpinner montantSpinner = new JSpinner(new SpinnerNumberModel(0.0, 0.0, client.getSolde(), 0.01));
         panel.add(montantSpinner, gbc);
 
-        // Boutons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton validerBtn = createStyledButton("Valider", MaterialDesign.MDI_CHECK, new Color(76, 175, 80));
-        JButton annulerBtn = createStyledButton("Annuler", MaterialDesign.MDI_CLOSE, new Color(244, 67, 54));
+        JButton validerBtn = createStyledButton("Valider", MaterialDesign.MDI_CHECK, SUCCESS_COLOR);
+        JButton annulerBtn = createStyledButton("Annuler", MaterialDesign.MDI_CLOSE, ERROR_COLOR);
 
         validerBtn.addActionListener(e -> {
             try {
@@ -763,9 +761,9 @@ public class ReportViewSwing {
                     String.format("Règlement de %.2f € effectué avec succès", montant));
 
                 dialog.dispose();
-                afficherEtatCreances(); // Rafraîchir la vue
+                afficherEtatCreances(); 
             } catch (Exception ex) {
-                showErrorMessage("Erreur", "Erreur lors du règlement : " + ex.getMessage());
+                handleError("règlement de créance", ex);
             }
         });
 
@@ -778,4 +776,12 @@ public class ReportViewSwing {
         dialog.add(buttonPanel, BorderLayout.SOUTH);
         dialog.setVisible(true);
     }
+
+    private void handleError(String operation, Exception e) {
+        LOGGER.log(Level.SEVERE, "Erreur lors de " + operation, e);
+        showErrorMessage("Erreur", MSG_ERREUR_GENERATION + e.getMessage());
+    }
+
+    public JPanel getMainPanel() {
+        return mainPanel;    }
 }
