@@ -25,31 +25,45 @@ public class DatabaseManager {
     }
 
     public static void initDatabase() {
-        // Créer le répertoire de la base de données si nécessaire
         File dbFile = new File(DB_FILE);
-        if (!dbFile.exists()) {
-            try (Connection conn = getConnection()) {
-                // Lecture du fichier schema.sql
-                String schema = new BufferedReader(
-                    new InputStreamReader(
-                        DatabaseManager.class.getClassLoader().getResourceAsStream("schema.sql"),
-                        StandardCharsets.UTF_8))
-                    .lines()
-                    .collect(Collectors.joining("\n"));
+        boolean dbExists = dbFile.exists();
 
-                // Exécution des requêtes SQL
-                try (Statement stmt = conn.createStatement()) {
-                    for (String sql : schema.split(";")) {
-                        if (!sql.trim().isEmpty()) {
-                            stmt.execute(sql);
-                        }
+        try (Connection conn = getConnection()) {
+            // Lecture du fichier schema.sql
+            String schema = new BufferedReader(
+                new InputStreamReader(
+                    DatabaseManager.class.getClassLoader().getResourceAsStream("schema.sql"),
+                    StandardCharsets.UTF_8))
+                .lines()
+                .collect(Collectors.joining("\n"));
+
+            // Exécution des requêtes SQL
+            try (Statement stmt = conn.createStatement()) {
+                for (String sql : schema.split(";")) {
+                    if (!sql.trim().isEmpty()) {
+                        stmt.execute(sql);
                     }
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
-                System.err.println("Erreur lors de l'initialisation de la base de données: " + e.getMessage());
-                System.exit(1);
+
+                // Si la base de données vient d'être créée, insérer les configurations par défaut
+                if (!dbExists) {
+                    String[] defaultConfigs = {
+                        "INSERT INTO configurations (cle, valeur, description) VALUES ('TAUX_TVA', '20.0', 'Taux de TVA en pourcentage')",
+                        "INSERT INTO configurations (cle, valeur, description) VALUES ('NOM_ENTREPRISE', '', 'Nom de l''entreprise')",
+                        "INSERT INTO configurations (cle, valeur, description) VALUES ('ADRESSE_ENTREPRISE', '', 'Adresse de l''entreprise')",
+                        "INSERT INTO configurations (cle, valeur, description) VALUES ('TELEPHONE_ENTREPRISE', '', 'Numéro de téléphone de l''entreprise')",
+                        "INSERT INTO configurations (cle, valeur, description) VALUES ('PIED_PAGE_RECU', 'Merci de votre visite !', 'Message en pied de page des reçus')"
+                    };
+
+                    for (String configSql : defaultConfigs) {
+                        stmt.execute(configSql);
+                    }
+                }
             }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.err.println("Erreur lors de l'initialisation de la base de données: " + e.getMessage());
+            System.exit(1);
         }
     }
 }
