@@ -21,6 +21,8 @@ public class MainViewSwing {
     private final ProduitController produitController;
     private final ClientController clientController;
     private final CaisseController caisseController;
+    private JLabel titleLabel; // Pour stocker la référence au label du titre
+    private String currentTitle = "HOME"; // Pour stocker le titre actuel
 
     public MainViewSwing() {
         mainPanel = new JPanel(new BorderLayout());
@@ -35,7 +37,7 @@ public class MainViewSwing {
     }
 
     private void initializeComponents() {
-        // En-tête vert avec "HOME"
+        // En-tête vert avec titre dynamique
         JPanel headerPanel = createHeader();
         mainPanel.add(headerPanel, BorderLayout.NORTH);
 
@@ -55,13 +57,18 @@ public class MainViewSwing {
         headerPanel.setBackground(new Color(76, 175, 80)); // Vert
         headerPanel.setPreferredSize(new Dimension(0, 50));
 
-        JLabel titleLabel = new JLabel("HOME", SwingConstants.CENTER);
+        titleLabel = new JLabel(currentTitle, SwingConstants.CENTER);
         titleLabel.setForeground(Color.WHITE);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
         headerPanel.add(titleLabel, BorderLayout.CENTER);
         return headerPanel;
+    }
+
+    private void updateTitle(String newTitle) {
+        currentTitle = newTitle;
+        titleLabel.setText(newTitle);
     }
 
     private JPanel createNavigationPanel() {
@@ -100,7 +107,10 @@ public class MainViewSwing {
             final String cardName = viewNames[i];
 
             if (i < viewNames.length - 1) { // Tous sauf Déconnexion
-                navButton.addActionListener(e -> cardLayout.show(contentPanel, cardName));
+                navButton.addActionListener(e -> {
+                    cardLayout.show(contentPanel, cardName);
+                    updateTitle(cardName.toUpperCase()); // Met à jour le titre avec le nom de la vue
+                });
             } else { // Bouton Déconnexion
                 navButton.addActionListener(e -> handleLogout());
             }
@@ -111,6 +121,7 @@ public class MainViewSwing {
 
             if (i == 0) {
                 navButton.setSelected(true);
+                updateTitle(viewNames[i].toUpperCase()); // Définit le titre initial
             }
         }
 

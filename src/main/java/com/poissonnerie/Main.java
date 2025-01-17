@@ -27,7 +27,7 @@ public class Main {
                 Color sidebarColor = new Color(51, 51, 76); // Couleur sombre pour la barre latérale
                 Color primaryTextColor = Color.WHITE;
                 Color darkTextColor = new Color(33, 33, 33);
-                Color backgroundColor = new Color(245, 245, 245);
+                Color backgroundColor = new Color(51, 51, 76);
 
                 // Configuration des boutons de navigation avec style moderne
                 UIManager.put("ToggleButton.background", sidebarColor);
