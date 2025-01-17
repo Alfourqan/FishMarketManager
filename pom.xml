@@ -36,6 +36,12 @@
         <artifactId>flatlaf-intellij-themes</artifactId>
         <version>3.2.1</version>
     </dependency>
+    <!-- FlatLaf Extras -->
+    <dependency>
+        <groupId>com.formdev</groupId>
+        <artifactId>flatlaf-extras</artifactId>
+        <version>3.2.1</version>
+    </dependency>
     <!-- Material Design Icons -->
     <dependency>
         <groupId>org.kordamp.ikonli</groupId>

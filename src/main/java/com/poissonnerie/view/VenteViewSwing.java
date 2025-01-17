@@ -14,8 +14,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import com.formdev.flatlaf.extras.FlatSVGIcon; // Assuming you use FlatLaf library for MaterialDesign Icons
+import org.kordamp.ikonli.materialdesign.MaterialDesign;
+import org.kordamp.ikonli.swing.FontIcon;
 
 public class VenteViewSwing {
     private final JPanel mainPanel;
@@ -31,7 +31,6 @@ public class VenteViewSwing {
     private JComboBox<Object> produitCombo;
     private JCheckBox creditCheck;
     private JLabel totalLabel;
-    //private JButton actualiserBtn; //Removed
 
     public VenteViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -114,8 +113,6 @@ public class VenteViewSwing {
         clientCombo.setEnabled(enabled && creditCheck.isSelected());
         produitCombo.setEnabled(enabled);
         creditCheck.setEnabled(enabled);
-        //actualiserBtn.setEnabled(enabled); //Removed
-        // Désactiver les autres contrôles si nécessaire
     }
 
     private void initializeComponents() {
@@ -130,17 +127,68 @@ public class VenteViewSwing {
         splitPane.setResizeWeight(0.5);
 
         // Bouton d'actualisation
-        JPanel actionPanel = createActionPanel(); //Replaced
+        JPanel actionPanel = createActionPanel();
 
         mainPanel.add(splitPane, BorderLayout.CENTER);
         mainPanel.add(actionPanel, BorderLayout.SOUTH);
     }
 
+    private JPanel createActionPanel() {
+        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        actionPanel.setOpaque(false);
+
+        // Création des boutons avec style moderne comme dans ProduitViewSwing
+        JButton ajouterBtn = createStyledButton("Nouveau", MaterialDesign.MDI_PLUS_BOX, new Color(76, 175, 80));
+        JButton modifierBtn = createStyledButton("Modifier", MaterialDesign.MDI_PENCIL_BOX, new Color(33, 150, 243));
+        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesign.MDI_MINUS_BOX, new Color(244, 67, 54));
+        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH, new Color(156, 39, 176));
+
+        // Ajout des gestionnaires d'événements
+        ajouterBtn.addActionListener(e -> {/* TODO */});
+        modifierBtn.addActionListener(e -> {/* TODO */});
+        supprimerBtn.addActionListener(e -> {/* TODO */});
+        actualiserBtn.addActionListener(e -> actualiserDonnees());
+
+        // Ajout des boutons au panel
+        actionPanel.add(ajouterBtn);
+        actionPanel.add(modifierBtn);
+        actionPanel.add(supprimerBtn);
+        actionPanel.add(actualiserBtn);
+
+        return actionPanel;
+    }
+
+    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
+        FontIcon icon = FontIcon.of(iconCode);
+        icon.setIconSize(18);
+        icon.setIconColor(Color.WHITE);
+
+        JButton button = new JButton(text);
+        button.setIcon(icon);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        button.setBackground(color);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setMargin(new Insets(8, 16, 8, 16));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Effet de survol
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(color.darker());
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(color);
+            }
+        });
+
+        return button;
+    }
 
     private void actualiserDonnees() {
         try {
             System.out.println("Début de l'actualisation des données...");
-            //actualiserBtn.setEnabled(false); //Removed
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
             // Sauvegarder l'état actuel
@@ -167,7 +215,6 @@ public class VenteViewSwing {
                 "Erreur",
                 JOptionPane.ERROR_MESSAGE);
         } finally {
-            //actualiserBtn.setEnabled(true); //Removed
             setCursor(Cursor.getDefaultCursor());
         }
     }
@@ -576,47 +623,5 @@ public class VenteViewSwing {
     }
     private void setCursor(Cursor cursor) {
         mainPanel.setCursor(cursor);
-    }
-
-    private JPanel createActionPanel() {
-        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        actionPanel.setOpaque(false);
-
-        // Boutons avec style moderne
-        JButton okButton = createStyledButton("Enregistrer", MaterialDesign.MDI_CONTENT_SAVE, new Color(76, 175, 80));
-        JButton cancelButton = createStyledButton("Annuler", MaterialDesign.MDI_CLOSE, new Color(244, 67, 54));
-
-        actionPanel.add(okButton);
-        actionPanel.add(cancelButton);
-
-        return actionPanel;
-    }
-
-    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
-        FontIcon icon = FontIcon.of(iconCode);
-        icon.setIconSize(18);
-        icon.setIconColor(Color.WHITE);
-
-        JButton button = new JButton(text);
-        button.setIcon(icon);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        button.setBackground(color);
-        button.setForeground(Color.WHITE);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setMargin(new Insets(8, 16, 8, 16));
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        // Effet de survol
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(color.darker());
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(color);
-            }
-        });
-
-        return button;
     }
 }

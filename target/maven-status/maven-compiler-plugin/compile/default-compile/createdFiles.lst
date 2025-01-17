@@ -43,6 +43,7 @@ com/poissonnerie/view/ProduitViewSwing$3.class
 com/poissonnerie/view/ReportViewSwing$1.class
 com/poissonnerie/view/ReportViewSwing.class
 com/poissonnerie/view/ConfigurationViewSwing$1.class
+com/poissonnerie/view/VenteViewSwing$5.class
 com/poissonnerie/model/Vente$LigneVente.class
 com/poissonnerie/view/InventaireViewSwing$1.class
 com/poissonnerie/test/TestInventaire.class
