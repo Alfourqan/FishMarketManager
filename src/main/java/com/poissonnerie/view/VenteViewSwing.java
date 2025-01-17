@@ -33,7 +33,7 @@ public class VenteViewSwing {
         venteController = new VenteController();
         produitController = new ProduitController();
         clientController = new ClientController();
-        
+
         String[] panierColumns = {"Produit", "Quantité", "Prix unitaire", "Total"};
         panierModel = new DefaultTableModel(panierColumns, 0) {
             @Override
@@ -42,7 +42,7 @@ public class VenteViewSwing {
             }
         };
         tablePanier = new JTable(panierModel);
-        
+
         String[] ventesColumns = {"Date", "Client", "Type", "Total"};
         ventesModel = new DefaultTableModel(ventesColumns, 0) {
             @Override
@@ -51,9 +51,9 @@ public class VenteViewSwing {
             }
         };
         tableVentes = new JTable(ventesModel);
-        
+
         panier = new ArrayList<>();
-        
+
         initializeComponents();
         loadData();
     }
@@ -75,7 +75,7 @@ public class VenteViewSwing {
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                 nouvelleVentePanel, historiquePanel);
         splitPane.setResizeWeight(0.5);
-        
+
         mainPanel.add(splitPane, BorderLayout.CENTER);
     }
 
@@ -85,10 +85,10 @@ public class VenteViewSwing {
 
         // En-tête de vente
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        clientCombo = new JComboBox<>(clientController.getClients().toArray(new Client[0]));
+        clientCombo = new JComboBox<>();
         clientCombo.setPreferredSize(new Dimension(200, 25));
         creditCheck = new JCheckBox("Vente à crédit");
-        
+
         clientCombo.setEnabled(false);
         creditCheck.addActionListener(e -> {
             clientCombo.setEnabled(creditCheck.isSelected());
@@ -96,18 +96,22 @@ public class VenteViewSwing {
                 clientCombo.setSelectedIndex(-1);
             }
         });
-        
+
         headerPanel.add(new JLabel("Client:"));
         headerPanel.add(clientCombo);
         headerPanel.add(creditCheck);
 
         // Sélection des produits
         JPanel selectionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JComboBox<Produit> produitCombo = new JComboBox<>(
-            produitController.getProduits().toArray(new Produit[0]));
+        JComboBox<Produit> produitCombo = new JComboBox<>();
+        produitController.chargerProduits(); // Recharger les produits
+        for (Produit p : produitController.getProduits()) {
+            produitCombo.addItem(p);
+        }
+
         JTextField quantiteField = new JTextField(5);
         JButton ajouterBtn = new JButton("Ajouter au panier");
-        
+
         selectionPanel.add(new JLabel("Produit:"));
         selectionPanel.add(produitCombo);
         selectionPanel.add(new JLabel("Quantité:"));
@@ -116,40 +120,76 @@ public class VenteViewSwing {
 
         // Panier
         JScrollPane panierScroll = new JScrollPane(tablePanier);
-        
+
         // Footer
         JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         totalLabel = new JLabel("Total: 0.00 €");
         JButton validerBtn = new JButton("Valider la vente");
         JButton annulerBtn = new JButton("Annuler");
-        
+
         footerPanel.add(totalLabel);
         footerPanel.add(validerBtn);
         footerPanel.add(annulerBtn);
 
         // Event handlers
         ajouterBtn.addActionListener(e -> {
-            Produit produit = (Produit) produitCombo.getSelectedItem();
-            if (produit != null) {
-                try {
-                    int quantite = Integer.parseInt(quantiteField.getText());
-                    if (quantite > 0 && quantite <= produit.getStock()) {
-                        Vente.LigneVente ligne = new Vente.LigneVente(
-                            produit,
-                            quantite,
-                            produit.getPrix()
-                        );
-                        panier.add(ligne);
-                        updatePanierTable();
-                        produitCombo.setSelectedIndex(-1);
-                        quantiteField.setText("");
-                    }
-                } catch (NumberFormatException ex) {
+            try {
+                Produit produit = (Produit) produitCombo.getSelectedItem();
+                if (produit == null) {
                     JOptionPane.showMessageDialog(mainPanel,
-                        "Veuillez entrer une quantité valide",
+                        "Veuillez sélectionner un produit",
                         "Erreur",
                         JOptionPane.ERROR_MESSAGE);
+                    return;
                 }
+
+                String quantiteText = quantiteField.getText().trim();
+                if (quantiteText.isEmpty()) {
+                    JOptionPane.showMessageDialog(mainPanel,
+                        "Veuillez entrer une quantité",
+                        "Erreur",
+                        JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                int quantite = Integer.parseInt(quantiteText);
+                if (quantite <= 0) {
+                    JOptionPane.showMessageDialog(mainPanel,
+                        "La quantité doit être supérieure à 0",
+                        "Erreur",
+                        JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                if (quantite > produit.getStock()) {
+                    JOptionPane.showMessageDialog(mainPanel,
+                        "Stock insuffisant. Disponible : " + produit.getStock(),
+                        "Erreur",
+                        JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                Vente.LigneVente ligne = new Vente.LigneVente(
+                    produit,
+                    quantite,
+                    produit.getPrix()
+                );
+                panier.add(ligne);
+                updatePanierTable();
+
+                // Réinitialiser les champs
+                quantiteField.setText("");
+                produitCombo.setSelectedIndex(-1);
+
+                System.out.println("Produit ajouté au panier: " + produit.getNom() +
+                    ", Quantité: " + quantite +
+                    ", Prix unitaire: " + produit.getPrix());
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(mainPanel,
+                    "Veuillez entrer une quantité valide",
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -163,13 +203,13 @@ public class VenteViewSwing {
                     calculateTotal()
                 );
                 vente.setLignes(new ArrayList<>(panier));
-                
+
                 venteController.enregistrerVente(vente);
                 PDFGenerator.genererFacture(vente, "facture_" + vente.getId() + ".pdf");
-                
+
                 resetForm();
                 refreshVentesTable();
-                
+
                 JOptionPane.showMessageDialog(mainPanel,
                     "Vente enregistrée avec succès\nFacture générée: facture_" + vente.getId() + ".pdf",
                     "Succès",
@@ -194,19 +234,19 @@ public class VenteViewSwing {
     private JPanel createHistoriquePanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createTitledBorder("Historique des Ventes"));
-        
+
         JScrollPane scrollPane = new JScrollPane(tableVentes);
         tableVentes.setFillsViewportHeight(true);
-        
+
         panel.add(scrollPane, BorderLayout.CENTER);
-        
+
         return panel;
     }
 
     private void updatePanierTable() {
         panierModel.setRowCount(0);
         double total = 0;
-        
+
         for (Vente.LigneVente ligne : panier) {
             double sousTotal = ligne.getQuantite() * ligne.getPrixUnitaire();
             panierModel.addRow(new Object[]{
@@ -217,14 +257,14 @@ public class VenteViewSwing {
             });
             total += sousTotal;
         }
-        
+
         totalLabel.setText(String.format("Total: %.2f €", total));
     }
 
     private void refreshVentesTable() {
         ventesModel.setRowCount(0);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        
+
         for (Vente vente : venteController.getVentes()) {
             ventesModel.addRow(new Object[]{
                 vente.getDate().format(formatter),
