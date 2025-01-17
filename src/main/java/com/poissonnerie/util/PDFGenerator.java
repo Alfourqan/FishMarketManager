@@ -1,14 +1,16 @@
 package com.poissonnerie.util;
 
 import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.BaseFont;
-import com.poissonnerie.model.Vente;
-import com.poissonnerie.model.Client;
+import com.poissonnerie.model.*;
 import com.poissonnerie.controller.ConfigurationController;
 import java.io.FileOutputStream;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Stream;
 
 public class PDFGenerator {
     private static final float TICKET_WIDTH = 170.079f; // 6 cm en points
@@ -221,6 +223,271 @@ public class PDFGenerator {
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Erreur lors de la génération du ticket: " + e.getMessage());
+        }
+    }
+
+    public static void genererRapportVentes(List<Vente> ventes, String cheminFichier) {
+        try {
+            Document document = new Document(PageSize.A4);
+            PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
+            document.open();
+
+            // En-tête
+            Font titleFont = new Font(Font.FontFamily.HELVETICA, 16, Font.BOLD);
+            Font normalFont = new Font(Font.FontFamily.HELVETICA, 12);
+            Font headerFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
+
+            Paragraph title = new Paragraph("Rapport des Ventes", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            title.setSpacingAfter(20);
+            document.add(title);
+
+            // Date du rapport
+            Paragraph date = new Paragraph("Date du rapport: " + 
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")), normalFont);
+            date.setSpacingAfter(20);
+            document.add(date);
+
+            // Tableau des ventes
+            PdfPTable table = new PdfPTable(new float[]{2, 3, 2, 2, 2});
+            table.setWidthPercentage(100);
+
+            // En-têtes
+            Stream.of("Date", "Client", "Type", "Montant", "Statut")
+                .forEach(columnTitle -> {
+                    Phrase phrase = new Phrase(columnTitle, headerFont);
+                    table.addCell(phrase);
+                });
+
+            // Données
+            double totalVentes = 0;
+            int nombreVentes = 0;
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+            for (Vente vente : ventes) {
+                table.addCell(vente.getDate().format(formatter));
+                table.addCell(vente.getClient() != null ? vente.getClient().getNom() : "Vente comptant");
+                table.addCell(vente.isCredit() ? "Crédit" : "Comptant");
+                table.addCell(String.format("%.2f €", vente.getTotal()));
+                table.addCell(vente.isCredit() ? "À payer" : "Payée");
+
+                totalVentes += vente.getTotal();
+                nombreVentes++;
+            }
+
+            document.add(table);
+
+            // Résumé
+            Paragraph resume = new Paragraph("\nRésumé des ventes:", headerFont);
+            resume.setSpacingBefore(20);
+            document.add(resume);
+
+            document.add(new Paragraph(String.format("Nombre total de ventes: %d", nombreVentes), normalFont));
+            document.add(new Paragraph(String.format("Montant total des ventes: %.2f €", totalVentes), normalFont));
+
+            document.close();
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de la génération du rapport des ventes: " + e.getMessage());
+        }
+    }
+
+    public static void genererRapportStocks(List<Produit> produits, String cheminFichier) {
+        try {
+            Document document = new Document(PageSize.A4);
+            PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
+            document.open();
+
+            // En-tête
+            Font titleFont = new Font(Font.FontFamily.HELVETICA, 16, Font.BOLD);
+            Font normalFont = new Font(Font.FontFamily.HELVETICA, 12);
+            Font headerFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
+
+            Paragraph title = new Paragraph("État des Stocks", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            title.setSpacingAfter(20);
+            document.add(title);
+
+            // Date du rapport
+            Paragraph date = new Paragraph("Date du rapport: " + 
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")), normalFont);
+            date.setSpacingAfter(20);
+            document.add(date);
+
+            // Tableau des stocks
+            PdfPTable table = new PdfPTable(new float[]{3, 2, 2, 2, 2, 2});
+            table.setWidthPercentage(100);
+
+            // En-têtes
+            Stream.of("Produit", "Catégorie", "Stock", "Seuil", "Prix Achat", "Prix Vente")
+                .forEach(columnTitle -> {
+                    Phrase phrase = new Phrase(columnTitle, headerFont);
+                    table.addCell(phrase);
+                });
+
+            // Données
+            int totalProduits = 0;
+            int produitsEnAlerte = 0;
+
+            for (Produit produit : produits) {
+                table.addCell(produit.getNom());
+                table.addCell(produit.getCategorie());
+                table.addCell(String.valueOf(produit.getStock()));
+                table.addCell(String.valueOf(produit.getSeuilAlerte()));
+                table.addCell(String.format("%.2f €", produit.getPrixAchat()));
+                table.addCell(String.format("%.2f €", produit.getPrixVente()));
+
+                totalProduits++;
+                if (produit.getStock() <= produit.getSeuilAlerte()) {
+                    produitsEnAlerte++;
+                }
+            }
+
+            document.add(table);
+
+            // Résumé
+            Paragraph resume = new Paragraph("\nRésumé des stocks:", headerFont);
+            resume.setSpacingBefore(20);
+            document.add(resume);
+
+            document.add(new Paragraph(String.format("Nombre total de produits: %d", totalProduits), normalFont));
+            document.add(new Paragraph(String.format("Produits en alerte de stock: %d", produitsEnAlerte), normalFont));
+
+            document.close();
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de la génération du rapport des stocks: " + e.getMessage());
+        }
+    }
+
+    public static void genererRapportCreances(List<Client> clients, String cheminFichier) {
+        try {
+            Document document = new Document(PageSize.A4);
+            PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
+            document.open();
+
+            // En-tête
+            Font titleFont = new Font(Font.FontFamily.HELVETICA, 16, Font.BOLD);
+            Font normalFont = new Font(Font.FontFamily.HELVETICA, 12);
+            Font headerFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
+
+            Paragraph title = new Paragraph("État des Créances", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            title.setSpacingAfter(20);
+            document.add(title);
+
+            // Date du rapport
+            Paragraph date = new Paragraph("Date du rapport: " + 
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")), normalFont);
+            date.setSpacingAfter(20);
+            document.add(date);
+
+            // Tableau des créances
+            PdfPTable table = new PdfPTable(new float[]{3, 2, 2, 2});
+            table.setWidthPercentage(100);
+
+            // En-têtes
+            Stream.of("Client", "Téléphone", "Solde", "Statut")
+                .forEach(columnTitle -> {
+                    Phrase phrase = new Phrase(columnTitle, headerFont);
+                    table.addCell(phrase);
+                });
+
+            // Données
+            double totalCreances = 0;
+            int clientsAvecCreances = 0;
+
+            for (Client client : clients) {
+                if (client.getSolde() > 0) {
+                    table.addCell(client.getNom());
+                    table.addCell(client.getTelephone() != null ? client.getTelephone() : "");
+                    table.addCell(String.format("%.2f €", client.getSolde()));
+                    table.addCell("À régler");
+
+                    totalCreances += client.getSolde();
+                    clientsAvecCreances++;
+                }
+            }
+
+            document.add(table);
+
+            // Résumé
+            Paragraph resume = new Paragraph("\nRésumé des créances:", headerFont);
+            resume.setSpacingBefore(20);
+            document.add(resume);
+
+            document.add(new Paragraph(String.format("Nombre de clients avec créances: %d", clientsAvecCreances), normalFont));
+            document.add(new Paragraph(String.format("Montant total des créances: %.2f €", totalCreances), normalFont));
+
+            document.close();
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de la génération du rapport des créances: " + e.getMessage());
+        }
+    }
+
+    public static void genererRapportCaisse(List<MouvementCaisse> mouvements, String cheminFichier) {
+        try {
+            Document document = new Document(PageSize.A4);
+            PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
+            document.open();
+
+            // En-tête
+            Font titleFont = new Font(Font.FontFamily.HELVETICA, 16, Font.BOLD);
+            Font normalFont = new Font(Font.FontFamily.HELVETICA, 12);
+            Font headerFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
+
+            Paragraph title = new Paragraph("Journal de Caisse", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            title.setSpacingAfter(20);
+            document.add(title);
+
+            // Date du rapport
+            Paragraph date = new Paragraph("Date du rapport: " + 
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")), normalFont);
+            date.setSpacingAfter(20);
+            document.add(date);
+
+            // Tableau des mouvements
+            PdfPTable table = new PdfPTable(new float[]{2, 3, 2, 2});
+            table.setWidthPercentage(100);
+
+            // En-têtes
+            Stream.of("Date", "Description", "Type", "Montant")
+                .forEach(columnTitle -> {
+                    Phrase phrase = new Phrase(columnTitle, headerFont);
+                    table.addCell(phrase);
+                });
+
+            // Données
+            double totalEntrees = 0;
+            double totalSorties = 0;
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+            for (MouvementCaisse mouvement : mouvements) {
+                table.addCell(mouvement.getDate().format(formatter));
+                table.addCell(mouvement.getDescription());
+                table.addCell(mouvement.getType().toString());
+                table.addCell(String.format("%.2f €", mouvement.getMontant()));
+
+                if (mouvement.getType() == MouvementCaisse.Type.ENTREE) {
+                    totalEntrees += mouvement.getMontant();
+                } else {
+                    totalSorties += mouvement.getMontant();
+                }
+            }
+
+            document.add(table);
+
+            // Résumé
+            Paragraph resume = new Paragraph("\nRésumé des mouvements:", headerFont);
+            resume.setSpacingBefore(20);
+            document.add(resume);
+
+            document.add(new Paragraph(String.format("Total des entrées: %.2f €", totalEntrees), normalFont));
+            document.add(new Paragraph(String.format("Total des sorties: %.2f €", totalSorties), normalFont));
+            document.add(new Paragraph(String.format("Solde: %.2f €", totalEntrees - totalSorties), normalFont));
+
+            document.close();
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de la génération du journal de caisse: " + e.getMessage());
         }
     }
 
