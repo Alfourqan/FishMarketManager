@@ -86,6 +86,11 @@ public class VenteViewSwing {
         // En-tête de vente
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         clientCombo = new JComboBox<>();
+        // Charger la liste des clients
+        clientController.chargerClients();
+        for (Client c : clientController.getClients()) {
+            clientCombo.addItem(c);
+        }
         clientCombo.setPreferredSize(new Dimension(200, 25));
         creditCheck = new JCheckBox("Vente à crédit");
 
@@ -137,42 +142,42 @@ public class VenteViewSwing {
                 Produit produit = (Produit) produitCombo.getSelectedItem();
                 if (produit == null) {
                     JOptionPane.showMessageDialog(mainPanel,
-                        "Veuillez sélectionner un produit",
-                        "Erreur",
-                        JOptionPane.ERROR_MESSAGE);
+                            "Veuillez sélectionner un produit",
+                            "Erreur",
+                            JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
                 String quantiteText = quantiteField.getText().trim();
                 if (quantiteText.isEmpty()) {
                     JOptionPane.showMessageDialog(mainPanel,
-                        "Veuillez entrer une quantité",
-                        "Erreur",
-                        JOptionPane.ERROR_MESSAGE);
+                            "Veuillez entrer une quantité",
+                            "Erreur",
+                            JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
                 int quantite = Integer.parseInt(quantiteText);
                 if (quantite <= 0) {
                     JOptionPane.showMessageDialog(mainPanel,
-                        "La quantité doit être supérieure à 0",
-                        "Erreur",
-                        JOptionPane.ERROR_MESSAGE);
+                            "La quantité doit être supérieure à 0",
+                            "Erreur",
+                            JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
                 if (quantite > produit.getStock()) {
                     JOptionPane.showMessageDialog(mainPanel,
-                        "Stock insuffisant. Disponible : " + produit.getStock(),
-                        "Erreur",
-                        JOptionPane.ERROR_MESSAGE);
+                            "Stock insuffisant. Disponible : " + produit.getStock(),
+                            "Erreur",
+                            JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
                 Vente.LigneVente ligne = new Vente.LigneVente(
-                    produit,
-                    quantite,
-                    produit.getPrix()
+                        produit,
+                        quantite,
+                        produit.getPrix()
                 );
                 panier.add(ligne);
                 updatePanierTable();
@@ -182,25 +187,25 @@ public class VenteViewSwing {
                 produitCombo.setSelectedIndex(-1);
 
                 System.out.println("Produit ajouté au panier: " + produit.getNom() +
-                    ", Quantité: " + quantite +
-                    ", Prix unitaire: " + produit.getPrix());
+                        ", Quantité: " + quantite +
+                        ", Prix unitaire: " + produit.getPrix());
 
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(mainPanel,
-                    "Veuillez entrer une quantité valide",
-                    "Erreur",
-                    JOptionPane.ERROR_MESSAGE);
+                        "Veuillez entrer une quantité valide",
+                        "Erreur",
+                        JOptionPane.ERROR_MESSAGE);
             }
         });
 
         validerBtn.addActionListener(e -> {
             if (!panier.isEmpty()) {
                 Vente vente = new Vente(
-                    0,
-                    LocalDateTime.now(),
-                    creditCheck.isSelected() ? (Client) clientCombo.getSelectedItem() : null,
-                    creditCheck.isSelected(),
-                    calculateTotal()
+                        0,
+                        LocalDateTime.now(),
+                        creditCheck.isSelected() ? (Client) clientCombo.getSelectedItem() : null,
+                        creditCheck.isSelected(),
+                        calculateTotal()
                 );
                 vente.setLignes(new ArrayList<>(panier));
 
@@ -211,9 +216,9 @@ public class VenteViewSwing {
                 refreshVentesTable();
 
                 JOptionPane.showMessageDialog(mainPanel,
-                    "Vente enregistrée avec succès\nFacture générée: facture_" + vente.getId() + ".pdf",
-                    "Succès",
-                    JOptionPane.INFORMATION_MESSAGE);
+                        "Vente enregistrée avec succès\nFacture générée: facture_" + vente.getId() + ".pdf",
+                        "Succès",
+                        JOptionPane.INFORMATION_MESSAGE);
             }
         });
 
@@ -250,10 +255,10 @@ public class VenteViewSwing {
         for (Vente.LigneVente ligne : panier) {
             double sousTotal = ligne.getQuantite() * ligne.getPrixUnitaire();
             panierModel.addRow(new Object[]{
-                ligne.getProduit().getNom(),
-                ligne.getQuantite(),
-                String.format("%.2f €", ligne.getPrixUnitaire()),
-                String.format("%.2f €", sousTotal)
+                    ligne.getProduit().getNom(),
+                    ligne.getQuantite(),
+                    String.format("%.2f €", ligne.getPrixUnitaire()),
+                    String.format("%.2f €", sousTotal)
             });
             total += sousTotal;
         }
@@ -267,18 +272,18 @@ public class VenteViewSwing {
 
         for (Vente vente : venteController.getVentes()) {
             ventesModel.addRow(new Object[]{
-                vente.getDate().format(formatter),
-                vente.getClient() != null ? vente.getClient().getNom() : "Vente comptant",
-                vente.isCredit() ? "Crédit" : "Comptant",
-                String.format("%.2f €", vente.getTotal())
+                    vente.getDate().format(formatter),
+                    vente.getClient() != null ? vente.getClient().getNom() : "Vente comptant",
+                    vente.isCredit() ? "Crédit" : "Comptant",
+                    String.format("%.2f €", vente.getTotal())
             });
         }
     }
 
     private double calculateTotal() {
         return panier.stream()
-            .mapToDouble(ligne -> ligne.getQuantite() * ligne.getPrixUnitaire())
-            .sum();
+                .mapToDouble(ligne -> ligne.getQuantite() * ligne.getPrixUnitaire())
+                .sum();
     }
 
     private void resetForm() {
