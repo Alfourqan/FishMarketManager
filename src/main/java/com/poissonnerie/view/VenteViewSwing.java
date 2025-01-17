@@ -309,21 +309,64 @@ public class VenteViewSwing {
                 );
                 vente.setLignes(new ArrayList<>(panier));
 
-                venteController.enregistrerVente(vente);
-                PDFGenerator.genererFacture(vente, "facture_" + vente.getId() + ".pdf");
+                // Générer la prévisualisation du ticket
+                String preview = PDFGenerator.genererPreviewTicket(vente);
 
-                resetForm();
-                refreshComboBoxes();
-                refreshVentesTable();
+                // Créer une fenêtre de prévisualisation
+                JDialog previewDialog = new JDialog((Frame)SwingUtilities.getWindowAncestor(mainPanel),
+                    "Prévisualisation du ticket", true);
+                previewDialog.setLayout(new BorderLayout(10, 10));
 
-                JOptionPane.showMessageDialog(mainPanel,
-                    "<html>Vente enregistrée avec succès<br>Facture générée: <b>facture_" +
-                        vente.getId() + ".pdf</b></html>",
-                    "Succès",
-                    JOptionPane.INFORMATION_MESSAGE);
+                // Zone de texte pour la prévisualisation
+                JTextArea previewArea = new JTextArea(preview);
+                previewArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+                previewArea.setEditable(false);
+                previewArea.setBackground(Color.WHITE);
+                JScrollPane scrollPane = new JScrollPane(previewArea);
+                previewDialog.add(scrollPane, BorderLayout.CENTER);
+
+                // Panneau de boutons
+                JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+                JButton confirmerBtn = new JButton("Confirmer et imprimer");
+                JButton cancelBtn = new JButton("Annuler");
+
+                confirmerBtn.addActionListener(confirmEvent -> {
+                    try {
+                        venteController.enregistrerVente(vente);
+                        PDFGenerator.genererTicket(vente, "ticket_" + vente.getId() + ".pdf");
+                        previewDialog.dispose();
+
+                        resetForm();
+                        refreshComboBoxes();
+                        refreshVentesTable();
+
+                        JOptionPane.showMessageDialog(mainPanel,
+                            "<html>Vente enregistrée avec succès<br>Ticket généré: <b>ticket_" +
+                                vente.getId() + ".pdf</b></html>",
+                            "Succès",
+                            JOptionPane.INFORMATION_MESSAGE);
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(previewDialog,
+                            "Erreur lors de l'enregistrement de la vente : " + ex.getMessage(),
+                            "Erreur",
+                            JOptionPane.ERROR_MESSAGE);
+                    }
+                });
+
+                cancelBtn.addActionListener(cancelEvent -> previewDialog.dispose());
+
+                buttonPanel.add(confirmerBtn);
+                buttonPanel.add(cancelBtn);
+                previewDialog.add(buttonPanel, BorderLayout.SOUTH);
+
+                // Configurer et afficher la fenêtre de prévisualisation
+                previewDialog.setSize(500, 600);
+                previewDialog.setLocationRelativeTo(mainPanel);
+                previewDialog.setVisible(true);
+
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(mainPanel,
-                    "Erreur lors de l'enregistrement de la vente : " + ex.getMessage(),
+                    "Erreur lors de la prévisualisation : " + ex.getMessage(),
                     "Erreur",
                     JOptionPane.ERROR_MESSAGE);
             }
