@@ -6,7 +6,9 @@
 /home/runner/workspace/src/main/java/com/poissonnerie/model/ConfigurationParam.java
 /home/runner/workspace/src/main/java/com/poissonnerie/view/CaisseViewSwing.java
 /home/runner/workspace/src/main/java/com/poissonnerie/view/ProduitViewSwing.java
+/home/runner/workspace/src/main/java/com/poissonnerie/test/TestInventaire.java
 /home/runner/workspace/src/main/java/com/poissonnerie/model/Produit.java
+/home/runner/workspace/src/main/java/com/poissonnerie/model/InventaireManager.java
 /home/runner/workspace/src/main/java/com/poissonnerie/controller/ConfigurationController.java
 /home/runner/workspace/src/main/java/com/poissonnerie/Main.java
 /home/runner/workspace/src/main/java/com/poissonnerie/view/MainViewSwing.java
