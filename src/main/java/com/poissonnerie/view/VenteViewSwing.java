@@ -103,9 +103,9 @@ public class VenteViewSwing {
             System.err.println("Erreur lors du chargement des données: " + e.getMessage());
             e.printStackTrace();
             JOptionPane.showMessageDialog(mainPanel,
-                "Erreur lors du chargement des données : " + e.getMessage(),
-                "Erreur",
-                JOptionPane.ERROR_MESSAGE);
+                    "Erreur lors du chargement des données : " + e.getMessage(),
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -204,16 +204,16 @@ public class VenteViewSwing {
 
             System.out.println("Actualisation terminée avec succès");
             JOptionPane.showMessageDialog(mainPanel,
-                "Données actualisées avec succès",
-                "Succès",
-                JOptionPane.INFORMATION_MESSAGE);
+                    "Données actualisées avec succès",
+                    "Succès",
+                    JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception ex) {
             System.err.println("Erreur lors de l'actualisation: " + ex.getMessage());
             ex.printStackTrace();
             JOptionPane.showMessageDialog(mainPanel,
-                "Erreur lors de l'actualisation : " + ex.getMessage(),
-                "Erreur",
-                JOptionPane.ERROR_MESSAGE);
+                    "Erreur lors de l'actualisation : " + ex.getMessage(),
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
         } finally {
             setCursor(Cursor.getDefaultCursor());
         }
@@ -244,7 +244,7 @@ public class VenteViewSwing {
         JPanel selectionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         produitCombo = new JComboBox<>();
         JTextField quantiteField = new JTextField(5);
-        JButton ajouterBtn = new JButton("Ajouter au panier");
+        JButton ajouterBtn = createStyledButton("Ajouter au panier", MaterialDesign.MDI_CART_PLUS, new Color(33, 150, 243));
 
         selectionPanel.add(new JLabel("Produit:"));
         selectionPanel.add(produitCombo);
@@ -256,11 +256,11 @@ public class VenteViewSwing {
         JScrollPane panierScroll = new JScrollPane(tablePanier);
 
         // Footer
-        JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
         totalLabel = new JLabel("Total: 0.00 €");
-        totalLabel.setFont(totalLabel.getFont().deriveFont(Font.BOLD));
-        JButton validerBtn = new JButton("Valider la vente");
-        JButton annulerBtn = new JButton("Annuler");
+        totalLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        JButton validerBtn = createStyledButton("Valider la vente", MaterialDesign.MDI_CHECK_CIRCLE, new Color(76, 175, 80));
+        JButton annulerBtn = createStyledButton("Annuler", MaterialDesign.MDI_CANCEL, new Color(244, 67, 54));
 
         footerPanel.add(totalLabel);
         footerPanel.add(validerBtn);
@@ -272,9 +272,9 @@ public class VenteViewSwing {
                 Object selectedItem = produitCombo.getSelectedItem();
                 if (!(selectedItem instanceof Produit)) {
                     JOptionPane.showMessageDialog(mainPanel,
-                        "Veuillez sélectionner un produit valide",
-                        "Erreur",
-                        JOptionPane.ERROR_MESSAGE);
+                            "Veuillez sélectionner un produit valide",
+                            "Erreur",
+                            JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
@@ -282,9 +282,9 @@ public class VenteViewSwing {
                 String quantiteText = quantiteField.getText().trim();
                 if (quantiteText.isEmpty()) {
                     JOptionPane.showMessageDialog(mainPanel,
-                        "Veuillez entrer une quantité",
-                        "Erreur",
-                        JOptionPane.ERROR_MESSAGE);
+                            "Veuillez entrer une quantité",
+                            "Erreur",
+                            JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
@@ -296,35 +296,35 @@ public class VenteViewSwing {
                     }
                 } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(mainPanel,
-                        "La quantité doit être un nombre entier positif",
-                        "Erreur",
-                        JOptionPane.ERROR_MESSAGE);
+                            "La quantité doit être un nombre entier positif",
+                            "Erreur",
+                            JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
                 if (quantite > produit.getStock()) {
                     JOptionPane.showMessageDialog(mainPanel,
-                        "Stock insuffisant. Disponible : " + produit.getStock(),
-                        "Erreur",
-                        JOptionPane.ERROR_MESSAGE);
+                            "Stock insuffisant. Disponible : " + produit.getStock(),
+                            "Erreur",
+                            JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
                 // Vérifier si le produit est déjà dans le panier
                 Optional<Vente.LigneVente> ligneExistante = panier.stream()
-                    .filter(ligne -> ligne.getProduit().getId() == produit.getId())
-                    .findFirst();
+                        .filter(ligne -> ligne.getProduit().getId() == produit.getId())
+                        .findFirst();
 
                 if (ligneExistante.isPresent()) {
                     Vente.LigneVente ligne = ligneExistante.get();
                     int nouvelleQuantite = ligne.getQuantite() + quantite;
                     if (nouvelleQuantite > produit.getStock()) {
                         JOptionPane.showMessageDialog(mainPanel,
-                            "Stock insuffisant pour ajouter " + quantite + " unités supplémentaires.\n" +
-                                "Quantité déjà dans le panier : " + ligne.getQuantite() + "\n" +
-                                "Stock disponible : " + produit.getStock(),
-                            "Erreur",
-                            JOptionPane.ERROR_MESSAGE);
+                                "Stock insuffisant pour ajouter " + quantite + " unités supplémentaires.\n" +
+                                        "Quantité déjà dans le panier : " + ligne.getQuantite() + "\n" +
+                                        "Stock disponible : " + produit.getStock(),
+                                "Erreur",
+                                JOptionPane.ERROR_MESSAGE);
                         return;
                     }
                     ligne.setQuantite(nouvelleQuantite);
@@ -340,39 +340,39 @@ public class VenteViewSwing {
 
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(mainPanel,
-                    "Erreur lors de l'ajout au panier : " + ex.getMessage(),
-                    "Erreur",
-                    JOptionPane.ERROR_MESSAGE);
+                        "Erreur lors de l'ajout au panier : " + ex.getMessage(),
+                        "Erreur",
+                        JOptionPane.ERROR_MESSAGE);
             }
         });
 
         validerBtn.addActionListener(e -> {
             if (panier.isEmpty()) {
                 JOptionPane.showMessageDialog(mainPanel,
-                    "Le panier est vide",
-                    "Erreur",
-                    JOptionPane.ERROR_MESSAGE);
+                        "Le panier est vide",
+                        "Erreur",
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
             if (creditCheck.isSelected() && clientCombo.getSelectedItem() == null) {
                 JOptionPane.showMessageDialog(mainPanel,
-                    "Veuillez sélectionner un client pour une vente à crédit",
-                    "Erreur",
-                    JOptionPane.ERROR_MESSAGE);
+                        "Veuillez sélectionner un client pour une vente à crédit",
+                        "Erreur",
+                        JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
             try {
                 Client selectedClient = creditCheck.isSelected() ?
-                    (Client) clientCombo.getSelectedItem() : null;
+                        (Client) clientCombo.getSelectedItem() : null;
 
                 Vente vente = new Vente(
-                    0,
-                    LocalDateTime.now(),
-                    selectedClient,
-                    creditCheck.isSelected(),
-                    calculateTotal()
+                        0,
+                        LocalDateTime.now(),
+                        selectedClient,
+                        creditCheck.isSelected(),
+                        calculateTotal()
                 );
                 vente.setLignes(new ArrayList<>(panier));
 
@@ -380,8 +380,8 @@ public class VenteViewSwing {
                 String preview = PDFGenerator.genererPreviewTicket(vente);
 
                 // Créer une fenêtre de prévisualisation
-                JDialog previewDialog = new JDialog((Frame)SwingUtilities.getWindowAncestor(mainPanel),
-                    "Prévisualisation du ticket", true);
+                JDialog previewDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel),
+                        "Prévisualisation du ticket", true);
                 previewDialog.setLayout(new BorderLayout(10, 10));
 
                 // Zone de texte pour la prévisualisation
@@ -408,15 +408,15 @@ public class VenteViewSwing {
                         refreshVentesTable();
 
                         JOptionPane.showMessageDialog(mainPanel,
-                            "<html>Vente enregistrée avec succès<br>Ticket généré: <b>ticket_" +
-                                vente.getId() + ".pdf</b></html>",
-                            "Succès",
-                            JOptionPane.INFORMATION_MESSAGE);
+                                "<html>Vente enregistrée avec succès<br>Ticket généré: <b>ticket_" +
+                                        vente.getId() + ".pdf</b></html>",
+                                "Succès",
+                                JOptionPane.INFORMATION_MESSAGE);
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(previewDialog,
-                            "Erreur lors de l'enregistrement de la vente : " + ex.getMessage(),
-                            "Erreur",
-                            JOptionPane.ERROR_MESSAGE);
+                                "Erreur lors de l'enregistrement de la vente : " + ex.getMessage(),
+                                "Erreur",
+                                JOptionPane.ERROR_MESSAGE);
                     }
                 });
 
@@ -433,9 +433,9 @@ public class VenteViewSwing {
 
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(mainPanel,
-                    "Erreur lors de la prévisualisation : " + ex.getMessage(),
-                    "Erreur",
-                    JOptionPane.ERROR_MESSAGE);
+                        "Erreur lors de la prévisualisation : " + ex.getMessage(),
+                        "Erreur",
+                        JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -472,11 +472,11 @@ public class VenteViewSwing {
         for (Vente.LigneVente ligne : panier) {
             double sousTotal = ligne.getQuantite() * ligne.getPrixUnitaire();
             panierModel.addRow(new Object[]{
-                String.format("%s (%s)", ligne.getProduit().getNom(),
-                    ligne.getProduit().getCategorie()),
-                ligne.getQuantite(),
-                String.format("%.2f €", ligne.getPrixUnitaire()),
-                String.format("%.2f €", sousTotal)
+                    String.format("%s (%s)", ligne.getProduit().getNom(),
+                            ligne.getProduit().getCategorie()),
+                    ligne.getQuantite(),
+                    String.format("%.2f €", ligne.getPrixUnitaire()),
+                    String.format("%.2f €", sousTotal)
             });
             total += sousTotal;
         }
@@ -494,10 +494,10 @@ public class VenteViewSwing {
 
         for (Vente vente : ventesTriees) {
             ventesModel.addRow(new Object[]{
-                vente.getDate().format(formatter),
-                vente.getClient() != null ? vente.getClient().getNom() : "Vente comptant",
-                vente.isCredit() ? "Crédit" : "Comptant",
-                String.format("%.2f €", vente.getTotal())
+                    vente.getDate().format(formatter),
+                    vente.getClient() != null ? vente.getClient().getNom() : "Vente comptant",
+                    vente.isCredit() ? "Crédit" : "Comptant",
+                    String.format("%.2f €", vente.getTotal())
             });
         }
 
@@ -506,8 +506,8 @@ public class VenteViewSwing {
 
     private double calculateTotal() {
         return panier.stream()
-            .mapToDouble(ligne -> ligne.getQuantite() * ligne.getPrixUnitaire())
-            .sum();
+                .mapToDouble(ligne -> ligne.getQuantite() * ligne.getPrixUnitaire())
+                .sum();
     }
 
     private void resetForm() {
@@ -534,19 +534,19 @@ public class VenteViewSwing {
 
         // Regrouper les produits par catégorie
         Map<String, List<Produit>> produitsParCategorie = produitController.getProduits().stream()
-            .filter(p -> p.getStock() > 0)
-            .collect(Collectors.groupingBy(
-                Produit::getCategorie,
-                TreeMap::new,
-                Collectors.toList()
-            ));
+                .filter(p -> p.getStock() > 0)
+                .collect(Collectors.groupingBy(
+                        Produit::getCategorie,
+                        TreeMap::new,
+                        Collectors.toList()
+                ));
 
         // Ajouter les produits par catégorie
         produitsParCategorie.forEach((categorie, produits) -> {
             produitModel.addElement("━━━ " + categorie.toUpperCase() + " ━━━");
             produits.stream()
-                .sorted(Comparator.comparing(Produit::getNom))
-                .forEach(produitModel::addElement);
+                    .sorted(Comparator.comparing(Produit::getNom))
+                    .forEach(produitModel::addElement);
         });
 
         produitCombo.setModel(produitModel);
@@ -562,9 +562,9 @@ public class VenteViewSwing {
                 } else if (value instanceof Client) {
                     Client client = (Client) value;
                     value = String.format("%s%s",
-                        client.getSolde() > 0 ? "⚠️ " : "👤 ",
-                        client.getNom() + (client.getSolde() > 0 ?
-                            String.format(" (Crédit: %.2f €)", client.getSolde()) : "")
+                            client.getSolde() > 0 ? "⚠️ " : "👤 ",
+                            client.getNom() + (client.getSolde() > 0 ?
+                                    String.format(" (Crédit: %.2f €)", client.getSolde()) : "")
                     );
                 }
                 return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
@@ -580,8 +580,8 @@ public class VenteViewSwing {
                     value = "⚪ Sélectionner un produit";
                 } else if (value instanceof String && ((String) value).startsWith("━━━")) {
                     JLabel label = (JLabel) super.getListCellRendererComponent(list, value,
-                                                                              index, isSelected,
-                                                                              cellHasFocus);
+                            index, isSelected,
+                            cellHasFocus);
                     label.setBackground(new Color(240, 240, 240));
                     label.setForeground(new Color(70, 70, 70));
                     label.setFont(label.getFont().deriveFont(Font.BOLD));
@@ -589,17 +589,17 @@ public class VenteViewSwing {
                 } else if (value instanceof Produit) {
                     Produit produit = (Produit) value;
                     String stockInfo = produit.getStock() <= produit.getSeuilAlerte() ?
-                        String.format("⚠️ %d en stock", produit.getStock()) :
-                        String.format("📦 %d en stock", produit.getStock());
+                            String.format("⚠️ %d en stock", produit.getStock()) :
+                            String.format("📦 %d en stock", produit.getStock());
 
                     value = String.format("%s • %.2f € • %s",
-                        produit.getNom(),
-                        produit.getPrixVente(),
-                        stockInfo
+                            produit.getNom(),
+                            produit.getPrixVente(),
+                            stockInfo
                     );
 
                     Component c = super.getListCellRendererComponent(list, value, index,
-                                                                    isSelected, cellHasFocus);
+                            isSelected, cellHasFocus);
                     if (produit.getStock() <= produit.getSeuilAlerte()) {
                         c.setForeground(new Color(200, 0, 0));
                     }
