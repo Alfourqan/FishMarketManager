@@ -19,7 +19,7 @@ public class ConfigurationController {
     public void chargerConfigurations() {
         configurations.clear();
         configCache.clear();
-        String sql = "SELECT * FROM configurations";
+        String sql = "SELECT * FROM configurations ORDER BY cle";
 
         try (Connection conn = DatabaseManager.getConnection();
              Statement stmt = conn.createStatement();
@@ -37,10 +37,34 @@ public class ConfigurationController {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new RuntimeException("Erreur lors du chargement des configurations", e);
         }
     }
 
     public void mettreAJourConfiguration(ConfigurationParam config) {
+        if (config == null || config.getCle() == null || config.getCle().trim().isEmpty()) {
+            throw new IllegalArgumentException("Configuration invalide");
+        }
+
+        // Validation spécifique pour certains paramètres
+        switch (config.getCle()) {
+            case ConfigurationParam.CLE_TAUX_TVA:
+                try {
+                    double tva = Double.parseDouble(config.getValeur());
+                    if (tva < 0 || tva > 100) {
+                        throw new IllegalArgumentException("Le taux de TVA doit être entre 0 et 100");
+                    }
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Le taux de TVA doit être un nombre valide");
+                }
+                break;
+            case ConfigurationParam.CLE_TELEPHONE_ENTREPRISE:
+                if (!config.getValeur().matches("^[0-9+\\-\\s]*$")) {
+                    throw new IllegalArgumentException("Format de numéro de téléphone invalide");
+                }
+                break;
+        }
+
         String sql = "UPDATE configurations SET valeur = ? WHERE id = ?";
 
         try (Connection conn = DatabaseManager.getConnection();
@@ -49,11 +73,12 @@ public class ConfigurationController {
             pstmt.setString(1, config.getValeur());
             pstmt.setInt(2, config.getId());
             pstmt.executeUpdate();
-            
+
             // Mise à jour du cache
             configCache.put(config.getCle(), config.getValeur());
         } catch (SQLException e) {
             e.printStackTrace();
+            throw new RuntimeException("Erreur lors de la mise à jour de la configuration", e);
         }
     }
 
@@ -75,6 +100,23 @@ public class ConfigurationController {
         infos.put("nom", getValeur(ConfigurationParam.CLE_NOM_ENTREPRISE));
         infos.put("adresse", getValeur(ConfigurationParam.CLE_ADRESSE_ENTREPRISE));
         infos.put("telephone", getValeur(ConfigurationParam.CLE_TELEPHONE_ENTREPRISE));
+        infos.put("pied_page", getValeur(ConfigurationParam.CLE_PIED_PAGE_RECU));
         return infos;
+    }
+
+    public void reinitialiserConfigurations() {
+        String sql = "UPDATE configurations SET valeur = CASE " +
+                    "WHEN cle = 'TAUX_TVA' THEN '20.0' " +
+                    "WHEN cle = 'PIED_PAGE_RECU' THEN 'Merci de votre visite !' " +
+                    "ELSE '' END";
+
+        try (Connection conn = DatabaseManager.getConnection();
+             Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate(sql);
+            chargerConfigurations(); // Recharger les configurations
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Erreur lors de la réinitialisation des configurations", e);
+        }
     }
 }

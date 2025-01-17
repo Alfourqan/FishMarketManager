@@ -53,8 +53,13 @@ public class ConfigurationViewSwing {
 
         // Boutons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton reinitialiserBtn = new JButton("Réinitialiser");
         JButton sauvegarderBtn = new JButton("Sauvegarder");
+
+        reinitialiserBtn.addActionListener(e -> reinitialiserConfigurations());
         sauvegarderBtn.addActionListener(e -> sauvegarderConfigurations());
+
+        buttonPanel.add(reinitialiserBtn);
         buttonPanel.add(sauvegarderBtn);
 
         mainPanel.add(scrollPane, BorderLayout.CENTER);
@@ -89,31 +94,73 @@ public class ConfigurationViewSwing {
     }
 
     private void loadData() {
-        controller.chargerConfigurations();
-
-        for (Map.Entry<String, JTextField> entry : champsSaisie.entrySet()) {
-            String valeur = controller.getValeur(entry.getKey());
-            entry.getValue().setText(valeur);
+        try {
+            controller.chargerConfigurations();
+            for (Map.Entry<String, JTextField> entry : champsSaisie.entrySet()) {
+                String valeur = controller.getValeur(entry.getKey());
+                entry.getValue().setText(valeur);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(mainPanel,
+                "Erreur lors du chargement des configurations : " + e.getMessage(),
+                "Erreur",
+                JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void sauvegarderConfigurations() {
-        boolean hasChanges = false;
+        try {
+            boolean hasChanges = false;
 
-        for (ConfigurationParam config : controller.getConfigurations()) {
-            JTextField field = champsSaisie.get(config.getCle());
-            if (field != null && !config.getValeur().equals(field.getText().trim())) {
-                config.setValeur(field.getText().trim());
-                controller.mettreAJourConfiguration(config);
-                hasChanges = true;
+            for (ConfigurationParam config : controller.getConfigurations()) {
+                JTextField field = champsSaisie.get(config.getCle());
+                if (field != null && !config.getValeur().equals(field.getText().trim())) {
+                    config.setValeur(field.getText().trim());
+                    controller.mettreAJourConfiguration(config);
+                    hasChanges = true;
+                }
             }
-        }
 
-        if (hasChanges) {
+            if (hasChanges) {
+                JOptionPane.showMessageDialog(mainPanel,
+                    "Les paramètres ont été sauvegardés avec succès",
+                    "Succès",
+                    JOptionPane.INFORMATION_MESSAGE);
+            }
+        } catch (IllegalArgumentException e) {
             JOptionPane.showMessageDialog(mainPanel,
-                "Les paramètres ont été sauvegardés avec succès",
-                "Succès",
-                JOptionPane.INFORMATION_MESSAGE);
+                "Erreur de validation : " + e.getMessage(),
+                "Erreur",
+                JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(mainPanel,
+                "Erreur lors de la sauvegarde : " + e.getMessage(),
+                "Erreur",
+                JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void reinitialiserConfigurations() {
+        if (JOptionPane.showConfirmDialog(mainPanel,
+            "Êtes-vous sûr de vouloir réinitialiser tous les paramètres ?",
+            "Confirmation",
+            JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+            try {
+                controller.reinitialiserConfigurations();
+                loadData();
+                JOptionPane.showMessageDialog(mainPanel,
+                    "Les paramètres ont été réinitialisés avec succès",
+                    "Succès",
+                    JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(mainPanel,
+                    "Erreur lors de la réinitialisation : " + e.getMessage(),
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
