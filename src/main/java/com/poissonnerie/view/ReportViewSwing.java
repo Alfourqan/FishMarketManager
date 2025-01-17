@@ -16,9 +16,15 @@ import com.poissonnerie.model.*;
 import java.util.ArrayList;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultCellEditor;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.RowFilter;
+import javax.swing.border.TitledBorder;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import javax.swing.SpinnerNumberModel;
+
 
 public class ReportViewSwing {
     private final JPanel mainPanel;
@@ -147,7 +153,7 @@ public class ReportViewSwing {
         JButton stocksBtn = createStyledButton("Rapport des stocks", MaterialDesign.MDI_PACKAGE_VARIANT, new Color(76, 175, 80));
         JButton fournisseursBtn = createStyledButton("Rapport fournisseurs", MaterialDesign.MDI_TRUCK_DELIVERY, new Color(255, 152, 0));
         JButton statistiquesBtn = createStyledButton("Statistiques", MaterialDesign.MDI_CHART_BAR, new Color(156, 39, 176));
-        JButton creancesBtn = createStyledButton("État des créances", MaterialDesign.MDI_ACCOUNT_CASH, new Color(233, 30, 99));
+        JButton creancesBtn = createStyledButton("État des créances", MaterialDesign.MDI_CASH_MULTIPLE, new Color(233, 30, 99));
 
         // Gestionnaires d'événements
         ventesBtn.addActionListener(e -> genererRapportVentes());
@@ -469,7 +475,7 @@ public class ReportViewSwing {
                 donnees[i][0] = client.getNom();
                 donnees[i][1] = client.getTelephone();
                 donnees[i][2] = String.format("%.2f €", client.getSolde());
-                donnees[i][3] = "Générer rapport";
+                donnees[i][3] = client; // Changed to store the Client object
             }
 
             JTable table = new JTable(donnees, colonnes) {
@@ -507,15 +513,14 @@ public class ReportViewSwing {
             table.setGridColor(new Color(230, 230, 230));
 
             // En-têtes du tableau
-            JTableHeader header = table.getTableHeader();
-            header.setBackground(new Color(240, 240, 240));
-            header.setForeground(new Color(33, 33, 33));
-            header.setFont(new Font("Segoe UI", Font.BOLD, 12));
-            header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(200, 200, 200)));
+            table.getTableHeader().setBackground(new Color(240, 240, 240));
+            table.getTableHeader().setForeground(new Color(33, 33, 33));
+            table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+            table.getTableHeader().setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(200, 200, 200)));
 
             // Renderer personnalisé pour la colonne Actions
             table.getColumnModel().getColumn(3).setCellRenderer((TableCellRenderer) (table1, value, isSelected, hasFocus, row, column) -> {
-                JButton button = new JButton("Générer rapport");
+                JButton button = new JButton("Détails");
                 button.setBackground(new Color(33, 150, 243));
                 button.setForeground(Color.WHITE);
                 button.setFocusPainted(false);
@@ -528,15 +533,15 @@ public class ReportViewSwing {
                 @Override
                 public Component getTableCellEditorComponent(JTable table, Object value,
                         boolean isSelected, int row, int col) {
-                    JButton button = new JButton("Générer rapport");
+                    JButton button = new JButton("Détails");
                     button.setBackground(new Color(33, 150, 243));
                     button.setForeground(Color.WHITE);
                     button.setFocusPainted(false);
                     button.setBorderPainted(false);
 
                     button.addActionListener(e -> {
-                        Client client = clientsAvecCreances.get(table.convertRowIndexToModel(row));
-                        genererRapportCreanceClient(client);
+                        Client client = (Client) value; // Retrieve Client object
+                        afficherDetailCreancesClient(client);
                         fireEditingStopped();
                     });
 
@@ -548,7 +553,7 @@ public class ReportViewSwing {
             table.getColumnModel().getColumn(0).setPreferredWidth(200);
             table.getColumnModel().getColumn(1).setPreferredWidth(150);
             table.getColumnModel().getColumn(2).setPreferredWidth(100);
-            table.getColumnModel().getColumn(3).setPreferredWidth(150);
+            table.getColumnModel().getColumn(3).setPreferredWidth(100);
 
             // Boutons d'action globaux
             JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -620,5 +625,157 @@ public class ReportViewSwing {
 
     private void showInfoMessage(String titre, String message) {
         JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.INFORMATION_MESSAGE);
+    }
+    
+    // New methods added here
+    private void afficherDetailCreancesClient(Client client) {
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel), 
+            "Détail des créances - " + client.getNom(), true);
+        dialog.setLayout(new BorderLayout(10, 10));
+        dialog.setSize(600, 400);
+        dialog.setLocationRelativeTo(null);
+
+        // Panel principal
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+        // Informations client
+        JPanel infoPanel = new JPanel(new GridLayout(3, 2, 5, 5));
+        infoPanel.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(new Color(76, 175, 80)),
+            "Informations client",
+            TitledBorder.DEFAULT_JUSTIFICATION,
+            TitledBorder.DEFAULT_POSITION,
+            new Font("Segoe UI", Font.BOLD, 12),
+            new Color(76, 175, 80)
+        ));
+
+        infoPanel.add(new JLabel("Nom:"));
+        infoPanel.add(new JLabel(client.getNom()));
+        infoPanel.add(new JLabel("Téléphone:"));
+        infoPanel.add(new JLabel(client.getTelephone()));
+        infoPanel.add(new JLabel("Solde actuel:"));
+        infoPanel.add(new JLabel(String.format("%.2f €", client.getSolde())));
+
+        // Boutons d'action
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton genererRapportBtn = createStyledButton("Générer rapport détaillé",
+            MaterialDesign.MDI_FILE_DOCUMENT, new Color(33, 150, 243));
+        JButton reglerCreanceBtn = createStyledButton("Régler créance",
+            MaterialDesign.MDI_CASH, new Color(76, 175, 80));
+
+        genererRapportBtn.addActionListener(e -> {
+            genererRapportCreanceClient(client);
+            dialog.dispose();
+        });
+
+        reglerCreanceBtn.addActionListener(e -> {
+            afficherDialogueReglement(client);
+            dialog.dispose();
+        });
+
+        buttonPanel.add(genererRapportBtn);
+        buttonPanel.add(reglerCreanceBtn);
+
+        // Historique des transactions
+        JPanel historiquePanel = new JPanel(new BorderLayout());
+        historiquePanel.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(new Color(33, 150, 243)),
+            "Historique des transactions",
+            TitledBorder.DEFAULT_JUSTIFICATION,
+            TitledBorder.DEFAULT_POSITION,
+            new Font("Segoe UI", Font.BOLD, 12),
+            new Color(33, 150, 243)
+        ));
+
+        // Table des transactions
+        String[] columns = {"Date", "Type", "Montant", "Solde après"};
+        Object[][] data = new Object[0][4]; // À remplir avec les vraies données
+
+        JTable table = new JTable(data, columns);
+        table.setFillsViewportHeight(true);
+        table.setRowHeight(25);
+        table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
+
+        historiquePanel.add(new JScrollPane(table), BorderLayout.CENTER);
+
+        // Assembly
+        mainPanel.add(infoPanel, BorderLayout.NORTH);
+        mainPanel.add(historiquePanel, BorderLayout.CENTER);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        dialog.add(mainPanel);
+        dialog.setVisible(true);
+    }
+
+    private void afficherDialogueReglement(Client client) {
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel), 
+            "Règlement de créance - " + client.getNom(), true);
+        dialog.setLayout(new BorderLayout(10, 10));
+        dialog.setSize(400, 250);
+        dialog.setLocationRelativeTo(null);
+
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridwidth = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        // Informations actuelles
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        panel.add(new JLabel("Solde actuel:"), gbc);
+
+        gbc.gridx = 1;
+        panel.add(new JLabel(String.format("%.2f €", client.getSolde())), gbc);
+
+        // Montant à régler
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        panel.add(new JLabel("Montant à régler:"), gbc);
+
+        gbc.gridx = 1;
+        JSpinner montantSpinner = new JSpinner(new SpinnerNumberModel(0.0, 0.0, client.getSolde(), 0.01));
+        panel.add(montantSpinner, gbc);
+
+        // Boutons
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton validerBtn = createStyledButton("Valider", MaterialDesign.MDI_CHECK, new Color(76, 175, 80));
+        JButton annulerBtn = createStyledButton("Annuler", MaterialDesign.MDI_CLOSE, new Color(244, 67, 54));
+
+        validerBtn.addActionListener(e -> {
+            try {
+                double montant = (double) montantSpinner.getValue();
+                if (montant <= 0) {
+                    showErrorMessage("Erreur", "Le montant doit être supérieur à 0");
+                    return;
+                }
+                if (montant > client.getSolde()) {
+                    showErrorMessage("Erreur", "Le montant ne peut pas être supérieur au solde");
+                    return;
+                }
+
+                ClientController clientController = new ClientController();
+                clientController.reglerCreance(client, montant);
+
+                showSuccessMessage("Succès", 
+                    String.format("Règlement de %.2f € effectué avec succès", montant));
+
+                dialog.dispose();
+                afficherEtatCreances(); // Rafraîchir la vue
+            } catch (Exception ex) {
+                showErrorMessage("Erreur", "Erreur lors du règlement : " + ex.getMessage());
+            }
+        });
+
+        annulerBtn.addActionListener(e -> dialog.dispose());
+
+        buttonPanel.add(validerBtn);
+        buttonPanel.add(annulerBtn);
+
+        dialog.add(panel, BorderLayout.CENTER);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+        dialog.setVisible(true);
     }
 }

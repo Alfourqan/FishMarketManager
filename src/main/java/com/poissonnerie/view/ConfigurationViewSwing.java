@@ -5,6 +5,7 @@ import com.poissonnerie.model.ConfigurationParam;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.border.Border;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.util.Map;
 import java.util.HashMap;
@@ -12,6 +13,11 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign;
 import org.kordamp.ikonli.swing.FontIcon;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
 
 public class ConfigurationViewSwing {
     private final JPanel mainPanel;
@@ -23,6 +29,11 @@ public class ConfigurationViewSwing {
     private final Font sousTitreFont = new Font("Segoe UI", Font.BOLD, 16);
     private final Font texteNormalFont = new Font("Segoe UI", Font.PLAIN, 14);
     private JPanel previewPanel;
+
+    public static final String CLE_TAUX_TVA = "TAUX_TVA";
+    public static final String CLE_TVA_ENABLED = "TVA_ENABLED";
+    public static final String CLE_TVA_CODE = "TVA_CODE"; 
+    public static final String CLE_TVA_TYPE = "TVA_TYPE"; 
 
     public ConfigurationViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -37,32 +48,26 @@ public class ConfigurationViewSwing {
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         mainPanel.setBackground(couleurFond);
 
-        // Panel principal avec scroll pour les configurations
         JPanel configPanel = new JPanel();
         configPanel.setLayout(new BoxLayout(configPanel, BoxLayout.Y_AXIS));
         configPanel.setOpaque(false);
 
-        // En-tête avec titre
         JPanel headerPanel = createHeaderPanel();
 
-        // Sections de configuration
         configPanel.add(createTVASection());
         configPanel.add(Box.createVerticalStrut(15));
         configPanel.add(createEntrepriseSection());
         configPanel.add(Box.createVerticalStrut(15));
         configPanel.add(createRecusSection());
 
-        // Panel de prévisualisation
         previewPanel = createPreviewPanel();
 
-        // Split pane pour avoir la configuration à gauche et la prévisualisation à droite
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
             new JScrollPane(configPanel),
             previewPanel);
         splitPane.setResizeWeight(0.6);
         splitPane.setBorder(null);
 
-        // Panel des boutons
         JPanel buttonPanel = createButtonPanel();
 
         mainPanel.add(headerPanel, BorderLayout.NORTH);
@@ -87,31 +92,9 @@ public class ConfigurationViewSwing {
         previewArea.setEditable(false);
         previewArea.setMargin(new Insets(10, 10, 10, 10));
 
-        // Exemple de reçu
-        StringBuilder preview = new StringBuilder();
-        preview.append("================================\n");
-        preview.append("       POISSONNERIE XYZ         \n");
-        preview.append("================================\n");
-        preview.append("123 Rue de la Mer\n");
-        preview.append("75001 Paris\n");
-        preview.append("Tel: 01.23.45.67.89\n");
-        preview.append("SIRET: 123 456 789 00001\n");
-        preview.append("--------------------------------\n");
-        preview.append("Article 1            10.00 EUR\n");
-        preview.append("Article 2            15.00 EUR\n");
-        preview.append("--------------------------------\n");
-        preview.append("Sous-total:          25.00 EUR\n");
-        preview.append("TVA (20%):            5.00 EUR\n");
-        preview.append("TOTAL:               30.00 EUR\n");
-        preview.append("================================\n");
-        preview.append("Merci de votre visite !\n");
-        preview.append("================================\n");
-
-        previewArea.setText(preview.toString());
         panel.add(new JScrollPane(previewArea), BorderLayout.CENTER);
 
-        // Bouton de mise à jour de la prévisualisation
-        JButton updatePreviewButton = createStyledButton("Mettre à jour la prévisualisation", 
+        JButton updatePreviewButton = createStyledButton("Mettre à jour la prévisualisation",
             MaterialDesign.MDI_REFRESH, new Color(76, 175, 80));
         updatePreviewButton.addActionListener(e -> updatePreview());
         panel.add(updatePreviewButton, BorderLayout.SOUTH);
@@ -120,52 +103,74 @@ public class ConfigurationViewSwing {
     }
 
     private void updatePreview() {
-        // Mise à jour de la prévisualisation avec les valeurs actuelles
-        JTextArea previewArea = (JTextArea) ((JScrollPane) previewPanel.getComponent(0)).getViewport().getView();
-        StringBuilder preview = new StringBuilder();
+        try {
+            JTextArea previewArea = (JTextArea) ((JScrollPane) previewPanel.getComponent(0)).getViewport().getView();
+            StringBuilder preview = new StringBuilder();
 
-        // En-tête
-        String nomEntreprise = ((JTextField) champsSaisie.get(ConfigurationParam.CLE_NOM_ENTREPRISE)).getText();
-        preview.append("================================\n");
-        preview.append(String.format("%s%s%s\n",
-            " ".repeat(3),
-            nomEntreprise,
-            " ".repeat(3)));
-        preview.append("================================\n");
+            String logoPath = ((JTextField) champsSaisie.get(ConfigurationParam.CLE_LOGO_PATH)).getText();
+            if (!logoPath.isEmpty()) {
+                preview.append("[LOGO]\n");
+            }
 
-        // Informations entreprise
-        String adresse = ((JTextField) champsSaisie.get(ConfigurationParam.CLE_ADRESSE_ENTREPRISE)).getText();
-        String telephone = ((JTextField) champsSaisie.get(ConfigurationParam.CLE_TELEPHONE_ENTREPRISE)).getText();
-        String siret = ((JTextField) champsSaisie.get(ConfigurationParam.CLE_SIRET_ENTREPRISE)).getText();
+            preview.append("================================\n");
+            String nomEntreprise = ((JTextField) champsSaisie.get(ConfigurationParam.CLE_NOM_ENTREPRISE)).getText();
+            if (!nomEntreprise.isEmpty()) {
+                preview.append(String.format("%s%s%s\n",
+                    " ".repeat(3),
+                    nomEntreprise,
+                    " ".repeat(3)));
+            } else {
+                preview.append("       VOTRE ENTREPRISE         \n");
+            }
+            preview.append("================================\n");
 
-        preview.append(adresse + "\n");
-        preview.append("Tel: " + telephone + "\n");
-        preview.append("SIRET: " + siret + "\n");
-        preview.append("--------------------------------\n");
+            String adresse = ((JTextField) champsSaisie.get(ConfigurationParam.CLE_ADRESSE_ENTREPRISE)).getText();
+            String telephone = ((JTextField) champsSaisie.get(ConfigurationParam.CLE_TELEPHONE_ENTREPRISE)).getText();
+            String siret = ((JTextField) champsSaisie.get(ConfigurationParam.CLE_SIRET_ENTREPRISE)).getText();
 
-        // Exemple d'articles avec TVA
-        boolean tvaEnabled = ((JCheckBox) champsSaisie.get(ConfigurationParam.CLE_TVA_ENABLED)).isSelected();
-        double tauxTva = (double) ((JSpinner) champsSaisie.get(ConfigurationParam.CLE_TAUX_TVA)).getValue();
+            if (!adresse.isEmpty()) preview.append(adresse + "\n");
+            if (!telephone.isEmpty()) preview.append("Tel: " + telephone + "\n");
+            if (!siret.isEmpty()) preview.append("SIRET: " + siret + "\n");
 
-        double sousTotal = 25.00;
-        preview.append(String.format("Sous-total:%14.2f EUR\n", sousTotal));
+            preview.append("--------------------------------\n");
 
-        if (tvaEnabled) {
-            double montantTva = sousTotal * (tauxTva / 100);
-            preview.append(String.format("TVA (%.1f%%):%13.2f EUR\n", tauxTva, montantTva));
-            preview.append(String.format("TOTAL:%18.2f EUR\n", sousTotal + montantTva));
-        } else {
-            preview.append(String.format("TOTAL:%18.2f EUR\n", sousTotal));
+            double sousTotal = 25.00;
+            preview.append(String.format("Article 1%14.2f EUR\n", 10.00));
+            preview.append(String.format("Article 2%14.2f EUR\n", 15.00));
+            preview.append("--------------------------------\n");
+            preview.append(String.format("Sous-total:%14.2f EUR\n", sousTotal));
+
+            boolean tvaEnabled = ((JCheckBox) champsSaisie.get(ConfigurationParam.CLE_TVA_ENABLED)).isSelected();
+            if (tvaEnabled) {
+                double tauxTva = (double) ((JSpinner) champsSaisie.get(ConfigurationParam.CLE_TAUX_TVA)).getValue();
+                double montantTva = sousTotal * (tauxTva / 100);
+                preview.append(String.format("TVA (%.1f%%):%13.2f EUR\n", tauxTva, montantTva));
+                preview.append(String.format("TOTAL:%18.2f EUR\n", sousTotal + montantTva));
+            } else {
+                preview.append(String.format("TOTAL:%18.2f EUR\n", sousTotal));
+            }
+
+            preview.append("================================\n");
+
+            String piedPage = ((JTextArea) champsSaisie.get(ConfigurationParam.CLE_PIED_PAGE_RECU)).getText();
+            if (!piedPage.isEmpty()) {
+                preview.append(piedPage + "\n");
+            } else {
+                preview.append("Merci de votre visite !\n");
+            }
+            preview.append("================================\n");
+
+            String format = ((JComboBox<?>) champsSaisie.get(ConfigurationParam.CLE_FORMAT_RECU)).getSelectedItem().toString();
+            if (format.equals("DETAILLE")) {
+                preview.append("\nMode de paiement: ESPECES\n");
+                preview.append("Date: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) + "\n");
+                preview.append("N° Ticket: #12345\n");
+            }
+
+            previewArea.setText(preview.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        preview.append("================================\n");
-
-        // Pied de page
-        String piedPage = ((JTextArea) champsSaisie.get(ConfigurationParam.CLE_PIED_PAGE_RECU)).getText();
-        preview.append(piedPage + "\n");
-        preview.append("================================\n");
-
-        previewArea.setText(preview.toString());
     }
 
     private JPanel createHeaderPanel() {
@@ -189,17 +194,36 @@ public class ConfigurationViewSwing {
     private JPanel createTVASection() {
         JPanel panel = createSectionPanel("Configuration TVA", MaterialDesign.MDI_PERCENT);
 
-        // Activation TVA
         JCheckBox tvaEnabledCheck = new JCheckBox("Activer la TVA");
         tvaEnabledCheck.setFont(texteNormalFont);
+        tvaEnabledCheck.setToolTipText("Active ou désactive le calcul de la TVA sur les ventes");
         champsSaisie.put(ConfigurationParam.CLE_TVA_ENABLED, tvaEnabledCheck);
 
-        // Taux TVA
+        JPanel tauxPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JSpinner tauxTvaSpinner = new JSpinner(new SpinnerNumberModel(20.0, 0.0, 100.0, 0.1));
+        JSlider tauxSlider = new JSlider(0, 100, 20);
+
+        tauxTvaSpinner.addChangeListener(e -> {
+            double value = (double) tauxTvaSpinner.getValue();
+            tauxSlider.setValue((int) value);
+            updatePreview();
+        });
+
+        tauxSlider.addChangeListener(e -> {
+            tauxTvaSpinner.setValue((double) tauxSlider.getValue());
+            updatePreview();
+        });
+
         tauxTvaSpinner.setFont(texteNormalFont);
         champsSaisie.put(ConfigurationParam.CLE_TAUX_TVA, tauxTvaSpinner);
 
-        // Layout
+        tvaEnabledCheck.addActionListener(e -> {
+            boolean enabled = tvaEnabledCheck.isSelected();
+            tauxTvaSpinner.setEnabled(enabled);
+            tauxSlider.setEnabled(enabled);
+            updatePreview();
+        });
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 1;
@@ -209,8 +233,36 @@ public class ConfigurationViewSwing {
 
         gbc.gridy = 2;
         panel.add(new JLabel("Taux de TVA (%):"), gbc);
+
+        tauxPanel.add(tauxTvaSpinner);
+        tauxPanel.add(tauxSlider);
         gbc.gridx = 1;
-        panel.add(tauxTvaSpinner, gbc);
+        panel.add(tauxPanel, gbc);
+
+        JPanel exemplePanel = new JPanel();
+        exemplePanel.setBorder(BorderFactory.createTitledBorder("Exemple de calcul"));
+        JLabel exempleLabel = new JLabel("Prix HT: 100€");
+        JLabel resultatLabel = new JLabel("Prix TTC: 120€");
+        exemplePanel.add(exempleLabel);
+        exemplePanel.add(resultatLabel);
+
+        ChangeListener updateExemple = e -> {
+            if (tvaEnabledCheck.isSelected()) {
+                double taux = (double) tauxTvaSpinner.getValue();
+                double prixHT = 100.0;
+                double prixTTC = prixHT * (1 + taux / 100);
+                resultatLabel.setText(String.format("Prix TTC: %.2f€", prixTTC));
+            } else {
+                resultatLabel.setText("TVA désactivée");
+            }
+        };
+        tauxTvaSpinner.addChangeListener(updateExemple);
+        tvaEnabledCheck.addActionListener(e -> updateExemple.stateChanged(null));
+
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
+        panel.add(exemplePanel, gbc);
 
         return panel;
     }
@@ -259,18 +311,19 @@ public class ConfigurationViewSwing {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        // Format des reçus
         JLabel formatLabel = new JLabel("Format des reçus:");
         formatLabel.setFont(texteNormalFont);
         JComboBox<String> formatCombo = new JComboBox<>(new String[]{"COMPACT", "DETAILLE"});
         formatCombo.setFont(texteNormalFont);
+        formatCombo.setToolTipText("COMPACT: Version simplifiée du reçu\nDETAILLE: Version complète avec informations additionnelles");
         champsSaisie.put(ConfigurationParam.CLE_FORMAT_RECU, formatCombo);
+
+        formatCombo.addActionListener(e -> updatePreview());
 
         panel.add(formatLabel, gbc);
         gbc.gridx = 1;
         panel.add(formatCombo, gbc);
 
-        // Logo
         gbc.gridx = 0;
         gbc.gridy++;
         JLabel logoLabel = new JLabel("Logo de l'entreprise:");
@@ -279,26 +332,34 @@ public class ConfigurationViewSwing {
         JPanel logoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JTextField logoPathField = new JTextField(20);
         logoPathField.setFont(texteNormalFont);
+        logoPathField.setToolTipText("Chemin vers le fichier image du logo (formats supportés: JPG, PNG, GIF)");
         styleTextField(logoPathField);
         champsSaisie.put(ConfigurationParam.CLE_LOGO_PATH, logoPathField);
 
-        JButton chooseLogoButton = new JButton("Choisir...");
+        JButton chooseLogoButton = createStyledButton("Choisir...", MaterialDesign.MDI_FILE_IMAGE, new Color(33, 150, 243));
         chooseLogoButton.addActionListener(e -> choisirLogo(logoPathField));
+
+        JButton clearLogoButton = createStyledButton("", MaterialDesign.MDI_CLOSE_CIRCLE, new Color(244, 67, 54));
+        clearLogoButton.setToolTipText("Effacer le logo");
+        clearLogoButton.addActionListener(e -> {
+            logoPathField.setText("");
+            updatePreview();
+        });
 
         logoPanel.add(logoPathField);
         logoPanel.add(chooseLogoButton);
+        logoPanel.add(clearLogoButton);
 
         panel.add(logoLabel, gbc);
         gbc.gridx = 1;
         panel.add(logoPanel, gbc);
 
-        // En-tête et pied de page
-        String[][] champs = {
-            {ConfigurationParam.CLE_EN_TETE_RECU, "Message d'en-tête"},
-            {ConfigurationParam.CLE_PIED_PAGE_RECU, "Message de pied de page"}
+        String[][] champsTextAreas = {
+            {ConfigurationParam.CLE_EN_TETE_RECU, "Message d'en-tête", "Message affiché en haut du reçu"},
+            {ConfigurationParam.CLE_PIED_PAGE_RECU, "Message de pied de page", "Message affiché en bas du reçu"}
         };
 
-        for (String[] champ : champs) {
+        for (String[] champ : champsTextAreas) {
             gbc.gridx = 0;
             gbc.gridy++;
             JLabel label = new JLabel(champ[1] + ":");
@@ -308,13 +369,35 @@ public class ConfigurationViewSwing {
             textArea.setFont(texteNormalFont);
             textArea.setLineWrap(true);
             textArea.setWrapStyleWord(true);
+            textArea.setToolTipText(champ[2]);
+
+            textArea.getDocument().addDocumentListener(new DocumentListener() {
+                public void changedUpdate(DocumentEvent e) { updatePreview(); }
+                public void removeUpdate(DocumentEvent e) { updatePreview(); }
+                public void insertUpdate(DocumentEvent e) { updatePreview(); }
+            });
+
             JScrollPane scrollPane = new JScrollPane(textArea);
+            scrollPane.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200)),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)
+            ));
+
             champsSaisie.put(champ[0], textArea);
 
             panel.add(label, gbc);
             gbc.gridx = 1;
             panel.add(scrollPane, gbc);
         }
+
+        JLabel previewLabel = new JLabel("Les modifications sont visibles dans l'aperçu à droite");
+        previewLabel.setFont(new Font(texteNormalFont.getName(), Font.ITALIC, texteNormalFont.getSize()));
+        previewLabel.setForeground(new Color(128, 128, 128));
+        gbc.gridx = 0;
+        gbc.gridy++;
+        gbc.gridwidth = 2;
+        gbc.insets = new Insets(15, 5, 5, 5);
+        panel.add(previewLabel, gbc);
 
         return panel;
     }
@@ -330,7 +413,6 @@ public class ConfigurationViewSwing {
             )
         ));
 
-        // En-tête de section avec icône
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         headerPanel.setBackground(Color.WHITE);
 
@@ -379,11 +461,18 @@ public class ConfigurationViewSwing {
 
     private void choisirLogo(JTextField logoPathField) {
         JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setFileFilter(new FileNameExtensionFilter("Images", "jpg", "jpeg", "png", "gif"));
+        fileChooser.setDialogTitle("Sélectionner un logo");
+        fileChooser.setFileFilter(new FileNameExtensionFilter(
+            "Images (*.jpg, *.jpeg, *.png, *.gif)", "jpg", "jpeg", "png", "gif"));
 
         if (fileChooser.showOpenDialog(mainPanel) == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();
+            if (file.length() > 1024 * 1024) { 
+                showErrorMessage("Le fichier est trop volumineux. Taille maximum : 1MB");
+                return;
+            }
             logoPathField.setText(file.getAbsolutePath());
+            updatePreview();
         }
     }
 
@@ -392,7 +481,7 @@ public class ConfigurationViewSwing {
             mainPanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             loadData();
             showSuccessMessage("Configurations actualisées avec succès");
-            updatePreview(); // Update preview after loading data
+            updatePreview(); 
         } catch (Exception ex) {
             showErrorMessage("Erreur lors de l'actualisation : " + ex.getMessage());
         } finally {
@@ -427,7 +516,7 @@ public class ConfigurationViewSwing {
             }
 
             System.out.println("Configurations chargées avec succès");
-            updatePreview(); // Update preview after loading data
+            updatePreview(); 
         } catch (Exception e) {
             System.err.println("Erreur lors du chargement des configurations: " + e.getMessage());
             showErrorMessage("Erreur lors du chargement des configurations : " + e.getMessage());
@@ -480,7 +569,6 @@ public class ConfigurationViewSwing {
     }
 
     private boolean validerChamps() {
-        // Validation du taux de TVA
         JSpinner tauxTVASpinner = (JSpinner) champsSaisie.get(ConfigurationParam.CLE_TAUX_TVA);
         double tauxTVA = (double) tauxTVASpinner.getValue();
         if (tauxTVA < 0 || tauxTVA > 100) {
@@ -488,7 +576,6 @@ public class ConfigurationViewSwing {
             return false;
         }
 
-        // Validation du numéro de téléphone
         JTextField telephoneField = (JTextField) champsSaisie.get(ConfigurationParam.CLE_TELEPHONE_ENTREPRISE);
         String telephone = telephoneField.getText().trim();
         if (!telephone.isEmpty() && !telephone.matches("^[0-9+\\-\\s]*$")) {
@@ -496,7 +583,6 @@ public class ConfigurationViewSwing {
             return false;
         }
 
-        // Validation du SIRET
         JTextField siretField = (JTextField) champsSaisie.get(ConfigurationParam.CLE_SIRET_ENTREPRISE);
         String siret = siretField.getText().trim();
         if (!siret.isEmpty() && !siret.matches("^[0-9]{14}$")) {
@@ -504,7 +590,21 @@ public class ConfigurationViewSwing {
             return false;
         }
 
-        // Validation du format des reçus
+        JTextField logoPathField = (JTextField) champsSaisie.get(ConfigurationParam.CLE_LOGO_PATH);
+        String logoPath = logoPathField.getText().trim();
+        if (!logoPath.isEmpty()) {
+            File logoFile = new File(logoPath);
+            if (!logoFile.exists() || !logoFile.isFile()) {
+                showErrorMessage("Le fichier logo spécifié n'existe pas");
+                return false;
+            }
+            String extension = logoPath.substring(logoPath.lastIndexOf(".") + 1).toLowerCase();
+            if (!extension.matches("jpg|jpeg|png|gif")) {
+                showErrorMessage("Le format du logo doit être JPG, PNG ou GIF");
+                return false;
+            }
+        }
+
         JComboBox<?> formatCombo = (JComboBox<?>) champsSaisie.get(ConfigurationParam.CLE_FORMAT_RECU);
         String formatRecu = formatCombo.getSelectedItem().toString();
         if (!formatRecu.equals("COMPACT") && !formatRecu.equals("DETAILLE")) {
