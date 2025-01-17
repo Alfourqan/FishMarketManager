@@ -47,25 +47,30 @@ public class Main {
 
                         // Création et affichage de la fenêtre principale
                         SwingUtilities.invokeAndWait(() -> {
-                            JFrame frame = new JFrame("Gestion Poissonnerie");
-                            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                            frame.setSize(1200, 800);
-                            System.out.println("Fenêtre principale créée.");
+                            try {
+                                JFrame frame = new JFrame("Gestion Poissonnerie");
+                                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                                frame.setSize(1200, 800);
+                                System.out.println("Fenêtre principale créée.");
 
-                            MainViewSwing mainView = new MainViewSwing();
-                            frame.setContentPane(mainView.getMainPanel());
-                            System.out.println("Vue principale configurée.");
+                                MainViewSwing mainView = new MainViewSwing();
+                                frame.setContentPane(mainView.getMainPanel());
+                                System.out.println("Vue principale configurée.");
 
-                            // Centrer la fenêtre
-                            frame.setLocationRelativeTo(null);
+                                // Centrer la fenêtre
+                                frame.setLocationRelativeTo(null);
 
-                            splash.setProgress(100, "Démarrage terminé");
-                            Thread.sleep(500);
+                                splash.setProgress(100, "Démarrage terminé");
+                                Thread.sleep(500);
 
-                            // Fermer le splash screen et afficher la fenêtre principale
-                            splash.dispose();
-                            frame.setVisible(true);
-                            System.out.println("Application démarrée avec succès.");
+                                // Fermer le splash screen et afficher la fenêtre principale
+                                splash.dispose();
+                                frame.setVisible(true);
+                                System.out.println("Application démarrée avec succès.");
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                                throw new RuntimeException("Interruption pendant le chargement de l'interface", e);
+                            }
                         });
 
                         // Ajouter un hook pour fermer proprement la connexion à la base de données
@@ -75,6 +80,9 @@ public class Main {
                             System.out.println("Connexion à la base de données fermée.");
                         }));
 
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException("Interruption pendant le chargement", e);
                     } catch (Exception e) {
                         e.printStackTrace();
                         String message = "Erreur lors du démarrage: " + e.getMessage() +
@@ -157,7 +165,6 @@ public class Main {
         UIManager.put("TextArea.foreground", darkTextColor);
         UIManager.put("TextArea.background", new Color(255, 255, 255));
         UIManager.put("TextArea.font", new Font("Segoe UI", Font.PLAIN, 13));
-
 
         // Marges et padding
         UIManager.put("Button.margin", new Insets(8, 16, 8, 16));
