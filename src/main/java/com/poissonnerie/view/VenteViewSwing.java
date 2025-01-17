@@ -260,7 +260,7 @@ public class VenteViewSwing {
         totalLabel = new JLabel("Total: 0.00 €");
         totalLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         JButton validerBtn = createStyledButton("Valider la vente", MaterialDesign.MDI_CHECK_CIRCLE, new Color(76, 175, 80));
-        JButton annulerBtn = createStyledButton("Annuler", MaterialDesign.MDI_CANCEL, new Color(244, 67, 54));
+        JButton annulerBtn = createStyledButton("Annuler", MaterialDesign.MDI_CLOSE_CIRCLE, new Color(244, 67, 54));
 
         footerPanel.add(totalLabel);
         footerPanel.add(validerBtn);
