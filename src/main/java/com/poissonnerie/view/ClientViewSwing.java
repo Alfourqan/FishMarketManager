@@ -83,10 +83,10 @@ public class ClientViewSwing {
         buttonPanel.setBackground(new Color(236, 239, 241));
 
         // Création des boutons avec icônes
-        JButton ajouterBtn = createStyledButton("Ajouter", MaterialDesignI.ACCOUNT_GROUP, new Color(76, 175, 80));
-        JButton modifierBtn = createStyledButton("Modifier", MaterialDesignI.COG, new Color(33, 150, 243));
-        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesignI.ACCOUNT_REMOVE, new Color(244, 67, 54));
-        JButton reglerCreanceBtn = createStyledButton("Régler créance", MaterialDesignI.FILE_DOCUMENT, new Color(255, 152, 0));
+        JButton ajouterBtn = createStyledButton("Ajouter", MaterialDesignI.ACCOUNT_PLUS, new Color(76, 175, 80));
+        JButton modifierBtn = createStyledButton("Modifier", MaterialDesignI.PENCIL, new Color(33, 150, 243));
+        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesignI.ACCOUNT_MINUS, new Color(244, 67, 54));
+        JButton reglerCreanceBtn = createStyledButton("Régler créance", MaterialDesignI.CURRENCY_USD, new Color(255, 152, 0));
         JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesignI.REFRESH, new Color(156, 39, 176));
 
         buttonPanel.add(ajouterBtn);
@@ -204,10 +204,10 @@ public class ClientViewSwing {
         for (Client client : controller.getClients()) {
             FontIcon icon;
             if (client.getSolde() > 0) {
-                icon = FontIcon.of(MaterialDesignI.ACCOUNT_ALERT);
+                icon = FontIcon.of(MaterialDesignI.ALERT);
                 icon.setIconColor(new Color(220, 53, 69)); // Rouge pour les créances
             } else {
-                icon = FontIcon.of(MaterialDesignI.ACCOUNT_CHECK);
+                icon = FontIcon.of(MaterialDesignI.CHECK);
                 icon.setIconColor(new Color(40, 167, 69)); // Vert pour les comptes à jour
             }
 
