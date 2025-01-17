@@ -42,6 +42,34 @@ public class ClientViewSwing {
         loadData();
     }
 
+    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
+        FontIcon icon = FontIcon.of(iconCode);
+        icon.setIconSize(18);
+        icon.setIconColor(Color.WHITE);
+
+        JButton button = new JButton(text);
+        button.setIcon(icon);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        button.setBackground(color);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setMargin(new Insets(8, 16, 8, 16));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Effet de survol
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(color.darker());
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(color);
+            }
+        });
+
+        return button;
+    }
+
     private void initializeComponents() {
         mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
         mainPanel.setBackground(new Color(236, 239, 241));
@@ -54,12 +82,12 @@ public class ClientViewSwing {
         ));
         buttonPanel.setBackground(new Color(236, 239, 241));
 
-        // Création des boutons avec icônes
-        JButton ajouterBtn = createStyledButton("Ajouter", MaterialDesign.MDI_ACCOUNT_PLUS);
-        JButton modifierBtn = createStyledButton("Modifier", MaterialDesign.MDI_PENCIL);
-        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesign.MDI_ACCOUNT_REMOVE);
-        JButton reglerCreanceBtn = createStyledButton("Régler créance", MaterialDesign.MDI_CREDIT_CARD);
-        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH);
+        // Création des boutons avec style moderne
+        JButton ajouterBtn = createStyledButton("Ajouter", MaterialDesign.MDI_PLUS_BOX, new Color(76, 175, 80));
+        JButton modifierBtn = createStyledButton("Modifier", MaterialDesign.MDI_PENCIL_BOX, new Color(33, 150, 243));
+        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesign.MDI_MINUS_BOX, new Color(244, 67, 54));
+        JButton reglerCreanceBtn = createStyledButton("Régler créance", MaterialDesign.MDI_CASH_MULTIPLE, new Color(255, 152, 0));
+        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH, new Color(156, 39, 176));
 
         buttonPanel.add(ajouterBtn);
         buttonPanel.add(modifierBtn);
@@ -169,15 +197,6 @@ public class ClientViewSwing {
                 mainPanel.setCursor(Cursor.getDefaultCursor());
             }
         });
-    }
-
-    private JButton createStyledButton(String text, Ikon iconCode) {
-        FontIcon icon = FontIcon.of(iconCode);
-        icon.setIconSize(16);
-        JButton button = new JButton(text, icon);
-        button.setMargin(new Insets(8, 16, 8, 16));
-        button.setFocusPainted(false);
-        return button;
     }
 
     private void refreshTable() {

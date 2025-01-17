@@ -37,6 +37,38 @@ public class ReportViewSwing {
         initializeComponents();
     }
 
+    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
+        FontIcon icon = FontIcon.of(iconCode);
+        icon.setIconSize(18);
+        icon.setIconColor(Color.WHITE);
+
+        JButton button = new JButton(text);
+        button.setIcon(icon);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        button.setBackground(color);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setMargin(new Insets(8, 16, 8, 16));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Effet de survol
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(color.darker());
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(color);
+            }
+        });
+
+        return button;
+    }
+
+    private JButton createReportButton(String text, MaterialDesign iconCode) {
+        return createStyledButton(text, iconCode, new Color(0, 135, 136));
+    }
+
     private void initializeComponents() {
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setDividerLocation(250);
@@ -105,10 +137,10 @@ public class ReportViewSwing {
             new Color(0, 135, 136)
         ));
 
-        JButton ventesBtn = createReportButton("Rapport des ventes", MaterialDesign.MDI_CART);
-        JButton stocksBtn = createReportButton("Rapport des stocks", MaterialDesign.MDI_PACKAGE_VARIANT);
-        JButton fournisseursBtn = createReportButton("Rapport fournisseurs", MaterialDesign.MDI_TRUCK_DELIVERY);
-        JButton statistiquesBtn = createReportButton("Statistiques", MaterialDesign.MDI_CHART_BAR);
+        JButton ventesBtn = createStyledButton("Rapport des ventes", MaterialDesign.MDI_CART, new Color(33, 150, 243));
+        JButton stocksBtn = createStyledButton("Rapport des stocks", MaterialDesign.MDI_PACKAGE_VARIANT, new Color(76, 175, 80));
+        JButton fournisseursBtn = createStyledButton("Rapport fournisseurs", MaterialDesign.MDI_TRUCK_DELIVERY, new Color(255, 152, 0));
+        JButton statistiquesBtn = createStyledButton("Statistiques", MaterialDesign.MDI_CHART_BAR, new Color(156, 39, 176));
 
         // Gestionnaires d'événements
         ventesBtn.addActionListener(e -> genererRapportVentes());
@@ -160,40 +192,6 @@ public class ReportViewSwing {
         return panel;
     }
 
-    private JButton createReportButton(String text, MaterialDesign iconCode) {
-        JButton button = new JButton(text);
-        FontIcon icon = FontIcon.of(iconCode);
-        icon.setIconSize(18);
-        button.setIcon(icon);
-
-        button.setAlignmentX(Component.LEFT_ALIGNMENT);
-        button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-        button.setMargin(new Insets(8, 15, 8, 15));
-        button.setFocusPainted(false);
-        button.setHorizontalAlignment(SwingConstants.LEFT);
-        button.setIconTextGap(10);
-        button.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        button.setForeground(new Color(33, 33, 33));
-        button.setBackground(Color.WHITE);
-        button.setBorderPainted(true);
-        button.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200)),
-            BorderFactory.createEmptyBorder(5, 10, 5, 10)
-        ));
-
-        // Effet de survol
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(new Color(245, 245, 245));
-            }
-
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(Color.WHITE);
-            }
-        });
-
-        return button;
-    }
 
     private JButton createPeriodButton(String text, Runnable action) {
         JButton button = new JButton(text);

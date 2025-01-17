@@ -137,7 +137,7 @@ public class VenteViewSwing {
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         actionPanel.setOpaque(false);
 
-        // Création des boutons avec style moderne comme dans ProduitViewSwing
+        // Création des boutons avec style moderne
         JButton ajouterBtn = createStyledButton("Nouveau", MaterialDesign.MDI_PLUS_BOX, new Color(76, 175, 80));
         JButton modifierBtn = createStyledButton("Modifier", MaterialDesign.MDI_PENCIL_BOX, new Color(33, 150, 243));
         JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesign.MDI_MINUS_BOX, new Color(244, 67, 54));
