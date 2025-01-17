@@ -1,6 +1,7 @@
 package com.poissonnerie.util;
 
 import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.BaseFont;
@@ -546,6 +547,7 @@ public class PDFGenerator {
             Font titleFont = new Font(Font.FontFamily.HELVETICA, 16, Font.BOLD);
             Font normalFont = new Font(Font.FontFamily.HELVETICA, 12);
             Font headerFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
+            Font redFont = new Font(Font.FontFamily.HELVETICA, 12, Font.NORMAL, BaseColor.RED);
 
             Paragraph title = new Paragraph("État des Créances", titleFont);
             title.setAlignment(Element.ALIGN_CENTER);
@@ -559,41 +561,91 @@ public class PDFGenerator {
             document.add(date);
 
             // Tableau des créances
-            PdfPTable table = new PdfPTable(new float[]{3, 2, 2, 2});
+            PdfPTable table = new PdfPTable(new float[]{3, 2, 2, 2, 2});
             table.setWidthPercentage(100);
+            table.setSpacingBefore(10);
 
             // En-têtes
-            Stream.of("Client", "Téléphone", "Solde", "Statut")
+            Stream.of("Client", "Téléphone", "Solde", "Dernière vente", "Statut")
                 .forEach(columnTitle -> {
-                    Phrase phrase = new Phrase(columnTitle, headerFont);
-                    table.addCell(phrase);
+                    PdfPCell header = new PdfPCell(new Phrase(columnTitle, headerFont));
+                    header.setBackgroundColor(new BaseColor(240, 240, 240));
+                    header.setPadding(8);
+                    header.setHorizontalAlignment(Element.ALIGN_CENTER);
+                    table.addCell(header);
                 });
 
             // Données
             double totalCreances = 0;
             int clientsAvecCreances = 0;
+            double plusGrandeCreance = 0;
+            String clientPlusGrandeCreance = "";
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
             for (Client client : clients) {
                 if (client.getSolde() > 0) {
-                    table.addCell(client.getNom());
-                    table.addCell(client.getTelephone() != null ? client.getTelephone() : "");
-                    table.addCell(String.format("%.2f €", client.getSolde()));
-                    table.addCell("À régler");
+                    table.addCell(new Phrase(client.getNom(), normalFont));
+                    table.addCell(new Phrase(client.getTelephone() != null ? client.getTelephone() : "-", normalFont));
+
+                    // Formatage du solde avec couleur rouge si > 1000€
+                    Phrase soldePhrase;
+                    if (client.getSolde() > 1000) {
+                        soldePhrase = new Phrase(String.format("%.2f €", client.getSolde()), redFont);
+                    } else {
+                        soldePhrase = new Phrase(String.format("%.2f €", client.getSolde()), normalFont);
+                    }
+                    PdfPCell soldeCell = new PdfPCell(soldePhrase);
+                    soldeCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
+                    soldeCell.setPadding(5);
+                    table.addCell(soldeCell);
+
+                    // Dernière vente (à implémenter selon votre modèle de données)
+                    table.addCell(new Phrase("À définir", normalFont));
+
+                    // Statut basé sur le montant
+                    String statut;
+                    if (client.getSolde() > 1000) {
+                        statut = "Critique";
+                    } else if (client.getSolde() > 500) {
+                        statut = "À suivre";
+                    } else {
+                        statut = "Normal";
+                    }
+                    table.addCell(new Phrase(statut, normalFont));
 
                     totalCreances += client.getSolde();
                     clientsAvecCreances++;
+
+                    if (client.getSolde() > plusGrandeCreance) {
+                        plusGrandeCreance = client.getSolde();
+                        clientPlusGrandeCreance = client.getNom();
+                    }
                 }
             }
 
             document.add(table);
 
-            // Résumé
+            // Résumé et statistiques
             Paragraph resume = new Paragraph("\nRésumé des créances:", headerFont);
             resume.setSpacingBefore(20);
             document.add(resume);
 
             document.add(new Paragraph(String.format("Nombre de clients avec créances: %d", clientsAvecCreances), normalFont));
             document.add(new Paragraph(String.format("Montant total des créances: %.2f €", totalCreances), normalFont));
+            document.add(new Paragraph(String.format("Moyenne par client: %.2f €", totalCreances / clientsAvecCreances), normalFont));
+
+            if (!clientPlusGrandeCreance.isEmpty()) {
+                document.add(new Paragraph(String.format("Plus grande créance: %.2f € (%s)", 
+                    plusGrandeCreance, clientPlusGrandeCreance), normalFont));
+            }
+
+            // Pied de page avec date et heure
+            Paragraph footer = new Paragraph("\nDocument généré le " + 
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy à HH:mm")),
+                new Font(Font.FontFamily.HELVETICA, 8, Font.ITALIC));
+            footer.setAlignment(Element.ALIGN_CENTER);
+            document.add(footer);
 
             document.close();
         } catch (Exception e) {
@@ -642,8 +694,7 @@ public class PDFGenerator {
             for (MouvementCaisse mouvement : mouvements) {
                 table.addCell(mouvement.getDate().format(formatter));
                 table.addCell(mouvement.getDescription());
-                table.addCell(mouvement.getType().toString());
-                table.addCell(String.format("%.2f €", mouvement.getMontant()));
+                table.addCell(mouvement.getType().toString());                table.addCell(String.format("%.2f €", mouvement.getMontant()));
 
                 if (mouvement.getType() == MouvementCaisse.TypeMouvement.ENTREE) {
                     totalEntrees += mouvement.getMontant();

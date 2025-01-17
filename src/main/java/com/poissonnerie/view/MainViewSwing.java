@@ -81,8 +81,8 @@ public class MainViewSwing {
         // Définir les éléments de navigation
         String[] viewNames = {
             "Produits", "Ventes", "Clients", "Factures",
-            "Fournisseurs", "Catégories", "Inventaire", "Caisse",
-            "Report", "Réglages", "Déconnexion"
+            "Fournisseurs", "Inventaire", "Caisse",
+            "Rapport", "Réglages", "Déconnexion"
         };
 
         MaterialDesign[] icons = {
@@ -138,7 +138,7 @@ public class MainViewSwing {
 
         // Ajouter les nouvelles vues
         contentPanel.add(new FournisseurViewSwing().getMainPanel(), "Fournisseurs");
-        contentPanel.add(new ReportViewSwing().getMainPanel(), "Report");
+        contentPanel.add(new ReportViewSwing().getMainPanel(), "Rapport");
         contentPanel.add(new ConfigurationViewSwing().getMainPanel(), "Réglages");
 
         // Ajouter des panels temporaires pour les autres vues
