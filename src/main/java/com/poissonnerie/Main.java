@@ -16,10 +16,31 @@ public class Main {
 
                 // Set Look and Feel
                 FlatMaterialLighterIJTheme.setup();
+
+                // Configuration du style global
                 UIManager.put("Button.arc", 10);
                 UIManager.put("Component.arc", 10);
                 UIManager.put("ProgressBar.arc", 10);
                 UIManager.put("TextComponent.arc", 10);
+
+                // Couleurs modernes
+                UIManager.put("Button.background", new Color(63, 81, 181));
+                UIManager.put("Button.foreground", Color.WHITE);
+                UIManager.put("Button.hoverBackground", new Color(92, 107, 192));
+                UIManager.put("Button.pressedBackground", new Color(48, 63, 159));
+
+                // Marges et padding
+                UIManager.put("Button.margin", new Insets(8, 16, 8, 16));
+                UIManager.put("TabbedPane.contentBorderInsets", new Insets(10, 10, 10, 10));
+                UIManager.put("TabbedPane.tabInsets", new Insets(8, 16, 8, 16));
+
+                // Style des tableaux
+                UIManager.put("Table.showHorizontalLines", true);
+                UIManager.put("Table.showVerticalLines", true);
+                UIManager.put("Table.gridColor", new Color(224, 224, 224));
+                UIManager.put("Table.selectionBackground", new Color(197, 202, 233));
+                UIManager.put("Table.selectionForeground", new Color(33, 33, 33));
+
                 System.out.println("Look and Feel configuré.");
 
                 // Initialisation de la base de données
