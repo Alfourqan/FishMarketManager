@@ -33,6 +33,13 @@ public class Client {
 
     @Override
     public String toString() {
-        return nom;
+        StringBuilder sb = new StringBuilder(nom);
+        if (telephone != null && !telephone.isEmpty()) {
+            sb.append(" - Tél: ").append(telephone);
+        }
+        if (solde > 0) {
+            sb.append(" (Crédit: ").append(String.format("%.2f€)", solde));
+        }
+        return sb.toString();
     }
 }

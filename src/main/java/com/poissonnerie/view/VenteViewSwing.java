@@ -12,7 +12,12 @@ import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JList;
 
 public class VenteViewSwing {
     private final JPanel mainPanel;
@@ -27,12 +32,14 @@ public class VenteViewSwing {
     private JComboBox<Client> clientCombo;
     private JCheckBox creditCheck;
     private JLabel totalLabel;
+    private JComboBox<Produit> produitCombo;
 
     public VenteViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
         venteController = new VenteController();
         produitController = new ProduitController();
         clientController = new ClientController();
+        panier = new ArrayList<>();
 
         String[] panierColumns = {"Produit", "Quantité", "Prix unitaire", "Total"};
         panierModel = new DefaultTableModel(panierColumns, 0) {
@@ -52,17 +59,27 @@ public class VenteViewSwing {
         };
         tableVentes = new JTable(ventesModel);
 
-        panier = new ArrayList<>();
-
         initializeComponents();
         loadData();
     }
 
     private void loadData() {
-        produitController.chargerProduits();
-        clientController.chargerClients();
-        venteController.chargerVentes();
-        refreshVentesTable();
+        try {
+            System.out.println("Chargement des données...");
+            produitController.chargerProduits();
+            clientController.chargerClients();
+            venteController.chargerVentes();
+            refreshComboBoxes();
+            refreshVentesTable();
+            System.out.println("Données chargées avec succès");
+        } catch (Exception e) {
+            System.err.println("Erreur lors du chargement des données: " + e.getMessage());
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(mainPanel,
+                "Erreur lors du chargement des données : " + e.getMessage(),
+                "Erreur",
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void initializeComponents() {
@@ -86,12 +103,6 @@ public class VenteViewSwing {
         // En-tête de vente
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         clientCombo = new JComboBox<>();
-        // Charger la liste des clients
-        clientController.chargerClients();
-        for (Client c : clientController.getClients()) {
-            clientCombo.addItem(c);
-        }
-        clientCombo.setPreferredSize(new Dimension(200, 25));
         creditCheck = new JCheckBox("Vente à crédit");
 
         clientCombo.setEnabled(false);
@@ -108,12 +119,7 @@ public class VenteViewSwing {
 
         // Sélection des produits
         JPanel selectionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JComboBox<Produit> produitCombo = new JComboBox<>();
-        produitController.chargerProduits(); // Recharger les produits
-        for (Produit p : produitController.getProduits()) {
-            produitCombo.addItem(p);
-        }
-
+        produitCombo = new JComboBox<>();
         JTextField quantiteField = new JTextField(5);
         JButton ajouterBtn = new JButton("Ajouter au panier");
 
@@ -142,42 +148,42 @@ public class VenteViewSwing {
                 Produit produit = (Produit) produitCombo.getSelectedItem();
                 if (produit == null) {
                     JOptionPane.showMessageDialog(mainPanel,
-                            "Veuillez sélectionner un produit",
-                            "Erreur",
-                            JOptionPane.ERROR_MESSAGE);
+                        "Veuillez sélectionner un produit",
+                        "Erreur",
+                        JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
                 String quantiteText = quantiteField.getText().trim();
                 if (quantiteText.isEmpty()) {
                     JOptionPane.showMessageDialog(mainPanel,
-                            "Veuillez entrer une quantité",
-                            "Erreur",
-                            JOptionPane.ERROR_MESSAGE);
+                        "Veuillez entrer une quantité",
+                        "Erreur",
+                        JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
                 int quantite = Integer.parseInt(quantiteText);
                 if (quantite <= 0) {
                     JOptionPane.showMessageDialog(mainPanel,
-                            "La quantité doit être supérieure à 0",
-                            "Erreur",
-                            JOptionPane.ERROR_MESSAGE);
+                        "La quantité doit être supérieure à 0",
+                        "Erreur",
+                        JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
                 if (quantite > produit.getStock()) {
                     JOptionPane.showMessageDialog(mainPanel,
-                            "Stock insuffisant. Disponible : " + produit.getStock(),
-                            "Erreur",
-                            JOptionPane.ERROR_MESSAGE);
+                        "Stock insuffisant. Disponible : " + produit.getStock(),
+                        "Erreur",
+                        JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
                 Vente.LigneVente ligne = new Vente.LigneVente(
-                        produit,
-                        quantite,
-                        produit.getPrix()
+                    produit,
+                    quantite,
+                    produit.getPrix()
                 );
                 panier.add(ligne);
                 updatePanierTable();
@@ -186,39 +192,56 @@ public class VenteViewSwing {
                 quantiteField.setText("");
                 produitCombo.setSelectedIndex(-1);
 
-                System.out.println("Produit ajouté au panier: " + produit.getNom() +
-                        ", Quantité: " + quantite +
-                        ", Prix unitaire: " + produit.getPrix());
-
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(mainPanel,
-                        "Veuillez entrer une quantité valide",
-                        "Erreur",
-                        JOptionPane.ERROR_MESSAGE);
+                    "Veuillez entrer une quantité valide",
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
             }
         });
 
         validerBtn.addActionListener(e -> {
             if (!panier.isEmpty()) {
+                if (creditCheck.isSelected() && clientCombo.getSelectedItem() == null) {
+                    JOptionPane.showMessageDialog(mainPanel,
+                        "Veuillez sélectionner un client pour une vente à crédit",
+                        "Erreur",
+                        JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
                 Vente vente = new Vente(
-                        0,
-                        LocalDateTime.now(),
-                        creditCheck.isSelected() ? (Client) clientCombo.getSelectedItem() : null,
-                        creditCheck.isSelected(),
-                        calculateTotal()
+                    0,
+                    LocalDateTime.now(),
+                    creditCheck.isSelected() ? (Client) clientCombo.getSelectedItem() : null,
+                    creditCheck.isSelected(),
+                    calculateTotal()
                 );
                 vente.setLignes(new ArrayList<>(panier));
 
-                venteController.enregistrerVente(vente);
-                PDFGenerator.genererFacture(vente, "facture_" + vente.getId() + ".pdf");
+                try {
+                    venteController.enregistrerVente(vente);
+                    PDFGenerator.genererFacture(vente, "facture_" + vente.getId() + ".pdf");
 
-                resetForm();
-                refreshVentesTable();
+                    resetForm();
+                    refreshComboBoxes(); // Rafraîchir les listes après la vente
+                    refreshVentesTable();
 
-                JOptionPane.showMessageDialog(mainPanel,
+                    JOptionPane.showMessageDialog(mainPanel,
                         "Vente enregistrée avec succès\nFacture générée: facture_" + vente.getId() + ".pdf",
                         "Succès",
                         JOptionPane.INFORMATION_MESSAGE);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(mainPanel,
+                        "Erreur lors de l'enregistrement de la vente : " + ex.getMessage(),
+                        "Erreur",
+                        JOptionPane.ERROR_MESSAGE);
+                }
+            } else {
+                JOptionPane.showMessageDialog(mainPanel,
+                    "Le panier est vide",
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -255,10 +278,10 @@ public class VenteViewSwing {
         for (Vente.LigneVente ligne : panier) {
             double sousTotal = ligne.getQuantite() * ligne.getPrixUnitaire();
             panierModel.addRow(new Object[]{
-                    ligne.getProduit().getNom(),
-                    ligne.getQuantite(),
-                    String.format("%.2f €", ligne.getPrixUnitaire()),
-                    String.format("%.2f €", sousTotal)
+                ligne.getProduit().getNom(),
+                ligne.getQuantite(),
+                String.format("%.2f €", ligne.getPrixUnitaire()),
+                String.format("%.2f €", sousTotal)
             });
             total += sousTotal;
         }
@@ -272,26 +295,72 @@ public class VenteViewSwing {
 
         for (Vente vente : venteController.getVentes()) {
             ventesModel.addRow(new Object[]{
-                    vente.getDate().format(formatter),
-                    vente.getClient() != null ? vente.getClient().getNom() : "Vente comptant",
-                    vente.isCredit() ? "Crédit" : "Comptant",
-                    String.format("%.2f €", vente.getTotal())
+                vente.getDate().format(formatter),
+                vente.getClient() != null ? vente.getClient().getNom() : "Vente comptant",
+                vente.isCredit() ? "Crédit" : "Comptant",
+                String.format("%.2f €", vente.getTotal())
             });
         }
     }
 
     private double calculateTotal() {
         return panier.stream()
-                .mapToDouble(ligne -> ligne.getQuantite() * ligne.getPrixUnitaire())
-                .sum();
+            .mapToDouble(ligne -> ligne.getQuantite() * ligne.getPrixUnitaire())
+            .sum();
     }
 
     private void resetForm() {
         clientCombo.setSelectedIndex(-1);
         creditCheck.setSelected(false);
         clientCombo.setEnabled(false);
+        produitCombo.setSelectedIndex(-1);
         panier.clear();
         updatePanierTable();
+    }
+
+    private void refreshComboBoxes() {
+        // Mise à jour ComboBox clients
+        DefaultComboBoxModel<Client> clientModel = new DefaultComboBoxModel<>();
+        clientModel.addElement(null); // Option vide
+        List<Client> clients = new ArrayList<>(clientController.getClients());
+        Collections.sort(clients, Comparator.comparing(Client::getNom));
+        for (Client client : clients) {
+            clientModel.addElement(client);
+        }
+        clientCombo.setModel(clientModel);
+
+        // Mise à jour ComboBox produits
+        DefaultComboBoxModel<Produit> produitModel = new DefaultComboBoxModel<>();
+        produitModel.addElement(null); // Option vide
+        List<Produit> produits = new ArrayList<>(produitController.getProduits());
+        Collections.sort(produits, Comparator.comparing(Produit::getNom));
+        for (Produit produit : produits) {
+            if (produit.getStock() > 0) { // N'afficher que les produits en stock
+                produitModel.addElement(produit);
+            }
+        }
+        produitCombo.setModel(produitModel);
+
+        // Mise à jour des renderers pour un meilleur affichage
+        clientCombo.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                if (value == null) {
+                    value = "-- Sélectionner un client --";
+                }
+                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            }
+        });
+
+        produitCombo.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                if (value == null) {
+                    value = "-- Sélectionner un produit --";
+                }
+                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            }
+        });
     }
 
     public JPanel getMainPanel() {

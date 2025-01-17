@@ -38,6 +38,11 @@ public class Produit {
 
     @Override
     public String toString() {
-        return nom;
+        return String.format("%s - %s (%.2f€) %s", 
+            nom, 
+            categorie, 
+            prix,
+            stock <= seuilAlerte ? String.format("[Stock bas: %d]", stock) : ""
+        ).trim();
     }
 }
