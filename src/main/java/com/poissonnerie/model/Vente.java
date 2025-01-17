@@ -1,23 +1,22 @@
 package com.poissonnerie.model;
 
-import javafx.beans.property.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
 public class Vente {
-    private final IntegerProperty id = new SimpleIntegerProperty();
-    private final ObjectProperty<LocalDateTime> date = new SimpleObjectProperty<>();
-    private final ObjectProperty<Client> client = new SimpleObjectProperty<>();
-    private final BooleanProperty credit = new SimpleBooleanProperty();
-    private final DoubleProperty total = new SimpleDoubleProperty();
+    private int id;
+    private LocalDateTime date;
+    private Client client;
+    private boolean credit;
+    private double total;
     private List<LigneVente> lignes;
 
     public Vente(int id, LocalDateTime date, Client client, boolean credit, double total) {
-        this.id.set(id);
-        this.date.set(date);
-        this.client.set(client);
-        this.credit.set(credit);
-        this.total.set(total);
+        this.id = id;
+        this.date = date;
+        this.client = client;
+        this.credit = credit;
+        this.total = total;
     }
 
     // Classe interne pour les lignes de vente
@@ -42,25 +41,20 @@ public class Vente {
     }
 
     // Getters et setters
-    public int getId() { return id.get(); }
-    public void setId(int id) { this.id.set(id); }
-    public IntegerProperty idProperty() { return id; }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    public LocalDateTime getDate() { return date.get(); }
-    public void setDate(LocalDateTime date) { this.date.set(date); }
-    public ObjectProperty<LocalDateTime> dateProperty() { return date; }
+    public LocalDateTime getDate() { return date; }
+    public void setDate(LocalDateTime date) { this.date = date; }
 
-    public Client getClient() { return client.get(); }
-    public void setClient(Client client) { this.client.set(client); }
-    public ObjectProperty<Client> clientProperty() { return client; }
+    public Client getClient() { return client; }
+    public void setClient(Client client) { this.client = client; }
 
-    public boolean isCredit() { return credit.get(); }
-    public void setCredit(boolean credit) { this.credit.set(credit); }
-    public BooleanProperty creditProperty() { return credit; }
+    public boolean isCredit() { return credit; }
+    public void setCredit(boolean credit) { this.credit = credit; }
 
-    public double getTotal() { return total.get(); }
-    public void setTotal(double total) { this.total.set(total); }
-    public DoubleProperty totalProperty() { return total; }
+    public double getTotal() { return total; }
+    public void setTotal(double total) { this.total = total; }
 
     public List<LigneVente> getLignes() { return lignes; }
     public void setLignes(List<LigneVente> lignes) { this.lignes = lignes; }

@@ -27,7 +27,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "mvn clean javafx:run"
+args = "mvn clean compile"
 
 [deployment]
-run = ["sh", "-c", "mvn clean javafx:run"]
+run = ["sh", "-c", "mvn clean compile"]
