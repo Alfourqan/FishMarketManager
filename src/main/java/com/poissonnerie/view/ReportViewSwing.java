@@ -2,7 +2,7 @@ package com.poissonnerie.view;
 
 import javax.swing.*;
 import java.awt.*;
-import org.kordamp.ikonli.materialdesign.MaterialDesign;
+import org.kordamp.ikonli.materialdesign2.MaterialDesignI;
 import org.kordamp.ikonli.swing.FontIcon;
 import com.poissonnerie.util.PDFGenerator;
 import java.time.LocalDate;
@@ -52,7 +52,7 @@ public class ReportViewSwing {
         mainPanel.add(splitPane, BorderLayout.CENTER);
     }
 
-    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
+    private JButton createStyledButton(String text, MaterialDesignI iconCode, Color color) {
         FontIcon icon = FontIcon.of(iconCode);
         icon.setIconSize(18);
         icon.setIconColor(Color.WHITE);
@@ -133,10 +133,10 @@ public class ReportViewSwing {
             new Color(0, 135, 136)
         ));
 
-        JButton ventesBtn = createStyledButton("Rapport des ventes", MaterialDesign.MDI_CART, new Color(76, 175, 80));
-        JButton stocksBtn = createStyledButton("Rapport des stocks", MaterialDesign.MDI_PACKAGE_VARIANT, new Color(33, 150, 243));
-        JButton fournisseursBtn = createStyledButton("Rapport fournisseurs", MaterialDesign.MDI_TRUCK_DELIVERY, new Color(255, 152, 0));
-        JButton statistiquesBtn = createStyledButton("Statistiques", MaterialDesign.MDI_CHART_BAR, new Color(156, 39, 176));
+        JButton ventesBtn = createStyledButton("Rapport des ventes", MaterialDesignI.CART, new Color(76, 175, 80));
+        JButton stocksBtn = createStyledButton("Rapport des stocks", MaterialDesignI.PACKAGE_VARIANT, new Color(33, 150, 243));
+        JButton fournisseursBtn = createStyledButton("Rapport fournisseurs", MaterialDesignI.TRUCK_DELIVERY, new Color(255, 152, 0));
+        JButton statistiquesBtn = createStyledButton("Statistiques", MaterialDesignI.CHART_BAR, new Color(156, 39, 176));
 
         // Gestionnaires d'événements
         ventesBtn.addActionListener(e -> genererRapportVentes());
@@ -188,7 +188,7 @@ public class ReportViewSwing {
         return panel;
     }
 
-    private JButton createReportButton(String text, MaterialDesign iconCode) {
+    private JButton createReportButton(String text, MaterialDesignI iconCode) {
         JButton button = new JButton(text);
         FontIcon icon = FontIcon.of(iconCode);
         icon.setIconSize(18);
