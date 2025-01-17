@@ -38,15 +38,17 @@ public class MainViewSwing {
             new ProduitViewSwing().getMainPanel(),
             new VenteViewSwing().getMainPanel(),
             new ClientViewSwing().getMainPanel(),
-            new CaisseViewSwing().getMainPanel()
+            new CaisseViewSwing().getMainPanel(),
+            new InventaireViewSwing().getMainPanel()  // Ajout de la vue inventaire
         };
 
-        String[] viewNames = {"Produits", "Ventes", "Clients", "Caisse"};
+        String[] viewNames = {"Produits", "Ventes", "Clients", "Caisse", "Inventaire"};  // Ajout du nom
         MaterialDesign[] icons = {
             MaterialDesign.MDI_PACKAGE_VARIANT,
             MaterialDesign.MDI_CART,
             MaterialDesign.MDI_ACCOUNT_MULTIPLE,
-            MaterialDesign.MDI_CASH_MULTIPLE
+            MaterialDesign.MDI_CASH_MULTIPLE,
+            MaterialDesign.MDI_CLIPBOARD_TEXT  // Changed from MDI_CLIPBOARD_CHECK_OUTLINE to MDI_CLIPBOARD_TEXT
         };
 
         ButtonGroup buttonGroup = new ButtonGroup();

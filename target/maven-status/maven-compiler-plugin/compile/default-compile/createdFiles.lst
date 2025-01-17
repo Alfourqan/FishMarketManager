@@ -6,6 +6,7 @@ com/poissonnerie/view/ClientViewSwing.class
 com/poissonnerie/view/VenteViewSwing$3.class
 com/poissonnerie/controller/ClientController.class
 com/poissonnerie/view/ClientViewSwing$1.class
+com/poissonnerie/view/InventaireViewSwing.class
 com/poissonnerie/controller/ProduitController.class
 com/poissonnerie/model/MouvementCaisse.class
 com/poissonnerie/model/Client.class
@@ -13,6 +14,9 @@ com/poissonnerie/test/TestInventaire$1.class
 com/poissonnerie/controller/ConfigurationController.class
 com/poissonnerie/view/ProduitViewSwing.class
 com/poissonnerie/model/ConfigurationParam.class
+com/poissonnerie/view/InventaireViewSwing$2.class
+com/poissonnerie/view/InventaireViewSwing$ButtonEditor.class
+com/poissonnerie/view/InventaireViewSwing$ButtonRenderer.class
 com/poissonnerie/view/ConfigurationViewSwing.class
 com/poissonnerie/controller/CaisseController.class
 com/poissonnerie/view/VenteViewSwing$4.class
@@ -24,6 +28,7 @@ com/poissonnerie/model/InventaireManager.class
 com/poissonnerie/model/MouvementCaisse$TypeMouvement.class
 com/poissonnerie/Main.class
 com/poissonnerie/view/MainViewSwing.class
+com/poissonnerie/view/InventaireViewSwing$1.class
 com/poissonnerie/model/Vente$LigneVente.class
 com/poissonnerie/controller/VenteController.class
 com/poissonnerie/test/TestInventaire.class

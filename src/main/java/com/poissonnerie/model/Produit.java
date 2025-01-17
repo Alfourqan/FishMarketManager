@@ -36,17 +36,19 @@ public class Produit {
     public int getSeuilAlerte() { return seuilAlerte; }
     public void setSeuilAlerte(int seuil) { this.seuilAlerte = seuil; }
 
-    // Nouvelles méthodes pour la gestion du stock
+    // Méthodes améliorées pour la gestion du stock
     public void ajusterStock(int quantite) {
         int nouveauStock = this.stock + quantite;
         if (nouveauStock < 0) {
-            throw new IllegalArgumentException("Le stock ne peut pas être négatif");
+            throw new IllegalArgumentException(
+                String.format("Stock insuffisant. Stock actuel: %d, Quantité demandée: %d",
+                    this.stock, Math.abs(quantite)));
         }
         this.stock = nouveauStock;
     }
 
     public boolean estStockBas() {
-        return this.stock <= this.seuilAlerte;
+        return this.stock > 0 && this.stock <= this.seuilAlerte;
     }
 
     public String getStatutStock() {
@@ -59,29 +61,23 @@ public class Produit {
         }
     }
 
+    public String getStatutStockFormatted() {
+        switch (getStatutStock()) {
+            case "RUPTURE":
+                return "⛔ RUPTURE DE STOCK";
+            case "BAS":
+                return String.format("⚠️ Stock critique: %d (seuil: %d)", stock, seuilAlerte);
+            default:
+                return String.format("✓ Stock normal: %d", stock);
+        }
+    }
+
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(nom)
-          .append(" - ")
-          .append(String.format("%.2f€", prix))
-          .append(" (")
-          .append(categorie)
-          .append(")");
-
-        // Ajoute l'état du stock avec plus de détails
-        String statutStock = getStatutStock();
-        switch (statutStock) {
-            case "RUPTURE":
-                sb.append(" ❌ RUPTURE DE STOCK");
-                break;
-            case "BAS":
-                sb.append(" ⚠️ Stock critique: ").append(stock).append(" (seuil: ").append(seuilAlerte).append(")");
-                break;
-            default:
-                sb.append(" ✓ Stock: ").append(stock);
-        }
-
-        return sb.toString();
+        return String.format("%s - %.2f€ (%s) %s",
+            nom,
+            prix,
+            categorie,
+            getStatutStockFormatted());
     }
 }
