@@ -23,8 +23,8 @@ public class Main {
                 UIManager.put("TextComponent.arc", 8);
 
                 // Couleurs modernes selon le design
-                Color primaryColor = new Color(76, 175, 80); // Vert pour l'en-tête
-                Color sidebarColor = new Color(33, 37, 41); // Couleur sombre pour la barre latérale
+                Color primaryColor = new Color(0, 135, 136); // Vert pour l'en-tête
+                Color sidebarColor = new Color(51, 51, 76); // Couleur sombre pour la barre latérale
                 Color primaryTextColor = Color.WHITE;
                 Color darkTextColor = new Color(33, 33, 33);
                 Color backgroundColor = new Color(245, 245, 245);

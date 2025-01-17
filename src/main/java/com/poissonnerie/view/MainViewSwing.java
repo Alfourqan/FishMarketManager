@@ -55,12 +55,12 @@ public class MainViewSwing {
         headerPanel.setBackground(new Color(76, 175, 80)); // Vert
         headerPanel.setPreferredSize(new Dimension(0, 50));
 
-        JLabel titleLabel = new JLabel("HOME");
+        JLabel titleLabel = new JLabel("HOME", SwingConstants.CENTER);
         titleLabel.setForeground(Color.WHITE);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
-        headerPanel.add(titleLabel, BorderLayout.WEST);
+        headerPanel.add(titleLabel, BorderLayout.CENTER);
         return headerPanel;
     }
 
