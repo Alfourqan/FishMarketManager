@@ -23,7 +23,6 @@ public class MainViewSwing {
         tabbedPane.addTab("Produits", new ProduitViewSwing().getMainPanel());
         tabbedPane.addTab("Ventes", new VenteViewSwing().getMainPanel());
         tabbedPane.addTab("Clients", new ClientViewSwing().getMainPanel());
-        tabbedPane.addTab("Caisse", new CaisseViewSwing().getMainPanel()); //Added line
 
         mainPanel.add(tabbedPane, BorderLayout.CENTER);
     }
