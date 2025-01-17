@@ -8,11 +8,18 @@ import java.util.Map;
 import java.util.HashMap;
 import org.kordamp.ikonli.materialdesign.MaterialDesign;
 import org.kordamp.ikonli.swing.FontIcon;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.io.File;
 
 public class ConfigurationViewSwing {
     private final JPanel mainPanel;
     private final ConfigurationController controller;
-    private final Map<String, JTextField> champsSaisie;
+    private final Map<String, JComponent> champsSaisie;
+    private final Color couleurPrincipale = new Color(33, 150, 243);
+    private final Color couleurFond = new Color(245, 245, 245);
+    private final Font titreFont = new Font("Segoe UI", Font.BOLD, 24);
+    private final Font sousTitreFont = new Font("Segoe UI", Font.BOLD, 16);
+    private final Font texteNormalFont = new Font("Segoe UI", Font.PLAIN, 14);
 
     public ConfigurationViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -25,83 +32,192 @@ public class ConfigurationViewSwing {
 
     private void initializeComponents() {
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        mainPanel.setBackground(new Color(245, 245, 245));
+        mainPanel.setBackground(couleurFond);
 
         // En-tête avec titre
-        JPanel headerPanel = new JPanel(new BorderLayout(15, 0));
-        headerPanel.setOpaque(false);
-        JLabel titleLabel = new JLabel("Paramètres de l'Application");
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
-        titleLabel.setForeground(new Color(33, 33, 33));
-        headerPanel.add(titleLabel, BorderLayout.WEST);
+        JPanel headerPanel = createHeaderPanel();
 
         // Panel principal avec scroll
         JPanel contentPanel = new JPanel();
         contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
         contentPanel.setOpaque(false);
 
-        // Section TVA avec style moderne
-        contentPanel.add(createSectionPanel("Configuration TVA", new String[][]{
-            {ConfigurationParam.CLE_TVA_ENABLED, "Activer la TVA", "true"},
-            {ConfigurationParam.CLE_TAUX_TVA, "Taux de TVA (%)", "20.0"}
-        }, MaterialDesign.MDI_PERCENT));
+        // Section TVA
+        contentPanel.add(createTVASection());
+        contentPanel.add(Box.createVerticalStrut(15));
 
         // Section Informations Entreprise
+        contentPanel.add(createEntrepriseSection());
         contentPanel.add(Box.createVerticalStrut(15));
-        contentPanel.add(createSectionPanel("Informations de l'entreprise", new String[][]{
-            {ConfigurationParam.CLE_NOM_ENTREPRISE, "Nom de l'entreprise", ""},
-            {ConfigurationParam.CLE_ADRESSE_ENTREPRISE, "Adresse", ""},
-            {ConfigurationParam.CLE_TELEPHONE_ENTREPRISE, "Téléphone", ""},
-            {ConfigurationParam.CLE_SIRET_ENTREPRISE, "Numéro SIRET", ""}
-        }, MaterialDesign.MDI_DOMAIN));
 
         // Section Personnalisation des Reçus
-        contentPanel.add(Box.createVerticalStrut(15));
-        contentPanel.add(createSectionPanel("Personnalisation des reçus", new String[][]{
-            {ConfigurationParam.CLE_FORMAT_RECU, "Format des reçus", "COMPACT"},
-            {ConfigurationParam.CLE_LOGO_PATH, "Chemin du logo", ""},
-            {ConfigurationParam.CLE_EN_TETE_RECU, "Message d'en-tête", ""},
-            {ConfigurationParam.CLE_PIED_PAGE_RECU, "Message de pied de page", "Merci de votre visite !"}
-        }, MaterialDesign.MDI_RECEIPT));
+        contentPanel.add(createRecusSection());
 
         JScrollPane scrollPane = new JScrollPane(contentPanel);
         scrollPane.setBorder(null);
-        scrollPane.getViewport().setBackground(new Color(245, 245, 245));
+        scrollPane.getViewport().setBackground(couleurFond);
+
+        // Panel des boutons
+        JPanel buttonPanel = createButtonPanel();
+
         mainPanel.add(headerPanel, BorderLayout.NORTH);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
-
-        // Panel des boutons avec style moderne
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-        buttonPanel.setOpaque(false);
-
-        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH, new Color(33, 150, 243));
-        JButton reinitialiserBtn = createStyledButton("Réinitialiser", MaterialDesign.MDI_RESTORE, new Color(244, 67, 54));
-        JButton sauvegarderBtn = createStyledButton("Sauvegarder", MaterialDesign.MDI_CONTENT_SAVE, new Color(76, 175, 80));
-
-        actualiserBtn.addActionListener(e -> {
-            try {
-                mainPanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                loadData();
-                showSuccessMessage("Configurations actualisées avec succès");
-            } catch (Exception ex) {
-                showErrorMessage("Erreur lors de l'actualisation : " + ex.getMessage());
-            } finally {
-                mainPanel.setCursor(Cursor.getDefaultCursor());
-            }
-        });
-
-        reinitialiserBtn.addActionListener(e -> reinitialiserConfigurations());
-        sauvegarderBtn.addActionListener(e -> sauvegarderConfigurations());
-
-        buttonPanel.add(actualiserBtn);
-        buttonPanel.add(reinitialiserBtn);
-        buttonPanel.add(sauvegarderBtn);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    private JPanel createSectionPanel(String titre, String[][] champs, MaterialDesign icon) {
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridBagLayout());
+    private JPanel createHeaderPanel() {
+        JPanel headerPanel = new JPanel(new BorderLayout(15, 0));
+        headerPanel.setOpaque(false);
+
+        FontIcon settingsIcon = FontIcon.of(MaterialDesign.MDI_SETTINGS);
+        settingsIcon.setIconSize(32);
+        settingsIcon.setIconColor(couleurPrincipale);
+        JLabel iconLabel = new JLabel(settingsIcon);
+
+        JLabel titleLabel = new JLabel("Paramètres de l'Application");
+        titleLabel.setFont(titreFont);
+        titleLabel.setForeground(new Color(33, 33, 33));
+
+        headerPanel.add(iconLabel, BorderLayout.WEST);
+        headerPanel.add(titleLabel, BorderLayout.CENTER);
+        return headerPanel;
+    }
+
+    private JPanel createTVASection() {
+        JPanel panel = createSectionPanel("Configuration TVA", MaterialDesign.MDI_PERCENT);
+
+        // Activation TVA
+        JCheckBox tvaEnabledCheck = new JCheckBox("Activer la TVA");
+        tvaEnabledCheck.setFont(texteNormalFont);
+        champsSaisie.put(ConfigurationParam.CLE_TVA_ENABLED, tvaEnabledCheck);
+
+        // Taux TVA
+        JSpinner tauxTvaSpinner = new JSpinner(new SpinnerNumberModel(20.0, 0.0, 100.0, 0.1));
+        tauxTvaSpinner.setFont(texteNormalFont);
+        champsSaisie.put(ConfigurationParam.CLE_TAUX_TVA, tauxTvaSpinner);
+
+        // Layout
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(5, 5, 5, 5);
+        panel.add(tvaEnabledCheck, gbc);
+
+        gbc.gridy = 2;
+        panel.add(new JLabel("Taux de TVA (%):"), gbc);
+        gbc.gridx = 1;
+        panel.add(tauxTvaSpinner, gbc);
+
+        return panel;
+    }
+
+    private JPanel createEntrepriseSection() {
+        JPanel panel = createSectionPanel("Informations de l'entreprise", MaterialDesign.MDI_DOMAIN);
+
+        String[][] champs = {
+            {ConfigurationParam.CLE_NOM_ENTREPRISE, "Nom de l'entreprise"},
+            {ConfigurationParam.CLE_ADRESSE_ENTREPRISE, "Adresse"},
+            {ConfigurationParam.CLE_TELEPHONE_ENTREPRISE, "Téléphone"},
+            {ConfigurationParam.CLE_SIRET_ENTREPRISE, "Numéro SIRET"}
+        };
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        for (String[] champ : champs) {
+            JLabel label = new JLabel(champ[1] + ":");
+            label.setFont(texteNormalFont);
+
+            JTextField textField = new JTextField(30);
+            textField.setFont(texteNormalFont);
+            styleTextField(textField);
+            champsSaisie.put(champ[0], textField);
+
+            panel.add(label, gbc);
+            gbc.gridx = 1;
+            panel.add(textField, gbc);
+            gbc.gridx = 0;
+            gbc.gridy++;
+        }
+
+        return panel;
+    }
+
+    private JPanel createRecusSection() {
+        JPanel panel = createSectionPanel("Personnalisation des reçus", MaterialDesign.MDI_RECEIPT);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        // Format des reçus
+        JLabel formatLabel = new JLabel("Format des reçus:");
+        formatLabel.setFont(texteNormalFont);
+        JComboBox<String> formatCombo = new JComboBox<>(new String[]{"COMPACT", "DETAILLE"});
+        formatCombo.setFont(texteNormalFont);
+        champsSaisie.put(ConfigurationParam.CLE_FORMAT_RECU, formatCombo);
+
+        panel.add(formatLabel, gbc);
+        gbc.gridx = 1;
+        panel.add(formatCombo, gbc);
+
+        // Logo
+        gbc.gridx = 0;
+        gbc.gridy++;
+        JLabel logoLabel = new JLabel("Logo de l'entreprise:");
+        logoLabel.setFont(texteNormalFont);
+
+        JPanel logoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JTextField logoPathField = new JTextField(20);
+        logoPathField.setFont(texteNormalFont);
+        styleTextField(logoPathField);
+        champsSaisie.put(ConfigurationParam.CLE_LOGO_PATH, logoPathField);
+
+        JButton chooseLogoButton = new JButton("Choisir...");
+        chooseLogoButton.addActionListener(e -> choisirLogo(logoPathField));
+
+        logoPanel.add(logoPathField);
+        logoPanel.add(chooseLogoButton);
+
+        panel.add(logoLabel, gbc);
+        gbc.gridx = 1;
+        panel.add(logoPanel, gbc);
+
+        // En-tête et pied de page
+        String[][] champs = {
+            {ConfigurationParam.CLE_EN_TETE_RECU, "Message d'en-tête"},
+            {ConfigurationParam.CLE_PIED_PAGE_RECU, "Message de pied de page"}
+        };
+
+        for (String[] champ : champs) {
+            gbc.gridx = 0;
+            gbc.gridy++;
+            JLabel label = new JLabel(champ[1] + ":");
+            label.setFont(texteNormalFont);
+
+            JTextArea textArea = new JTextArea(2, 30);
+            textArea.setFont(texteNormalFont);
+            textArea.setLineWrap(true);
+            textArea.setWrapStyleWord(true);
+            JScrollPane scrollPane = new JScrollPane(textArea);
+            champsSaisie.put(champ[0], textArea);
+
+            panel.add(label, gbc);
+            gbc.gridx = 1;
+            panel.add(scrollPane, gbc);
+        }
+
+        return panel;
+    }
+
+    private JPanel createSectionPanel(String titre, MaterialDesign icon) {
+        JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createEmptyBorder(5, 5, 5, 5),
@@ -114,12 +230,15 @@ public class ConfigurationViewSwing {
         // En-tête de section avec icône
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         headerPanel.setBackground(Color.WHITE);
+
         FontIcon fontIcon = FontIcon.of(icon);
         fontIcon.setIconSize(20);
-        fontIcon.setIconColor(new Color(33, 150, 243));
+        fontIcon.setIconColor(couleurPrincipale);
         JLabel iconLabel = new JLabel(fontIcon);
+
         JLabel titleLabel = new JLabel(titre);
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        titleLabel.setFont(sousTitreFont);
+
         headerPanel.add(iconLabel);
         headerPanel.add(titleLabel);
 
@@ -130,40 +249,179 @@ public class ConfigurationViewSwing {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(0, 0, 15, 0);
+
         panel.add(headerPanel, gbc);
 
-        gbc.gridwidth = 1;
-        gbc.gridy = 1;
-        gbc.insets = new Insets(5, 5, 5, 5);
+        return panel;
+    }
 
-        for (String[] champ : champs) {
-            JLabel label = new JLabel(champ[1] + ":");
-            label.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-            label.setPreferredSize(new Dimension(150, label.getPreferredSize().height));
+    private JPanel createButtonPanel() {
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        buttonPanel.setOpaque(false);
 
-            JTextField textField = new JTextField(30);
-            textField.setName(champ[0]);
-            textField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-            textField.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200)),
-                BorderFactory.createEmptyBorder(8, 10, 8, 10)
-            ));
-            champsSaisie.put(champ[0], textField);
+        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH, couleurPrincipale);
+        JButton reinitialiserBtn = createStyledButton("Réinitialiser", MaterialDesign.MDI_RESTORE, new Color(244, 67, 54));
+        JButton sauvegarderBtn = createStyledButton("Sauvegarder", MaterialDesign.MDI_CONTENT_SAVE, new Color(76, 175, 80));
 
-            gbc.gridx = 0;
-            gbc.weightx = 0;
-            gbc.fill = GridBagConstraints.NONE;
-            panel.add(label, gbc);
+        actualiserBtn.addActionListener(e -> actualiserConfigurations());
+        reinitialiserBtn.addActionListener(e -> reinitialiserConfigurations());
+        sauvegarderBtn.addActionListener(e -> sauvegarderConfigurations());
 
-            gbc.gridx = 1;
-            gbc.weightx = 1;
-            gbc.fill = GridBagConstraints.HORIZONTAL;
-            panel.add(textField, gbc);
+        buttonPanel.add(actualiserBtn);
+        buttonPanel.add(reinitialiserBtn);
+        buttonPanel.add(sauvegarderBtn);
 
-            gbc.gridy++;
+        return buttonPanel;
+    }
+
+    private void choisirLogo(JTextField logoPathField) {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Images", "jpg", "jpeg", "png", "gif"));
+
+        if (fileChooser.showOpenDialog(mainPanel) == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            logoPathField.setText(file.getAbsolutePath());
+        }
+    }
+
+    private void actualiserConfigurations() {
+        try {
+            mainPanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            loadData();
+            showSuccessMessage("Configurations actualisées avec succès");
+        } catch (Exception ex) {
+            showErrorMessage("Erreur lors de l'actualisation : " + ex.getMessage());
+        } finally {
+            mainPanel.setCursor(Cursor.getDefaultCursor());
+        }
+    }
+
+    private void loadData() {
+        try {
+            System.out.println("Chargement des configurations...");
+            controller.chargerConfigurations();
+
+            for (Map.Entry<String, JComponent> entry : champsSaisie.entrySet()) {
+                String valeur = controller.getValeur(entry.getKey());
+                JComponent composant = entry.getValue();
+
+                if (composant instanceof JTextField) {
+                    ((JTextField) composant).setText(valeur);
+                } else if (composant instanceof JTextArea) {
+                    ((JTextArea) composant).setText(valeur);
+                } else if (composant instanceof JCheckBox) {
+                    ((JCheckBox) composant).setSelected(Boolean.parseBoolean(valeur));
+                } else if (composant instanceof JSpinner) {
+                    try {
+                        ((JSpinner) composant).setValue(Double.parseDouble(valeur));
+                    } catch (NumberFormatException e) {
+                        ((JSpinner) composant).setValue(20.0);
+                    }
+                } else if (composant instanceof JComboBox) {
+                    ((JComboBox<?>) composant).setSelectedItem(valeur);
+                }
+            }
+
+            System.out.println("Configurations chargées avec succès");
+        } catch (Exception e) {
+            System.err.println("Erreur lors du chargement des configurations: " + e.getMessage());
+            showErrorMessage("Erreur lors du chargement des configurations : " + e.getMessage());
+        }
+    }
+
+    private void sauvegarderConfigurations() {
+        try {
+            if (!validerChamps()) {
+                return;
+            }
+
+            System.out.println("Début de la sauvegarde des configurations...");
+            boolean hasChanges = false;
+
+            for (Map.Entry<String, JComponent> entry : champsSaisie.entrySet()) {
+                String cle = entry.getKey();
+                JComponent composant = entry.getValue();
+                String nouvelleValeur = "";
+
+                if (composant instanceof JTextField) {
+                    nouvelleValeur = ((JTextField) composant).getText().trim();
+                } else if (composant instanceof JTextArea) {
+                    nouvelleValeur = ((JTextArea) composant).getText().trim();
+                } else if (composant instanceof JCheckBox) {
+                    nouvelleValeur = String.valueOf(((JCheckBox) composant).isSelected());
+                } else if (composant instanceof JSpinner) {
+                    nouvelleValeur = String.valueOf(((JSpinner) composant).getValue());
+                } else if (composant instanceof JComboBox) {
+                    nouvelleValeur = String.valueOf(((JComboBox<?>) composant).getSelectedItem());
+                }
+
+                String ancienneValeur = controller.getValeur(cle);
+                if (!nouvelleValeur.equals(ancienneValeur)) {
+                    System.out.println("Mise à jour de la configuration: " + cle + " = " + nouvelleValeur);
+                    ConfigurationParam config = new ConfigurationParam(0, cle, nouvelleValeur, "");
+                    controller.mettreAJourConfiguration(config);
+                    hasChanges = true;
+                }
+            }
+
+            if (hasChanges) {
+                showSuccessMessage("Les paramètres ont été sauvegardés avec succès");
+                loadData();
+            }
+        } catch (Exception e) {
+            System.err.println("Erreur lors de la sauvegarde: " + e.getMessage());
+            showErrorMessage("Erreur lors de la sauvegarde : " + e.getMessage());
+        }
+    }
+
+    private boolean validerChamps() {
+        // Validation du taux de TVA
+        JSpinner tauxTVASpinner = (JSpinner) champsSaisie.get(ConfigurationParam.CLE_TAUX_TVA);
+        double tauxTVA = (double) tauxTVASpinner.getValue();
+        if (tauxTVA < 0 || tauxTVA > 100) {
+            showErrorMessage("Le taux de TVA doit être compris entre 0 et 100");
+            return false;
         }
 
-        return panel;
+        // Validation du numéro de téléphone
+        JTextField telephoneField = (JTextField) champsSaisie.get(ConfigurationParam.CLE_TELEPHONE_ENTREPRISE);
+        String telephone = telephoneField.getText().trim();
+        if (!telephone.isEmpty() && !telephone.matches("^[0-9+\\-\\s]*$")) {
+            showErrorMessage("Le numéro de téléphone contient des caractères invalides");
+            return false;
+        }
+
+        // Validation du SIRET
+        JTextField siretField = (JTextField) champsSaisie.get(ConfigurationParam.CLE_SIRET_ENTREPRISE);
+        String siret = siretField.getText().trim();
+        if (!siret.isEmpty() && !siret.matches("^[0-9]{14}$")) {
+            showErrorMessage("Le numéro SIRET doit contenir exactement 14 chiffres");
+            return false;
+        }
+
+        // Validation du format des reçus
+        JComboBox<?> formatCombo = (JComboBox<?>) champsSaisie.get(ConfigurationParam.CLE_FORMAT_RECU);
+        String formatRecu = formatCombo.getSelectedItem().toString();
+        if (!formatRecu.equals("COMPACT") && !formatRecu.equals("DETAILLE")) {
+            showErrorMessage("Le format des reçus doit être 'COMPACT' ou 'DETAILLE'");
+            return false;
+        }
+
+        return true;
+    }
+
+    private void reinitialiserConfigurations() {
+        if (showConfirmDialog("Êtes-vous sûr de vouloir réinitialiser tous les paramètres ?")) {
+            try {
+                System.out.println("Réinitialisation des configurations...");
+                controller.reinitialiserConfigurations();
+                loadData();
+                showSuccessMessage("Les paramètres ont été réinitialisés avec succès");
+            } catch (Exception e) {
+                System.err.println("Erreur lors de la réinitialisation: " + e.getMessage());
+                showErrorMessage("Erreur lors de la réinitialisation : " + e.getMessage());
+            }
+        }
     }
 
     private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
@@ -181,7 +439,6 @@ public class ConfigurationViewSwing {
         button.setMargin(new Insets(8, 16, 8, 16));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // Effet de survol
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(color.darker());
@@ -194,103 +451,11 @@ public class ConfigurationViewSwing {
         return button;
     }
 
-    private void loadData() {
-        try {
-            System.out.println("Chargement des configurations...");
-            controller.chargerConfigurations();
-            for (Map.Entry<String, JTextField> entry : champsSaisie.entrySet()) {
-                String valeur = controller.getValeur(entry.getKey());
-                System.out.println("Configuration chargée: " + entry.getKey() + " = " + valeur);
-                entry.getValue().setText(valeur);
-            }
-            System.out.println("Configurations chargées avec succès");
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Erreur lors du chargement des configurations: " + e.getMessage());
-            showErrorMessage("Erreur lors du chargement des configurations : " + e.getMessage());
-        }
-    }
-
-    private boolean validerChamps() {
-        // Validation du taux de TVA
-        String tauxTVA = champsSaisie.get(ConfigurationParam.CLE_TAUX_TVA).getText().trim();
-        try {
-            double tva = Double.parseDouble(tauxTVA);
-            if (tva < 0 || tva > 100) {
-                showErrorMessage("Le taux de TVA doit être un nombre entre 0 et 100");
-                return false;
-            }
-        } catch (NumberFormatException e) {
-            showErrorMessage("Le taux de TVA doit être un nombre valide");
-            return false;
-        }
-
-        // Validation du numéro de téléphone
-        String telephone = champsSaisie.get(ConfigurationParam.CLE_TELEPHONE_ENTREPRISE).getText().trim();
-        if (!telephone.isEmpty() && !telephone.matches("^[0-9+\\-\\s]*$")) {
-            showErrorMessage("Le numéro de téléphone contient des caractères invalides");
-            return false;
-        }
-
-        // Validation du format des reçus
-        String formatRecu = champsSaisie.get(ConfigurationParam.CLE_FORMAT_RECU).getText().trim().toUpperCase();
-        if (!formatRecu.equals("COMPACT") && !formatRecu.equals("DETAILLE")) {
-            showErrorMessage("Le format des reçus doit être 'COMPACT' ou 'DETAILLE'");
-            return false;
-        }
-
-        return true;
-    }
-
-    private void sauvegarderConfigurations() {
-        try {
-            if (!validerChamps()) {
-                return;
-            }
-
-            System.out.println("Début de la sauvegarde des configurations...");
-            boolean hasChanges = false;
-            for (Map.Entry<String, JTextField> entry : champsSaisie.entrySet()) {
-                String cle = entry.getKey();
-                String nouvelleValeur = entry.getValue().getText().trim();
-                String ancienneValeur = controller.getValeur(cle);
-
-                if (!nouvelleValeur.equals(ancienneValeur)) {
-                    System.out.println("Mise à jour de la configuration: " + cle + " = " + nouvelleValeur);
-                    ConfigurationParam config = new ConfigurationParam(0, cle, nouvelleValeur, "");
-                    controller.mettreAJourConfiguration(config);
-                    hasChanges = true;
-                }
-            }
-
-            if (hasChanges) {
-                System.out.println("Configurations sauvegardées avec succès");
-                showSuccessMessage("Les paramètres ont été sauvegardés avec succès");
-                loadData(); // Recharger les données pour refléter les changements
-            } else {
-                System.out.println("Aucun changement à sauvegarder");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.err.println("Erreur lors de la sauvegarde: " + e.getMessage());
-            showErrorMessage("Erreur lors de la sauvegarde : " + e.getMessage());
-        }
-    }
-
-    private void reinitialiserConfigurations() {
-        if (showConfirmDialog("Êtes-vous sûr de vouloir réinitialiser tous les paramètres ?")) {
-            try {
-                System.out.println("Réinitialisation des configurations...");
-                controller.reinitialiserConfigurations();
-                loadData(); // Recharger les données après la réinitialisation
-                System.out.println("Configurations réinitialisées avec succès");
-                showSuccessMessage("Les paramètres ont été réinitialisés avec succès");
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.err.println("Erreur lors de la réinitialisation: " + e.getMessage());
-                showErrorMessage("Erreur lors de la réinitialisation : " + e.getMessage());
-            }
-        }
+    private void styleTextField(JTextField textField) {
+        textField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(8, 10, 8, 10)
+        ));
     }
 
     private void showSuccessMessage(String message) {
