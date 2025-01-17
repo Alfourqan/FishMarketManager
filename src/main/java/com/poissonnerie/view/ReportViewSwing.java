@@ -98,28 +98,6 @@ public class ReportViewSwing {
             new Color(0, 135, 136)
         ));
 
-        JButton aujourdhuiBtn = createPeriodButton("Aujourd'hui", () -> {
-            dateDebut = LocalDate.now();
-            dateFin = LocalDate.now();
-            updateCharts();
-        });
-
-        JButton semaineBtn = createPeriodButton("Cette semaine", () -> {
-            dateDebut = LocalDate.now().minusWeeks(1);
-            dateFin = LocalDate.now();
-            updateCharts();
-        });
-
-        JButton moisBtn = createPeriodButton("Ce mois", () -> {
-            dateDebut = LocalDate.now().minusMonths(1);
-            dateFin = LocalDate.now();
-            updateCharts();
-        });
-
-        periodPanel.add(aujourdhuiBtn);
-        periodPanel.add(semaineBtn);
-        periodPanel.add(moisBtn);
-
         // Boutons de génération de rapports avec style moderne
         JPanel reportButtonsPanel = new JPanel();
         reportButtonsPanel.setLayout(new BoxLayout(reportButtonsPanel, BoxLayout.Y_AXIS));
@@ -133,10 +111,10 @@ public class ReportViewSwing {
             new Color(0, 135, 136)
         ));
 
-        JButton ventesBtn = createStyledButton("Rapport des ventes", MaterialDesignI.CART_OUTLINE, new Color(76, 175, 80));
-        JButton stocksBtn = createStyledButton("Rapport des stocks", MaterialDesignI.PACKAGE_VARIANT_OUTLINE, new Color(33, 150, 243));
-        JButton fournisseursBtn = createStyledButton("Rapport fournisseurs", MaterialDesignI.TRUCK_DELIVERY_OUTLINE, new Color(255, 152, 0));
-        JButton statistiquesBtn = createStyledButton("Statistiques", MaterialDesignI.CHART_BAR_STACKED_OUTLINE, new Color(156, 39, 176));
+        JButton ventesBtn = createStyledButton("Rapport des ventes", MaterialDesignI.CART, new Color(76, 175, 80));
+        JButton stocksBtn = createStyledButton("Rapport des stocks", MaterialDesignI.PACKAGE, new Color(33, 150, 243));
+        JButton fournisseursBtn = createStyledButton("Rapport fournisseurs", MaterialDesignI.ACCOUNT_GROUP, new Color(255, 152, 0));
+        JButton statistiquesBtn = createStyledButton("Statistiques", MaterialDesignI.CHART_BAR, new Color(156, 39, 176));
 
         // Gestionnaires d'événements
         ventesBtn.addActionListener(e -> genererRapportVentes());

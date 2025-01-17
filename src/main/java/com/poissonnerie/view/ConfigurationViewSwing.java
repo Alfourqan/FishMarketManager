@@ -43,7 +43,7 @@ public class ConfigurationViewSwing {
         // Section TVA avec style moderne
         contentPanel.add(createSectionPanel("Configuration TVA", new String[][]{
             {ConfigurationParam.CLE_TAUX_TVA, "Taux de TVA (%)", "20.0"}
-        }, MaterialDesignI.PERCENT));
+        }, MaterialDesignI.CURRENCY_USD));
 
         // Section Informations Entreprise
         contentPanel.add(Box.createVerticalStrut(15));
@@ -51,7 +51,7 @@ public class ConfigurationViewSwing {
             {ConfigurationParam.CLE_NOM_ENTREPRISE, "Nom de l'entreprise", ""},
             {ConfigurationParam.CLE_ADRESSE_ENTREPRISE, "Adresse", ""},
             {ConfigurationParam.CLE_TELEPHONE_ENTREPRISE, "Téléphone", ""}
-        }, MaterialDesignI.OFFICE_BUILDING));
+        }, MaterialDesignI.ACCOUNT_GROUP));
 
         // Section Personnalisation Reçus
         contentPanel.add(Box.createVerticalStrut(15));
@@ -70,8 +70,8 @@ public class ConfigurationViewSwing {
         buttonPanel.setOpaque(false);
 
         JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesignI.REFRESH, new Color(33, 150, 243));
-        JButton reinitialiserBtn = createStyledButton("Réinitialiser", MaterialDesignI.RESTART, new Color(244, 67, 54));
-        JButton sauvegarderBtn = createStyledButton("Sauvegarder", MaterialDesignI.CONTENT_SAVE, new Color(76, 175, 80));
+        JButton reinitialiserBtn = createStyledButton("Réinitialiser", MaterialDesignI.COG, new Color(244, 67, 54));
+        JButton sauvegarderBtn = createStyledButton("Sauvegarder", MaterialDesignI.FILE_DOCUMENT, new Color(76, 175, 80));
 
         actualiserBtn.addActionListener(e -> {
             try {

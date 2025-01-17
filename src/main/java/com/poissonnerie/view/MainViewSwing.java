@@ -81,17 +81,17 @@ public class MainViewSwing {
         };
 
         MaterialDesignI[] icons = {
-            MaterialDesignI.PACKAGE_VARIANT_CLOSED_OUTLINE,
-            MaterialDesignI.CART_OUTLINE,
-            MaterialDesignI.ACCOUNT_GROUP_OUTLINE,
-            MaterialDesignI.FILE_DOCUMENT_OUTLINE,
-            MaterialDesignI.TRUCK_DELIVERY_OUTLINE,
-            MaterialDesignI.TAG_MULTIPLE_OUTLINE,
-            MaterialDesignI.CLIPBOARD_TEXT_OUTLINE,
-            MaterialDesignI.CASH_MULTIPLE,
-            MaterialDesignI.CHART_BAR_STACKED,
-            MaterialDesignI.COG_OUTLINE,
-            MaterialDesignI.LOGOUT_VARIANT
+            MaterialDesignI.PACKAGE,
+            MaterialDesignI.CART,
+            MaterialDesignI.ACCOUNT_GROUP,
+            MaterialDesignI.FILE_DOCUMENT,
+            MaterialDesignI.TRUCK_DELIVERY,
+            MaterialDesignI.TAG_MULTIPLE,
+            MaterialDesignI.CLIPBOARD_TEXT,
+            MaterialDesignI.CASH,
+            MaterialDesignI.CHART_BAR,
+            MaterialDesignI.COG,
+            MaterialDesignI.LOGOUT
         };
 
         ButtonGroup buttonGroup = new ButtonGroup();
