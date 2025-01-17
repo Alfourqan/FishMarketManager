@@ -34,6 +34,7 @@ com/poissonnerie/model/InventaireManager.class
 com/poissonnerie/model/MouvementCaisse$TypeMouvement.class
 com/poissonnerie/view/ReportViewSwing$1.class
 com/poissonnerie/view/ReportViewSwing.class
+com/poissonnerie/view/FournisseurViewSwing$2.class
 com/poissonnerie/Main.class
 com/poissonnerie/view/MainViewSwing.class
 com/poissonnerie/model/Vente$LigneVente.class
