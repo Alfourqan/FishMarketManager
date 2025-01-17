@@ -2,6 +2,7 @@ package com.poissonnerie.view;
 
 import com.poissonnerie.controller.ClientController;
 import com.poissonnerie.model.Client;
+import com.poissonnerie.util.PDFGenerator;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -145,8 +146,8 @@ public class ClientViewSwing {
 
     private void showReglerCreanceDialog(Client client) {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel),
-                               "Régler créance",
-                               true);
+                                   "Régler créance",
+                                   true);
         JPanel panel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
@@ -160,7 +161,7 @@ public class ClientViewSwing {
         ));
 
         JLabel clientLabel = new JLabel("<html><b>Client:</b> " + client.getNom() + "</html>");
-        JLabel soldeLabel = new JLabel(String.format("<html><b>Solde actuel:</b> <font color='red'>%.2f €</font></html>", 
+        JLabel soldeLabel = new JLabel(String.format("<html><b>Solde actuel:</b> <font color='red'>%.2f €</font></html>",
             client.getSolde()));
 
         headerPanel.add(clientLabel, BorderLayout.NORTH);
@@ -216,13 +217,20 @@ public class ClientViewSwing {
 
                 if (montant > client.getSolde()) {
                     throw new IllegalArgumentException(
-                        String.format("Le montant ne peut pas dépasser le solde actuel (%.2f €)", 
+                        String.format("Le montant ne peut pas dépasser le solde actuel (%.2f €)",
                         client.getSolde())
                     );
                 }
 
                 // Tentative de règlement
                 controller.reglerCreance(client, montant);
+
+                // Générer le reçu de règlement
+                String nomFichier = String.format("reglement_%s_%d.pdf",
+                    client.getNom().toLowerCase().replace(" ", "_"),
+                    System.currentTimeMillis());
+                PDFGenerator.genererReglementCreance(client, montant,
+                    client.getSolde(), nomFichier);
 
                 // Rafraîchir l'affichage
                 refreshTable();
@@ -237,8 +245,9 @@ public class ClientViewSwing {
                         "<table>" +
                         "<tr><td><b>Montant réglé:</b></td><td style='padding-left: 10px'>%.2f €</td></tr>" +
                         "<tr><td><b>Nouveau solde:</b></td><td style='padding-left: 10px'>%.2f €</td></tr>" +
+                        "<tr><td colspan='2'><br>Reçu généré: <b>%s</b></td></tr>" +
                         "</table></html>",
-                        montant, client.getSolde()),
+                        montant, client.getSolde(), nomFichier),
                     "Succès",
                     JOptionPane.INFORMATION_MESSAGE);
 

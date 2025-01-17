@@ -19,11 +19,7 @@ public class VenteController {
 
     public void chargerVentes() {
         ventes.clear();
-        Connection conn = null;
-        try {
-            conn = DatabaseManager.getConnection();
-            conn.setAutoCommit(false); // Début de la transaction
-
+        try (Connection conn = DatabaseManager.getConnection()) {
             System.out.println("Chargement des ventes en cours...");
             String sql = "SELECT v.*, c.* FROM ventes v LEFT JOIN clients c ON v.client_id = c.id ORDER BY v.date DESC";
 
@@ -62,30 +58,12 @@ public class VenteController {
                 }
             }
 
-            conn.commit();
             System.out.println("Ventes chargées avec succès: " + ventes.size() + " ventes");
 
         } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                    System.err.println("Transaction annulée suite à une erreur");
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
-            }
             e.printStackTrace();
             System.err.println("Erreur lors du chargement des ventes: " + e.getMessage());
             throw new RuntimeException("Erreur lors du chargement des ventes", e);
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.setAutoCommit(true);
-                    conn.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 
@@ -126,10 +104,12 @@ public class VenteController {
     }
 
     public void enregistrerVente(Vente vente) {
-        Connection conn = null;
-        try {
-            conn = DatabaseManager.getConnection();
-            conn.setAutoCommit(false);
+        try (Connection conn = DatabaseManager.getConnection()) {
+            // Démarrer la transaction explicitement pour SQLite
+            try (Statement stmt = conn.createStatement()) {
+                stmt.execute("BEGIN TRANSACTION");
+            }
+
             System.out.println("Début de l'enregistrement de la vente...");
 
             // Insérer la vente
@@ -149,7 +129,7 @@ public class VenteController {
 
                 pstmt.executeUpdate();
 
-                // Récupérer l'ID généré avec last_insert_rowid()
+                // Récupérer l'ID généré
                 try (Statement stmt = conn.createStatement();
                      ResultSet rs = stmt.executeQuery("SELECT last_insert_rowid() as id")) {
                     if (rs.next()) {
@@ -199,31 +179,25 @@ public class VenteController {
                 }
             }
 
-            conn.commit();
+            // Valider la transaction
+            try (Statement stmt = conn.createStatement()) {
+                stmt.execute("COMMIT");
+            }
+
             ventes.add(vente);
             System.out.println("Vente enregistrée avec succès");
 
         } catch (SQLException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                    System.err.println("Transaction annulée suite à une erreur");
-                } catch (SQLException ex) {
-                    ex.printStackTrace();
-                }
+            try (Connection conn = DatabaseManager.getConnection();
+                 Statement stmt = conn.createStatement()) {
+                stmt.execute("ROLLBACK");
+                System.err.println("Transaction annulée suite à une erreur");
+            } catch (SQLException ex) {
+                ex.printStackTrace();
             }
             e.printStackTrace();
             System.err.println("Erreur lors de l'enregistrement de la vente: " + e.getMessage());
             throw new RuntimeException("Erreur lors de l'enregistrement de la vente", e);
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.setAutoCommit(true);
-                    conn.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 }

@@ -4,9 +4,11 @@ import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.itextpdf.text.pdf.BaseFont;
 import com.poissonnerie.model.Vente;
+import com.poissonnerie.model.Client;
 import com.poissonnerie.controller.ConfigurationController;
 import java.io.FileOutputStream;
 import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
 
 public class PDFGenerator {
     private static final float TICKET_WIDTH = 170.079f; // 6 cm en points
@@ -89,6 +91,97 @@ public class PDFGenerator {
         preview.append("\n");  // Espace final
 
         return preview.toString();
+    }
+
+    public static String genererPreviewReglementCreance(Client client, double montant, double nouveauSolde) {
+        StringBuilder preview = new StringBuilder();
+        ConfigurationController configController = new ConfigurationController();
+        configController.chargerConfigurations();
+
+        // En-tête
+        String nomEntreprise = configController.getValeur("NOM_ENTREPRISE");
+        String adresse = configController.getValeur("ADRESSE_ENTREPRISE");
+        String telephone = configController.getValeur("TELEPHONE_ENTREPRISE");
+
+        preview.append("\n");  // Espace en haut
+        preview.append(centerText(nomEntreprise.toUpperCase(), 40)).append("\n");
+        preview.append(centerText(adresse, 40)).append("\n");
+        preview.append(centerText(telephone, 40)).append("\n\n");
+        preview.append(repeatChar('=', 40)).append("\n");
+
+        // Informations du reçu
+        preview.append(centerText("REÇU DE RÈGLEMENT", 40)).append("\n");
+        preview.append(String.format("Date: %s\n", 
+            LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))));
+        preview.append(repeatChar('-', 40)).append("\n");
+
+        // Informations client
+        preview.append(String.format("Client: %s\n", client.getNom()));
+        if (client.getTelephone() != null && !client.getTelephone().isEmpty()) {
+            preview.append(String.format("Tél: %s\n", client.getTelephone()));
+        }
+        preview.append(repeatChar('-', 40)).append("\n\n");
+
+        // Détails du règlement
+        preview.append("DÉTAILS DU RÈGLEMENT\n");
+        preview.append(repeatChar('-', 40)).append("\n");
+        preview.append(String.format("Ancien solde:%28.2f€\n", client.getSolde()));
+        preview.append(String.format("Montant réglé:%27.2f€\n", montant));
+        preview.append(repeatChar('-', 40)).append("\n");
+        preview.append(String.format("Nouveau solde:%27.2f€\n", nouveauSolde));
+        preview.append(repeatChar('=', 40)).append("\n\n");
+
+        // Signatures
+        preview.append("Signature client:\n\n\n");
+        preview.append("Signature vendeur:\n\n\n");
+        preview.append(repeatChar('-', 40)).append("\n\n");
+
+        // Pied de page
+        String piedPage = configController.getValeur("PIED_PAGE_RECU");
+        preview.append(centerText(piedPage, 40)).append("\n");
+        preview.append(centerText("* * *", 40)).append("\n");
+        preview.append("\n");  // Espace final
+
+        return preview.toString();
+    }
+
+    public static void genererReglementCreance(Client client, double montant, double nouveauSolde, String cheminFichier) {
+        try {
+            Document document = new Document(new Rectangle(TICKET_WIDTH, PageSize.A4.getHeight()));
+            document.setMargins(MARGIN, MARGIN, MARGIN, MARGIN);
+            PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
+            document.open();
+
+            // Police monospace pour meilleur alignement
+            BaseFont baseFont = BaseFont.createFont(BaseFont.COURIER, BaseFont.CP1252, BaseFont.EMBEDDED);
+            Font normalFont = new Font(baseFont, 8);
+            Font boldFont = new Font(baseFont, 8, Font.BOLD);
+            Font titleFont = new Font(baseFont, 10, Font.BOLD);
+
+            // Convertir le preview en PDF
+            String preview = genererPreviewReglementCreance(client, montant, nouveauSolde);
+            for (String line : preview.split("\n")) {
+                Font currentFont = normalFont;
+                if (line.matches(".*TOTAL.*|.*DÉTAILS DU RÈGLEMENT.*") || line.startsWith("===")) {
+                    currentFont = boldFont;
+                } else if (line.equals(line.toUpperCase()) && !line.startsWith("---")) {
+                    currentFont = titleFont;
+                }
+
+                Paragraph p = new Paragraph(line, currentFont);
+                p.setAlignment(Element.ALIGN_LEFT);
+                if (line.matches(".*Nouveau solde:.*")) {
+                    p.setSpacingBefore(5);
+                    p.setSpacingAfter(5);
+                }
+                document.add(p);
+            }
+
+            document.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Erreur lors de la génération du reçu: " + e.getMessage());
+        }
     }
 
     public static void genererTicket(Vente vente, String cheminFichier) {
