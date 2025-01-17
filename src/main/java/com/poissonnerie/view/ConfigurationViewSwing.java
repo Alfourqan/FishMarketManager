@@ -42,6 +42,7 @@ public class ConfigurationViewSwing {
 
         // Section TVA avec style moderne
         contentPanel.add(createSectionPanel("Configuration TVA", new String[][]{
+            {ConfigurationParam.CLE_TVA_ENABLED, "Activer la TVA", "true"},
             {ConfigurationParam.CLE_TAUX_TVA, "Taux de TVA (%)", "20.0"}
         }, MaterialDesign.MDI_PERCENT));
 
@@ -50,12 +51,16 @@ public class ConfigurationViewSwing {
         contentPanel.add(createSectionPanel("Informations de l'entreprise", new String[][]{
             {ConfigurationParam.CLE_NOM_ENTREPRISE, "Nom de l'entreprise", ""},
             {ConfigurationParam.CLE_ADRESSE_ENTREPRISE, "Adresse", ""},
-            {ConfigurationParam.CLE_TELEPHONE_ENTREPRISE, "Téléphone", ""}
-        }, MaterialDesign.MDI_DOMAIN)); // Utilisation de MDI_DOMAIN au lieu de MDI_OFFICE_BUILDING
+            {ConfigurationParam.CLE_TELEPHONE_ENTREPRISE, "Téléphone", ""},
+            {ConfigurationParam.CLE_SIRET_ENTREPRISE, "Numéro SIRET", ""}
+        }, MaterialDesign.MDI_DOMAIN));
 
-        // Section Personnalisation Reçus
+        // Section Personnalisation des Reçus
         contentPanel.add(Box.createVerticalStrut(15));
         contentPanel.add(createSectionPanel("Personnalisation des reçus", new String[][]{
+            {ConfigurationParam.CLE_FORMAT_RECU, "Format des reçus", "COMPACT"},
+            {ConfigurationParam.CLE_LOGO_PATH, "Chemin du logo", ""},
+            {ConfigurationParam.CLE_EN_TETE_RECU, "Message d'en-tête", ""},
             {ConfigurationParam.CLE_PIED_PAGE_RECU, "Message de pied de page", "Merci de votre visite !"}
         }, MaterialDesign.MDI_RECEIPT));
 
@@ -224,6 +229,13 @@ public class ConfigurationViewSwing {
         String telephone = champsSaisie.get(ConfigurationParam.CLE_TELEPHONE_ENTREPRISE).getText().trim();
         if (!telephone.isEmpty() && !telephone.matches("^[0-9+\\-\\s]*$")) {
             showErrorMessage("Le numéro de téléphone contient des caractères invalides");
+            return false;
+        }
+
+        // Validation du format des reçus
+        String formatRecu = champsSaisie.get(ConfigurationParam.CLE_FORMAT_RECU).getText().trim().toUpperCase();
+        if (!formatRecu.equals("COMPACT") && !formatRecu.equals("DETAILLE")) {
+            showErrorMessage("Le format des reçus doit être 'COMPACT' ou 'DETAILLE'");
             return false;
         }
 

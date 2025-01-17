@@ -2,6 +2,7 @@ package com.poissonnerie.controller;
 
 import com.poissonnerie.model.ConfigurationParam;
 import com.poissonnerie.util.DatabaseManager;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -89,8 +90,14 @@ public class ConfigurationController {
     public void reinitialiserConfigurations() {
         String sql = "UPDATE configurations SET valeur = CASE " +
                     "WHEN cle = 'TAUX_TVA' THEN '20.0' " +
+                    "WHEN cle = 'TVA_ENABLED' THEN 'true' " +
+                    "WHEN cle = 'FORMAT_RECU' THEN 'COMPACT' " +
                     "WHEN cle = 'PIED_PAGE_RECU' THEN 'Merci de votre visite !' " +
-                    "ELSE '' END";
+                    "WHEN cle = 'EN_TETE_RECU' THEN 'Votre Poissonnerie de Confiance' " +
+                    "ELSE '' END " +
+                    "WHERE cle IN ('TAUX_TVA', 'TVA_ENABLED', 'FORMAT_RECU', 'PIED_PAGE_RECU', " +
+                    "'EN_TETE_RECU', 'NOM_ENTREPRISE', 'ADRESSE_ENTREPRISE', 'TELEPHONE_ENTREPRISE', " +
+                    "'SIRET_ENTREPRISE', 'LOGO_PATH')";
 
         try (Connection conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(false);

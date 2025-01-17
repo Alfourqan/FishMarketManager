@@ -27,9 +27,19 @@ public class ConfigurationParam {
     public void setDescription(String description) { this.description = description; }
 
     // Constantes pour les clés de configuration
+    // Configuration TVA
     public static final String CLE_TAUX_TVA = "TAUX_TVA";
+    public static final String CLE_TVA_ENABLED = "TVA_ENABLED";
+
+    // Informations entreprise
     public static final String CLE_NOM_ENTREPRISE = "NOM_ENTREPRISE";
     public static final String CLE_ADRESSE_ENTREPRISE = "ADRESSE_ENTREPRISE";
     public static final String CLE_TELEPHONE_ENTREPRISE = "TELEPHONE_ENTREPRISE";
+    public static final String CLE_SIRET_ENTREPRISE = "SIRET_ENTREPRISE";
+
+    // Configuration des reçus
+    public static final String CLE_LOGO_PATH = "LOGO_PATH";
+    public static final String CLE_FORMAT_RECU = "FORMAT_RECU";
     public static final String CLE_PIED_PAGE_RECU = "PIED_PAGE_RECU";
+    public static final String CLE_EN_TETE_RECU = "EN_TETE_RECU";
 }

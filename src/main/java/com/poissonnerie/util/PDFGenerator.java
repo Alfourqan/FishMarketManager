@@ -28,13 +28,22 @@ public class PDFGenerator {
         String adresse = configController.getValeur("ADRESSE_ENTREPRISE");
         String telephone = configController.getValeur("TELEPHONE_ENTREPRISE");
         String siret = configController.getValeur("SIRET_ENTREPRISE");
+        String enTete = configController.getValeur("EN_TETE_RECU");
+
+        // Configuration TVA
+        boolean tvaEnabled = Boolean.parseBoolean(configController.getValeur("TVA_ENABLED"));
         String tauxTVA = configController.getValeur("TAUX_TVA");
 
         preview.append("\n");  // Espace en haut
         preview.append(centerText(nomEntreprise.toUpperCase(), 40)).append("\n");
         preview.append(centerText(adresse, 40)).append("\n");
         preview.append(centerText("Tél : " + telephone, 40)).append("\n");
-        preview.append(centerText("SIRET : " + siret, 40)).append("\n");
+        if (!siret.isEmpty()) {
+            preview.append(centerText("SIRET : " + siret, 40)).append("\n");
+        }
+        if (!enTete.isEmpty()) {
+            preview.append(centerText(enTete, 40)).append("\n");
+        }
         preview.append(repeatChar('=', 40)).append("\n\n");
 
         // Informations de la facture
@@ -73,10 +82,16 @@ public class PDFGenerator {
         // Totaux et TVA
         preview.append("\n").append(repeatChar('=', 40)).append("\n");
         preview.append(String.format("TOTAL HT%32.2f€\n", totalHT));
-        double tva = totalHT * (Double.parseDouble(tauxTVA) / 100);
-        preview.append(String.format("TVA %s%%%32.2f€\n", tauxTVA, tva));
-        preview.append(repeatChar('-', 40)).append("\n");
-        preview.append(String.format("TOTAL TTC%30.2f€\n", totalHT + tva));
+
+        if (tvaEnabled) {
+            double tva = totalHT * (Double.parseDouble(tauxTVA) / 100);
+            preview.append(String.format("TVA %s%%%32.2f€\n", tauxTVA, tva));
+            preview.append(repeatChar('-', 40)).append("\n");
+            preview.append(String.format("TOTAL TTC%30.2f€\n", totalHT + tva));
+        } else {
+            preview.append(String.format("TOTAL%34.2f€\n", totalHT));
+        }
+
         preview.append(repeatChar('=', 40)).append("\n");
         preview.append(String.format("Nombre d'articles: %d\n", totalArticles));
 
@@ -493,17 +508,6 @@ public class PDFGenerator {
         }
     }
 
-    private static String centerText(String text, int width) {
-        if (text == null || text.isEmpty()) return repeatChar(' ', width);
-        int padding = (width - text.length()) / 2;
-        if (padding <= 0) return text;
-        return String.format("%" + padding + "s%s%" + padding + "s", "", text, "");
-    }
-
-    private static String repeatChar(char c, int count) {
-        return new String(new char[count]).replace('\0', c);
-    }
-
     public static void genererRapportFournisseurs(List<Fournisseur> fournisseurs, String cheminFichier) {
         try {
             Document document = new Document(PageSize.A4);
@@ -575,5 +579,16 @@ public class PDFGenerator {
             throw new RuntimeException("Erreur lors de la génération du rapport des fournisseurs: " + 
                 e.getMessage());
         }
+    }
+
+    private static String centerText(String text, int width) {
+        if (text == null || text.isEmpty()) return repeatChar(' ', width);
+        int padding = (width - text.length()) / 2;
+        if (padding <= 0) return text;
+        return String.format("%" + padding + "s%s%" + padding + "s", "", text, "");
+    }
+
+    private static String repeatChar(char c, int count) {
+        return new String(new char[count]).replace('\0', c);
     }
 }

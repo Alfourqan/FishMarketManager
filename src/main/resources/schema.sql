@@ -66,7 +66,12 @@ CREATE TABLE IF NOT EXISTS mouvements_caisse (
 -- Insertion des configurations par défaut si elles n'existent pas
 INSERT OR IGNORE INTO configurations (cle, valeur, description) VALUES
 ('TAUX_TVA', '20.0', 'Taux de TVA en pourcentage'),
+('TVA_ENABLED', 'true', 'Activation/désactivation de la TVA'),
 ('NOM_ENTREPRISE', '', 'Nom de l''entreprise'),
 ('ADRESSE_ENTREPRISE', '', 'Adresse de l''entreprise'),
 ('TELEPHONE_ENTREPRISE', '', 'Numéro de téléphone de l''entreprise'),
-('PIED_PAGE_RECU', 'Merci de votre visite !', 'Message en pied de page des reçus');
+('SIRET_ENTREPRISE', '', 'Numéro SIRET de l''entreprise'),
+('LOGO_PATH', '', 'Chemin vers le logo de l''entreprise'),
+('FORMAT_RECU', 'COMPACT', 'Format des reçus (COMPACT ou DETAILLE)'),
+('PIED_PAGE_RECU', 'Merci de votre visite !', 'Message en pied de page des reçus'),
+('EN_TETE_RECU', '', 'Message en en-tête des reçus');
