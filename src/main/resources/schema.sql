@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS lignes_vente (
 CREATE TABLE IF NOT EXISTS mouvements_caisse (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     date TEXT DEFAULT (datetime('now', 'localtime')),
-    type TEXT NOT NULL CHECK (type IN ('ENTREE', 'SORTIE')),
+    type TEXT NOT NULL CHECK (type IN ('ENTREE', 'SORTIE', 'OUVERTURE', 'CLOTURE')),
     montant REAL NOT NULL,
     description TEXT
 );
