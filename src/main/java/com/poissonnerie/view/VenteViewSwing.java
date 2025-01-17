@@ -137,22 +137,13 @@ public class VenteViewSwing {
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         actionPanel.setOpaque(false);
 
-        // Création des boutons avec style moderne
-        JButton ajouterBtn = createStyledButton("Nouveau", MaterialDesign.MDI_PLUS_BOX, new Color(76, 175, 80));
-        JButton modifierBtn = createStyledButton("Modifier", MaterialDesign.MDI_PENCIL_BOX, new Color(33, 150, 243));
-        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesign.MDI_MINUS_BOX, new Color(244, 67, 54));
+        // Création du bouton d'actualisation avec style moderne
         JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH, new Color(156, 39, 176));
 
-        // Ajout des gestionnaires d'événements
-        ajouterBtn.addActionListener(e -> {/* TODO */});
-        modifierBtn.addActionListener(e -> {/* TODO */});
-        supprimerBtn.addActionListener(e -> {/* TODO */});
+        // Ajout du gestionnaire d'événements
         actualiserBtn.addActionListener(e -> actualiserDonnees());
 
-        // Ajout des boutons au panel
-        actionPanel.add(ajouterBtn);
-        actionPanel.add(modifierBtn);
-        actionPanel.add(supprimerBtn);
+        // Ajout du bouton au panel
         actionPanel.add(actualiserBtn);
 
         return actionPanel;
