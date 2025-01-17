@@ -58,4 +58,14 @@ public class Vente {
 
     public List<LigneVente> getLignes() { return lignes; }
     public void setLignes(List<LigneVente> lignes) { this.lignes = lignes; }
+
+    // Méthode pour calculer le montant total de la vente
+    public double getMontantTotal() {
+        if (lignes == null || lignes.isEmpty()) {
+            return 0.0;
+        }
+        return lignes.stream()
+            .mapToDouble(ligne -> ligne.getQuantite() * ligne.getPrixUnitaire())
+            .sum();
+    }
 }

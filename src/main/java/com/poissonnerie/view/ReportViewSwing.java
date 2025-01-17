@@ -19,7 +19,7 @@ public class ReportViewSwing {
     private final VenteController venteController;
     private final ProduitController produitController;
     private final FournisseurController fournisseurController;
-    private JPanel chartPanel; // Pour les graphiques
+    private JPanel chartPanel;
     private LocalDate dateDebut;
     private LocalDate dateFin;
 
@@ -38,16 +38,12 @@ public class ReportViewSwing {
     }
 
     private void initializeComponents() {
-        // Panel principal divisé en deux
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
         splitPane.setDividerLocation(250);
         splitPane.setDividerSize(1);
         splitPane.setBorder(null);
 
-        // Panel gauche pour les boutons de génération de rapports
         JPanel leftPanel = createLeftPanel();
-
-        // Panel droit pour l'affichage des graphiques/statistiques
         JPanel rightPanel = createRightPanel();
 
         splitPane.setLeftComponent(leftPanel);
@@ -65,7 +61,14 @@ public class ReportViewSwing {
         // Sélecteur de période
         JPanel periodPanel = new JPanel(new GridLayout(4, 1, 5, 5));
         periodPanel.setBackground(panel.getBackground());
-        periodPanel.setBorder(BorderFactory.createTitledBorder("Période"));
+        periodPanel.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(new Color(0, 135, 136), 1),
+            "Période",
+            javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+            javax.swing.border.TitledBorder.DEFAULT_POSITION,
+            new Font("Segoe UI", Font.BOLD, 12),
+            new Color(0, 135, 136)
+        ));
 
         JButton aujourdhuiBtn = createPeriodButton("Aujourd'hui", () -> {
             dateDebut = LocalDate.now();
@@ -89,7 +92,19 @@ public class ReportViewSwing {
         periodPanel.add(semaineBtn);
         periodPanel.add(moisBtn);
 
-        // Boutons de génération de rapports
+        // Boutons de génération de rapports avec style moderne
+        JPanel reportButtonsPanel = new JPanel();
+        reportButtonsPanel.setLayout(new BoxLayout(reportButtonsPanel, BoxLayout.Y_AXIS));
+        reportButtonsPanel.setBackground(panel.getBackground());
+        reportButtonsPanel.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(new Color(0, 135, 136), 1),
+            "Rapports",
+            javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION,
+            javax.swing.border.TitledBorder.DEFAULT_POSITION,
+            new Font("Segoe UI", Font.BOLD, 12),
+            new Color(0, 135, 136)
+        ));
+
         JButton ventesBtn = createReportButton("Rapport des ventes", MaterialDesign.MDI_CART);
         JButton stocksBtn = createReportButton("Rapport des stocks", MaterialDesign.MDI_PACKAGE_VARIANT);
         JButton fournisseursBtn = createReportButton("Rapport fournisseurs", MaterialDesign.MDI_TRUCK_DELIVERY);
@@ -101,15 +116,19 @@ public class ReportViewSwing {
         fournisseursBtn.addActionListener(e -> genererRapportFournisseurs());
         statistiquesBtn.addActionListener(e -> afficherStatistiques());
 
+        reportButtonsPanel.add(Box.createVerticalStrut(5));
+        reportButtonsPanel.add(ventesBtn);
+        reportButtonsPanel.add(Box.createVerticalStrut(5));
+        reportButtonsPanel.add(stocksBtn);
+        reportButtonsPanel.add(Box.createVerticalStrut(5));
+        reportButtonsPanel.add(fournisseursBtn);
+        reportButtonsPanel.add(Box.createVerticalStrut(5));
+        reportButtonsPanel.add(statistiquesBtn);
+        reportButtonsPanel.add(Box.createVerticalStrut(5));
+
         panel.add(periodPanel);
-        panel.add(Box.createVerticalStrut(20));
-        panel.add(ventesBtn);
-        panel.add(Box.createVerticalStrut(10));
-        panel.add(stocksBtn);
-        panel.add(Box.createVerticalStrut(10));
-        panel.add(fournisseursBtn);
-        panel.add(Box.createVerticalStrut(10));
-        panel.add(statistiquesBtn);
+        panel.add(Box.createVerticalStrut(15));
+        panel.add(reportButtonsPanel);
         panel.add(Box.createVerticalGlue());
 
         return panel;
@@ -118,17 +137,24 @@ public class ReportViewSwing {
     private JPanel createRightPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Titre du panel
-        JLabel titleLabel = new JLabel("Statistiques et graphiques", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(Color.WHITE);
+        headerPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(220, 220, 220)));
 
-        // Panel pour les graphiques
+        JLabel titleLabel = new JLabel("Tableau de bord", SwingConstants.LEFT);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        titleLabel.setForeground(new Color(33, 33, 33));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+
+        headerPanel.add(titleLabel, BorderLayout.CENTER);
+
         chartPanel = new JPanel();
         chartPanel.setBackground(Color.WHITE);
+        chartPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 0, 0));
 
-        panel.add(titleLabel, BorderLayout.NORTH);
+        panel.add(headerPanel, BorderLayout.NORTH);
         panel.add(chartPanel, BorderLayout.CENTER);
 
         return panel;
@@ -146,6 +172,25 @@ public class ReportViewSwing {
         button.setFocusPainted(false);
         button.setHorizontalAlignment(SwingConstants.LEFT);
         button.setIconTextGap(10);
+        button.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        button.setForeground(new Color(33, 33, 33));
+        button.setBackground(Color.WHITE);
+        button.setBorderPainted(true);
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
+
+        // Effet de survol
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(new Color(245, 245, 245));
+            }
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(Color.WHITE);
+            }
+        });
 
         return button;
     }
@@ -153,6 +198,25 @@ public class ReportViewSwing {
     private JButton createPeriodButton(String text, Runnable action) {
         JButton button = new JButton(text);
         button.setFocusPainted(false);
+        button.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        button.setBackground(Color.WHITE);
+        button.setForeground(new Color(33, 33, 33));
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(8, 12, 8, 12)
+        ));
+
+        // Effet de survol
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(new Color(245, 245, 245));
+            }
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(Color.WHITE);
+            }
+        });
+
         button.addActionListener(e -> action.run());
         return button;
     }
@@ -203,15 +267,34 @@ public class ReportViewSwing {
     }
 
     private void afficherStatistiques() {
-        // Mise à jour des statistiques dans le panel de droite
         chartPanel.removeAll();
-        chartPanel.setLayout(new GridLayout(2, 2, 10, 10));
+        chartPanel.setLayout(new GridLayout(2, 2, 15, 15));
 
-        // Exemple de statistiques (à remplacer par de vrais graphiques)
-        addStatPanel("Ventes du jour", "15 commandes\n2500 €");
-        addStatPanel("Produits en stock", "150 produits\n25 en alerte");
-        addStatPanel("Fournisseurs actifs", "8 fournisseurs\n3 commandes en cours");
-        addStatPanel("Chiffre d'affaires", "Mensuel: 45000 €\nAnnuel: 520000 €");
+        addStatPanel("Ventes", String.format(
+            "Aujourd'hui: %.2f €\nCette semaine: %.2f €\nCe mois: %.2f €",
+            calculerVentesTotal(LocalDate.now(), LocalDate.now()),
+            calculerVentesTotal(LocalDate.now().minusWeeks(1), LocalDate.now()),
+            calculerVentesTotal(LocalDate.now().minusMonths(1), LocalDate.now())
+        ));
+
+        addStatPanel("Stock", String.format(
+            "Total produits: %d\nEn alerte: %d\nValeur totale: %.2f €",
+            getNombreProduits(),
+            getNombreProduitsEnAlerte(),
+            getValeurTotaleStock()
+        ));
+
+        addStatPanel("Fournisseurs", String.format(
+            "Total: %d\nCommandes en cours: %d",
+            getNombreFournisseurs(),
+            getCommandesEnCours()
+        ));
+
+        addStatPanel("Performance", String.format(
+            "Marge brute: %.2f %%\nRotation stock: %.1f jours",
+            calculerMargeBrute(),
+            calculerRotationStock()
+        ));
 
         chartPanel.revalidate();
         chartPanel.repaint();
@@ -219,28 +302,96 @@ public class ReportViewSwing {
 
     private void addStatPanel(String title, String content) {
         JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setLayout(new BorderLayout(0, 10));
         panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200)),
-            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+            BorderFactory.createLineBorder(new Color(220, 220, 220)),
+            BorderFactory.createEmptyBorder(15, 15, 15, 15)
         ));
-        panel.setBackground(new Color(250, 250, 250));
+        panel.setBackground(Color.WHITE);
 
         JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        titleLabel.setForeground(new Color(33, 33, 33));
 
         JTextArea contentArea = new JTextArea(content);
-        contentArea.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        contentArea.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         contentArea.setEditable(false);
         contentArea.setBackground(panel.getBackground());
-        contentArea.setAlignmentX(Component.CENTER_ALIGNMENT);
+        contentArea.setBorder(null);
 
-        panel.add(titleLabel);
-        panel.add(Box.createVerticalStrut(10));
-        panel.add(contentArea);
+        panel.add(titleLabel, BorderLayout.NORTH);
+        panel.add(contentArea, BorderLayout.CENTER);
 
         chartPanel.add(panel);
+    }
+
+    // Méthodes utilitaires pour les statistiques
+    private double calculerVentesTotal(LocalDate debut, LocalDate fin) {
+        try {
+            venteController.chargerVentes();
+            return venteController.getVentes().stream()
+                .filter(v -> !v.getDate().toLocalDate().isBefore(debut) && 
+                           !v.getDate().toLocalDate().isAfter(fin))
+                .mapToDouble(Vente::getMontantTotal)
+                .sum();
+        } catch (Exception e) {
+            return 0.0;
+        }
+    }
+
+    private int getNombreProduits() {
+        try {
+            produitController.chargerProduits();
+            return produitController.getProduits().size();
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    private int getNombreProduitsEnAlerte() {
+        try {
+            produitController.chargerProduits();
+            return (int) produitController.getProduits().stream()
+                .filter(p -> p.getQuantite() <= p.getSeuilAlerte())
+                .count();
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    private double getValeurTotaleStock() {
+        try {
+            produitController.chargerProduits();
+            return produitController.getProduits().stream()
+                .mapToDouble(p -> p.getPrixAchat() * p.getQuantite())
+                .sum();
+        } catch (Exception e) {
+            return 0.0;
+        }
+    }
+
+    private int getNombreFournisseurs() {
+        try {
+            fournisseurController.chargerFournisseurs();
+            return fournisseurController.getFournisseurs().size();
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    private int getCommandesEnCours() {
+        // À implémenter selon la logique métier
+        return 0;
+    }
+
+    private double calculerMargeBrute() {
+        // À implémenter selon la logique métier
+        return 25.5; // Exemple
+    }
+
+    private double calculerRotationStock() {
+        // À implémenter selon la logique métier
+        return 15.3; // Exemple
     }
 
     private void updateCharts() {

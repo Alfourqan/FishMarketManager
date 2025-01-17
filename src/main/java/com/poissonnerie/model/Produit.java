@@ -44,6 +44,11 @@ public class Produit {
     public int getSeuilAlerte() { return seuilAlerte; }
     public void setSeuilAlerte(int seuil) { this.seuilAlerte = seuil; }
 
+    // Alias de getStock() pour maintenir la compatibilité
+    public int getQuantite() { 
+        return getStock(); 
+    }
+
     // Méthodes améliorées pour la gestion du stock
     public void ajusterStock(int quantite) {
         int nouveauStock = this.stock + quantite;

@@ -11,6 +11,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class PDFGenerator {
     private static final float TICKET_WIDTH = 170.079f; // 6 cm en points
@@ -500,5 +502,78 @@ public class PDFGenerator {
 
     private static String repeatChar(char c, int count) {
         return new String(new char[count]).replace('\0', c);
+    }
+
+    public static void genererRapportFournisseurs(List<Fournisseur> fournisseurs, String cheminFichier) {
+        try {
+            Document document = new Document(PageSize.A4);
+            PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
+            document.open();
+
+            // En-tête
+            Font titleFont = new Font(Font.FontFamily.HELVETICA, 16, Font.BOLD);
+            Font normalFont = new Font(Font.FontFamily.HELVETICA, 12);
+            Font headerFont = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD);
+
+            Paragraph title = new Paragraph("Liste des Fournisseurs", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            title.setSpacingAfter(20);
+            document.add(title);
+
+            // Date du rapport
+            Paragraph date = new Paragraph("Date du rapport: " + 
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")), normalFont);
+            date.setSpacingAfter(20);
+            document.add(date);
+
+            // Tableau des fournisseurs
+            PdfPTable table = new PdfPTable(new float[]{3, 2, 3, 2});
+            table.setWidthPercentage(100);
+
+            // En-têtes
+            Stream.of("Nom", "Téléphone", "Adresse", "Statut")
+                .forEach(columnTitle -> {
+                    Phrase phrase = new Phrase(columnTitle, headerFont);
+                    table.addCell(phrase);
+                });
+
+            // Données
+            for (Fournisseur fournisseur : fournisseurs) {
+                table.addCell(fournisseur.getNom());
+                table.addCell(fournisseur.getTelephone() != null ? fournisseur.getTelephone() : "");
+                table.addCell(fournisseur.getAdresse() != null ? fournisseur.getAdresse() : "");
+                table.addCell(fournisseur.getStatut());
+            }
+
+            document.add(table);
+
+            // Résumé
+            Paragraph resume = new Paragraph("\nRésumé:", headerFont);
+            resume.setSpacingBefore(20);
+            document.add(resume);
+
+            document.add(new Paragraph(String.format("Nombre total de fournisseurs: %d", fournisseurs.size()), 
+                normalFont));
+
+            Map<String, Long> statutCount = fournisseurs.stream()
+                .collect(Collectors.groupingBy(
+                    Fournisseur::getStatut,
+                    Collectors.counting()
+                ));
+
+            statutCount.forEach((statut, count) -> {
+                try {
+                    document.add(new Paragraph(String.format("Fournisseurs %s: %d", 
+                        statut.toLowerCase(), count), normalFont));
+                } catch (DocumentException e) {
+                    e.printStackTrace();
+                }
+            });
+
+            document.close();
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de la génération du rapport des fournisseurs: " + 
+                e.getMessage());
+        }
     }
 }
