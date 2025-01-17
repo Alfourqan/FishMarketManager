@@ -31,21 +31,21 @@ public class ConfigurationViewSwing {
 
         // Section TVA
         contentPanel.add(createSectionPanel("Configuration TVA", new String[][]{
-            {ConfigurationParam.CLE_TAUX_TVA, "Taux de TVA (%)", "20.0"}
+            {ConfigurationParam.CLE_TAUX_TVA, "Taux de TVA (%)", "20.0", "Taux de TVA appliqué aux ventes (entre 0 et 100)"}
         }));
 
         // Section Informations Entreprise
         contentPanel.add(Box.createVerticalStrut(10));
         contentPanel.add(createSectionPanel("Informations de l'entreprise", new String[][]{
-            {ConfigurationParam.CLE_NOM_ENTREPRISE, "Nom de l'entreprise", ""},
-            {ConfigurationParam.CLE_ADRESSE_ENTREPRISE, "Adresse", ""},
-            {ConfigurationParam.CLE_TELEPHONE_ENTREPRISE, "Téléphone", ""}
+            {ConfigurationParam.CLE_NOM_ENTREPRISE, "Nom de l'entreprise", "", "Nom qui apparaîtra sur les factures et reçus"},
+            {ConfigurationParam.CLE_ADRESSE_ENTREPRISE, "Adresse", "", "Adresse complète de l'entreprise"},
+            {ConfigurationParam.CLE_TELEPHONE_ENTREPRISE, "Téléphone", "", "Numéro de téléphone de contact"}
         }));
 
         // Section Personnalisation Reçus
         contentPanel.add(Box.createVerticalStrut(10));
         contentPanel.add(createSectionPanel("Personnalisation des reçus", new String[][]{
-            {ConfigurationParam.CLE_PIED_PAGE_RECU, "Message de pied de page", ""}
+            {ConfigurationParam.CLE_PIED_PAGE_RECU, "Message de pied de page", "Merci de votre visite !", "Message qui apparaîtra en bas des reçus"}
         }));
 
         JScrollPane scrollPane = new JScrollPane(contentPanel);
@@ -79,10 +79,12 @@ public class ConfigurationViewSwing {
 
             JLabel label = new JLabel(champ[1] + ":");
             label.setPreferredSize(new Dimension(150, label.getPreferredSize().height));
+            label.setToolTipText(champ[3]); // Ajout du tooltip
             rowPanel.add(label, BorderLayout.WEST);
 
             JTextField textField = new JTextField(20);
             textField.putClientProperty("cle", champ[0]);
+            textField.setToolTipText(champ[3]); // Ajout du tooltip
             champsSaisie.put(champ[0], textField);
             rowPanel.add(textField, BorderLayout.CENTER);
 
