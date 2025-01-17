@@ -49,6 +49,7 @@ public class VenteController {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            System.err.println("Erreur lors du chargement des ventes: " + e.getMessage());
         }
     }
 
@@ -87,6 +88,7 @@ public class VenteController {
             vente.setLignes(lignes);
         } catch (SQLException e) {
             e.printStackTrace();
+            System.err.println("Erreur lors du chargement des lignes de vente: " + e.getMessage());
         }
     }
 
@@ -95,10 +97,13 @@ public class VenteController {
         try {
             conn = DatabaseManager.getConnection();
             conn.setAutoCommit(false);
+            System.out.println("Début de l'enregistrement de la vente...");
 
             // Insertion de la vente
             String sqlVente = "INSERT INTO ventes (date, client_id, credit, total) VALUES (?, ?, ?, ?)";
-            try (PreparedStatement pstmt = conn.prepareStatement(sqlVente, Statement.RETURN_GENERATED_KEYS)) {
+            int venteId;
+
+            try (PreparedStatement pstmt = conn.prepareStatement(sqlVente)) {
                 pstmt.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
                 if (vente.getClient() != null) {
                     pstmt.setInt(2, vente.getClient().getId());
@@ -110,9 +115,15 @@ public class VenteController {
 
                 pstmt.executeUpdate();
 
-                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        vente.setId(generatedKeys.getInt(1));
+                // Récupérer l'ID généré avec last_insert_rowid()
+                try (Statement stmt = conn.createStatement();
+                     ResultSet rs = stmt.executeQuery("SELECT last_insert_rowid() as id")) {
+                    if (rs.next()) {
+                        venteId = rs.getInt("id");
+                        vente.setId(venteId);
+                        System.out.println("ID de vente généré: " + venteId);
+                    } else {
+                        throw new SQLException("Impossible de récupérer l'ID de la vente");
                     }
                 }
             }
@@ -133,6 +144,7 @@ public class VenteController {
                         pstmtStock.setInt(1, ligne.getQuantite());
                         pstmtStock.setInt(2, ligne.getProduit().getId());
                         pstmtStock.executeUpdate();
+                        System.out.println("Stock mis à jour pour le produit " + ligne.getProduit().getId());
                     }
                 }
             }
@@ -144,21 +156,26 @@ public class VenteController {
                     pstmt.setDouble(1, vente.getTotal());
                     pstmt.setInt(2, vente.getClient().getId());
                     pstmt.executeUpdate();
+                    System.out.println("Solde client mis à jour");
                 }
             }
 
             conn.commit();
             ventes.add(vente);
+            System.out.println("Vente enregistrée avec succès");
 
         } catch (SQLException e) {
             if (conn != null) {
                 try {
                     conn.rollback();
+                    System.err.println("Transaction annulée suite à une erreur");
                 } catch (SQLException ex) {
                     ex.printStackTrace();
+                    System.err.println("Erreur lors du rollback: " + ex.getMessage());
                 }
             }
             e.printStackTrace();
+            System.err.println("Erreur lors de l'enregistrement de la vente: " + e.getMessage());
         } finally {
             if (conn != null) {
                 try {
@@ -166,6 +183,7 @@ public class VenteController {
                     conn.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
+                    System.err.println("Erreur lors de la fermeture de la connexion: " + e.getMessage());
                 }
             }
         }

@@ -18,7 +18,7 @@ public class ConfigurationViewSwing {
         champsSaisie = new HashMap<>();
 
         initializeComponents();
-        loadData(); // Chargement initial des données
+        loadData();
     }
 
     private void initializeComponents() {
@@ -83,7 +83,7 @@ public class ConfigurationViewSwing {
             label.setPreferredSize(new Dimension(150, label.getPreferredSize().height));
 
             JTextField textField = new JTextField(20);
-            textField.setName(champ[0]); // Utiliser le nom pour identifier le champ
+            textField.setName(champ[0]);
             champsSaisie.put(champ[0], textField);
 
             gbc.gridx = 0;
@@ -104,16 +104,18 @@ public class ConfigurationViewSwing {
 
     private void loadData() {
         try {
+            System.out.println("Chargement des configurations...");
             controller.chargerConfigurations();
             for (Map.Entry<String, JTextField> entry : champsSaisie.entrySet()) {
                 String valeur = controller.getValeur(entry.getKey());
-                if (valeur != null) {
-                    SwingUtilities.invokeLater(() -> entry.getValue().setText(valeur));
-                }
+                System.out.println("Configuration chargée: " + entry.getKey() + " = " + valeur);
+                SwingUtilities.invokeLater(() -> entry.getValue().setText(valeur));
             }
+            System.out.println("Configurations chargées avec succès");
         } catch (Exception e) {
             e.printStackTrace();
-            SwingUtilities.invokeLater(() -> 
+            System.err.println("Erreur lors du chargement des configurations: " + e.getMessage());
+            SwingUtilities.invokeLater(() ->
                 JOptionPane.showMessageDialog(mainPanel,
                     "Erreur lors du chargement des configurations : " + e.getMessage(),
                     "Erreur",
@@ -122,16 +124,54 @@ public class ConfigurationViewSwing {
         }
     }
 
+    private boolean validerChamps() {
+        // Validation du taux de TVA
+        String tauxTVA = champsSaisie.get(ConfigurationParam.CLE_TAUX_TVA).getText().trim();
+        try {
+            double tva = Double.parseDouble(tauxTVA);
+            if (tva < 0 || tva > 100) {
+                JOptionPane.showMessageDialog(mainPanel,
+                    "Le taux de TVA doit être un nombre entre 0 et 100",
+                    "Erreur de validation",
+                    JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(mainPanel,
+                "Le taux de TVA doit être un nombre valide",
+                "Erreur de validation",
+                JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        // Validation du numéro de téléphone
+        String telephone = champsSaisie.get(ConfigurationParam.CLE_TELEPHONE_ENTREPRISE).getText().trim();
+        if (!telephone.isEmpty() && !telephone.matches("^[0-9+\\-\\s]*$")) {
+            JOptionPane.showMessageDialog(mainPanel,
+                "Le numéro de téléphone contient des caractères invalides",
+                "Erreur de validation",
+                JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        return true;
+    }
+
     private void sauvegarderConfigurations() {
         try {
-            boolean hasChanges = false;
+            if (!validerChamps()) {
+                return;
+            }
 
+            System.out.println("Début de la sauvegarde des configurations...");
+            boolean hasChanges = false;
             for (Map.Entry<String, JTextField> entry : champsSaisie.entrySet()) {
                 String cle = entry.getKey();
                 String nouvelleValeur = entry.getValue().getText().trim();
                 String ancienneValeur = controller.getValeur(cle);
 
                 if (!nouvelleValeur.equals(ancienneValeur)) {
+                    System.out.println("Mise à jour de la configuration: " + cle + " = " + nouvelleValeur);
                     ConfigurationParam config = new ConfigurationParam(0, cle, nouvelleValeur, "");
                     controller.mettreAJourConfiguration(config);
                     hasChanges = true;
@@ -139,13 +179,18 @@ public class ConfigurationViewSwing {
             }
 
             if (hasChanges) {
+                System.out.println("Configurations sauvegardées avec succès");
                 JOptionPane.showMessageDialog(mainPanel,
                     "Les paramètres ont été sauvegardés avec succès",
                     "Succès",
                     JOptionPane.INFORMATION_MESSAGE);
+                loadData(); // Recharger les données pour refléter les changements
+            } else {
+                System.out.println("Aucun changement à sauvegarder");
             }
         } catch (Exception e) {
             e.printStackTrace();
+            System.err.println("Erreur lors de la sauvegarde: " + e.getMessage());
             JOptionPane.showMessageDialog(mainPanel,
                 "Erreur lors de la sauvegarde : " + e.getMessage(),
                 "Erreur",
@@ -160,14 +205,17 @@ public class ConfigurationViewSwing {
             JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 
             try {
+                System.out.println("Réinitialisation des configurations...");
                 controller.reinitialiserConfigurations();
                 loadData(); // Recharger les données après la réinitialisation
+                System.out.println("Configurations réinitialisées avec succès");
                 JOptionPane.showMessageDialog(mainPanel,
                     "Les paramètres ont été réinitialisés avec succès",
                     "Succès",
                     JOptionPane.INFORMATION_MESSAGE);
             } catch (Exception e) {
                 e.printStackTrace();
+                System.err.println("Erreur lors de la réinitialisation: " + e.getMessage());
                 JOptionPane.showMessageDialog(mainPanel,
                     "Erreur lors de la réinitialisation : " + e.getMessage(),
                     "Erreur",
