@@ -467,7 +467,7 @@ public class PDFGenerator {
                 table.addCell(mouvement.getType().toString());
                 table.addCell(String.format("%.2f €", mouvement.getMontant()));
 
-                if (mouvement.getType() == MouvementCaisse.Type.ENTREE) {
+                if (mouvement.getType() == MouvementCaisse.TypeMouvement.ENTREE) {
                     totalEntrees += mouvement.getMontant();
                 } else {
                     totalSorties += mouvement.getMontant();
