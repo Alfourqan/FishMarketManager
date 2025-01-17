@@ -15,6 +15,8 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon; // Assuming you use FlatLaf library for MaterialDesign Icons
+
 public class VenteViewSwing {
     private final JPanel mainPanel;
     private final VenteController venteController;
@@ -29,7 +31,7 @@ public class VenteViewSwing {
     private JComboBox<Object> produitCombo;
     private JCheckBox creditCheck;
     private JLabel totalLabel;
-    private JButton actualiserBtn;
+    //private JButton actualiserBtn; //Removed
 
     public VenteViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -112,7 +114,7 @@ public class VenteViewSwing {
         clientCombo.setEnabled(enabled && creditCheck.isSelected());
         produitCombo.setEnabled(enabled);
         creditCheck.setEnabled(enabled);
-        actualiserBtn.setEnabled(enabled);
+        //actualiserBtn.setEnabled(enabled); //Removed
         // Désactiver les autres contrôles si nécessaire
     }
 
@@ -128,20 +130,17 @@ public class VenteViewSwing {
         splitPane.setResizeWeight(0.5);
 
         // Bouton d'actualisation
-        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        actualiserBtn = new JButton("Actualiser les données");
-        actualiserBtn.setIcon(UIManager.getIcon("Table.refreshIcon"));
-        actualiserBtn.addActionListener(e -> actualiserDonnees());
-        actionPanel.add(actualiserBtn);
+        JPanel actionPanel = createActionPanel(); //Replaced
 
         mainPanel.add(splitPane, BorderLayout.CENTER);
         mainPanel.add(actionPanel, BorderLayout.SOUTH);
     }
 
+
     private void actualiserDonnees() {
         try {
             System.out.println("Début de l'actualisation des données...");
-            actualiserBtn.setEnabled(false);
+            //actualiserBtn.setEnabled(false); //Removed
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
             // Sauvegarder l'état actuel
@@ -168,7 +167,7 @@ public class VenteViewSwing {
                 "Erreur",
                 JOptionPane.ERROR_MESSAGE);
         } finally {
-            actualiserBtn.setEnabled(true);
+            //actualiserBtn.setEnabled(true); //Removed
             setCursor(Cursor.getDefaultCursor());
         }
     }
@@ -509,8 +508,8 @@ public class VenteViewSwing {
         clientCombo.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value,
-                                                       int index, boolean isSelected,
-                                                       boolean cellHasFocus) {
+                                                          int index, boolean isSelected,
+                                                          boolean cellHasFocus) {
                 if (value == null) {
                     value = "⚪ Sélectionner un client";
                 } else if (value instanceof Client) {
@@ -528,14 +527,14 @@ public class VenteViewSwing {
         produitCombo.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value,
-                                                       int index, boolean isSelected,
-                                                       boolean cellHasFocus) {
+                                                          int index, boolean isSelected,
+                                                          boolean cellHasFocus) {
                 if (value == null) {
                     value = "⚪ Sélectionner un produit";
                 } else if (value instanceof String && ((String) value).startsWith("━━━")) {
                     JLabel label = (JLabel) super.getListCellRendererComponent(list, value,
-                                                                             index, isSelected,
-                                                                             cellHasFocus);
+                                                                              index, isSelected,
+                                                                              cellHasFocus);
                     label.setBackground(new Color(240, 240, 240));
                     label.setForeground(new Color(70, 70, 70));
                     label.setFont(label.getFont().deriveFont(Font.BOLD));
@@ -553,7 +552,7 @@ public class VenteViewSwing {
                     );
 
                     Component c = super.getListCellRendererComponent(list, value, index,
-                                                                   isSelected, cellHasFocus);
+                                                                    isSelected, cellHasFocus);
                     if (produit.getStock() <= produit.getSeuilAlerte()) {
                         c.setForeground(new Color(200, 0, 0));
                     }
@@ -577,5 +576,47 @@ public class VenteViewSwing {
     }
     private void setCursor(Cursor cursor) {
         mainPanel.setCursor(cursor);
+    }
+
+    private JPanel createActionPanel() {
+        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        actionPanel.setOpaque(false);
+
+        // Boutons avec style moderne
+        JButton okButton = createStyledButton("Enregistrer", MaterialDesign.MDI_CONTENT_SAVE, new Color(76, 175, 80));
+        JButton cancelButton = createStyledButton("Annuler", MaterialDesign.MDI_CLOSE, new Color(244, 67, 54));
+
+        actionPanel.add(okButton);
+        actionPanel.add(cancelButton);
+
+        return actionPanel;
+    }
+
+    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
+        FontIcon icon = FontIcon.of(iconCode);
+        icon.setIconSize(18);
+        icon.setIconColor(Color.WHITE);
+
+        JButton button = new JButton(text);
+        button.setIcon(icon);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        button.setBackground(color);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setMargin(new Insets(8, 16, 8, 16));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Effet de survol
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(color.darker());
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(color);
+            }
+        });
+
+        return button;
     }
 }
