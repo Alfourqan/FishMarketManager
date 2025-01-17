@@ -8,8 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class ConfigurationController {
+    private static final Logger LOGGER = Logger.getLogger(ConfigurationController.class.getName());
     private final List<ConfigurationParam> configurations = new ArrayList<>();
     private final Map<String, String> configCache = new HashMap<>();
 
@@ -19,47 +22,45 @@ public class ConfigurationController {
         String sql = "SELECT * FROM configurations ORDER BY cle";
 
         try (Connection conn = DatabaseManager.getConnection();
-             Statement stmt = conn.createStatement()) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             conn.setAutoCommit(false);
             try {
-                ResultSet rs = stmt.executeQuery(sql);
+                ResultSet rs = stmt.executeQuery();
                 while (rs.next()) {
                     ConfigurationParam config = new ConfigurationParam(
                         rs.getInt("id"),
-                        rs.getString("cle"),
-                        rs.getString("valeur"),
-                        rs.getString("description")
+                        sanitizeInput(rs.getString("cle")),
+                        sanitizeInput(rs.getString("valeur")),
+                        sanitizeInput(rs.getString("description"))
                     );
                     configurations.add(config);
                     configCache.put(config.getCle(), config.getValeur());
                 }
                 conn.commit();
-                System.out.println("Configurations chargées: " + configurations.size() + " entrées");
+                LOGGER.info("Configurations chargées: " + configurations.size() + " entrées");
             } catch (SQLException e) {
                 conn.rollback();
+                LOGGER.log(Level.SEVERE, "Erreur lors du chargement des configurations", e);
                 throw e;
             }
         } catch (SQLException e) {
-            System.err.println("Erreur lors du chargement des configurations: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Erreur lors du chargement des configurations", e);
             throw new RuntimeException("Erreur lors du chargement des configurations", e);
         }
     }
 
     public void mettreAJourConfiguration(ConfigurationParam config) {
-        if (config == null || config.getCle() == null || config.getCle().trim().isEmpty()) {
-            throw new IllegalArgumentException("Configuration invalide");
-        }
+        validateConfiguration(config);
 
         String sql = "UPDATE configurations SET valeur = ? WHERE cle = ?";
-        System.out.println("Mise à jour de la configuration: " + config.getCle() + " = " + config.getValeur());
+        LOGGER.info("Mise à jour de la configuration: " + config.getCle() + " = " + config.getValeur());
 
         try (Connection conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setString(1, config.getValeur());
-                pstmt.setString(2, config.getCle());
+                pstmt.setString(1, sanitizeInput(config.getValeur()));
+                pstmt.setString(2, sanitizeInput(config.getCle()));
                 int rowsUpdated = pstmt.executeUpdate();
 
                 if (rowsUpdated > 0) {
@@ -71,18 +72,19 @@ public class ConfigurationController {
                         }
                     }
                     conn.commit();
-                    System.out.println("Configuration mise à jour avec succès");
+                    LOGGER.info("Configuration mise à jour avec succès");
                 } else {
                     conn.rollback();
-                    System.err.println("Configuration non trouvée: " + config.getCle());
+                    LOGGER.warning("Configuration non trouvée: " + config.getCle());
+                    throw new IllegalStateException("Configuration non trouvée: " + config.getCle());
                 }
             } catch (SQLException e) {
                 conn.rollback();
+                LOGGER.log(Level.SEVERE, "Erreur lors de la mise à jour de la configuration", e);
                 throw e;
             }
         } catch (SQLException e) {
-            System.err.println("Erreur lors de la mise à jour de la configuration: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Erreur lors de la mise à jour de la configuration", e);
             throw new RuntimeException("Erreur lors de la mise à jour de la configuration", e);
         }
     }
@@ -101,36 +103,42 @@ public class ConfigurationController {
 
         try (Connection conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(false);
-            try (Statement stmt = conn.createStatement()) {
-                int rowsUpdated = stmt.executeUpdate(sql);
+            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                int rowsUpdated = stmt.executeUpdate();
                 conn.commit();
-                System.out.println("Configurations réinitialisées: " + rowsUpdated + " entrées mises à jour");
+                LOGGER.info("Configurations réinitialisées: " + rowsUpdated + " entrées mises à jour");
                 chargerConfigurations(); // Recharger les configurations après réinitialisation
             } catch (SQLException e) {
                 conn.rollback();
+                LOGGER.log(Level.SEVERE, "Erreur lors de la réinitialisation des configurations", e);
                 throw e;
             }
         } catch (SQLException e) {
-            System.err.println("Erreur lors de la réinitialisation des configurations: " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Erreur lors de la réinitialisation des configurations", e);
             throw new RuntimeException("Erreur lors de la réinitialisation des configurations", e);
         }
     }
 
     public String getValeur(String cle) {
-        return configCache.getOrDefault(cle, "");
+        return sanitizeInput(configCache.getOrDefault(cle, ""));
     }
 
     public List<ConfigurationParam> getConfigurations() {
-        return configurations;
+        return new ArrayList<>(configurations); // Retourne une copie de la liste pour éviter les modifications externes
     }
+
     public double getTauxTVA() {
         String taux = getValeur(ConfigurationParam.CLE_TAUX_TVA);
         try {
-            return Double.parseDouble(taux);
+            double tauxTVA = Double.parseDouble(taux);
+            if (tauxTVA < 0 || tauxTVA > 100) {
+                LOGGER.warning("Taux TVA invalide: " + tauxTVA);
+                return 0.0;
+            }
+            return tauxTVA;
         } catch (NumberFormatException e) {
-            System.err.println("Erreur de conversion du taux TVA: " + e.getMessage());
-            return 0.0; // Valeur par défaut si non configurée
+            LOGGER.log(Level.WARNING, "Erreur de conversion du taux TVA", e);
+            return 0.0;
         }
     }
 
@@ -141,5 +149,67 @@ public class ConfigurationController {
         infos.put("telephone", getValeur(ConfigurationParam.CLE_TELEPHONE_ENTREPRISE));
         infos.put("pied_page", getValeur(ConfigurationParam.CLE_PIED_PAGE_RECU));
         return infos;
+    }
+
+    private void validateConfiguration(ConfigurationParam config) {
+        if (config == null) {
+            throw new IllegalArgumentException("La configuration ne peut pas être null");
+        }
+        if (config.getCle() == null || config.getCle().trim().isEmpty()) {
+            throw new IllegalArgumentException("La clé de configuration ne peut pas être vide");
+        }
+        if (config.getValeur() == null) {
+            throw new IllegalArgumentException("La valeur de configuration ne peut pas être null");
+        }
+
+        // Validation spécifique selon le type de configuration
+        switch (config.getCle()) {
+            case ConfigurationParam.CLE_TAUX_TVA:
+                validateTauxTVA(config.getValeur());
+                break;
+            case ConfigurationParam.CLE_TVA_ENABLED:
+                validateBoolean(config.getValeur());
+                break;
+            case ConfigurationParam.CLE_FORMAT_RECU:
+                validateFormatRecu(config.getValeur());
+                break;
+            // Ajoutez d'autres validations spécifiques ici
+        }
+    }
+
+    private void validateTauxTVA(String valeur) {
+        try {
+            double taux = Double.parseDouble(valeur);
+            if (taux < 0 || taux > 100) {
+                throw new IllegalArgumentException("Le taux de TVA doit être compris entre 0 et 100");
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Le taux de TVA doit être un nombre valide");
+        }
+    }
+
+    private void validateBoolean(String valeur) {
+        if (!valeur.equalsIgnoreCase("true") && !valeur.equalsIgnoreCase("false")) {
+            throw new IllegalArgumentException("La valeur doit être 'true' ou 'false'");
+        }
+    }
+
+    private void validateFormatRecu(String valeur) {
+        if (!valeur.equals("COMPACT") && !valeur.equals("DETAILLE")) {
+            throw new IllegalArgumentException("Le format du reçu doit être 'COMPACT' ou 'DETAILLE'");
+        }
+    }
+
+    private String sanitizeInput(String input) {
+        if (input == null) {
+            return "";
+        }
+        // Échapper les caractères spéciaux HTML
+        return input.replaceAll("&", "&amp;")
+                   .replaceAll("<", "&lt;")
+                   .replaceAll(">", "&gt;")
+                   .replaceAll("\"", "&quot;")
+                   .replaceAll("'", "&#x27;")
+                   .replaceAll("/", "&#x2F;");
     }
 }

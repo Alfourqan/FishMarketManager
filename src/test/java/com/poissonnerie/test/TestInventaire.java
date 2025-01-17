@@ -7,6 +7,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Tests unitaires pour la gestion de l'inventaire
@@ -95,22 +97,47 @@ public class TestInventaire {
         assertEquals(10, saumon.getStock(), "Le stock doit être revenu à 10");
     }
 
-    public static void main(String[] args) {
-        TestInventaire test = new TestInventaire();
-        test.setUp();
+    // Tests de validation des entrées
+    @Test
+    public void testAjusterStockProduitNull() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            inventaireManager.ajusterStock(null, 1);
+        }, "Doit lever une exception pour un produit null");
+    }
 
-        System.out.println("\n=== Tests de gestion des stocks ===\n");
+    @Test
+    public void testAjouterObserverNull() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            inventaireManager.ajouterObserver(null);
+        }, "Doit lever une exception pour un observer null");
+    }
 
-        try {
-            test.testAjustementStockNormal();
-            test.testStockBas();
-            test.testRuptureStock();
-            test.testReapprovisionnement();
-            System.out.println("\n✅ Tous les tests ont réussi");
-        } catch (AssertionError e) {
-            System.out.println("\n❌ Échec des tests: " + e.getMessage());
-        } finally {
-            test.tearDown();
-        }
+    @Test
+    public void testRetirerObserverNull() {
+        assertThrows(IllegalArgumentException.class, () -> {
+            inventaireManager.retirerObserver(null);
+        }, "Doit lever une exception pour un observer null");
+    }
+
+    @Test
+    public void testGetProduitsBas() {
+        assertTrue(inventaireManager.getProduitsBas(null).isEmpty(),
+            "La liste doit être vide pour une entrée null");
+
+        List<Produit> produits = Arrays.asList(saumon, null, 
+            new Produit(2, "Thon", "Poisson", 15.0, 20.99, 3, 5));
+        assertEquals(2, inventaireManager.getProduitsBas(produits).size(),
+            "Doit retourner le bon nombre de produits en stock bas");
+    }
+
+    @Test
+    public void testGetProduitsEnRupture() {
+        assertTrue(inventaireManager.getProduitsEnRupture(null).isEmpty(),
+            "La liste doit être vide pour une entrée null");
+
+        Produit thonRupture = new Produit(2, "Thon", "Poisson", 15.0, 20.99, 0, 5);
+        List<Produit> produits = Arrays.asList(saumon, null, thonRupture);
+        assertEquals(1, inventaireManager.getProduitsEnRupture(produits).size(),
+            "Doit retourner le bon nombre de produits en rupture");
     }
 }

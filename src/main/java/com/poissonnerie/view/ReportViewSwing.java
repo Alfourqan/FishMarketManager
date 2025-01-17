@@ -256,19 +256,38 @@ public class ReportViewSwing {
         return button;
     }
 
+    /* Ajout des vérifications de type */
     private void genererRapport(String type, List<?> donnees, String nomFichier) {
+        if (donnees == null) {
+            LOGGER.severe("Les données ne peuvent pas être null");
+            afficherMessageErreur("Erreur", "Données invalides pour la génération du rapport");
+            return;
+        }
+
         try {
             switch (type) {
                 case "ventes":
+                    if (!(donnees.stream().allMatch(d -> d instanceof Vente))) {
+                        throw new IllegalArgumentException("Type de données incorrect pour le rapport des ventes");
+                    }
                     PDFGenerator.genererRapportVentes((List<Vente>) donnees, nomFichier);
                     break;
                 case "stocks":
+                    if (!(donnees.stream().allMatch(d -> d instanceof Produit))) {
+                        throw new IllegalArgumentException("Type de données incorrect pour le rapport des stocks");
+                    }
                     PDFGenerator.genererRapportStocks((List<Produit>) donnees, nomFichier);
                     break;
                 case "fournisseurs":
+                    if (!(donnees.stream().allMatch(d -> d instanceof Fournisseur))) {
+                        throw new IllegalArgumentException("Type de données incorrect pour le rapport des fournisseurs");
+                    }
                     PDFGenerator.genererRapportFournisseurs((List<Fournisseur>) donnees, nomFichier);
                     break;
                 case "creances":
+                    if (!(donnees.stream().allMatch(d -> d instanceof Client))) {
+                        throw new IllegalArgumentException("Type de données incorrect pour le rapport des créances");
+                    }
                     PDFGenerator.genererRapportCreances((List<Client>) donnees, nomFichier);
                     break;
                 default:
@@ -282,7 +301,6 @@ public class ReportViewSwing {
             afficherMessageErreur("Erreur", MSG_ERREUR_GENERATION + e.getMessage());
         }
     }
-
 
     private void afficherStatistiques() {
         chartPanel.removeAll();
@@ -620,15 +638,26 @@ public class ReportViewSwing {
         JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.INFORMATION_MESSAGE);
     }
     
+    /* Amélioration de la gestion des erreurs dans createDetailDialog */
     private JDialog createDetailDialog(Client client) {
+        if (client == null) {
+            LOGGER.severe("Client null passé à createDetailDialog");
+            throw new IllegalArgumentException("Le client ne peut pas être null");
+        }
+
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel), 
             "Détail des créances - " + client.getNom(), true);
         dialog.setLayout(new BorderLayout(10, 10));
         dialog.setSize(600, 400);
         dialog.setLocationRelativeTo(null);
 
-        JPanel mainPanel = createDetailMainPanel(client);
-        dialog.add(mainPanel);
+        try {
+            JPanel mainPanel = createDetailMainPanel(client);
+            dialog.add(mainPanel);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la création du panel de détails", e);
+            throw new RuntimeException("Impossible de créer le dialogue de détails", e);
+        }
 
         return dialog;
     }
@@ -709,20 +738,38 @@ public class ReportViewSwing {
         return buttonPanel;
     }
 
+    /* Amélioration de la méthode afficherDialogueReglement */
     private void afficherDialogueReglement(Client client) {
-        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel), 
-            "Règlement de créance - " + client.getNom(), true);
-        dialog.setLayout(new BorderLayout(10, 10));
-        dialog.setSize(400, 250);
-        dialog.setLocationRelativeTo(null);
+        if (client == null || client.getSolde() <= 0) {
+            LOGGER.warning("Tentative d'afficher le dialogue de règlement pour un client invalide");
+            showErrorMessage("Erreur", "Client invalide ou sans créance");
+            return;
+        }
 
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridwidth = 1;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(5, 5, 5, 5);
+        try {
+            JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel), 
+                "Règlement de créance - " + client.getNom(), true);
+            dialog.setLayout(new BorderLayout(10, 10));
+            dialog.setSize(400, 250);
+            dialog.setLocationRelativeTo(null);
 
+            JPanel panel = new JPanel(new GridBagLayout());
+            panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.gridwidth = 1;
+            gbc.fill = GridBagConstraints.HORIZONTAL;
+            gbc.insets = new Insets(5, 5, 5, 5);
+
+            configureReglementDialogComponents(dialog, panel, gbc, client);
+            dialog.setVisible(true);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'affichage du dialogue de règlement", e);
+            showErrorMessage("Erreur", "Impossible d'afficher le dialogue de règlement: " + e.getMessage());
+        }
+    }
+
+    /* Nouvelle méthode pour la configuration des composants du dialogue de règlement */
+    private void configureReglementDialogComponents(JDialog dialog, JPanel panel, GridBagConstraints gbc, Client client) {
         gbc.gridx = 0;
         gbc.gridy = 0;
         panel.add(new JLabel("Solde actuel:"), gbc);
@@ -735,46 +782,58 @@ public class ReportViewSwing {
         panel.add(new JLabel("Montant à régler:"), gbc);
 
         gbc.gridx = 1;
-        JSpinner montantSpinner = new JSpinner(new SpinnerNumberModel(0.0, 0.0, client.getSolde(), 0.01));
+        SpinnerNumberModel spinnerModel = new SpinnerNumberModel(0.0, 0.0, client.getSolde(), 0.01);
+        JSpinner montantSpinner = new JSpinner(spinnerModel);
         panel.add(montantSpinner, gbc);
 
+        JPanel buttonPanel = createReglementButtonPanel(dialog, montantSpinner, client);
+
+        dialog.add(panel, BorderLayout.CENTER);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    /* Nouvelle méthode pour créer le panel des boutons de règlement */
+    private JPanel createReglementButtonPanel(JDialog dialog, JSpinner montantSpinner, Client client) {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton validerBtn = createStyledButton("Valider", MaterialDesign.MDI_CHECK, SUCCESS_COLOR);
         JButton annulerBtn = createStyledButton("Annuler", MaterialDesign.MDI_CLOSE, ERROR_COLOR);
 
-        validerBtn.addActionListener(e -> {
-            try {
-                double montant = (double) montantSpinner.getValue();
-                if (montant <= 0) {
-                    showErrorMessage("Erreur", "Le montant doit être supérieur à 0");
-                    return;
-                }
-                if (montant > client.getSolde()) {
-                    showErrorMessage("Erreur", "Le montant ne peut pas être supérieur au solde");
-                    return;
-                }
-
-                ClientController clientController = new ClientController();
-                clientController.reglerCreance(client, montant);
-
-                showSuccessMessage("Succès", 
-                    String.format("Règlement de %.2f € effectué avec succès", montant));
-
-                dialog.dispose();
-                afficherEtatCreances(); 
-            } catch (Exception ex) {
-                handleError("règlement de créance", ex);
-            }
-        });
-
+        validerBtn.addActionListener(e -> handleReglementValidation(dialog, montantSpinner, client));
         annulerBtn.addActionListener(e -> dialog.dispose());
 
         buttonPanel.add(validerBtn);
         buttonPanel.add(annulerBtn);
+        return buttonPanel;
+    }
 
-        dialog.add(panel, BorderLayout.CENTER);
-        dialog.add(buttonPanel, BorderLayout.SOUTH);
-        dialog.setVisible(true);
+    /* Nouvelle méthode pour gérer la validation du règlement */
+    private void handleReglementValidation(JDialog dialog, JSpinner montantSpinner, Client client) {
+        try {
+            double montant = (double) montantSpinner.getValue();
+            validateReglementAmount(montant, client.getSolde());
+
+            ClientController clientController = new ClientController();
+            clientController.reglerCreance(client, montant);
+
+            showSuccessMessage("Succès", String.format("Règlement de %.2f € effectué avec succès", montant));
+            dialog.dispose();
+            afficherEtatCreances();
+        } catch (IllegalArgumentException ex) {
+            showErrorMessage("Erreur", ex.getMessage());
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Erreur lors du règlement de la créance", ex);
+            showErrorMessage("Erreur", "Une erreur est survenue lors du règlement: " + ex.getMessage());
+        }
+    }
+
+    /* Nouvelle méthode pour valider le montant du règlement */
+    private void validateReglementAmount(double montant, double solde) {
+        if (montant <= 0) {
+            throw new IllegalArgumentException("Le montant doit être supérieur à 0");
+        }
+        if (montant > solde) {
+            throw new IllegalArgumentException("Le montant ne peut pas être supérieur au solde");
+        }
     }
 
     private void handleError(String operation, Exception e) {
@@ -784,4 +843,14 @@ public class ReportViewSwing {
 
     public JPanel getMainPanel() {
         return mainPanel;    }
+    private void afficherDetailCreancesClient(Client client) {
+        try {
+            JDialog dialog = createDetailDialog(client);
+            dialog.setVisible(true);
+            LOGGER.info("Affichage des détails des créances pour le client: " + client.getNom());
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'affichage des détails du client", e);
+            showErrorMessage("Erreur", "Impossible d'afficher les détails : " + e.getMessage());
+        }
+    }
 }
