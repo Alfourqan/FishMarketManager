@@ -13,10 +13,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.JList;
-import javax.swing.plaf.basic.BasicComboBoxRenderer;
+import java.util.stream.Collectors;
 
 public class VenteViewSwing {
     private final JPanel mainPanel;
@@ -28,10 +25,10 @@ public class VenteViewSwing {
     private final DefaultTableModel panierModel;
     private final DefaultTableModel ventesModel;
     private final List<Vente.LigneVente> panier;
-    private JComboBox<Client> clientCombo;
+    private JComboBox<Object> clientCombo;
     private JCheckBox creditCheck;
     private JLabel totalLabel;
-    private JComboBox<Produit> produitCombo;
+    private JComboBox<Object> produitCombo;
 
     public VenteViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -92,7 +89,31 @@ public class VenteViewSwing {
                 nouvelleVentePanel, historiquePanel);
         splitPane.setResizeWeight(0.5);
 
+        // Bouton d'actualisation
+        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton actualiserBtn = new JButton("Actualiser les données");
+        actualiserBtn.setIcon(UIManager.getIcon("Table.refreshIcon")); // Icône standard de rafraîchissement
+        actualiserBtn.addActionListener(e -> {
+            try {
+                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                loadData();
+                JOptionPane.showMessageDialog(mainPanel,
+                    "Données actualisées avec succès",
+                    "Succès",
+                    JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(mainPanel,
+                    "Erreur lors de l'actualisation : " + ex.getMessage(),
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
+            } finally {
+                setCursor(Cursor.getDefaultCursor());
+            }
+        });
+        actionPanel.add(actualiserBtn);
+
         mainPanel.add(splitPane, BorderLayout.CENTER);
+        mainPanel.add(actionPanel, BorderLayout.SOUTH);
     }
 
     private JPanel createNouvelleVentePanel() {
@@ -134,6 +155,7 @@ public class VenteViewSwing {
         // Footer
         JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         totalLabel = new JLabel("Total: 0.00 €");
+        totalLabel.setFont(totalLabel.getFont().deriveFont(Font.BOLD));
         JButton validerBtn = new JButton("Valider la vente");
         JButton annulerBtn = new JButton("Annuler");
 
@@ -144,15 +166,16 @@ public class VenteViewSwing {
         // Event handlers
         ajouterBtn.addActionListener(e -> {
             try {
-                Produit produit = (Produit) produitCombo.getSelectedItem();
-                if (produit == null) {
+                Object selectedItem = produitCombo.getSelectedItem();
+                if (!(selectedItem instanceof Produit)) {
                     JOptionPane.showMessageDialog(mainPanel,
-                        "Veuillez sélectionner un produit",
+                        "Veuillez sélectionner un produit valide",
                         "Erreur",
                         JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
+                Produit produit = (Produit) selectedItem;
                 String quantiteText = quantiteField.getText().trim();
                 if (quantiteText.isEmpty()) {
                     JOptionPane.showMessageDialog(mainPanel,
@@ -162,10 +185,15 @@ public class VenteViewSwing {
                     return;
                 }
 
-                int quantite = Integer.parseInt(quantiteText);
-                if (quantite <= 0) {
+                int quantite;
+                try {
+                    quantite = Integer.parseInt(quantiteText);
+                    if (quantite <= 0) {
+                        throw new NumberFormatException();
+                    }
+                } catch (NumberFormatException ex) {
                     JOptionPane.showMessageDialog(mainPanel,
-                        "La quantité doit être supérieure à 0",
+                        "La quantité doit être un nombre entier positif",
                         "Erreur",
                         JOptionPane.ERROR_MESSAGE);
                     return;
@@ -179,66 +207,87 @@ public class VenteViewSwing {
                     return;
                 }
 
-                Vente.LigneVente ligne = new Vente.LigneVente(
-                    produit,
-                    quantite,
-                    produit.getPrix()
-                );
-                panier.add(ligne);
-                updatePanierTable();
+                // Vérifier si le produit est déjà dans le panier
+                Optional<Vente.LigneVente> ligneExistante = panier.stream()
+                    .filter(ligne -> ligne.getProduit().getId() == produit.getId())
+                    .findFirst();
 
-                // Réinitialiser les champs
+                if (ligneExistante.isPresent()) {
+                    Vente.LigneVente ligne = ligneExistante.get();
+                    int nouvelleQuantite = ligne.getQuantite() + quantite;
+                    if (nouvelleQuantite > produit.getStock()) {
+                        JOptionPane.showMessageDialog(mainPanel,
+                            "Stock insuffisant pour ajouter " + quantite + " unités supplémentaires.\n" +
+                            "Quantité déjà dans le panier : " + ligne.getQuantite() + "\n" +
+                            "Stock disponible : " + produit.getStock(),
+                            "Erreur",
+                            JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    ligne.setQuantite(nouvelleQuantite);
+                } else {
+                    Vente.LigneVente ligne = new Vente.LigneVente(produit, quantite, produit.getPrix());
+                    panier.add(ligne);
+                }
+
+                updatePanierTable();
                 quantiteField.setText("");
                 produitCombo.setSelectedIndex(-1);
+                quantiteField.requestFocus();
 
-            } catch (NumberFormatException ex) {
+            } catch (Exception ex) {
                 JOptionPane.showMessageDialog(mainPanel,
-                    "Veuillez entrer une quantité valide",
+                    "Erreur lors de l'ajout au panier : " + ex.getMessage(),
                     "Erreur",
                     JOptionPane.ERROR_MESSAGE);
             }
         });
 
         validerBtn.addActionListener(e -> {
-            if (!panier.isEmpty()) {
-                if (creditCheck.isSelected() && clientCombo.getSelectedItem() == null) {
-                    JOptionPane.showMessageDialog(mainPanel,
-                        "Veuillez sélectionner un client pour une vente à crédit",
-                        "Erreur",
-                        JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
+            if (panier.isEmpty()) {
+                JOptionPane.showMessageDialog(mainPanel,
+                    "Le panier est vide",
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (creditCheck.isSelected() && clientCombo.getSelectedItem() == null) {
+                JOptionPane.showMessageDialog(mainPanel,
+                    "Veuillez sélectionner un client pour une vente à crédit",
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            try {
+                Client selectedClient = creditCheck.isSelected() ?
+                    (Client) clientCombo.getSelectedItem() : null;
 
                 Vente vente = new Vente(
                     0,
                     LocalDateTime.now(),
-                    creditCheck.isSelected() ? (Client) clientCombo.getSelectedItem() : null,
+                    selectedClient,
                     creditCheck.isSelected(),
                     calculateTotal()
                 );
                 vente.setLignes(new ArrayList<>(panier));
 
-                try {
-                    venteController.enregistrerVente(vente);
-                    PDFGenerator.genererFacture(vente, "facture_" + vente.getId() + ".pdf");
+                venteController.enregistrerVente(vente);
+                PDFGenerator.genererFacture(vente, "facture_" + vente.getId() + ".pdf");
 
-                    resetForm();
-                    refreshComboBoxes(); // Rafraîchir les listes après la vente
-                    refreshVentesTable();
+                resetForm();
+                refreshComboBoxes();
+                refreshVentesTable();
 
-                    JOptionPane.showMessageDialog(mainPanel,
-                        "Vente enregistrée avec succès\nFacture générée: facture_" + vente.getId() + ".pdf",
-                        "Succès",
-                        JOptionPane.INFORMATION_MESSAGE);
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(mainPanel,
-                        "Erreur lors de l'enregistrement de la vente : " + ex.getMessage(),
-                        "Erreur",
-                        JOptionPane.ERROR_MESSAGE);
-                }
-            } else {
                 JOptionPane.showMessageDialog(mainPanel,
-                    "Le panier est vide",
+                    "<html>Vente enregistrée avec succès<br>Facture générée: <b>facture_" +
+                    vente.getId() + ".pdf</b></html>",
+                    "Succès",
+                    JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(mainPanel,
+                    "Erreur lors de l'enregistrement de la vente : " + ex.getMessage(),
                     "Erreur",
                     JOptionPane.ERROR_MESSAGE);
             }
@@ -277,7 +326,8 @@ public class VenteViewSwing {
         for (Vente.LigneVente ligne : panier) {
             double sousTotal = ligne.getQuantite() * ligne.getPrixUnitaire();
             panierModel.addRow(new Object[]{
-                ligne.getProduit().getNom(),
+                String.format("%s (%s)", ligne.getProduit().getNom(),
+                    ligne.getProduit().getCategorie()),
                 ligne.getQuantite(),
                 String.format("%.2f €", ligne.getPrixUnitaire()),
                 String.format("%.2f €", sousTotal)
@@ -319,110 +369,107 @@ public class VenteViewSwing {
 
     private void refreshComboBoxes() {
         // Mise à jour ComboBox clients
-        DefaultComboBoxModel<Client> clientModel = new DefaultComboBoxModel<>();
-        clientModel.addElement(null); // Option vide
+        DefaultComboBoxModel<Object> clientModel = new DefaultComboBoxModel<>();
+        clientModel.addElement(null);
         List<Client> clients = new ArrayList<>(clientController.getClients());
-        Collections.sort(clients, Comparator.comparing(Client::getNom));
-        for (Client client : clients) {
-            clientModel.addElement(client);
-        }
+        clients.sort(Comparator.comparing(Client::getNom));
+        clients.forEach(clientModel::addElement);
         clientCombo.setModel(clientModel);
 
         // Mise à jour ComboBox produits
-        DefaultComboBoxModel<Produit> produitModel = new DefaultComboBoxModel<>();
-        produitModel.addElement(null); // Option vide
+        DefaultComboBoxModel<Object> produitModel = new DefaultComboBoxModel<>();
+        produitModel.addElement(null);
 
-        // Trier les produits par catégorie puis par nom
-        List<Produit> produits = new ArrayList<>(produitController.getProduits());
-        Map<String, List<Produit>> produitsParCategorie = new TreeMap<>();
-
-        for (Produit produit : produits) {
-            if (produit.getStock() > 0) { // Ne garder que les produits en stock
-                produitsParCategorie.computeIfAbsent(produit.getCategorie(), k -> new ArrayList<>()).add(produit);
-            }
-        }
+        // Regrouper les produits par catégorie
+        Map<String, List<Produit>> produitsParCategorie = produitController.getProduits().stream()
+            .filter(p -> p.getStock() > 0)
+            .collect(Collectors.groupingBy(
+                Produit::getCategorie,
+                TreeMap::new,
+                Collectors.toList()
+            ));
 
         // Ajouter les produits par catégorie
-        for (Map.Entry<String, List<Produit>> entry : produitsParCategorie.entrySet()) {
-            // Trier les produits de la catégorie par nom
-            List<Produit> produitsCategorie = entry.getValue();
-            Collections.sort(produitsCategorie, Comparator.comparing(Produit::getNom));
-
-            // Ajouter un séparateur avec le nom de la catégorie
-            produitModel.addElement(new ProduitSeparator(entry.getKey()));
-
-            // Ajouter les produits de la catégorie
-            for (Produit produit : produitsCategorie) {
-                produitModel.addElement(produit);
-            }
-        }
+        produitsParCategorie.forEach((categorie, produits) -> {
+            produitModel.addElement("━━━ " + categorie.toUpperCase() + " ━━━");
+            produits.stream()
+                .sorted(Comparator.comparing(Produit::getNom))
+                .forEach(produitModel::addElement);
+        });
 
         produitCombo.setModel(produitModel);
 
         // Configuration des renderers personnalisés
         clientCombo.setRenderer(new DefaultListCellRenderer() {
             @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            public Component getListCellRendererComponent(JList<?> list, Object value,
+                                                        int index, boolean isSelected,
+                                                        boolean cellHasFocus) {
                 if (value == null) {
-                    value = "-- Sélectionner un client --";
+                    value = "⚪ Sélectionner un client";
+                } else if (value instanceof Client) {
+                    Client client = (Client) value;
+                    value = String.format("%s%s",
+                        client.getSolde() > 0 ? "⚠️ " : "👤 ",
+                        client.getNom() + (client.getSolde() > 0 ?
+                            String.format(" (Crédit: %.2f €)", client.getSolde()) : "")
+                    );
                 }
                 return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             }
         });
 
-        produitCombo.setRenderer(new BasicComboBoxRenderer() {
+        produitCombo.setRenderer(new DefaultListCellRenderer() {
             @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            public Component getListCellRendererComponent(JList<?> list, Object value,
+                                                        int index, boolean isSelected,
+                                                        boolean cellHasFocus) {
                 if (value == null) {
-                    value = "-- Sélectionner un produit --";
-                } else if (value instanceof ProduitSeparator) {
-                    ProduitSeparator separator = (ProduitSeparator) value;
-                    JLabel label = new JLabel(separator.getCategorie());
+                    value = "⚪ Sélectionner un produit";
+                } else if (value instanceof String && ((String) value).startsWith("━━━")) {
+                    JLabel label = (JLabel) super.getListCellRendererComponent(list, value,
+                                                                             index, isSelected,
+                                                                             cellHasFocus);
                     label.setBackground(new Color(240, 240, 240));
-                    label.setForeground(Color.DARK_GRAY);
+                    label.setForeground(new Color(70, 70, 70));
                     label.setFont(label.getFont().deriveFont(Font.BOLD));
-                    label.setOpaque(true);
                     return label;
-                }
-
-                Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                if (c instanceof JLabel && value instanceof Produit) {
+                } else if (value instanceof Produit) {
                     Produit produit = (Produit) value;
+                    String stockInfo = produit.getStock() <= produit.getSeuilAlerte() ?
+                        String.format("⚠️ %d en stock", produit.getStock()) :
+                        String.format("📦 %d en stock", produit.getStock());
+
+                    value = String.format("%s • %.2f € • %s",
+                        produit.getNom(),
+                        produit.getPrix(),
+                        stockInfo
+                    );
+
+                    Component c = super.getListCellRendererComponent(list, value, index,
+                                                                   isSelected, cellHasFocus);
                     if (produit.getStock() <= produit.getSeuilAlerte()) {
-                        setForeground(Color.RED);
+                        c.setForeground(new Color(200, 0, 0));
                     }
+                    return c;
                 }
-                return c;
+                return super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             }
         });
 
         // Empêcher la sélection des séparateurs
         produitCombo.addActionListener(e -> {
-            if (produitCombo.getSelectedItem() instanceof ProduitSeparator) {
+            Object selectedItem = produitCombo.getSelectedItem();
+            if (selectedItem instanceof String && ((String) selectedItem).startsWith("━━━")) {
                 produitCombo.setSelectedItem(null);
             }
         });
     }
 
-    // Classe interne pour les séparateurs de catégories
-    private static class ProduitSeparator {
-        private final String categorie;
-
-        public ProduitSeparator(String categorie) {
-            this.categorie = "=== " + categorie + " ===";
-        }
-
-        public String getCategorie() {
-            return categorie;
-        }
-
-        @Override
-        public String toString() {
-            return categorie;
-        }
-    }
-
     public JPanel getMainPanel() {
         return mainPanel;
+    }
+    private void setCursor(Cursor cursor) {
+        mainPanel.setCursor(cursor);
     }
 }

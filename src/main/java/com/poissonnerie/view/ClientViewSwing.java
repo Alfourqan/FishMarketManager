@@ -40,11 +40,14 @@ public class ClientViewSwing {
         JButton modifierBtn = new JButton("Modifier");
         JButton supprimerBtn = new JButton("Supprimer");
         JButton reglerCreanceBtn = new JButton("Régler créance");
+        JButton actualiserBtn = new JButton("Actualiser");
+        actualiserBtn.setIcon(UIManager.getIcon("Table.refreshIcon"));
 
         buttonPanel.add(ajouterBtn);
         buttonPanel.add(modifierBtn);
         buttonPanel.add(supprimerBtn);
         buttonPanel.add(reglerCreanceBtn);
+        buttonPanel.add(actualiserBtn);
 
         // Table avec scroll
         JScrollPane scrollPane = new JScrollPane(tableClients);
@@ -63,6 +66,7 @@ public class ClientViewSwing {
                     JOptionPane.INFORMATION_MESSAGE);
             }
         });
+
         supprimerBtn.addActionListener(e -> {
             int selectedRow = tableClients.getSelectedRow();
             if (selectedRow >= 0) {
@@ -80,7 +84,7 @@ public class ClientViewSwing {
                     "Confirmation de suppression",
                     JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
                     try {
-                        controller.supprimerClient(controller.getClients().get(selectedRow));
+                        controller.supprimerClient(client);
                         refreshTable();
                     } catch (Exception ex) {
                         JOptionPane.showMessageDialog(mainPanel,
@@ -96,6 +100,7 @@ public class ClientViewSwing {
                     JOptionPane.INFORMATION_MESSAGE);
             }
         });
+
         reglerCreanceBtn.addActionListener(e -> {
             int selectedRow = tableClients.getSelectedRow();
             if (selectedRow >= 0) {
@@ -113,6 +118,24 @@ public class ClientViewSwing {
                     "Veuillez sélectionner un client",
                     "Aucune sélection",
                     JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+
+        actualiserBtn.addActionListener(e -> {
+            try {
+                mainPanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                loadData();
+                JOptionPane.showMessageDialog(mainPanel,
+                    "Données actualisées avec succès",
+                    "Succès",
+                    JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(mainPanel,
+                    "Erreur lors de l'actualisation : " + ex.getMessage(),
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
+            } finally {
+                mainPanel.setCursor(Cursor.getDefaultCursor());
             }
         });
 

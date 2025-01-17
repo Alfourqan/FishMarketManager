@@ -53,12 +53,33 @@ public class ConfigurationViewSwing {
 
         // Boutons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton actualiserBtn = new JButton("Actualiser");
+        actualiserBtn.setIcon(UIManager.getIcon("Table.refreshIcon")); // Icône standard
         JButton reinitialiserBtn = new JButton("Réinitialiser");
         JButton sauvegarderBtn = new JButton("Sauvegarder");
+
+        actualiserBtn.addActionListener(e -> {
+            try {
+                mainPanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                loadData();
+                JOptionPane.showMessageDialog(mainPanel,
+                    "Configurations actualisées avec succès",
+                    "Succès",
+                    JOptionPane.INFORMATION_MESSAGE);
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(mainPanel,
+                    "Erreur lors de l'actualisation : " + ex.getMessage(),
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
+            } finally {
+                mainPanel.setCursor(Cursor.getDefaultCursor());
+            }
+        });
 
         reinitialiserBtn.addActionListener(e -> reinitialiserConfigurations());
         sauvegarderBtn.addActionListener(e -> sauvegarderConfigurations());
 
+        buttonPanel.add(actualiserBtn);
         buttonPanel.add(reinitialiserBtn);
         buttonPanel.add(sauvegarderBtn);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
@@ -82,7 +103,7 @@ public class ConfigurationViewSwing {
             JLabel label = new JLabel(champ[1] + ":");
             label.setPreferredSize(new Dimension(150, label.getPreferredSize().height));
 
-            JTextField textField = new JTextField(20);
+            JTextField textField = new JTextField(30);
             textField.setName(champ[0]);
             champsSaisie.put(champ[0], textField);
 
@@ -109,18 +130,16 @@ public class ConfigurationViewSwing {
             for (Map.Entry<String, JTextField> entry : champsSaisie.entrySet()) {
                 String valeur = controller.getValeur(entry.getKey());
                 System.out.println("Configuration chargée: " + entry.getKey() + " = " + valeur);
-                SwingUtilities.invokeLater(() -> entry.getValue().setText(valeur));
+                entry.getValue().setText(valeur);
             }
             System.out.println("Configurations chargées avec succès");
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Erreur lors du chargement des configurations: " + e.getMessage());
-            SwingUtilities.invokeLater(() ->
-                JOptionPane.showMessageDialog(mainPanel,
-                    "Erreur lors du chargement des configurations : " + e.getMessage(),
-                    "Erreur",
-                    JOptionPane.ERROR_MESSAGE)
-            );
+            JOptionPane.showMessageDialog(mainPanel,
+                "Erreur lors du chargement des configurations : " + e.getMessage(),
+                "Erreur",
+                JOptionPane.ERROR_MESSAGE);
         }
     }
 
