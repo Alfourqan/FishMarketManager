@@ -9,11 +9,13 @@ import com.formdev.flatlaf.FlatLightLaf;
 import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialLighterIJTheme;
 
 public class Main {
+    private static SplashScreen splash;
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             try {
                 // Créer et afficher le splash screen
-                SplashScreen splash = new SplashScreen();
+                splash = new SplashScreen();
                 splash.setVisible(true);
 
                 // Simuler le chargement avec des étapes
@@ -29,18 +31,32 @@ public class Main {
                                 FlatMaterialLighterIJTheme.setup();
                                 configureUI();
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                handleError(e, "Erreur lors de la configuration du thème");
                             }
                         });
 
                         splash.setProgress(30, "Configuration de l'interface...");
                         Thread.sleep(500);
 
-                        // Initialisation de la base de données
+                        // Initialisation de la base de données avec retry
                         splash.setProgress(50, "Initialisation de la base de données...");
                         System.out.println("Initialisation de la base de données...");
-                        DatabaseManager.initDatabase();
-                        System.out.println("Base de données initialisée avec succès.");
+
+                        // Tentatives de connexion avec délai
+                        int maxRetries = 3;
+                        for (int i = 0; i < maxRetries; i++) {
+                            try {
+                                DatabaseManager.initDatabase();
+                                System.out.println("Base de données initialisée avec succès.");
+                                break;
+                            } catch (Exception e) {
+                                if (i == maxRetries - 1) {
+                                    throw e; // Dernière tentative échouée
+                                }
+                                System.out.println("Tentative " + (i + 1) + " échouée, nouvelle tentative dans 1 seconde...");
+                                Thread.sleep(1000);
+                            }
+                        }
 
                         splash.setProgress(80, "Chargement de l'interface principale...");
                         Thread.sleep(500);
@@ -65,50 +81,43 @@ public class Main {
 
                                 // Fermer le splash screen et afficher la fenêtre principale
                                 splash.dispose();
+                                splash = null; // Permettre la collecte de mémoire
                                 frame.setVisible(true);
                                 System.out.println("Application démarrée avec succès.");
-                            } catch (InterruptedException e) {
-                                Thread.currentThread().interrupt();
-                                throw new RuntimeException("Interruption pendant le chargement de l'interface", e);
+
+                            } catch (Exception e) {
+                                handleError(e, "Erreur lors du chargement de l'interface principale");
                             }
                         });
 
-                        // Ajouter un hook pour fermer proprement la connexion à la base de données
-                        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                            System.out.println("Fermeture de l'application...");
-                            DatabaseManager.closeConnection();
-                            System.out.println("Connexion à la base de données fermée.");
-                        }));
-
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                        throw new RuntimeException("Interruption pendant le chargement", e);
                     } catch (Exception e) {
-                        e.printStackTrace();
-                        String message = "Erreur lors du démarrage: " + e.getMessage() +
-                                "\nType: " + e.getClass().getSimpleName();
-                        System.err.println(message);
-                        SwingUtilities.invokeLater(() -> {
-                            JOptionPane.showMessageDialog(null,
-                                message,
-                                "Erreur",
-                                JOptionPane.ERROR_MESSAGE);
-                            System.exit(1);
-                        });
+                        handleError(e, "Erreur lors du démarrage");
                     }
                 }).start();
 
             } catch (Exception e) {
-                e.printStackTrace();
-                String message = "Erreur lors du démarrage: " + e.getMessage() +
-                                "\nType: " + e.getClass().getSimpleName();
-                System.err.println(message);
-                JOptionPane.showMessageDialog(null,
-                    message,
-                    "Erreur",
-                    JOptionPane.ERROR_MESSAGE);
-                System.exit(1);
+                handleError(e, "Erreur critique");
             }
+        });
+    }
+
+    private static void handleError(Exception e, String message) {
+        e.printStackTrace();
+        String fullMessage = message + ": " + e.getMessage() +
+                           "\nType: " + e.getClass().getSimpleName();
+        System.err.println(fullMessage);
+
+        SwingUtilities.invokeLater(() -> {
+            if (splash != null) {
+                splash.dispose();
+                splash = null;
+            }
+
+            JOptionPane.showMessageDialog(null,
+                fullMessage,
+                "Erreur",
+                JOptionPane.ERROR_MESSAGE);
+            System.exit(1);
         });
     }
 
@@ -156,6 +165,8 @@ public class Main {
         UIManager.put("Panel.background", backgroundColor);
         UIManager.put("Label.foreground", darkTextColor);
         UIManager.put("Label.font", new Font("Segoe UI", Font.PLAIN, 13));
+
+        // Configuration des champs de texte
         UIManager.put("TextField.foreground", darkTextColor);
         UIManager.put("TextField.background", new Color(255, 255, 255));
         UIManager.put("TextField.font", new Font("Segoe UI", Font.PLAIN, 13));
