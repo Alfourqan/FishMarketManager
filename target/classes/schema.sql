@@ -1,54 +1,58 @@
--- Creation of tables with PostgreSQL syntax
+PRAGMA foreign_keys = ON;
+
 CREATE TABLE IF NOT EXISTS configurations (
-    id SERIAL PRIMARY KEY,
-    cle VARCHAR(255) NOT NULL UNIQUE,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cle TEXT NOT NULL UNIQUE,
     valeur TEXT,
     description TEXT
 );
 
 CREATE TABLE IF NOT EXISTS produits (
-    id SERIAL PRIMARY KEY,
-    nom VARCHAR(255) NOT NULL,
-    categorie VARCHAR(50) NOT NULL,
-    prix DECIMAL(10,2) NOT NULL,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nom TEXT NOT NULL,
+    categorie TEXT NOT NULL,
+    prix REAL NOT NULL,
     stock INTEGER NOT NULL,
     seuil_alerte INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS clients (
-    id SERIAL PRIMARY KEY,
-    nom VARCHAR(255) NOT NULL,
-    telephone VARCHAR(20),
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nom TEXT NOT NULL,
+    telephone TEXT,
     adresse TEXT,
-    solde DECIMAL(10,2) DEFAULT 0
+    solde REAL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS ventes (
-    id SERIAL PRIMARY KEY,
-    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    client_id INTEGER REFERENCES clients(id),
-    credit BOOLEAN DEFAULT FALSE,
-    total DECIMAL(10,2) NOT NULL
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT DEFAULT (datetime('now', 'localtime')),
+    client_id INTEGER,
+    credit INTEGER DEFAULT 0,
+    total REAL NOT NULL,
+    FOREIGN KEY (client_id) REFERENCES clients(id)
 );
 
 CREATE TABLE IF NOT EXISTS lignes_vente (
-    id SERIAL PRIMARY KEY,
-    vente_id INTEGER REFERENCES ventes(id),
-    produit_id INTEGER REFERENCES produits(id),
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    vente_id INTEGER,
+    produit_id INTEGER,
     quantite INTEGER NOT NULL,
-    prix_unitaire DECIMAL(10,2) NOT NULL
+    prix_unitaire REAL NOT NULL,
+    FOREIGN KEY (vente_id) REFERENCES ventes(id),
+    FOREIGN KEY (produit_id) REFERENCES produits(id)
 );
 
 CREATE TABLE IF NOT EXISTS mouvements_caisse (
-    id SERIAL PRIMARY KEY,
-    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    type VARCHAR(10) CHECK (type IN ('ENTREE', 'SORTIE')),
-    montant DECIMAL(10,2) NOT NULL,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT DEFAULT (datetime('now', 'localtime')),
+    type TEXT NOT NULL CHECK (type IN ('ENTREE', 'SORTIE')),
+    montant REAL NOT NULL,
     description TEXT
 );
 
 -- Insertion des configurations par défaut si elles n'existent pas
-INSERT INTO configurations (cle, valeur, description) VALUES
+INSERT OR IGNORE INTO configurations (cle, valeur, description) VALUES
 ('TAUX_TVA', '20.0', 'Taux de TVA en pourcentage'),
 ('NOM_ENTREPRISE', '', 'Nom de l''entreprise'),
 ('ADRESSE_ENTREPRISE', '', 'Adresse de l''entreprise'),
