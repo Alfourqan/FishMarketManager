@@ -10,7 +10,7 @@ public class MainViewSwing {
     public MainViewSwing() {
         mainPanel = new JPanel(new BorderLayout());
         tabbedPane = new JTabbedPane();
-        
+
         initializeComponents();
     }
 
@@ -23,22 +23,27 @@ public class MainViewSwing {
         tabbedPane.addTab("Produits", new ProduitViewSwing().getMainPanel());
         tabbedPane.addTab("Ventes", new VenteViewSwing().getMainPanel());
         tabbedPane.addTab("Clients", new ClientViewSwing().getMainPanel());
-        
+
         mainPanel.add(tabbedPane, BorderLayout.CENTER);
     }
 
     private JMenuBar createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
-        
+
         // Menu Fichier
         JMenu fichierMenu = new JMenu("Fichier");
+        JMenuItem parametresMenuItem = new JMenuItem("Paramètres");
         JMenuItem exporterMenuItem = new JMenuItem("Exporter les données");
         JMenuItem quitterMenuItem = new JMenuItem("Quitter");
+
+        parametresMenuItem.addActionListener(e -> showParametres());
         quitterMenuItem.addActionListener(e -> System.exit(0));
+
+        fichierMenu.add(parametresMenuItem);
         fichierMenu.add(exporterMenuItem);
         fichierMenu.addSeparator();
         fichierMenu.add(quitterMenuItem);
-        
+
         // Menu Rapports
         JMenu rapportsMenu = new JMenu("Rapports");
         JMenuItem ventesJourMenuItem = new JMenuItem("Ventes du jour");
@@ -47,11 +52,30 @@ public class MainViewSwing {
         rapportsMenu.add(ventesJourMenuItem);
         rapportsMenu.add(stocksMenuItem);
         rapportsMenu.add(creancesMenuItem);
-        
+
         menuBar.add(fichierMenu);
         menuBar.add(rapportsMenu);
-        
+
         return menuBar;
+    }
+
+    private void showParametres() {
+        Window window = SwingUtilities.getWindowAncestor(mainPanel);
+        JDialog dialog;
+        if (window instanceof Frame) {
+            dialog = new JDialog((Frame) window, "Paramètres", true);
+        } else if (window instanceof Dialog) {
+            dialog = new JDialog((Dialog) window, "Paramètres", true);
+        } else {
+            dialog = new JDialog();
+            dialog.setTitle("Paramètres");
+            dialog.setModal(true);
+        }
+
+        dialog.setContentPane(new ConfigurationViewSwing().getMainPanel());
+        dialog.setSize(600, 400);
+        dialog.setLocationRelativeTo(mainPanel);
+        dialog.setVisible(true);
     }
 
     public JPanel getMainPanel() {
