@@ -6,6 +6,7 @@ import com.poissonnerie.model.Client;
 import com.poissonnerie.util.DatabaseManager;
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,13 +19,17 @@ public class VenteController {
 
     public void chargerVentes() {
         ventes.clear();
-        String sql = "SELECT v.*, c.* FROM ventes v LEFT JOIN clients c ON v.client_id = c.id ORDER BY v.date DESC";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
 
-        try (Connection conn = DatabaseManager.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+        try {
+            conn = DatabaseManager.getConnection();
+            String sql = "SELECT v.*, c.* FROM ventes v LEFT JOIN clients c ON v.client_id = c.id ORDER BY v.date DESC";
+            pstmt = conn.prepareStatement(sql);
+            rs = pstmt.executeQuery();
 
-            while (rs.next()) {
+            while (rs != null && rs.next()) {
                 Client client = null;
                 if (rs.getObject("client_id") != null) {
                     client = new Client(
@@ -36,9 +41,16 @@ public class VenteController {
                     );
                 }
 
+                // Conversion du timestamp Unix en LocalDateTime
+                long timestamp = rs.getLong("date");
+                LocalDateTime date = LocalDateTime.ofInstant(
+                    Instant.ofEpochMilli(timestamp),
+                    java.time.ZoneId.systemDefault()
+                );
+
                 Vente vente = new Vente(
                     rs.getInt("id"),
-                    rs.getTimestamp("date").toLocalDateTime(),
+                    date,
                     client,
                     rs.getBoolean("credit"),
                     rs.getDouble("total")
@@ -47,26 +59,39 @@ public class VenteController {
                 chargerLignesVente(vente);
                 ventes.add(vente);
             }
+            System.out.println("Ventes chargées avec succès: " + ventes.size() + " ventes");
         } catch (SQLException e) {
             e.printStackTrace();
             System.err.println("Erreur lors du chargement des ventes: " + e.getMessage());
+            throw new RuntimeException("Erreur lors du chargement des ventes", e);
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (pstmt != null) pstmt.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                System.err.println("Erreur lors de la fermeture des ressources: " + e.getMessage());
+            }
         }
     }
 
     private void chargerLignesVente(Vente vente) {
-        String sql = "SELECT l.*, p.* FROM lignes_vente l " +
-                    "JOIN produits p ON l.produit_id = p.id " +
-                    "WHERE l.vente_id = ?";
+        Connection conn = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
 
-        List<Vente.LigneVente> lignes = new ArrayList<>();
+        try {
+            conn = DatabaseManager.getConnection();
+            String sql = "SELECT l.*, p.* FROM lignes_vente l " +
+                        "JOIN produits p ON l.produit_id = p.id " +
+                        "WHERE l.vente_id = ?";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
+            pstmt = conn.prepareStatement(sql);
             pstmt.setInt(1, vente.getId());
-            ResultSet rs = pstmt.executeQuery();
+            rs = pstmt.executeQuery();
 
-            while (rs.next()) {
+            List<Vente.LigneVente> lignes = new ArrayList<>();
+            while (rs != null && rs.next()) {
                 Produit produit = new Produit(
                     rs.getInt("produit_id"),
                     rs.getString("nom"),
@@ -86,9 +111,18 @@ public class VenteController {
             }
 
             vente.setLignes(lignes);
+            System.out.println("Lignes de vente chargées pour la vente " + vente.getId() + ": " + lignes.size() + " lignes");
         } catch (SQLException e) {
             e.printStackTrace();
             System.err.println("Erreur lors du chargement des lignes de vente: " + e.getMessage());
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (pstmt != null) pstmt.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                System.err.println("Erreur lors de la fermeture des ressources: " + e.getMessage());
+            }
         }
     }
 
@@ -99,12 +133,16 @@ public class VenteController {
             conn.setAutoCommit(false);
             System.out.println("Début de l'enregistrement de la vente...");
 
-            // Insertion de la vente
+            // Insertion de la vente avec timestamp Unix
             String sqlVente = "INSERT INTO ventes (date, client_id, credit, total) VALUES (?, ?, ?, ?)";
             int venteId;
 
             try (PreparedStatement pstmt = conn.prepareStatement(sqlVente)) {
-                pstmt.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
+                // Conversion de LocalDateTime en timestamp Unix
+                long timestamp = vente.getDate().atZone(java.time.ZoneId.systemDefault())
+                    .toInstant().toEpochMilli();
+                pstmt.setLong(1, timestamp);
+
                 if (vente.getClient() != null) {
                     pstmt.setInt(2, vente.getClient().getId());
                 } else {
@@ -115,7 +153,7 @@ public class VenteController {
 
                 pstmt.executeUpdate();
 
-                // Récupérer l'ID généré avec last_insert_rowid()
+                // Récupérer l'ID généré
                 try (Statement stmt = conn.createStatement();
                      ResultSet rs = stmt.executeQuery("SELECT last_insert_rowid() as id")) {
                     if (rs.next()) {
@@ -176,6 +214,7 @@ public class VenteController {
             }
             e.printStackTrace();
             System.err.println("Erreur lors de l'enregistrement de la vente: " + e.getMessage());
+            throw new RuntimeException("Erreur lors de l'enregistrement de la vente", e);
         } finally {
             if (conn != null) {
                 try {

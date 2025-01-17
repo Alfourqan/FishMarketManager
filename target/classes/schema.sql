@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS clients (
 
 CREATE TABLE IF NOT EXISTS ventes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    date TEXT DEFAULT (datetime('now', 'localtime')),
+    date INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000),
     client_id INTEGER,
     credit INTEGER DEFAULT 0,
     total REAL NOT NULL,

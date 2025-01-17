@@ -26,9 +26,10 @@ public class VenteViewSwing {
     private final DefaultTableModel ventesModel;
     private final List<Vente.LigneVente> panier;
     private JComboBox<Object> clientCombo;
+    private JComboBox<Object> produitCombo;
     private JCheckBox creditCheck;
     private JLabel totalLabel;
-    private JComboBox<Object> produitCombo;
+    private JButton actualiserBtn;
 
     public VenteViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -61,12 +62,29 @@ public class VenteViewSwing {
 
     private void loadData() {
         try {
-            System.out.println("Chargement des données...");
+            System.out.println("Chargement des données de vente...");
+
+            // Sauvegarder la sélection actuelle
+            int selectedRow = tableVentes.getSelectedRow();
+
+            // Charger les données
             produitController.chargerProduits();
+            System.out.println("Produits chargés");
+
             clientController.chargerClients();
+            System.out.println("Clients chargés");
+
             venteController.chargerVentes();
+            System.out.println("Ventes chargées: " + venteController.getVentes().size() + " ventes");
+
             refreshComboBoxes();
             refreshVentesTable();
+
+            // Restaurer la sélection si possible
+            if (selectedRow >= 0 && selectedRow < tableVentes.getRowCount()) {
+                tableVentes.setRowSelectionInterval(selectedRow, selectedRow);
+            }
+
             System.out.println("Données chargées avec succès");
         } catch (Exception e) {
             System.err.println("Erreur lors du chargement des données: " + e.getMessage());
@@ -91,29 +109,47 @@ public class VenteViewSwing {
 
         // Bouton d'actualisation
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton actualiserBtn = new JButton("Actualiser les données");
-        actualiserBtn.setIcon(UIManager.getIcon("Table.refreshIcon")); // Icône standard de rafraîchissement
-        actualiserBtn.addActionListener(e -> {
-            try {
-                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                loadData();
-                JOptionPane.showMessageDialog(mainPanel,
-                    "Données actualisées avec succès",
-                    "Succès",
-                    JOptionPane.INFORMATION_MESSAGE);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(mainPanel,
-                    "Erreur lors de l'actualisation : " + ex.getMessage(),
-                    "Erreur",
-                    JOptionPane.ERROR_MESSAGE);
-            } finally {
-                setCursor(Cursor.getDefaultCursor());
-            }
-        });
+        actualiserBtn = new JButton("Actualiser les données");
+        actualiserBtn.setIcon(UIManager.getIcon("Table.refreshIcon"));
+        actualiserBtn.addActionListener(e -> actualiserDonnees());
         actionPanel.add(actualiserBtn);
 
         mainPanel.add(splitPane, BorderLayout.CENTER);
         mainPanel.add(actionPanel, BorderLayout.SOUTH);
+    }
+
+    private void actualiserDonnees() {
+        try {
+            System.out.println("Début de l'actualisation des données...");
+            actualiserBtn.setEnabled(false);
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+            // Sauvegarder l'état actuel
+            int selectedRow = tableVentes.getSelectedRow();
+
+            loadData();
+
+            // Restaurer la sélection
+            if (selectedRow >= 0 && selectedRow < tableVentes.getRowCount()) {
+                tableVentes.setRowSelectionInterval(selectedRow, selectedRow);
+            }
+
+            System.out.println("Actualisation terminée avec succès");
+            JOptionPane.showMessageDialog(mainPanel,
+                "Données actualisées avec succès",
+                "Succès",
+                JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception ex) {
+            System.err.println("Erreur lors de l'actualisation: " + ex.getMessage());
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(mainPanel,
+                "Erreur lors de l'actualisation : " + ex.getMessage(),
+                "Erreur",
+                JOptionPane.ERROR_MESSAGE);
+        } finally {
+            actualiserBtn.setEnabled(true);
+            setCursor(Cursor.getDefaultCursor());
+        }
     }
 
     private JPanel createNouvelleVentePanel() {
@@ -218,8 +254,8 @@ public class VenteViewSwing {
                     if (nouvelleQuantite > produit.getStock()) {
                         JOptionPane.showMessageDialog(mainPanel,
                             "Stock insuffisant pour ajouter " + quantite + " unités supplémentaires.\n" +
-                            "Quantité déjà dans le panier : " + ligne.getQuantite() + "\n" +
-                            "Stock disponible : " + produit.getStock(),
+                                "Quantité déjà dans le panier : " + ligne.getQuantite() + "\n" +
+                                "Stock disponible : " + produit.getStock(),
                             "Erreur",
                             JOptionPane.ERROR_MESSAGE);
                         return;
@@ -282,7 +318,7 @@ public class VenteViewSwing {
 
                 JOptionPane.showMessageDialog(mainPanel,
                     "<html>Vente enregistrée avec succès<br>Facture générée: <b>facture_" +
-                    vente.getId() + ".pdf</b></html>",
+                        vente.getId() + ".pdf</b></html>",
                     "Succès",
                     JOptionPane.INFORMATION_MESSAGE);
             } catch (Exception ex) {
@@ -342,7 +378,11 @@ public class VenteViewSwing {
         ventesModel.setRowCount(0);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-        for (Vente vente : venteController.getVentes()) {
+        List<Vente> ventesTriees = new ArrayList<>(venteController.getVentes());
+        // Tri des ventes par date décroissante
+        ventesTriees.sort((v1, v2) -> v2.getDate().compareTo(v1.getDate()));
+
+        for (Vente vente : ventesTriees) {
             ventesModel.addRow(new Object[]{
                 vente.getDate().format(formatter),
                 vente.getClient() != null ? vente.getClient().getNom() : "Vente comptant",
@@ -350,6 +390,8 @@ public class VenteViewSwing {
                 String.format("%.2f €", vente.getTotal())
             });
         }
+
+        System.out.println("Table des ventes mise à jour avec " + ventesTriees.size() + " ventes");
     }
 
     private double calculateTotal() {
