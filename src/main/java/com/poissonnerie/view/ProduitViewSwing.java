@@ -34,22 +34,25 @@ public class ProduitViewSwing {
         };
         tableProduits = new JTable(tableModel);
         tableProduits.getColumnModel().getColumn(0).setMaxWidth(30);
-        tableProduits.setRowHeight(25);
+        tableProduits.setRowHeight(30); // Augmentation de la hauteur des lignes
+        tableProduits.setFont(new Font(tableProduits.getFont().getName(), Font.PLAIN, 13)); // Police plus grande
 
         initializeComponents();
         loadData();
     }
 
     private void initializeComponents() {
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15)); // Marges plus grandes
 
-        // Boutons d'action avec icônes
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        // Panel des boutons avec style moderne
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
         buttonPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY),
-            BorderFactory.createEmptyBorder(5, 5, 10, 5)
+            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(224, 224, 224)),
+            BorderFactory.createEmptyBorder(5, 5, 15, 5)
         ));
 
+        // Création des boutons avec icônes et style moderne
         JButton ajouterBtn = createStyledButton("Ajouter", MaterialDesign.MDI_PLUS_BOX);
         JButton modifierBtn = createStyledButton("Modifier", MaterialDesign.MDI_PENCIL_BOX);
         JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesign.MDI_MINUS_BOX);
@@ -60,13 +63,16 @@ public class ProduitViewSwing {
         buttonPanel.add(supprimerBtn);
         buttonPanel.add(actualiserBtn);
 
-        // Table avec scroll
+        // Style moderne pour la table
         JScrollPane scrollPane = new JScrollPane(tableProduits);
-        tableProduits.setFillsViewportHeight(true);
-
-        // Style de la table
-        tableProduits.setShowGrid(false);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        tableProduits.setShowGrid(true);
+        tableProduits.setGridColor(new Color(224, 224, 224));
+        tableProduits.setSelectionBackground(new Color(197, 202, 233));
+        tableProduits.setSelectionForeground(new Color(33, 33, 33));
         tableProduits.setIntercellSpacing(new Dimension(0, 0));
+        tableProduits.getTableHeader().setBackground(new Color(245, 246, 247));
+        tableProduits.getTableHeader().setFont(tableProduits.getTableHeader().getFont().deriveFont(Font.BOLD));
 
         // Gestionnaires d'événements
         ajouterBtn.addActionListener(e -> showProduitDialog(null));
@@ -75,45 +81,28 @@ public class ProduitViewSwing {
             if (selectedRow >= 0) {
                 showProduitDialog(controller.getProduits().get(selectedRow));
             } else {
-                JOptionPane.showMessageDialog(mainPanel,
-                    "Veuillez sélectionner un produit à modifier",
-                    "Aucune sélection",
-                    JOptionPane.INFORMATION_MESSAGE);
+                showWarningMessage("Veuillez sélectionner un produit à modifier");
             }
         });
 
         supprimerBtn.addActionListener(e -> {
             int selectedRow = tableProduits.getSelectedRow();
             if (selectedRow >= 0) {
-                if (JOptionPane.showConfirmDialog(mainPanel,
-                    "Êtes-vous sûr de vouloir supprimer ce produit ?",
-                    "Confirmation de suppression",
-                    JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+                if (showConfirmDialog("Êtes-vous sûr de vouloir supprimer ce produit ?")) {
                     try {
                         controller.supprimerProduit(controller.getProduits().get(selectedRow));
                         refreshTable();
-                        JOptionPane.showMessageDialog(mainPanel,
-                            "Produit supprimé avec succès",
-                            "Succès",
-                            JOptionPane.INFORMATION_MESSAGE);
+                        showSuccessMessage("Produit supprimé avec succès");
                     } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(mainPanel,
-                            ex.getMessage(),
-                            "Erreur",
-                            JOptionPane.ERROR_MESSAGE);
+                        showErrorMessage(ex.getMessage());
                     }
                 }
             } else {
-                JOptionPane.showMessageDialog(mainPanel,
-                    "Veuillez sélectionner un produit à supprimer",
-                    "Aucune sélection",
-                    JOptionPane.INFORMATION_MESSAGE);
+                showWarningMessage("Veuillez sélectionner un produit à supprimer");
             }
         });
 
-        actualiserBtn.addActionListener(e -> {
-            loadData();
-        });
+        actualiserBtn.addActionListener(e -> loadData());
 
         mainPanel.add(buttonPanel, BorderLayout.NORTH);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
@@ -121,22 +110,166 @@ public class ProduitViewSwing {
 
     private JButton createStyledButton(String text, Ikon iconCode) {
         FontIcon icon = FontIcon.of(iconCode);
-        icon.setIconSize(16);
+        icon.setIconSize(18);
         JButton button = new JButton(text, icon);
-        button.setMargin(new Insets(5, 10, 5, 10));
+        button.setMargin(new Insets(8, 16, 8, 16));
+        button.setFocusPainted(false);
         return button;
     }
 
-    private void loadData() {
-        try {
-            controller.chargerProduits();
-            refreshTable();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(mainPanel,
-                "Erreur lors du chargement des produits : " + e.getMessage(),
-                "Erreur",
-                JOptionPane.ERROR_MESSAGE);
+    private void showProduitDialog(Produit produit) {
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel),
+                                  produit == null ? "Nouveau produit" : "Modifier produit",
+                                  true);
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+
+        // Panel principal avec padding
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // Style moderne pour les champs
+        JTextField nomField = createStyledTextField();
+        JComboBox<String> categorieCombo = new JComboBox<>(new String[]{"Frais", "Surgelé", "Transformé"});
+        JTextField prixField = createStyledTextField();
+        JTextField stockField = createStyledTextField();
+        JTextField seuilField = createStyledTextField();
+
+        // Layout
+        addFormField(panel, gbc, "Nom:", nomField, 0);
+        addFormField(panel, gbc, "Catégorie:", categorieCombo, 1);
+        addFormField(panel, gbc, "Prix:", prixField, 2);
+        addFormField(panel, gbc, "Stock:", stockField, 3);
+        addFormField(panel, gbc, "Seuil d'alerte:", seuilField, 4);
+
+        // Pré-remplissage si modification
+        if (produit != null) {
+            nomField.setText(produit.getNom());
+            categorieCombo.setSelectedItem(produit.getCategorie());
+            prixField.setText(String.valueOf(produit.getPrix()));
+            stockField.setText(String.valueOf(produit.getStock()));
+            seuilField.setText(String.valueOf(produit.getSeuilAlerte()));
         }
+
+        // Boutons avec style moderne
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        JButton okButton = new JButton("OK");
+        JButton cancelButton = new JButton("Annuler");
+
+        // Gestionnaires d'événements
+        okButton.addActionListener(evt -> {
+            try {
+                validateAndSaveProduit(produit, nomField, categorieCombo, prixField, stockField, seuilField);
+                dialog.dispose();
+            } catch (Exception e) {
+                showErrorMessage(e.getMessage());
+            }
+        });
+
+        cancelButton.addActionListener(evt -> dialog.dispose());
+
+        buttonPanel.add(okButton);
+        buttonPanel.add(cancelButton);
+
+        // Finalisation du dialog
+        JPanel contentPane = new JPanel(new BorderLayout(10, 10));
+        contentPane.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+        contentPane.add(panel, BorderLayout.CENTER);
+        contentPane.add(buttonPanel, BorderLayout.SOUTH);
+
+        dialog.setContentPane(contentPane);
+        dialog.pack();
+        dialog.setLocationRelativeTo(mainPanel);
+        dialog.setResizable(false);
+        dialog.setVisible(true);
+    }
+
+    private JTextField createStyledTextField() {
+        JTextField field = new JTextField(20);
+        field.setPreferredSize(new Dimension(200, 30));
+        return field;
+    }
+
+    private void addFormField(JPanel panel, GridBagConstraints gbc, String labelText, JComponent field, int row) {
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.weightx = 0;
+        JLabel label = new JLabel(labelText);
+        label.setHorizontalAlignment(SwingConstants.RIGHT);
+        panel.add(label, gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 1;
+        panel.add(field, gbc);
+    }
+
+    private void validateAndSaveProduit(Produit produit, JTextField nomField, JComboBox<String> categorieCombo,
+                                      JTextField prixField, JTextField stockField, JTextField seuilField) {
+        String nom = nomField.getText().trim();
+        String categorie = (String) categorieCombo.getSelectedItem();
+        String prixText = prixField.getText().trim().replace(",", ".");
+        String stockText = stockField.getText().trim();
+        String seuilText = seuilField.getText().trim();
+
+        // Validation
+        if (nom.isEmpty()) throw new IllegalArgumentException("Le nom est obligatoire");
+
+        double prix = validateDouble(prixText, "Prix invalide");
+        if (prix <= 0) throw new IllegalArgumentException("Le prix doit être positif");
+
+        int stock = validateInt(stockText, "Stock invalide");
+        if (stock < 0) throw new IllegalArgumentException("Le stock ne peut pas être négatif");
+
+        int seuil = validateInt(seuilText, "Seuil d'alerte invalide");
+        if (seuil < 0) throw new IllegalArgumentException("Le seuil d'alerte ne peut pas être négatif");
+
+        // Sauvegarde
+        if (produit == null) {
+            controller.ajouterProduit(new Produit(0, nom, categorie, prix, stock, seuil));
+        } else {
+            produit.setNom(nom);
+            produit.setCategorie(categorie);
+            produit.setPrix(prix);
+            produit.setStock(stock);
+            produit.setSeuilAlerte(seuil);
+            controller.mettreAJourProduit(produit);
+        }
+        refreshTable();
+    }
+
+    private double validateDouble(String value, String errorMessage) {
+        try {
+            return Double.parseDouble(value);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
+    private int validateInt(String value, String errorMessage) {
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
+    private void showWarningMessage(String message) {
+        JOptionPane.showMessageDialog(mainPanel, message, "Attention", JOptionPane.WARNING_MESSAGE);
+    }
+
+    private void showErrorMessage(String message) {
+        JOptionPane.showMessageDialog(mainPanel, message, "Erreur", JOptionPane.ERROR_MESSAGE);
+    }
+
+    private void showSuccessMessage(String message) {
+        JOptionPane.showMessageDialog(mainPanel, message, "Succès", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private boolean showConfirmDialog(String message) {
+        return JOptionPane.showConfirmDialog(mainPanel, message, "Confirmation",
+            JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
     }
 
     private void refreshTable() {
@@ -162,142 +295,13 @@ public class ProduitViewSwing {
         }
     }
 
-    private void showProduitDialog(Produit produit) {
-        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel),
-                                   produit == null ? "Nouveau produit" : "Modifier produit",
-                                   true);
-        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-
-        JPanel panel = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        // Champs du formulaire
-        JTextField nomField = new JTextField(20);
-        JComboBox<String> categorieCombo = new JComboBox<>(new String[]{"Frais", "Surgelé", "Transformé"});
-        JTextField prixField = new JTextField(20);
-        JTextField stockField = new JTextField(20);
-        JTextField seuilField = new JTextField(20);
-
-        // Layout
-        gbc.gridx = 0; gbc.gridy = 0;
-        panel.add(new JLabel("Nom:"), gbc);
-        gbc.gridx = 1;
-        panel.add(nomField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 1;
-        panel.add(new JLabel("Catégorie:"), gbc);
-        gbc.gridx = 1;
-        panel.add(categorieCombo, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 2;
-        panel.add(new JLabel("Prix:"), gbc);
-        gbc.gridx = 1;
-        panel.add(prixField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 3;
-        panel.add(new JLabel("Stock:"), gbc);
-        gbc.gridx = 1;
-        panel.add(stockField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = 4;
-        panel.add(new JLabel("Seuil d'alerte:"), gbc);
-        gbc.gridx = 1;
-        panel.add(seuilField, gbc);
-
-        // Pré-remplissage si modification
-        if (produit != null) {
-            nomField.setText(produit.getNom());
-            categorieCombo.setSelectedItem(produit.getCategorie());
-            prixField.setText(String.valueOf(produit.getPrix()));
-            stockField.setText(String.valueOf(produit.getStock()));
-            seuilField.setText(String.valueOf(produit.getSeuilAlerte()));
+    private void loadData() {
+        try {
+            controller.chargerProduits();
+            refreshTable();
+        } catch (Exception e) {
+            showErrorMessage("Erreur lors du chargement des produits : " + e.getMessage());
         }
-
-        // Boutons
-        JPanel buttonPanel = new JPanel();
-        JButton okButton = new JButton("OK");
-        JButton cancelButton = new JButton("Annuler");
-
-        okButton.addActionListener(evt -> {
-            try {
-                String nom = nomField.getText().trim();
-                String categorie = (String) categorieCombo.getSelectedItem();
-                String prixText = prixField.getText().trim().replace(",", ".");
-                String stockText = stockField.getText().trim();
-                String seuilText = seuilField.getText().trim();
-
-                if (nom.isEmpty()) {
-                    throw new IllegalArgumentException("Le nom est obligatoire");
-                }
-
-                double prix;
-                try {
-                    prix = Double.parseDouble(prixText);
-                    if (prix <= 0) {
-                        throw new IllegalArgumentException("Le prix doit être positif");
-                    }
-                } catch (NumberFormatException e) {
-                    throw new IllegalArgumentException("Prix invalide");
-                }
-
-                int stock;
-                try {
-                    stock = Integer.parseInt(stockText);
-                    if (stock < 0) {
-                        throw new IllegalArgumentException("Le stock ne peut pas être négatif");
-                    }
-                } catch (NumberFormatException e) {
-                    throw new IllegalArgumentException("Stock invalide");
-                }
-
-                int seuil;
-                try {
-                    seuil = Integer.parseInt(seuilText);
-                    if (seuil < 0) {
-                        throw new IllegalArgumentException("Le seuil d'alerte ne peut pas être négatif");
-                    }
-                } catch (NumberFormatException e) {
-                    throw new IllegalArgumentException("Seuil d'alerte invalide");
-                }
-
-                if (produit == null) {
-                    Produit nouveauProduit = new Produit(0, nom, categorie, prix, stock, seuil);
-                    controller.ajouterProduit(nouveauProduit);
-                } else {
-                    produit.setNom(nom);
-                    produit.setCategorie(categorie);
-                    produit.setPrix(prix);
-                    produit.setStock(stock);
-                    produit.setSeuilAlerte(seuil);
-                    controller.mettreAJourProduit(produit);
-                }
-                refreshTable();
-                dialog.dispose();
-            } catch (Exception e) {
-                JOptionPane.showMessageDialog(dialog,
-                    e.getMessage(),
-                    "Erreur",
-                    JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
-        cancelButton.addActionListener(evt -> dialog.dispose());
-
-        buttonPanel.add(okButton);
-        buttonPanel.add(cancelButton);
-
-        // Finalisation du dialog
-        JPanel contentPane = new JPanel(new BorderLayout(10, 10));
-        contentPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        contentPane.add(panel, BorderLayout.CENTER);
-        contentPane.add(buttonPanel, BorderLayout.SOUTH);
-
-        dialog.setContentPane(contentPane);
-        dialog.pack();
-        dialog.setLocationRelativeTo(mainPanel);
-        dialog.setVisible(true);
     }
 
     public JPanel getMainPanel() {
