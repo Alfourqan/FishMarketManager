@@ -38,24 +38,30 @@ public class ClientController {
 
     public void ajouterClient(Client client) {
         String sql = "INSERT INTO clients (nom, telephone, adresse, solde) VALUES (?, ?, ?, ?)";
+        String getIdSql = "SELECT last_insert_rowid() as id";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, client.getNom());
+                pstmt.setString(2, client.getTelephone());
+                pstmt.setString(3, client.getAdresse());
+                pstmt.setDouble(4, client.getSolde());
+                pstmt.executeUpdate();
 
-            pstmt.setString(1, client.getNom());
-            pstmt.setString(2, client.getTelephone());
-            pstmt.setString(3, client.getAdresse());
-            pstmt.setDouble(4, client.getSolde());
-
-            pstmt.executeUpdate();
-
-            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    client.setId(generatedKeys.getInt(1));
+                // Récupérer l'ID généré
+                try (Statement stmt = conn.createStatement();
+                     ResultSet rs = stmt.executeQuery(getIdSql)) {
+                    if (rs.next()) {
+                        client.setId(rs.getInt("id"));
+                        clients.add(client);
+                    }
                 }
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
             }
-
-            clients.add(client);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -86,8 +92,9 @@ public class ClientController {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setInt(1, client.getId());
-            pstmt.executeUpdate();
-            clients.remove(client);
+            if (pstmt.executeUpdate() > 0) {
+                clients.remove(client);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }

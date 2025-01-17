@@ -4,7 +4,6 @@ import com.poissonnerie.controller.ConfigurationController;
 import com.poissonnerie.model.ConfigurationParam;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -19,7 +18,7 @@ public class ConfigurationViewSwing {
         champsSaisie = new HashMap<>();
 
         initializeComponents();
-        loadData();
+        loadData(); // Chargement initial des données
     }
 
     private void initializeComponents() {
@@ -31,25 +30,26 @@ public class ConfigurationViewSwing {
 
         // Section TVA
         contentPanel.add(createSectionPanel("Configuration TVA", new String[][]{
-            {ConfigurationParam.CLE_TAUX_TVA, "Taux de TVA (%)", "20.0", "Taux de TVA appliqué aux ventes (entre 0 et 100)"}
+            {ConfigurationParam.CLE_TAUX_TVA, "Taux de TVA (%)", "20.0"}
         }));
 
         // Section Informations Entreprise
         contentPanel.add(Box.createVerticalStrut(10));
         contentPanel.add(createSectionPanel("Informations de l'entreprise", new String[][]{
-            {ConfigurationParam.CLE_NOM_ENTREPRISE, "Nom de l'entreprise", "", "Nom qui apparaîtra sur les factures et reçus"},
-            {ConfigurationParam.CLE_ADRESSE_ENTREPRISE, "Adresse", "", "Adresse complète de l'entreprise"},
-            {ConfigurationParam.CLE_TELEPHONE_ENTREPRISE, "Téléphone", "", "Numéro de téléphone de contact"}
+            {ConfigurationParam.CLE_NOM_ENTREPRISE, "Nom de l'entreprise", ""},
+            {ConfigurationParam.CLE_ADRESSE_ENTREPRISE, "Adresse", ""},
+            {ConfigurationParam.CLE_TELEPHONE_ENTREPRISE, "Téléphone", ""}
         }));
 
         // Section Personnalisation Reçus
         contentPanel.add(Box.createVerticalStrut(10));
         contentPanel.add(createSectionPanel("Personnalisation des reçus", new String[][]{
-            {ConfigurationParam.CLE_PIED_PAGE_RECU, "Message de pied de page", "Merci de votre visite !", "Message qui apparaîtra en bas des reçus"}
+            {ConfigurationParam.CLE_PIED_PAGE_RECU, "Message de pied de page", "Merci de votre visite !"}
         }));
 
         JScrollPane scrollPane = new JScrollPane(contentPanel);
         scrollPane.setBorder(null);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
 
         // Boutons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -61,35 +61,42 @@ public class ConfigurationViewSwing {
 
         buttonPanel.add(reinitialiserBtn);
         buttonPanel.add(sauvegarderBtn);
-
-        mainPanel.add(scrollPane, BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
     }
 
     private JPanel createSectionPanel(String titre, String[][] champs) {
         JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setLayout(new GridBagLayout());
         panel.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createTitledBorder(titre),
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
 
-        for (String[] champ : champs) {
-            JPanel rowPanel = new JPanel(new BorderLayout(10, 0));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(2, 5, 2, 5);
 
+        for (String[] champ : champs) {
             JLabel label = new JLabel(champ[1] + ":");
             label.setPreferredSize(new Dimension(150, label.getPreferredSize().height));
-            label.setToolTipText(champ[3]); // Ajout du tooltip
-            rowPanel.add(label, BorderLayout.WEST);
 
             JTextField textField = new JTextField(20);
-            textField.putClientProperty("cle", champ[0]);
-            textField.setToolTipText(champ[3]); // Ajout du tooltip
+            textField.setName(champ[0]); // Utiliser le nom pour identifier le champ
             champsSaisie.put(champ[0], textField);
-            rowPanel.add(textField, BorderLayout.CENTER);
 
-            panel.add(rowPanel);
-            panel.add(Box.createVerticalStrut(5));
+            gbc.gridx = 0;
+            panel.add(label, gbc);
+
+            gbc.gridx = 1;
+            gbc.weightx = 1.0;
+            gbc.fill = GridBagConstraints.HORIZONTAL;
+            panel.add(textField, gbc);
+
+            gbc.gridy++;
+            gbc.weightx = 0.0;
+            gbc.fill = GridBagConstraints.NONE;
         }
 
         return panel;
@@ -100,14 +107,18 @@ public class ConfigurationViewSwing {
             controller.chargerConfigurations();
             for (Map.Entry<String, JTextField> entry : champsSaisie.entrySet()) {
                 String valeur = controller.getValeur(entry.getKey());
-                entry.getValue().setText(valeur);
+                if (valeur != null) {
+                    SwingUtilities.invokeLater(() -> entry.getValue().setText(valeur));
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
-            JOptionPane.showMessageDialog(mainPanel,
-                "Erreur lors du chargement des configurations : " + e.getMessage(),
-                "Erreur",
-                JOptionPane.ERROR_MESSAGE);
+            SwingUtilities.invokeLater(() -> 
+                JOptionPane.showMessageDialog(mainPanel,
+                    "Erreur lors du chargement des configurations : " + e.getMessage(),
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE)
+            );
         }
     }
 
@@ -115,10 +126,13 @@ public class ConfigurationViewSwing {
         try {
             boolean hasChanges = false;
 
-            for (ConfigurationParam config : controller.getConfigurations()) {
-                JTextField field = champsSaisie.get(config.getCle());
-                if (field != null && !config.getValeur().equals(field.getText().trim())) {
-                    config.setValeur(field.getText().trim());
+            for (Map.Entry<String, JTextField> entry : champsSaisie.entrySet()) {
+                String cle = entry.getKey();
+                String nouvelleValeur = entry.getValue().getText().trim();
+                String ancienneValeur = controller.getValeur(cle);
+
+                if (!nouvelleValeur.equals(ancienneValeur)) {
+                    ConfigurationParam config = new ConfigurationParam(0, cle, nouvelleValeur, "");
                     controller.mettreAJourConfiguration(config);
                     hasChanges = true;
                 }
@@ -130,11 +144,6 @@ public class ConfigurationViewSwing {
                     "Succès",
                     JOptionPane.INFORMATION_MESSAGE);
             }
-        } catch (IllegalArgumentException e) {
-            JOptionPane.showMessageDialog(mainPanel,
-                "Erreur de validation : " + e.getMessage(),
-                "Erreur",
-                JOptionPane.ERROR_MESSAGE);
         } catch (Exception e) {
             e.printStackTrace();
             JOptionPane.showMessageDialog(mainPanel,
@@ -149,9 +158,10 @@ public class ConfigurationViewSwing {
             "Êtes-vous sûr de vouloir réinitialiser tous les paramètres ?",
             "Confirmation",
             JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+
             try {
                 controller.reinitialiserConfigurations();
-                loadData();
+                loadData(); // Recharger les données après la réinitialisation
                 JOptionPane.showMessageDialog(mainPanel,
                     "Les paramètres ont été réinitialisés avec succès",
                     "Succès",

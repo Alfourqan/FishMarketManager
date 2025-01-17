@@ -39,25 +39,31 @@ public class ProduitController {
 
     public void ajouterProduit(Produit produit) {
         String sql = "INSERT INTO produits (nom, categorie, prix, stock, seuil_alerte) VALUES (?, ?, ?, ?, ?)";
+        String getIdSql = "SELECT last_insert_rowid() as id";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, produit.getNom());
+                pstmt.setString(2, produit.getCategorie());
+                pstmt.setDouble(3, produit.getPrix());
+                pstmt.setInt(4, produit.getStock());
+                pstmt.setInt(5, produit.getSeuilAlerte());
+                pstmt.executeUpdate();
 
-            pstmt.setString(1, produit.getNom());
-            pstmt.setString(2, produit.getCategorie());
-            pstmt.setDouble(3, produit.getPrix());
-            pstmt.setInt(4, produit.getStock());
-            pstmt.setInt(5, produit.getSeuilAlerte());
-
-            pstmt.executeUpdate();
-
-            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    produit.setId(generatedKeys.getInt(1));
+                // Récupérer l'ID généré
+                try (Statement stmt = conn.createStatement();
+                     ResultSet rs = stmt.executeQuery(getIdSql)) {
+                    if (rs.next()) {
+                        produit.setId(rs.getInt("id"));
+                        produits.add(produit);
+                    }
                 }
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
             }
-
-            produits.add(produit);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -89,8 +95,9 @@ public class ProduitController {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setInt(1, produit.getId());
-            pstmt.executeUpdate();
-            produits.remove(produit);
+            if (pstmt.executeUpdate() > 0) {
+                produits.remove(produit);
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
