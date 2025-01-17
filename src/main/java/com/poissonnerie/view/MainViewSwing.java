@@ -7,11 +7,13 @@ import org.kordamp.ikonli.swing.FontIcon;
 
 public class MainViewSwing {
     private final JPanel mainPanel;
-    private final JTabbedPane tabbedPane;
+    private final CardLayout cardLayout;
+    private final JPanel contentPanel;
 
     public MainViewSwing() {
         mainPanel = new JPanel(new BorderLayout());
-        tabbedPane = new JTabbedPane();
+        cardLayout = new CardLayout();
+        contentPanel = new JPanel(cardLayout);
 
         initializeComponents();
     }
@@ -21,22 +23,70 @@ public class MainViewSwing {
         JMenuBar menuBar = createMenuBar();
         mainPanel.add(menuBar, BorderLayout.NORTH);
 
-        // Tabs avec icônes
-        FontIcon productsIcon = FontIcon.of(MaterialDesign.MDI_PACKAGE);
-        productsIcon.setIconSize(20);
-        FontIcon salesIcon = FontIcon.of(MaterialDesign.MDI_CART);
-        salesIcon.setIconSize(20);
-        FontIcon clientsIcon = FontIcon.of(MaterialDesign.MDI_ACCOUNT_MULTIPLE);
-        clientsIcon.setIconSize(20);
-        FontIcon cashIcon = FontIcon.of(MaterialDesign.MDI_CASH_100);
-        cashIcon.setIconSize(20);
+        // Panel de navigation vertical à gauche
+        JPanel navigationPanel = new JPanel();
+        navigationPanel.setLayout(new BoxLayout(navigationPanel, BoxLayout.Y_AXIS));
+        navigationPanel.setBackground(new Color(245, 246, 247));
+        navigationPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        navigationPanel.setPreferredSize(new Dimension(200, 0));
 
-        tabbedPane.addTab("Produits", productsIcon, new ProduitViewSwing().getMainPanel());
-        tabbedPane.addTab("Ventes", salesIcon, new VenteViewSwing().getMainPanel());
-        tabbedPane.addTab("Clients", clientsIcon, new ClientViewSwing().getMainPanel());
-        tabbedPane.addTab("Caisse", cashIcon, new CaisseViewSwing().getMainPanel());
+        // Création des boutons de navigation avec icônes
+        JPanel[] views = {
+            new ProduitViewSwing().getMainPanel(),
+            new VenteViewSwing().getMainPanel(),
+            new ClientViewSwing().getMainPanel(),
+            new CaisseViewSwing().getMainPanel()
+        };
 
-        mainPanel.add(tabbedPane, BorderLayout.CENTER);
+        String[] viewNames = {"Produits", "Ventes", "Clients", "Caisse"};
+        MaterialDesign[] icons = {
+            MaterialDesign.MDI_PACKAGE,
+            MaterialDesign.MDI_CART,
+            MaterialDesign.MDI_ACCOUNT_MULTIPLE,
+            MaterialDesign.MDI_CASH_100
+        };
+
+        ButtonGroup buttonGroup = new ButtonGroup();
+
+        for (int i = 0; i < viewNames.length; i++) {
+            JToggleButton navButton = createNavigationButton(viewNames[i], icons[i]);
+            final String cardName = viewNames[i];
+            final int index = i;
+
+            navButton.addActionListener(e -> cardLayout.show(contentPanel, cardName));
+            buttonGroup.add(navButton);
+            navigationPanel.add(navButton);
+            navigationPanel.add(Box.createVerticalStrut(10));
+
+            contentPanel.add(views[index], cardName);
+
+            // Sélectionner le premier bouton par défaut
+            if (i == 0) {
+                navButton.setSelected(true);
+            }
+        }
+
+        mainPanel.add(navigationPanel, BorderLayout.WEST);
+        mainPanel.add(contentPanel, BorderLayout.CENTER);
+    }
+
+    private JToggleButton createNavigationButton(String text, MaterialDesign iconCode) {
+        JToggleButton button = new JToggleButton(text);
+
+        // Configuration de l'icône
+        FontIcon icon = FontIcon.of(iconCode);
+        icon.setIconSize(24);
+        button.setIcon(icon);
+
+        // Style du bouton
+        button.setHorizontalAlignment(SwingConstants.LEFT);
+        button.setMargin(new Insets(10, 15, 10, 15));
+        button.setFocusPainted(false);
+        button.setPreferredSize(new Dimension(180, 50));
+        button.setMaximumSize(new Dimension(180, 50));
+        button.setMinimumSize(new Dimension(180, 50));
+
+        return button;
     }
 
     private JMenuBar createMenuBar() {
@@ -77,13 +127,6 @@ public class MainViewSwing {
 
         menuBar.add(fichierMenu);
         menuBar.add(rapportsMenu);
-
-        // Gestionnaires d'événements pour les rapports
-        caisseMenuItem.addActionListener(e -> {
-            tabbedPane.setSelectedComponent(
-                tabbedPane.getComponentAt(tabbedPane.indexOfTab("Caisse"))
-            );
-        });
 
         return menuBar;
     }

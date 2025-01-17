@@ -9,7 +9,6 @@ import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialLighte
 
 public class Main {
     public static void main(String[] args) {
-        // Pour garantir que l'interface graphique s'exécute dans l'EDT
         SwingUtilities.invokeLater(() -> {
             try {
                 System.out.println("Démarrage de l'application...");
@@ -29,7 +28,16 @@ public class Main {
                 Color primaryTextColor = Color.WHITE;
                 Color darkTextColor = new Color(33, 33, 33); // Texte foncé pour meilleur contraste
 
-                // Configuration des boutons
+                // Configuration des boutons de navigation
+                UIManager.put("ToggleButton.background", new Color(245, 246, 247));
+                UIManager.put("ToggleButton.foreground", darkTextColor);
+                UIManager.put("ToggleButton.select", primaryColor);
+                UIManager.put("ToggleButton.selectedForeground", Color.WHITE);
+                UIManager.put("ToggleButton.font", new Font(UIManager.getFont("ToggleButton.font").getName(), Font.BOLD, 14));
+                UIManager.put("ToggleButton.margin", new Insets(10, 15, 10, 15));
+                UIManager.put("ToggleButton.focusable", false);
+
+                // Configuration des boutons standards
                 UIManager.put("Button.background", primaryColor);
                 UIManager.put("Button.foreground", primaryTextColor);
                 UIManager.put("Button.hoverBackground", primaryLightColor);
@@ -38,6 +46,7 @@ public class Main {
                 UIManager.put("Button.selectedBackground", primaryColor.darker());
                 UIManager.put("Button.default.background", primaryColor);
                 UIManager.put("Button.default.foreground", primaryTextColor);
+
 
                 // Configuration des onglets
                 UIManager.put("TabbedPane.foreground", darkTextColor);
@@ -118,10 +127,10 @@ public class Main {
 
             } catch (Exception e) {
                 e.printStackTrace();
-                String message = "Erreur lors du démarrage: " + e.getMessage() + 
+                String message = "Erreur lors du démarrage: " + e.getMessage() +
                                "\nType: " + e.getClass().getSimpleName();
                 System.err.println(message);
-                JOptionPane.showMessageDialog(null, 
+                JOptionPane.showMessageDialog(null,
                     message,
                     "Erreur",
                     JOptionPane.ERROR_MESSAGE);
