@@ -15,6 +15,10 @@ author = "agent"
 task = "workflow.run"
 args = "Java Application"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Application Poissonnerie"
+
 [[workflows.workflow]]
 name = "Java Application"
 author = "agent"
@@ -28,6 +32,20 @@ task = "packager.installForAll"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "mvn clean compile"
+
+[[workflows.workflow]]
+name = "Application Poissonnerie"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "mvn clean compile exec:java -Dexec.mainClass=\"com.poissonnerie.Main\""
 
 [deployment]
 run = ["sh", "-c", "mvn clean compile"]
