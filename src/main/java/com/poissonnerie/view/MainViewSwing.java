@@ -29,9 +29,9 @@ public class MainViewSwing {
         navigationPanel.setBackground(new Color(220, 224, 228)); // Gris clair
         navigationPanel.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(200, 200, 200)),
-            BorderFactory.createEmptyBorder(25, 20, 25, 20)
+            BorderFactory.createEmptyBorder(15, 15, 15, 15)
         ));
-        navigationPanel.setPreferredSize(new Dimension(240, 0));
+        navigationPanel.setPreferredSize(new Dimension(160, 0));
 
         // Création des boutons de navigation avec icônes
         JPanel[] views = {
@@ -52,7 +52,7 @@ public class MainViewSwing {
         ButtonGroup buttonGroup = new ButtonGroup();
 
         // Ajouter un padding en haut
-        navigationPanel.add(Box.createVerticalStrut(10));
+        navigationPanel.add(Box.createVerticalStrut(5));
 
         for (int i = 0; i < viewNames.length; i++) {
             JToggleButton navButton = createNavigationButton(viewNames[i], icons[i]);
@@ -62,7 +62,7 @@ public class MainViewSwing {
             navButton.addActionListener(e -> cardLayout.show(contentPanel, cardName));
             buttonGroup.add(navButton);
             navigationPanel.add(navButton);
-            navigationPanel.add(Box.createVerticalStrut(20)); // Plus d'espace entre les boutons
+            navigationPanel.add(Box.createVerticalStrut(5)); // Moins d'espace entre les boutons
 
             contentPanel.add(views[index], cardName);
 
@@ -73,7 +73,7 @@ public class MainViewSwing {
         }
 
         // Ajouter un padding en bas
-        navigationPanel.add(Box.createVerticalStrut(10));
+        navigationPanel.add(Box.createVerticalStrut(5));
 
         mainPanel.add(navigationPanel, BorderLayout.WEST);
         mainPanel.add(contentPanel, BorderLayout.CENTER);
@@ -82,20 +82,20 @@ public class MainViewSwing {
     private JToggleButton createNavigationButton(String text, MaterialDesign iconCode) {
         JToggleButton button = new JToggleButton(text);
 
-        // Configuration de l'icône avec une taille plus grande
+        // Configuration de l'icône avec une taille plus petite
         FontIcon icon = FontIcon.of(iconCode);
-        icon.setIconSize(32); // Icônes plus grandes
+        icon.setIconSize(18);
         button.setIcon(icon);
 
         // Style du bouton amélioré
         button.setHorizontalAlignment(SwingConstants.LEFT);
-        button.setIconTextGap(15); // Plus d'espace entre l'icône et le texte
-        button.setMargin(new Insets(15, 25, 15, 25));
+        button.setIconTextGap(10); // Espace entre l'icône et le texte
+        button.setMargin(new Insets(6, 10, 6, 10)); // Marges réduites
         button.setFocusPainted(false);
-        button.setPreferredSize(new Dimension(220, 65));
-        button.setMaximumSize(new Dimension(220, 65));
-        button.setMinimumSize(new Dimension(220, 65));
-        button.setFont(new Font(button.getFont().getName(), Font.BOLD, 15));
+        button.setPreferredSize(new Dimension(130, 32)); // Dimensions réduites
+        button.setMaximumSize(new Dimension(130, 32));
+        button.setMinimumSize(new Dimension(130, 32));
+        button.setFont(new Font(button.getFont().getName(), Font.BOLD, 12)); // Police plus petite
 
         // Meilleur contraste pour le texte
         button.setForeground(new Color(50, 50, 50));
