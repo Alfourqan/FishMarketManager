@@ -34,23 +34,24 @@ public class ProduitViewSwing {
         };
         tableProduits = new JTable(tableModel);
         tableProduits.getColumnModel().getColumn(0).setMaxWidth(30);
-        tableProduits.setRowHeight(30); // Augmentation de la hauteur des lignes
-        tableProduits.setFont(new Font(tableProduits.getFont().getName(), Font.PLAIN, 13)); // Police plus grande
+        tableProduits.setRowHeight(30);
+        tableProduits.setFont(new Font(tableProduits.getFont().getName(), Font.PLAIN, 13));
 
         initializeComponents();
         loadData();
     }
 
     private void initializeComponents() {
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15)); // Marges plus grandes
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         // Panel des boutons avec style moderne
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
         buttonPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(224, 224, 224)),
+            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(200, 200, 200)),
             BorderFactory.createEmptyBorder(5, 5, 15, 5)
         ));
+        buttonPanel.setBackground(new Color(236, 239, 241));
 
         // Création des boutons avec icônes et style moderne
         JButton ajouterBtn = createStyledButton("Ajouter", MaterialDesign.MDI_PLUS_BOX);
@@ -66,12 +67,16 @@ public class ProduitViewSwing {
         // Style moderne pour la table
         JScrollPane scrollPane = new JScrollPane(tableProduits);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.setBackground(new Color(236, 239, 241));
+        scrollPane.getViewport().setBackground(new Color(236, 239, 241));
+
         tableProduits.setShowGrid(true);
-        tableProduits.setGridColor(new Color(224, 224, 224));
+        tableProduits.setGridColor(new Color(200, 200, 200));
+        tableProduits.setBackground(new Color(245, 246, 247));
         tableProduits.setSelectionBackground(new Color(197, 202, 233));
         tableProduits.setSelectionForeground(new Color(33, 33, 33));
         tableProduits.setIntercellSpacing(new Dimension(0, 0));
-        tableProduits.getTableHeader().setBackground(new Color(245, 246, 247));
+        tableProduits.getTableHeader().setBackground(new Color(220, 224, 228));
         tableProduits.getTableHeader().setFont(tableProduits.getTableHeader().getFont().deriveFont(Font.BOLD));
 
         // Gestionnaires d'événements
@@ -104,6 +109,7 @@ public class ProduitViewSwing {
 
         actualiserBtn.addActionListener(e -> loadData());
 
+        mainPanel.setBackground(new Color(236, 239, 241));
         mainPanel.add(buttonPanel, BorderLayout.NORTH);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
     }

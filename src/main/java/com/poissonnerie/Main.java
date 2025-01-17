@@ -26,15 +26,18 @@ public class Main {
                 Color primaryColor = new Color(25, 118, 210); // Bleu plus foncé
                 Color primaryLightColor = new Color(64, 196, 255); // Bleu clair pour hover
                 Color primaryTextColor = Color.WHITE;
-                Color darkTextColor = new Color(33, 33, 33); // Texte foncé pour meilleur contraste
+                Color darkTextColor = new Color(33, 33, 33);
+                Color backgroundColor = new Color(245, 245, 245); // Gris plus clair pour le fond
+                Color panelBackgroundColor = new Color(250, 250, 250); // Blanc cassé pour les panneaux
 
-                // Configuration des boutons de navigation
-                UIManager.put("ToggleButton.background", new Color(245, 246, 247));
-                UIManager.put("ToggleButton.foreground", darkTextColor);
+                // Configuration des boutons de navigation avec meilleur contraste
+                UIManager.put("ToggleButton.background", new Color(230, 235, 240));
+                UIManager.put("ToggleButton.foreground", new Color(40, 40, 40));
                 UIManager.put("ToggleButton.select", primaryColor);
                 UIManager.put("ToggleButton.selectedForeground", Color.WHITE);
+                UIManager.put("ToggleButton.hoverBackground", new Color(210, 220, 230));
                 UIManager.put("ToggleButton.font", new Font(UIManager.getFont("ToggleButton.font").getName(), Font.BOLD, 14));
-                UIManager.put("ToggleButton.margin", new Insets(10, 15, 10, 15));
+                UIManager.put("ToggleButton.margin", new Insets(12, 20, 12, 20));
                 UIManager.put("ToggleButton.focusable", false);
 
                 // Configuration des boutons standards
@@ -47,38 +50,30 @@ public class Main {
                 UIManager.put("Button.default.background", primaryColor);
                 UIManager.put("Button.default.foreground", primaryTextColor);
 
-
-                // Configuration des onglets
-                UIManager.put("TabbedPane.foreground", darkTextColor);
-                UIManager.put("TabbedPane.selectedForeground", primaryColor);
-                UIManager.put("TabbedPane.selectedBackground", new Color(232, 240, 254));
-                UIManager.put("TabbedPane.unselectedBackground", new Color(245, 246, 247));
-                UIManager.put("TabbedPane.contentAreaColor", Color.WHITE);
-                UIManager.put("TabbedPane.focus", primaryColor);
-                UIManager.put("TabbedPane.font", new Font(UIManager.getFont("TabbedPane.font").getName(), Font.BOLD, 13));
-                UIManager.put("TabbedPane.selectedTabPadInsets", new Insets(3, 3, 3, 3));
-                UIManager.put("TabbedPane.tabInsets", new Insets(8, 16, 8, 16));
-
-                // Configuration des menus
+                // Configuration des menus avec meilleur contraste
                 UIManager.put("MenuBar.foreground", darkTextColor);
-                UIManager.put("MenuBar.background", Color.WHITE);
+                UIManager.put("MenuBar.background", new Color(230, 235, 240));
                 UIManager.put("Menu.foreground", darkTextColor);
                 UIManager.put("Menu.selectionBackground", primaryColor);
                 UIManager.put("Menu.selectionForeground", Color.WHITE);
-                UIManager.put("Menu.font", new Font(UIManager.getFont("Menu.font").getName(), Font.PLAIN, 13));
+                UIManager.put("Menu.font", new Font(UIManager.getFont("Menu.font").getName(), Font.BOLD, 13));
                 UIManager.put("MenuItem.foreground", darkTextColor);
                 UIManager.put("MenuItem.selectionBackground", primaryColor);
                 UIManager.put("MenuItem.selectionForeground", Color.WHITE);
                 UIManager.put("MenuItem.font", new Font(UIManager.getFont("MenuItem.font").getName(), Font.PLAIN, 13));
 
                 // Couleurs des textes et composants
+                UIManager.put("Panel.background", backgroundColor);
                 UIManager.put("Label.foreground", darkTextColor);
                 UIManager.put("Label.font", new Font(UIManager.getFont("Label.font").getName(), Font.PLAIN, 13));
                 UIManager.put("TextField.foreground", darkTextColor);
+                UIManager.put("TextField.background", new Color(255, 255, 255));
                 UIManager.put("TextField.font", new Font(UIManager.getFont("TextField.font").getName(), Font.PLAIN, 13));
                 UIManager.put("ComboBox.foreground", darkTextColor);
+                UIManager.put("ComboBox.background", new Color(255, 255, 255));
                 UIManager.put("ComboBox.font", new Font(UIManager.getFont("ComboBox.font").getName(), Font.PLAIN, 13));
                 UIManager.put("TextArea.foreground", darkTextColor);
+                UIManager.put("TextArea.background", new Color(255, 255, 255));
                 UIManager.put("TextArea.font", new Font(UIManager.getFont("TextArea.font").getName(), Font.PLAIN, 13));
 
                 // Marges et padding
@@ -88,11 +83,12 @@ public class Main {
                 // Style des tableaux
                 UIManager.put("Table.showHorizontalLines", true);
                 UIManager.put("Table.showVerticalLines", true);
-                UIManager.put("Table.gridColor", new Color(224, 224, 224));
-                UIManager.put("Table.selectionBackground", new Color(232, 240, 254));
-                UIManager.put("Table.selectionForeground", darkTextColor);
+                UIManager.put("Table.gridColor", new Color(220, 220, 220));
+                UIManager.put("Table.selectionBackground", new Color(207, 216, 233));
+                UIManager.put("Table.selectionForeground", new Color(33, 33, 33));
+                UIManager.put("Table.background", new Color(250, 250, 250));
                 UIManager.put("Table.font", new Font(UIManager.getFont("Table.font").getName(), Font.PLAIN, 13));
-                UIManager.put("TableHeader.background", new Color(245, 246, 247));
+                UIManager.put("TableHeader.background", new Color(235, 238, 241));
                 UIManager.put("TableHeader.foreground", darkTextColor);
                 UIManager.put("TableHeader.font", new Font(UIManager.getFont("TableHeader.font").getName(), Font.BOLD, 13));
 
@@ -128,7 +124,7 @@ public class Main {
             } catch (Exception e) {
                 e.printStackTrace();
                 String message = "Erreur lors du démarrage: " + e.getMessage() +
-                               "\nType: " + e.getClass().getSimpleName();
+                                "\nType: " + e.getClass().getSimpleName();
                 System.err.println(message);
                 JOptionPane.showMessageDialog(null,
                     message,

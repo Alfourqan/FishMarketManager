@@ -23,12 +23,15 @@ public class MainViewSwing {
         JMenuBar menuBar = createMenuBar();
         mainPanel.add(menuBar, BorderLayout.NORTH);
 
-        // Panel de navigation vertical à gauche
+        // Panel de navigation vertical à gauche avec plus d'espace
         JPanel navigationPanel = new JPanel();
         navigationPanel.setLayout(new BoxLayout(navigationPanel, BoxLayout.Y_AXIS));
-        navigationPanel.setBackground(new Color(245, 246, 247));
-        navigationPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        navigationPanel.setPreferredSize(new Dimension(200, 0));
+        navigationPanel.setBackground(new Color(220, 224, 228)); // Gris clair
+        navigationPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(25, 20, 25, 20)
+        ));
+        navigationPanel.setPreferredSize(new Dimension(240, 0));
 
         // Création des boutons de navigation avec icônes
         JPanel[] views = {
@@ -40,13 +43,16 @@ public class MainViewSwing {
 
         String[] viewNames = {"Produits", "Ventes", "Clients", "Caisse"};
         MaterialDesign[] icons = {
-            MaterialDesign.MDI_PACKAGE,
+            MaterialDesign.MDI_PACKAGE_VARIANT,
             MaterialDesign.MDI_CART,
             MaterialDesign.MDI_ACCOUNT_MULTIPLE,
-            MaterialDesign.MDI_CASH_100
+            MaterialDesign.MDI_CASH_MULTIPLE
         };
 
         ButtonGroup buttonGroup = new ButtonGroup();
+
+        // Ajouter un padding en haut
+        navigationPanel.add(Box.createVerticalStrut(10));
 
         for (int i = 0; i < viewNames.length; i++) {
             JToggleButton navButton = createNavigationButton(viewNames[i], icons[i]);
@@ -56,7 +62,7 @@ public class MainViewSwing {
             navButton.addActionListener(e -> cardLayout.show(contentPanel, cardName));
             buttonGroup.add(navButton);
             navigationPanel.add(navButton);
-            navigationPanel.add(Box.createVerticalStrut(10));
+            navigationPanel.add(Box.createVerticalStrut(20)); // Plus d'espace entre les boutons
 
             contentPanel.add(views[index], cardName);
 
@@ -66,6 +72,9 @@ public class MainViewSwing {
             }
         }
 
+        // Ajouter un padding en bas
+        navigationPanel.add(Box.createVerticalStrut(10));
+
         mainPanel.add(navigationPanel, BorderLayout.WEST);
         mainPanel.add(contentPanel, BorderLayout.CENTER);
     }
@@ -73,18 +82,23 @@ public class MainViewSwing {
     private JToggleButton createNavigationButton(String text, MaterialDesign iconCode) {
         JToggleButton button = new JToggleButton(text);
 
-        // Configuration de l'icône
+        // Configuration de l'icône avec une taille plus grande
         FontIcon icon = FontIcon.of(iconCode);
-        icon.setIconSize(24);
+        icon.setIconSize(32); // Icônes plus grandes
         button.setIcon(icon);
 
-        // Style du bouton
+        // Style du bouton amélioré
         button.setHorizontalAlignment(SwingConstants.LEFT);
-        button.setMargin(new Insets(10, 15, 10, 15));
+        button.setIconTextGap(15); // Plus d'espace entre l'icône et le texte
+        button.setMargin(new Insets(15, 25, 15, 25));
         button.setFocusPainted(false);
-        button.setPreferredSize(new Dimension(180, 50));
-        button.setMaximumSize(new Dimension(180, 50));
-        button.setMinimumSize(new Dimension(180, 50));
+        button.setPreferredSize(new Dimension(220, 65));
+        button.setMaximumSize(new Dimension(220, 65));
+        button.setMinimumSize(new Dimension(220, 65));
+        button.setFont(new Font(button.getFont().getName(), Font.BOLD, 15));
+
+        // Meilleur contraste pour le texte
+        button.setForeground(new Color(50, 50, 50));
 
         return button;
     }
@@ -92,14 +106,14 @@ public class MainViewSwing {
     private JMenuBar createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
 
-        // Menu Fichier
+        // Menu Fichier avec icônes plus grandes
         JMenu fichierMenu = new JMenu("Fichier");
         JMenuItem parametresMenuItem = new JMenuItem("Paramètres", 
-            FontIcon.of(MaterialDesign.MDI_SETTINGS, 16));
+            createLargeIcon(MaterialDesign.MDI_SETTINGS));
         JMenuItem exporterMenuItem = new JMenuItem("Exporter les données", 
-            FontIcon.of(MaterialDesign.MDI_EXPORT, 16));
+            createLargeIcon(MaterialDesign.MDI_EXPORT));
         JMenuItem quitterMenuItem = new JMenuItem("Quitter", 
-            FontIcon.of(MaterialDesign.MDI_EXIT_TO_APP, 16));
+            createLargeIcon(MaterialDesign.MDI_EXIT_TO_APP));
 
         parametresMenuItem.addActionListener(e -> showParametres());
         quitterMenuItem.addActionListener(e -> System.exit(0));
@@ -109,16 +123,16 @@ public class MainViewSwing {
         fichierMenu.addSeparator();
         fichierMenu.add(quitterMenuItem);
 
-        // Menu Rapports avec icônes
+        // Menu Rapports avec icônes plus grandes
         JMenu rapportsMenu = new JMenu("Rapports");
         JMenuItem ventesJourMenuItem = new JMenuItem("Ventes du jour", 
-            FontIcon.of(MaterialDesign.MDI_CHART_BAR, 16));
+            createLargeIcon(MaterialDesign.MDI_CHART_BAR));
         JMenuItem stocksMenuItem = new JMenuItem("État des stocks", 
-            FontIcon.of(MaterialDesign.MDI_CLIPBOARD_TEXT, 16));
+            createLargeIcon(MaterialDesign.MDI_CLIPBOARD_TEXT));
         JMenuItem creancesMenuItem = new JMenuItem("État des créances", 
-            FontIcon.of(MaterialDesign.MDI_WALLET_MEMBERSHIP, 16));
+            createLargeIcon(MaterialDesign.MDI_WALLET_MEMBERSHIP));
         JMenuItem caisseMenuItem = new JMenuItem("Journal de caisse", 
-            FontIcon.of(MaterialDesign.MDI_CASH, 16));
+            createLargeIcon(MaterialDesign.MDI_CASH));
 
         rapportsMenu.add(ventesJourMenuItem);
         rapportsMenu.add(stocksMenuItem);
@@ -128,7 +142,17 @@ public class MainViewSwing {
         menuBar.add(fichierMenu);
         menuBar.add(rapportsMenu);
 
+        // Style du menu
+        fichierMenu.setFont(new Font(fichierMenu.getFont().getName(), Font.BOLD, 13));
+        rapportsMenu.setFont(new Font(rapportsMenu.getFont().getName(), Font.BOLD, 13));
+
         return menuBar;
+    }
+
+    private FontIcon createLargeIcon(MaterialDesign iconCode) {
+        FontIcon icon = FontIcon.of(iconCode);
+        icon.setIconSize(20);
+        return icon;
     }
 
     private void showParametres() {

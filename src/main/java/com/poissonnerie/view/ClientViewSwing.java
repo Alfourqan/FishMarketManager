@@ -35,21 +35,24 @@ public class ClientViewSwing {
         };
         tableClients = new JTable(tableModel);
         tableClients.getColumnModel().getColumn(0).setMaxWidth(30);
-        tableClients.setRowHeight(25);
+        tableClients.setRowHeight(30);
+        tableClients.setFont(new Font(tableClients.getFont().getName(), Font.PLAIN, 13));
 
         initializeComponents();
         loadData();
     }
 
     private void initializeComponents() {
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        mainPanel.setBackground(new Color(236, 239, 241));
 
-        // Boutons d'action avec icônes
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
+        // Panel des boutons avec style moderne
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
         buttonPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, Color.LIGHT_GRAY),
-            BorderFactory.createEmptyBorder(5, 5, 10, 5)
+            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(5, 5, 15, 5)
         ));
+        buttonPanel.setBackground(new Color(236, 239, 241));
 
         // Création des boutons avec icônes
         JButton ajouterBtn = createStyledButton("Ajouter", MaterialDesign.MDI_ACCOUNT_PLUS);
@@ -64,13 +67,22 @@ public class ClientViewSwing {
         buttonPanel.add(reglerCreanceBtn);
         buttonPanel.add(actualiserBtn);
 
-        // Table avec scroll
+        // Style moderne pour la table
         JScrollPane scrollPane = new JScrollPane(tableClients);
-        tableClients.setFillsViewportHeight(true);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.setBackground(new Color(236, 239, 241));
+        scrollPane.getViewport().setBackground(new Color(236, 239, 241));
 
-        // Style de la table
-        tableClients.setShowGrid(false);
-        tableClients.setIntercellSpacing(new Dimension(0, 0));
+        tableClients.setShowGrid(true);
+        tableClients.setGridColor(new Color(200, 200, 200));
+        tableClients.setBackground(new Color(245, 246, 247));
+        tableClients.setSelectionBackground(new Color(197, 202, 233));
+        tableClients.setSelectionForeground(new Color(33, 33, 33));
+        tableClients.getTableHeader().setBackground(new Color(220, 224, 228));
+        tableClients.getTableHeader().setFont(tableClients.getTableHeader().getFont().deriveFont(Font.BOLD));
+
+        mainPanel.add(buttonPanel, BorderLayout.NORTH);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
 
         // Gestionnaires d'événements
         ajouterBtn.addActionListener(e -> showClientDialog(null));
@@ -157,16 +169,14 @@ public class ClientViewSwing {
                 mainPanel.setCursor(Cursor.getDefaultCursor());
             }
         });
-
-        mainPanel.add(buttonPanel, BorderLayout.NORTH);
-        mainPanel.add(scrollPane, BorderLayout.CENTER);
     }
 
     private JButton createStyledButton(String text, Ikon iconCode) {
         FontIcon icon = FontIcon.of(iconCode);
         icon.setIconSize(16);
         JButton button = new JButton(text, icon);
-        button.setMargin(new Insets(5, 10, 5, 10));
+        button.setMargin(new Insets(8, 16, 8, 16));
+        button.setFocusPainted(false);
         return button;
     }
 
