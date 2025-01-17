@@ -35,6 +35,7 @@ public class ConfigurationController {
                 configurations.add(config);
                 configCache.put(config.getCle(), config.getValeur());
             }
+            System.out.println("Configurations chargées: " + configurations.size() + " entrées");
         } catch (SQLException e) {
             e.printStackTrace();
             throw new RuntimeException("Erreur lors du chargement des configurations", e);
@@ -65,20 +66,32 @@ public class ConfigurationController {
                 break;
         }
 
-        String sql = "UPDATE configurations SET valeur = ? WHERE id = ?";
+        String sql = "UPDATE configurations SET valeur = ? WHERE cle = ?";
+        System.out.println("Mise à jour de la configuration: " + config.getCle() + " = " + config.getValeur());
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, config.getValeur());
-            pstmt.setInt(2, config.getId());
-            pstmt.executeUpdate();
+            pstmt.setString(2, config.getCle());
+            int rowsUpdated = pstmt.executeUpdate();
 
-            // Mise à jour du cache
-            configCache.put(config.getCle(), config.getValeur());
+            if (rowsUpdated > 0) {
+                // Mise à jour du cache et de la liste
+                configCache.put(config.getCle(), config.getValeur());
+                for (ConfigurationParam conf : configurations) {
+                    if (conf.getCle().equals(config.getCle())) {
+                        conf.setValeur(config.getValeur());
+                        break;
+                    }
+                }
+                System.out.println("Configuration mise à jour avec succès");
+            } else {
+                System.out.println("Aucune configuration mise à jour");
+            }
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException("Erreur lors de la mise à jour de la configuration", e);
+            throw new RuntimeException("Erreur lors de la mise à jour de la configuration: " + e.getMessage(), e);
         }
     }
 
@@ -112,7 +125,8 @@ public class ConfigurationController {
 
         try (Connection conn = DatabaseManager.getConnection();
              Statement stmt = conn.createStatement()) {
-            stmt.executeUpdate(sql);
+            int rowsUpdated = stmt.executeUpdate(sql);
+            System.out.println("Configurations réinitialisées: " + rowsUpdated + " entrées mises à jour");
             chargerConfigurations(); // Recharger les configurations
         } catch (SQLException e) {
             e.printStackTrace();
