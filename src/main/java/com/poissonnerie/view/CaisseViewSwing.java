@@ -83,8 +83,8 @@ public class CaisseViewSwing {
 
         // Boutons de gestion de la caisse avec le nouveau style
         ouvrirBtn = createStyledButton("Ouvrir la caisse", MaterialDesign.MDI_CASH, new Color(76, 175, 80));
-        cloturerBtn = createStyledButton("Clôturer la caisse", MaterialDesign.MDI_CASH_OFF, new Color(244, 67, 54));
-        ajouterBtn = createStyledButton("Nouveau mouvement", MaterialDesign.MDI_PLUS_BOX, new Color(33, 150, 243));
+        cloturerBtn = createStyledButton("Clôturer la caisse", MaterialDesign.MDI_CLOSE_CIRCLE, new Color(244, 67, 54));
+        ajouterBtn = createStyledButton("Nouveau mouvement", MaterialDesign.MDI_PLUS, new Color(33, 150, 243));
         exporterBtn = createStyledButton("Exporter (CSV)", MaterialDesign.MDI_EXPORT, new Color(156, 39, 176));
 
         actionPanel.add(ouvrirBtn);

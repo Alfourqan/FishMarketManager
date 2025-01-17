@@ -44,7 +44,7 @@ public class FournisseurViewSwing {
         // Style moderne pour la table
         tableFournisseurs.setShowGrid(true);
         tableFournisseurs.setGridColor(new Color(230, 230, 230));
-        tableFournisseurs.setBackground(Color.WHITE);
+        tableFournisseurs.setBackground(new Color(252, 252, 252));
         tableFournisseurs.setSelectionBackground(new Color(232, 240, 254));
         tableFournisseurs.setSelectionForeground(new Color(33, 33, 33));
         tableFournisseurs.getTableHeader().setBackground(new Color(245, 246, 247));
@@ -52,10 +52,26 @@ public class FournisseurViewSwing {
         tableFournisseurs.setRowHeight(40);
         tableFournisseurs.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         tableFournisseurs.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
+        tableFournisseurs.setIntercellSpacing(new Dimension(10, 5));
 
         // Ajustement des colonnes
         tableFournisseurs.getColumnModel().getColumn(0).setMaxWidth(60);
         tableFournisseurs.getColumnModel().getColumn(0).setMinWidth(60);
+
+        // Style alterné des lignes
+        tableFournisseurs.setDefaultRenderer(Object.class, new javax.swing.table.DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                                                           boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value,
+                                                                isSelected, hasFocus, row, column);
+                if (!isSelected) {
+                    c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(249, 249, 249));
+                }
+                setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 8));
+                return c;
+            }
+        });
     }
 
     private void initializeComponents() {
@@ -80,6 +96,7 @@ public class FournisseurViewSwing {
         JScrollPane scrollPane = new JScrollPane(tableFournisseurs);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getViewport().setBackground(Color.WHITE);
+        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(225, 225, 225)));
 
         // Ajout final au panel principal
         mainPanel.add(contentPanel, BorderLayout.NORTH);
@@ -89,13 +106,20 @@ public class FournisseurViewSwing {
     private JPanel createHeaderPanel() {
         JPanel headerPanel = new JPanel(new BorderLayout(15, 0));
         headerPanel.setOpaque(false);
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
 
-        // Titre avec icône
+        // Titre avec icône et style moderne
         JLabel titleLabel = new JLabel("Gestion des Fournisseurs");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
         titleLabel.setForeground(new Color(33, 33, 33));
 
-        // Barre de recherche
+        FontIcon titleIcon = FontIcon.of(MaterialDesign.MDI_STORE);
+        titleIcon.setIconSize(28);
+        titleIcon.setIconColor(new Color(0, 135, 136));
+        titleLabel.setIcon(titleIcon);
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
+
+        // Barre de recherche avec style moderne
         searchField = createSearchField();
 
         headerPanel.add(titleLabel, BorderLayout.WEST);
@@ -108,8 +132,8 @@ public class FournisseurViewSwing {
         JTextField field = new JTextField(20);
         field.setPreferredSize(new Dimension(250, 35));
         field.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200)),
-            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+                BorderFactory.createLineBorder(new Color(200, 200, 200)),
+                BorderFactory.createEmptyBorder(5, 10, 5, 10)
         ));
         field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 
@@ -144,23 +168,43 @@ public class FournisseurViewSwing {
         return field;
     }
 
-    private void updateTableWithSearch(String searchTerm) {
-        try {
-            List<Fournisseur> resultats = controller.rechercherFournisseurs(searchTerm);
-            refreshTable(resultats);
-        } catch (Exception e) {
-            showErrorMessage("Erreur lors de la recherche : " + e.getMessage());
-        }
+    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
+        FontIcon icon = FontIcon.of(iconCode);
+        icon.setIconSize(18);
+        icon.setIconColor(Color.WHITE);
+
+        JButton button = new JButton(text);
+        button.setIcon(icon);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        button.setBackground(color);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setMargin(new Insets(8, 16, 8, 16));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Effet de survol
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(color.darker());
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(color);
+            }
+        });
+
+        return button;
     }
 
     private JPanel createActionPanel() {
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         actionPanel.setOpaque(false);
+        actionPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
 
         // Création des boutons avec style moderne
-        JButton ajouterBtn = createStyledButton("Nouveau", MaterialDesign.MDI_PLUS_BOX, new Color(76, 175, 80));
-        JButton modifierBtn = createStyledButton("Modifier", MaterialDesign.MDI_PENCIL_BOX, new Color(33, 150, 243));
-        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesign.MDI_MINUS_BOX, new Color(244, 67, 54));
+        JButton ajouterBtn = createStyledButton("Nouveau", MaterialDesign.MDI_PLUS, new Color(76, 175, 80));
+        JButton modifierBtn = createStyledButton("Modifier", MaterialDesign.MDI_PENCIL, new Color(33, 150, 243));
+        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesign.MDI_DELETE, new Color(244, 67, 54));
         JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH, new Color(156, 39, 176));
         JButton rapportBtn = createStyledButton("Rapport", MaterialDesign.MDI_FILE_PDF, new Color(63, 81, 181));
 
@@ -208,38 +252,10 @@ public class FournisseurViewSwing {
     }
 
 
-    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
-        FontIcon icon = FontIcon.of(iconCode);
-        icon.setIconSize(18);
-        icon.setIconColor(Color.WHITE);
-
-        JButton button = new JButton(text);
-        button.setIcon(icon);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        button.setBackground(color);
-        button.setForeground(Color.WHITE);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setMargin(new Insets(8, 16, 8, 16));
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        // Effet de survol
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(color.darker());
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(color);
-            }
-        });
-
-        return button;
-    }
-
     private void showFournisseurDialog(Fournisseur fournisseur) {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel),
-                                  fournisseur == null ? "Nouveau fournisseur" : "Modifier fournisseur",
-                                  true);
+                                      fournisseur == null ? "Nouveau fournisseur" : "Modifier fournisseur",
+                                      true);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
         JPanel panel = new JPanel(new GridBagLayout());
@@ -292,7 +308,7 @@ public class FournisseurViewSwing {
         okButton.addActionListener(evt -> {
             try {
                 validateAndSaveFournisseur(fournisseur, nomField, contactField, telephoneField,
-                                         emailField, adresseArea);
+                                             emailField, adresseArea);
                 dialog.dispose();
             } catch (Exception e) {
                 showErrorMessage(e.getMessage());
@@ -321,8 +337,8 @@ public class FournisseurViewSwing {
         JTextField field = new JTextField(20);
         field.setPreferredSize(new Dimension(250, 30));
         field.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200)),
-            BorderFactory.createEmptyBorder(5, 8, 5, 8)
+                BorderFactory.createLineBorder(new Color(200, 200, 200)),
+                BorderFactory.createEmptyBorder(5, 8, 5, 8)
         ));
         field.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         return field;
@@ -338,7 +354,7 @@ public class FournisseurViewSwing {
     }
 
     private void addFormField(JPanel panel, GridBagConstraints gbc, String labelText,
-                            JComponent field, int row) {
+                              JComponent field, int row) {
         gbc.gridx = 0;
         gbc.gridy = row;
         gbc.weightx = 0;
@@ -353,8 +369,8 @@ public class FournisseurViewSwing {
     }
 
     private void validateAndSaveFournisseur(Fournisseur fournisseur, JTextField nomField,
-                                          JTextField contactField, JTextField telephoneField,
-                                          JTextField emailField, JTextArea adresseArea) {
+                                             JTextField contactField, JTextField telephoneField,
+                                             JTextField emailField, JTextArea adresseArea) {
         String nom = nomField.getText().trim();
         String contact = contactField.getText().trim();
         String telephone = telephoneField.getText().trim();
@@ -393,20 +409,20 @@ public class FournisseurViewSwing {
 
     private boolean showConfirmDialog(String message) {
         return JOptionPane.showConfirmDialog(mainPanel, message, "Confirmation",
-            JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+                                             JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
     }
 
     private void refreshTable() {
         tableModel.setRowCount(0);
         for (Fournisseur fournisseur : controller.getFournisseurs()) {
             tableModel.addRow(new Object[]{
-                fournisseur.getId(),
-                fournisseur.getNom(),
-                fournisseur.getContact(),
-                fournisseur.getTelephone(),
-                fournisseur.getEmail(),
-                fournisseur.getAdresse(),
-                fournisseur.getStatut()
+                    fournisseur.getId(),
+                    fournisseur.getNom(),
+                    fournisseur.getContact(),
+                    fournisseur.getTelephone(),
+                    fournisseur.getEmail(),
+                    fournisseur.getAdresse(),
+                    fournisseur.getStatut()
             });
         }
     }
@@ -414,13 +430,13 @@ public class FournisseurViewSwing {
         tableModel.setRowCount(0);
         for (Fournisseur fournisseur : fournisseurs) {
             tableModel.addRow(new Object[]{
-                fournisseur.getId(),
-                fournisseur.getNom(),
-                fournisseur.getContact(),
-                fournisseur.getTelephone(),
-                fournisseur.getEmail(),
-                fournisseur.getAdresse(),
-                fournisseur.getStatut()
+                    fournisseur.getId(),
+                    fournisseur.getNom(),
+                    fournisseur.getContact(),
+                    fournisseur.getTelephone(),
+                    fournisseur.getEmail(),
+                    fournisseur.getAdresse(),
+                    fournisseur.getStatut()
             });
         }
     }
@@ -434,6 +450,14 @@ public class FournisseurViewSwing {
         }
     }
 
+    private void updateTableWithSearch(String searchTerm) {
+        try {
+            List<Fournisseur> resultats = controller.rechercherFournisseurs(searchTerm);
+            refreshTable(resultats);
+        } catch (Exception e) {
+            showErrorMessage("Erreur lors de la recherche : " + e.getMessage());
+        }
+    }
 
     private void genererRapport() {
         try {
