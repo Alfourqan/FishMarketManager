@@ -170,11 +170,12 @@ public class MainViewSwing {
         button.setPreferredSize(new Dimension(170, 40));
         button.setMaximumSize(new Dimension(170, 40));
         button.setMinimumSize(new Dimension(170, 40));
-        button.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
         button.setForeground(Color.WHITE);
         button.setBackground(new Color(33, 37, 41));
         button.setBorderPainted(false);
         button.setOpaque(true);
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         // Style au survol et à la sélection
         button.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -188,6 +189,43 @@ public class MainViewSwing {
                 if (!button.isSelected()) {
                     button.setBackground(new Color(33, 37, 41));
                 }
+            }
+        });
+
+        // Style lorsque le bouton est sélectionné
+        button.addChangeListener(e -> {
+            if (button.isSelected()) {
+                button.setBackground(new Color(76, 175, 80));
+            } else {
+                button.setBackground(new Color(33, 37, 41));
+            }
+        });
+
+        return button;
+    }
+
+    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
+        FontIcon icon = FontIcon.of(iconCode);
+        icon.setIconSize(18);
+        icon.setIconColor(Color.WHITE);
+
+        JButton button = new JButton(text);
+        button.setIcon(icon);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        button.setBackground(color);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setMargin(new Insets(8, 16, 8, 16));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Effet de survol
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(color.darker());
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(color);
             }
         });
 
