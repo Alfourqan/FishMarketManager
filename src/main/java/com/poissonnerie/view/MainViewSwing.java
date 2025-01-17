@@ -80,8 +80,8 @@ public class MainViewSwing {
 
         // Définir les éléments de navigation
         String[] viewNames = {
-            "Produits", "Ventes", "Clients", "Factures", 
-            "Fournisseurs", "Catégories", "Inventaire", "Caisse", 
+            "Produits", "Ventes", "Clients", "Factures",
+            "Fournisseurs", "Catégories", "Inventaire", "Caisse",
             "Report", "Réglages", "Déconnexion"
         };
 
@@ -136,11 +136,13 @@ public class MainViewSwing {
         contentPanel.add(new CaisseViewSwing().getMainPanel(), "Caisse");
         contentPanel.add(new InventaireViewSwing().getMainPanel(), "Inventaire");
 
-        // Ajouter des panels temporaires pour les nouvelles vues
+        // Ajouter les nouvelles vues
+        contentPanel.add(new FournisseurViewSwing().getMainPanel(), "Fournisseurs");
+        contentPanel.add(new ReportViewSwing().getMainPanel(), "Report");
+
+        // Ajouter des panels temporaires pour les autres vues
         contentPanel.add(createTemporaryPanel("Factures"), "Factures");
-        contentPanel.add(createTemporaryPanel("Fournisseurs"), "Fournisseurs");
         contentPanel.add(createTemporaryPanel("Catégories"), "Catégories");
-        contentPanel.add(createTemporaryPanel("Report"), "Report");
         contentPanel.add(createTemporaryPanel("Réglages"), "Réglages");
     }
 
@@ -265,7 +267,7 @@ public class MainViewSwing {
             String nomFichier = "rapport_ventes_" + aujourdhui + ".pdf";
             PDFGenerator.genererRapportVentes(ventesJour, nomFichier);
 
-            afficherMessageSuccess("Rapport genere avec succes", 
+            afficherMessageSuccess("Rapport genere avec succes",
                 "Le rapport des ventes a ete genere dans le fichier : " + nomFichier);
 
             ouvrirFichierPDF(nomFichier);
@@ -281,7 +283,7 @@ public class MainViewSwing {
             String nomFichier = "rapport_stocks_" + LocalDate.now() + ".pdf";
             PDFGenerator.genererRapportStocks(produitController.getProduits(), nomFichier);
 
-            afficherMessageSuccess("Rapport genere avec succes", 
+            afficherMessageSuccess("Rapport genere avec succes",
                 "Le rapport des stocks a ete genere dans le fichier : " + nomFichier);
 
             ouvrirFichierPDF(nomFichier);
@@ -297,7 +299,7 @@ public class MainViewSwing {
             String nomFichier = "rapport_creances_" + LocalDate.now() + ".pdf";
             PDFGenerator.genererRapportCreances(clientController.getClients(), nomFichier);
 
-            afficherMessageSuccess("Rapport genere avec succes", 
+            afficherMessageSuccess("Rapport genere avec succes",
                 "Le rapport des creances a ete genere dans le fichier : " + nomFichier);
 
             ouvrirFichierPDF(nomFichier);
@@ -313,7 +315,7 @@ public class MainViewSwing {
             String nomFichier = "rapport_caisse_" + LocalDate.now() + ".pdf";
             PDFGenerator.genererRapportCaisse(caisseController.getMouvements(), nomFichier);
 
-            afficherMessageSuccess("Rapport genere avec succes", 
+            afficherMessageSuccess("Rapport genere avec succes",
                 "Le rapport de caisse a ete genere dans le fichier : " + nomFichier);
 
             ouvrirFichierPDF(nomFichier);

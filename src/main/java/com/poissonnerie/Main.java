@@ -26,7 +26,7 @@ public class Main {
                 Color primaryColor = new Color(0, 135, 136); // Vert pour l'en-tête
                 Color sidebarColor = new Color(51, 51, 75); // Couleur sombre pour la barre latérale
                 Color primaryTextColor = Color.WHITE;
-                Color darkTextColor = new Color(51, 51, 76);
+                Color darkTextColor = new Color(33, 33, 33);
                 Color backgroundColor = new Color(245, 245, 245);
 
                 // Configuration des boutons de navigation avec style moderne
