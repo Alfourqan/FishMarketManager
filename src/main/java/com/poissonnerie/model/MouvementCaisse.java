@@ -10,8 +10,10 @@ public class MouvementCaisse {
     private String description;
 
     public enum TypeMouvement {
+        OUVERTURE("OUVERTURE"),
         ENTREE("ENTREE"),
-        SORTIE("SORTIE");
+        SORTIE("SORTIE"),
+        CLOTURE("CLOTURE");
 
         private final String value;
 

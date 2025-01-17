@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 
 public class CaisseViewSwing {
     private final JPanel mainPanel;
@@ -19,6 +18,11 @@ public class CaisseViewSwing {
     private final DefaultTableModel tableModel;
     private final JLabel soldeLabel;
     private JComboBox<MouvementCaisse.TypeMouvement> typeCombo;
+    private JButton ouvrirBtn;
+    private JButton cloturerBtn;
+    private JButton ajouterBtn;
+    private JButton exporterBtn;
+    private boolean caisseOuverte = false;
 
     public CaisseViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -38,6 +42,7 @@ public class CaisseViewSwing {
 
         initializeComponents();
         loadData();
+        updateCaisseState();
     }
 
     private void initializeComponents() {
@@ -46,9 +51,15 @@ public class CaisseViewSwing {
         // Panel du haut avec le solde et les boutons d'action
         JPanel topPanel = new JPanel(new BorderLayout());
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton ajouterBtn = new JButton("Nouveau mouvement");
-        JButton exporterBtn = new JButton("Exporter (CSV)");
 
+        // Boutons de gestion de la caisse
+        ouvrirBtn = new JButton("Ouvrir la caisse");
+        cloturerBtn = new JButton("Clôturer la caisse");
+        ajouterBtn = new JButton("Nouveau mouvement");
+        exporterBtn = new JButton("Exporter (CSV)");
+
+        actionPanel.add(ouvrirBtn);
+        actionPanel.add(cloturerBtn);
         actionPanel.add(ajouterBtn);
         actionPanel.add(exporterBtn);
         topPanel.add(soldeLabel, BorderLayout.WEST);
@@ -59,6 +70,8 @@ public class CaisseViewSwing {
         tableMouvements.setFillsViewportHeight(true);
 
         // Event handlers
+        ouvrirBtn.addActionListener(e -> ouvrirCaisse());
+        cloturerBtn.addActionListener(e -> cloturerCaisse());
         ajouterBtn.addActionListener(e -> showMouvementDialog());
         exporterBtn.addActionListener(e -> exporterMouvements());
 
@@ -66,7 +79,120 @@ public class CaisseViewSwing {
         mainPanel.add(scrollPane, BorderLayout.CENTER);
     }
 
+    private void ouvrirCaisse() {
+        if (!caisseOuverte) {
+            try {
+                double montantInitial = getMontantInitial();
+                if (montantInitial > 0) {
+                    MouvementCaisse mouvement = new MouvementCaisse(
+                        0,
+                        LocalDateTime.now(),
+                        MouvementCaisse.TypeMouvement.OUVERTURE,
+                        montantInitial,
+                        "Ouverture de caisse"
+                    );
+                    controller.ajouterMouvement(mouvement);
+                    caisseOuverte = true;
+                    updateCaisseState();
+                    refreshTable();
+                    JOptionPane.showMessageDialog(mainPanel,
+                        "La caisse a été ouverte avec succès",
+                        "Succès",
+                        JOptionPane.INFORMATION_MESSAGE);
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(mainPanel,
+                    "Erreur lors de l'ouverture de la caisse : " + e.getMessage(),
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private double getMontantInitial() {
+        String montantStr = JOptionPane.showInputDialog(mainPanel,
+            "Entrez le montant initial de la caisse:",
+            "Ouverture de caisse",
+            JOptionPane.QUESTION_MESSAGE);
+
+        if (montantStr == null || montantStr.trim().isEmpty()) {
+            return 0;
+        }
+
+        try {
+            double montant = Double.parseDouble(montantStr.replace(",", "."));
+            if (montant <= 0) {
+                throw new IllegalArgumentException("Le montant doit être positif");
+            }
+            return montant;
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(mainPanel,
+                "Montant invalide",
+                "Erreur",
+                JOptionPane.ERROR_MESSAGE);
+            return 0;
+        }
+    }
+
+    private void cloturerCaisse() {
+        if (caisseOuverte) {
+            int confirmation = JOptionPane.showConfirmDialog(mainPanel,
+                "Êtes-vous sûr de vouloir clôturer la caisse ?",
+                "Confirmation",
+                JOptionPane.YES_NO_OPTION);
+
+            if (confirmation == JOptionPane.YES_OPTION) {
+                try {
+                    double soldeFinal = controller.getSoldeCaisse();
+                    MouvementCaisse mouvement = new MouvementCaisse(
+                        0,
+                        LocalDateTime.now(),
+                        MouvementCaisse.TypeMouvement.CLOTURE,
+                        soldeFinal,
+                        "Clôture de caisse"
+                    );
+                    controller.ajouterMouvement(mouvement);
+                    caisseOuverte = false;
+                    updateCaisseState();
+                    refreshTable();
+
+                    // Afficher le récapitulatif de clôture
+                    JOptionPane.showMessageDialog(mainPanel,
+                        String.format("Clôture de caisse effectuée\nSolde final: %.2f €", soldeFinal),
+                        "Succès",
+                        JOptionPane.INFORMATION_MESSAGE);
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(mainPanel,
+                        "Erreur lors de la clôture de la caisse : " + e.getMessage(),
+                        "Erreur",
+                        JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }
+    }
+
+    private void updateCaisseState() {
+        // Mettre à jour l'état des boutons en fonction de l'état de la caisse
+        ouvrirBtn.setEnabled(!caisseOuverte);
+        cloturerBtn.setEnabled(caisseOuverte);
+        ajouterBtn.setEnabled(caisseOuverte);
+
+        // Vérifier le dernier mouvement pour déterminer l'état de la caisse
+        if (controller.getMouvements().size() > 0) {
+            MouvementCaisse dernierMouvement = controller.getMouvements().get(controller.getMouvements().size() - 1);
+            caisseOuverte = dernierMouvement.getType() != MouvementCaisse.TypeMouvement.CLOTURE;
+        }
+    }
+
     private void showMouvementDialog() {
+        if (!caisseOuverte) {
+            JOptionPane.showMessageDialog(mainPanel,
+                "La caisse doit être ouverte pour effectuer des mouvements",
+                "Caisse fermée",
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel),
             "Nouveau mouvement de caisse", true);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -77,7 +203,10 @@ public class CaisseViewSwing {
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         // Champs du formulaire
-        typeCombo = new JComboBox<>(MouvementCaisse.TypeMouvement.values());
+        typeCombo = new JComboBox<>(new MouvementCaisse.TypeMouvement[]{
+            MouvementCaisse.TypeMouvement.ENTREE,
+            MouvementCaisse.TypeMouvement.SORTIE
+        });
         JTextField montantField = new JTextField(10);
         JTextField descriptionField = new JTextField(20);
 
@@ -227,6 +356,7 @@ public class CaisseViewSwing {
 
         // Mettre à jour le solde
         soldeLabel.setText(String.format("Solde: %.2f €", controller.getSoldeCaisse()));
+        updateCaisseState();
     }
 
     public JPanel getMainPanel() {
