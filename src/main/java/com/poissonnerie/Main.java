@@ -46,6 +46,9 @@ public class Main {
                 UIManager.put("TabbedPane.unselectedBackground", new Color(245, 246, 247));
                 UIManager.put("TabbedPane.contentAreaColor", Color.WHITE);
                 UIManager.put("TabbedPane.focus", primaryColor);
+                UIManager.put("TabbedPane.font", new Font(UIManager.getFont("TabbedPane.font").getName(), Font.BOLD, 13));
+                UIManager.put("TabbedPane.selectedTabPadInsets", new Insets(3, 3, 3, 3));
+                UIManager.put("TabbedPane.tabInsets", new Insets(8, 16, 8, 16));
 
                 // Configuration des menus
                 UIManager.put("MenuBar.foreground", darkTextColor);
@@ -53,20 +56,25 @@ public class Main {
                 UIManager.put("Menu.foreground", darkTextColor);
                 UIManager.put("Menu.selectionBackground", primaryColor);
                 UIManager.put("Menu.selectionForeground", Color.WHITE);
+                UIManager.put("Menu.font", new Font(UIManager.getFont("Menu.font").getName(), Font.PLAIN, 13));
                 UIManager.put("MenuItem.foreground", darkTextColor);
                 UIManager.put("MenuItem.selectionBackground", primaryColor);
                 UIManager.put("MenuItem.selectionForeground", Color.WHITE);
+                UIManager.put("MenuItem.font", new Font(UIManager.getFont("MenuItem.font").getName(), Font.PLAIN, 13));
 
                 // Couleurs des textes et composants
                 UIManager.put("Label.foreground", darkTextColor);
+                UIManager.put("Label.font", new Font(UIManager.getFont("Label.font").getName(), Font.PLAIN, 13));
                 UIManager.put("TextField.foreground", darkTextColor);
+                UIManager.put("TextField.font", new Font(UIManager.getFont("TextField.font").getName(), Font.PLAIN, 13));
                 UIManager.put("ComboBox.foreground", darkTextColor);
+                UIManager.put("ComboBox.font", new Font(UIManager.getFont("ComboBox.font").getName(), Font.PLAIN, 13));
                 UIManager.put("TextArea.foreground", darkTextColor);
+                UIManager.put("TextArea.font", new Font(UIManager.getFont("TextArea.font").getName(), Font.PLAIN, 13));
 
                 // Marges et padding
                 UIManager.put("Button.margin", new Insets(8, 16, 8, 16));
                 UIManager.put("TabbedPane.contentBorderInsets", new Insets(10, 10, 10, 10));
-                UIManager.put("TabbedPane.tabInsets", new Insets(8, 16, 8, 16));
 
                 // Style des tableaux
                 UIManager.put("Table.showHorizontalLines", true);
@@ -74,8 +82,10 @@ public class Main {
                 UIManager.put("Table.gridColor", new Color(224, 224, 224));
                 UIManager.put("Table.selectionBackground", new Color(232, 240, 254));
                 UIManager.put("Table.selectionForeground", darkTextColor);
+                UIManager.put("Table.font", new Font(UIManager.getFont("Table.font").getName(), Font.PLAIN, 13));
                 UIManager.put("TableHeader.background", new Color(245, 246, 247));
                 UIManager.put("TableHeader.foreground", darkTextColor);
+                UIManager.put("TableHeader.font", new Font(UIManager.getFont("TableHeader.font").getName(), Font.BOLD, 13));
 
                 System.out.println("Look and Feel configuré.");
 
