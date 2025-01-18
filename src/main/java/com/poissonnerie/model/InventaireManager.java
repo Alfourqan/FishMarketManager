@@ -86,9 +86,10 @@ public class InventaireManager {
 
         List<Produit> produitsBas = new ArrayList<>();
         for (Produit produit : produits) {
-            if (produit != null && produit.estStockBas()) {
+            // Inclure les produits avec stock bas ou en rupture
+            if (produit != null && (produit.estStockBas() || produit.estEnRupture())) {
                 produitsBas.add(produit);
-                LOGGER.info("Produit en stock bas détecté: " + produit.getNom());
+                LOGGER.info("Produit en stock bas ou en rupture détecté: " + produit.getNom());
             }
         }
         return Collections.unmodifiableList(produitsBas);

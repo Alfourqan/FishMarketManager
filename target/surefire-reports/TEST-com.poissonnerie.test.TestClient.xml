@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.poissonnerie.test.TestFournisseur" time="0.353" tests="10" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.poissonnerie.test.TestClient" time="0.097" tests="8" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="21"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -54,77 +54,44 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="65.0"/>
   </properties>
-  <testcase name="testValidationFournisseurValide" classname="com.poissonnerie.test.TestFournisseur" time="0.278">
-    <system-err><![CDATA[Jan 18, 2025 11:25:51 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
-INFO: Tentative d'ajout d'un nouveau fournisseur: Fournisseur Test
-Jan 18, 2025 11:25:51 PM com.poissonnerie.util.DatabaseManager initializeConnection
-INFO: Initialisation d'une nouvelle connexion à la base de données
-SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
-SLF4J: Defaulting to no-operation (NOP) logger implementation
-SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
-Jan 18, 2025 11:25:52 PM com.poissonnerie.util.DatabaseManager initializeConnection
-INFO: Configuration des PRAGMA SQLite effectuée
-Jan 18, 2025 11:25:52 PM com.poissonnerie.util.DatabaseManager initializeConnection
-INFO: Connexion à la base de données établie avec succès
-Jan 18, 2025 11:25:52 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
-INFO: Fournisseur ajouté avec succès, ID: 13
+  <testcase name="testValidationClientNull" classname="com.poissonnerie.test.TestClient" time="0.003"/>
+  <testcase name="testValidationLongueurMaximale" classname="com.poissonnerie.test.TestClient" time="0.006"/>
+  <testcase name="testValidationTelephoneInvalide" classname="com.poissonnerie.test.TestClient" time="0.003"/>
+  <testcase name="testReglementCreanceClientNull" classname="com.poissonnerie.test.TestClient" time="0.004">
+    <system-err><![CDATA[Jan 18, 2025 11:25:57 PM com.poissonnerie.controller.ClientController reglerCreance
+WARNING: Tentative de règlement de créance pour un client invalide
 ]]></system-err>
   </testcase>
-  <testcase name="testValidationLongueurMaximale" classname="com.poissonnerie.test.TestFournisseur" time="0.002">
-    <system-err><![CDATA[Jan 18, 2025 11:25:52 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
-INFO: Tentative d'ajout d'un nouveau fournisseur: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-Jan 18, 2025 11:25:52 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
-INFO: Tentative d'ajout d'un nouveau fournisseur: Nom valide
-]]></system-err>
-  </testcase>
-  <testcase name="testRechercheTermeNull" classname="com.poissonnerie.test.TestFournisseur" time="0.002">
-    <system-err><![CDATA[Jan 18, 2025 11:25:52 PM com.poissonnerie.controller.FournisseurController rechercherFournisseurs
-WARNING: Tentative de recherche avec un terme vide
-]]></system-err>
-  </testcase>
-  <testcase name="testRechercheTermeVide" classname="com.poissonnerie.test.TestFournisseur" time="0.002">
-    <system-err><![CDATA[Jan 18, 2025 11:25:52 PM com.poissonnerie.controller.FournisseurController rechercherFournisseurs
-WARNING: Tentative de recherche avec un terme vide
-]]></system-err>
-  </testcase>
-  <testcase name="testValidationTelephoneInvalide" classname="com.poissonnerie.test.TestFournisseur" time="0.001">
-    <system-err><![CDATA[Jan 18, 2025 11:25:52 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
-INFO: Tentative d'ajout d'un nouveau fournisseur: Fournisseur Test
-]]></system-err>
-  </testcase>
-  <testcase name="testValidationFournisseurNull" classname="com.poissonnerie.test.TestFournisseur" time="0.002">
-    <system-err><![CDATA[Jan 18, 2025 11:25:52 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
-SEVERE: Tentative d'ajout d'un fournisseur null
-]]></system-err>
-  </testcase>
-  <testcase name="testSanitizationEntrees" classname="com.poissonnerie.test.TestFournisseur" time="0.03">
-    <system-err><![CDATA[Jan 18, 2025 11:25:52 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
-INFO: Tentative d'ajout d'un nouveau fournisseur: Test<script>alert('xss')</script>
-Jan 18, 2025 11:25:52 PM com.poissonnerie.util.DatabaseManager needsNewConnection
+  <testcase name="testReglementCreanceMontantInvalide" classname="com.poissonnerie.test.TestClient" time="0.004"/>
+  <testcase name="testSanitizationEntrees" classname="com.poissonnerie.test.TestClient" time="0.032">
+    <system-err><![CDATA[Jan 18, 2025 11:25:57 PM com.poissonnerie.controller.ClientController ajouterClient
+INFO: Tentative d'ajout d'un nouveau client: Test<script>alert('xss')</script>
+Jan 18, 2025 11:25:57 PM com.poissonnerie.util.DatabaseManager needsNewConnection
 WARNING: Connexion détectée comme invalide ou fermée
-Jan 18, 2025 11:25:52 PM com.poissonnerie.util.DatabaseManager initializeConnection
+Jan 18, 2025 11:25:57 PM com.poissonnerie.util.DatabaseManager initializeConnection
 INFO: Initialisation d'une nouvelle connexion à la base de données
-Jan 18, 2025 11:25:52 PM com.poissonnerie.util.DatabaseManager initializeConnection
+Jan 18, 2025 11:25:57 PM com.poissonnerie.util.DatabaseManager initializeConnection
 INFO: Configuration des PRAGMA SQLite effectuée
-Jan 18, 2025 11:25:52 PM com.poissonnerie.util.DatabaseManager initializeConnection
+Jan 18, 2025 11:25:57 PM com.poissonnerie.util.DatabaseManager initializeConnection
 INFO: Connexion à la base de données établie avec succès
-Jan 18, 2025 11:25:52 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
-INFO: Fournisseur ajouté avec succès, ID: 14
+Jan 18, 2025 11:25:57 PM com.poissonnerie.controller.ClientController ajouterClient
+INFO: Client ajouté avec succès, ID: 2
 ]]></system-err>
   </testcase>
-  <testcase name="testValidationNomVide" classname="com.poissonnerie.test.TestFournisseur" time="0.002">
-    <system-err><![CDATA[Jan 18, 2025 11:25:52 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
-INFO: Tentative d'ajout d'un nouveau fournisseur: 
-]]></system-err>
-  </testcase>
-  <testcase name="testValidationEmailInvalide" classname="com.poissonnerie.test.TestFournisseur" time="0.002">
-    <system-err><![CDATA[Jan 18, 2025 11:25:52 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
-INFO: Tentative d'ajout d'un nouveau fournisseur: Fournisseur Test
-]]></system-err>
-  </testcase>
-  <testcase name="testSuppressionFournisseurInvalide" classname="com.poissonnerie.test.TestFournisseur" time="0.002">
-    <system-err><![CDATA[Jan 18, 2025 11:25:52 PM com.poissonnerie.controller.FournisseurController supprimerFournisseur
-WARNING: Tentative de suppression d'un fournisseur invalide
+  <testcase name="testValidationNomVide" classname="com.poissonnerie.test.TestClient" time="0.001"/>
+  <testcase name="testValidationClientValide" classname="com.poissonnerie.test.TestClient" time="0.024">
+    <system-err><![CDATA[Jan 18, 2025 11:25:57 PM com.poissonnerie.controller.ClientController ajouterClient
+INFO: Tentative d'ajout d'un nouveau client: Client Test
+Jan 18, 2025 11:25:57 PM com.poissonnerie.util.DatabaseManager needsNewConnection
+WARNING: Connexion détectée comme invalide ou fermée
+Jan 18, 2025 11:25:57 PM com.poissonnerie.util.DatabaseManager initializeConnection
+INFO: Initialisation d'une nouvelle connexion à la base de données
+Jan 18, 2025 11:25:57 PM com.poissonnerie.util.DatabaseManager initializeConnection
+INFO: Configuration des PRAGMA SQLite effectuée
+Jan 18, 2025 11:25:57 PM com.poissonnerie.util.DatabaseManager initializeConnection
+INFO: Connexion à la base de données établie avec succès
+Jan 18, 2025 11:25:57 PM com.poissonnerie.controller.ClientController ajouterClient
+INFO: Client ajouté avec succès, ID: 3
 ]]></system-err>
   </testcase>
 </testsuite>

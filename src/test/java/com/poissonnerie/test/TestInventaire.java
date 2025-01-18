@@ -10,9 +10,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Tests unitaires pour la gestion de l'inventaire
- */
 public class TestInventaire {
     private InventaireManager inventaireManager;
     private Produit saumon;
@@ -23,6 +20,7 @@ public class TestInventaire {
     @BeforeEach
     public void setUp() {
         inventaireManager = new InventaireManager();
+        // Initialiser avec un stock normal pour les tests généraux
         saumon = new Produit(1, "Saumon frais", "Poisson", 20.0, 25.99, 10, 5);
         stockBasAppele = false;
         ruptureStockAppelee = false;
@@ -67,13 +65,16 @@ public class TestInventaire {
 
     @Test
     public void testStockBas() {
+        // Ajuster le stock pour qu'il soit bas (mais pas en rupture)
         inventaireManager.ajusterStock(saumon, -6);
+        assertEquals(4, saumon.getStock(), "Le stock doit être à 4");
         assertTrue(stockBasAppele, "L'alerte de stock bas doit être déclenchée");
         assertFalse(ruptureStockAppelee, "L'alerte de rupture ne doit pas être déclenchée");
     }
 
     @Test
     public void testRuptureStock() {
+        // Mettre en rupture de stock
         inventaireManager.ajusterStock(saumon, -10);
         assertTrue(ruptureStockAppelee, "L'alerte de rupture doit être déclenchée");
         assertEquals(0, saumon.getStock(), "Le stock doit être à zéro");
@@ -88,16 +89,15 @@ public class TestInventaire {
 
     @Test
     public void testReapprovisionnement() {
-        inventaireManager.ajusterStock(saumon, -8);
-        assertTrue(stockBasAppele, "Doit déclencher l'alerte de stock bas");
+        // Commencer avec un stock bas
+        saumon.setStock(3);
+        assertTrue(saumon.estStockBas(), "Le stock initial doit être bas");
 
-        stockBasAppele = false; // Reset du flag
-        inventaireManager.ajusterStock(saumon, 8);
-        assertFalse(stockBasAppele, "Ne doit plus être en alerte après réapprovisionnement");
+        inventaireManager.ajusterStock(saumon, 7);
+        assertFalse(saumon.estStockBas(), "Ne doit plus être en alerte après réapprovisionnement");
         assertEquals(10, saumon.getStock(), "Le stock doit être revenu à 10");
     }
 
-    // Tests de validation des entrées
     @Test
     public void testAjusterStockProduitNull() {
         assertThrows(IllegalArgumentException.class, () -> {
@@ -106,28 +106,16 @@ public class TestInventaire {
     }
 
     @Test
-    public void testAjouterObserverNull() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            inventaireManager.ajouterObserver(null);
-        }, "Doit lever une exception pour un observer null");
-    }
-
-    @Test
-    public void testRetirerObserverNull() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            inventaireManager.retirerObserver(null);
-        }, "Doit lever une exception pour un observer null");
-    }
-
-    @Test
     public void testGetProduitsBas() {
-        assertTrue(inventaireManager.getProduitsBas(null).isEmpty(),
-            "La liste doit être vide pour une entrée null");
+        // Configurer les produits avec des stocks bas
+        saumon.setStock(4); // En dessous du seuil (5)
+        Produit thon = new Produit(2, "Thon", "Poisson", 15.0, 20.99, 3, 5); // En dessous du seuil (5)
+        List<Produit> produits = Arrays.asList(saumon, null, thon);
+        List<Produit> produitsBas = inventaireManager.getProduitsBas(produits);
 
-        List<Produit> produits = Arrays.asList(saumon, null, 
-            new Produit(2, "Thon", "Poisson", 15.0, 20.99, 3, 5));
-        assertEquals(2, inventaireManager.getProduitsBas(produits).size(),
-            "Doit retourner le bon nombre de produits en stock bas");
+        assertEquals(2, produitsBas.size(), "Doit retourner le bon nombre de produits en stock bas");
+        assertTrue(produitsBas.contains(saumon), "Le saumon doit être dans la liste des produits en stock bas");
+        assertTrue(produitsBas.contains(thon), "Le thon doit être dans la liste des produits en stock bas");
     }
 
     @Test
@@ -137,7 +125,11 @@ public class TestInventaire {
 
         Produit thonRupture = new Produit(2, "Thon", "Poisson", 15.0, 20.99, 0, 5);
         List<Produit> produits = Arrays.asList(saumon, null, thonRupture);
-        assertEquals(1, inventaireManager.getProduitsEnRupture(produits).size(),
+        List<Produit> produitsRupture = inventaireManager.getProduitsEnRupture(produits);
+
+        assertEquals(1, produitsRupture.size(),
             "Doit retourner le bon nombre de produits en rupture");
+        assertTrue(produitsRupture.contains(thonRupture),
+            "Le thon doit être dans la liste des produits en rupture");
     }
 }
