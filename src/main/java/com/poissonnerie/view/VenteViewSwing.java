@@ -308,18 +308,21 @@ public class VenteViewSwing {
                         .findFirst();
 
                 if (ligneExistante.isPresent()) {
-                    Vente.LigneVente ligne = ligneExistante.get();
-                    int nouvelleQuantite = ligne.getQuantite() + quantite;
+                    Vente.LigneVente ancienneLigne = ligneExistante.get();
+                    int nouvelleQuantite = ancienneLigne.getQuantite() + quantite;
                     if (nouvelleQuantite > produit.getStock()) {
                         JOptionPane.showMessageDialog(mainPanel,
                                 "Stock insuffisant pour ajouter " + quantite + " unités supplémentaires.\n" +
-                                        "Quantité déjà dans le panier : " + ligne.getQuantite() + "\n" +
+                                        "Quantité déjà dans le panier : " + ancienneLigne.getQuantite() + "\n" +
                                         "Stock disponible : " + produit.getStock(),
                                 "Erreur",
                                 JOptionPane.ERROR_MESSAGE);
                         return;
                     }
-                    ligne.setQuantite(nouvelleQuantite);
+                    // Créer une nouvelle ligne avec la nouvelle quantité
+                    panier.remove(ancienneLigne);
+                    Vente.LigneVente nouvelleLigne = new Vente.LigneVente(produit, nouvelleQuantite, produit.getPrixVente());
+                    panier.add(nouvelleLigne);
                 } else {
                     Vente.LigneVente ligne = new Vente.LigneVente(produit, quantite, produit.getPrixVente());
                     panier.add(ligne);

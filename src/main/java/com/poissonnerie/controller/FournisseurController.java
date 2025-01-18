@@ -8,16 +8,19 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 public class FournisseurController {
     private static final Logger LOGGER = Logger.getLogger(FournisseurController.class.getName());
     private List<Fournisseur> fournisseurs;
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
-        "^[A-Za-z0-9+_.-]+@(.+)$"
+        "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"
     );
     private static final Pattern PHONE_PATTERN = Pattern.compile(
-        "^[0-9+\\-\\s]*$"
+        "^[+]?[(]?[0-9]{1,4}[)]?[-\\s./0-9]*$"
     );
+    private static final int MAX_RETRY_ATTEMPTS = 3;
+    private static final long RETRY_DELAY_MS = 1000;
 
     public FournisseurController() {
         this.fournisseurs = new ArrayList<>();
@@ -28,30 +31,44 @@ public class FournisseurController {
         fournisseurs.clear();
         String sql = "SELECT * FROM fournisseurs WHERE supprime = false ORDER BY nom";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        for (int attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
+            try (Connection conn = DatabaseManager.getConnection()) {
+                conn.setAutoCommit(false);
+                try (PreparedStatement pstmt = conn.prepareStatement(sql);
+                     ResultSet rs = pstmt.executeQuery()) {
 
-            conn.setAutoCommit(false);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    Fournisseur fournisseur = creerFournisseurDepuisResultSet(rs);
-                    fournisseurs.add(fournisseur);
+                    while (rs.next()) {
+                        Fournisseur fournisseur = creerFournisseurDepuisResultSet(rs);
+                        fournisseurs.add(fournisseur);
+                    }
+                    conn.commit();
+                    LOGGER.info("Fournisseurs chargés avec succès: " + fournisseurs.size() + " enregistrements");
+                    return;
+                } catch (SQLException e) {
+                    conn.rollback();
+                    if (attempt == MAX_RETRY_ATTEMPTS) {
+                        LOGGER.log(Level.SEVERE, "Échec définitif du chargement des fournisseurs après " + MAX_RETRY_ATTEMPTS + " tentatives", e);
+                        throw new RuntimeException("Erreur lors du chargement des fournisseurs", e);
+                    }
+                    LOGGER.warning("Tentative " + attempt + " échouée, nouvelle tentative dans " + RETRY_DELAY_MS + "ms");
+                    Thread.sleep(RETRY_DELAY_MS);
                 }
-                conn.commit();
-                LOGGER.info("Fournisseurs chargés avec succès: " + fournisseurs.size() + " enregistrements");
             } catch (SQLException e) {
-                conn.rollback();
-                LOGGER.log(Level.SEVERE, "Erreur lors du chargement des fournisseurs", e);
-                throw new RuntimeException("Erreur lors du chargement des fournisseurs", e);
+                if (attempt == MAX_RETRY_ATTEMPTS) {
+                    LOGGER.log(Level.SEVERE, "Erreur fatale de connexion à la base de données", e);
+                    throw new RuntimeException("Erreur de connexion à la base de données", e);
+                }
+                LOGGER.warning("Tentative de connexion " + attempt + " échouée");
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                LOGGER.severe("Interruption pendant la tentative de reconnexion");
+                throw new RuntimeException("Opération interrompue", e);
             }
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur de connexion à la base de données", e);
-            throw new RuntimeException("Erreur de connexion à la base de données", e);
         }
     }
 
     public List<Fournisseur> getFournisseurs() {
-        return new ArrayList<>(fournisseurs); // Retourne une copie pour éviter les modifications externes
+        return new ArrayList<>(fournisseurs);
     }
 
     public void ajouterFournisseur(Fournisseur fournisseur) {
@@ -60,30 +77,47 @@ public class FournisseurController {
 
         String sql = "INSERT INTO fournisseurs (nom, contact, telephone, email, adresse, statut) VALUES (?, ?, ?, ?, ?, ?)";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        for (int attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
+            try (Connection conn = DatabaseManager.getConnection()) {
+                conn.setAutoCommit(false);
+                try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                    preparerStatementFournisseur(pstmt, fournisseur);
+                    int rowsAffected = pstmt.executeUpdate();
 
-            conn.setAutoCommit(false);
-            try {
-                preparerStatementFournisseur(pstmt, fournisseur);
-                pstmt.executeUpdate();
-
-                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        fournisseur.setId(generatedKeys.getInt(1));
-                        fournisseurs.add(fournisseur);
-                        LOGGER.info("Fournisseur ajouté avec succès, ID: " + fournisseur.getId());
+                    if (rowsAffected == 0) {
+                        throw new SQLException("L'insertion du fournisseur a échoué, aucune ligne affectée.");
                     }
+
+                    try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                        if (generatedKeys.next()) {
+                            fournisseur.setId(generatedKeys.getInt(1));
+                            fournisseurs.add(fournisseur);
+                            LOGGER.info("Fournisseur ajouté avec succès, ID: " + fournisseur.getId());
+                        } else {
+                            throw new SQLException("L'insertion du fournisseur a échoué, aucun ID généré.");
+                        }
+                    }
+                    conn.commit();
+                    return;
+                } catch (SQLException e) {
+                    conn.rollback();
+                    if (attempt == MAX_RETRY_ATTEMPTS) {
+                        LOGGER.log(Level.SEVERE, "Échec définitif de l'ajout du fournisseur après " + MAX_RETRY_ATTEMPTS + " tentatives", e);
+                        throw new RuntimeException("Erreur lors de l'ajout du fournisseur", e);
+                    }
+                    LOGGER.warning("Tentative " + attempt + " échouée, nouvelle tentative dans " + RETRY_DELAY_MS + "ms");
+                    Thread.sleep(RETRY_DELAY_MS);
                 }
-                conn.commit();
-            } catch (SQLException e) {
-                conn.rollback();
-                LOGGER.log(Level.SEVERE, "Erreur lors de l'ajout du fournisseur", e);
-                throw new RuntimeException("Erreur lors de l'ajout du fournisseur", e);
+            } catch (SQLException | InterruptedException e) {
+                if (e instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("Opération interrompue", e);
+                }
+                if (attempt == MAX_RETRY_ATTEMPTS) {
+                    LOGGER.log(Level.SEVERE, "Erreur fatale lors de l'ajout du fournisseur", e);
+                    throw new RuntimeException("Erreur lors de l'ajout du fournisseur", e);
+                }
             }
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur de connexion lors de l'ajout du fournisseur", e);
-            throw new RuntimeException("Erreur de connexion lors de l'ajout du fournisseur", e);
         }
     }
 
@@ -91,37 +125,49 @@ public class FournisseurController {
         LOGGER.info("Tentative de mise à jour du fournisseur ID: " + fournisseur.getId());
         validateFournisseur(fournisseur);
 
-        String sql = "UPDATE fournisseurs SET nom = ?, contact = ?, telephone = ?, email = ?, adresse = ?, statut = ? WHERE id = ? AND supprime = false";
+        String sql = "UPDATE fournisseurs SET nom = ?, contact = ?, telephone = ?, email = ?, adresse = ?, statut = ? " +
+                    "WHERE id = ? AND supprime = false";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        for (int attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
+            try (Connection conn = DatabaseManager.getConnection()) {
+                conn.setAutoCommit(false);
+                try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                    preparerStatementFournisseur(pstmt, fournisseur);
+                    pstmt.setInt(7, fournisseur.getId());
 
-            conn.setAutoCommit(false);
-            try {
-                preparerStatementFournisseur(pstmt, fournisseur);
-                pstmt.setInt(7, fournisseur.getId());
+                    int rowsUpdated = pstmt.executeUpdate();
+                    if (rowsUpdated == 0) {
+                        throw new IllegalStateException("Fournisseur non trouvé ou déjà supprimé: " + fournisseur.getId());
+                    }
 
-                int rowsUpdated = pstmt.executeUpdate();
-                if (rowsUpdated == 0) {
-                    throw new IllegalStateException("Fournisseur non trouvé ou déjà supprimé: " + fournisseur.getId());
+                    // Mise à jour de la liste en mémoire
+                    int index = fournisseurs.indexOf(fournisseur);
+                    if (index != -1) {
+                        fournisseurs.set(index, fournisseur);
+                    }
+
+                    conn.commit();
+                    LOGGER.info("Fournisseur mis à jour avec succès, ID: " + fournisseur.getId());
+                    return;
+                } catch (SQLException e) {
+                    conn.rollback();
+                    if (attempt == MAX_RETRY_ATTEMPTS) {
+                        LOGGER.log(Level.SEVERE, "Échec définitif de la mise à jour du fournisseur après " + MAX_RETRY_ATTEMPTS + " tentatives", e);
+                        throw new RuntimeException("Erreur lors de la mise à jour du fournisseur", e);
+                    }
+                    LOGGER.warning("Tentative " + attempt + " échouée, nouvelle tentative dans " + RETRY_DELAY_MS + "ms");
+                    Thread.sleep(RETRY_DELAY_MS);
                 }
-
-                // Mettre à jour la liste en mémoire
-                int index = fournisseurs.indexOf(fournisseur);
-                if (index != -1) {
-                    fournisseurs.set(index, fournisseur);
+            } catch (SQLException | InterruptedException e) {
+                if (e instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("Opération interrompue", e);
                 }
-
-                conn.commit();
-                LOGGER.info("Fournisseur mis à jour avec succès, ID: " + fournisseur.getId());
-            } catch (SQLException e) {
-                conn.rollback();
-                LOGGER.log(Level.SEVERE, "Erreur lors de la mise à jour du fournisseur", e);
-                throw new RuntimeException("Erreur lors de la mise à jour du fournisseur", e);
+                if (attempt == MAX_RETRY_ATTEMPTS) {
+                    LOGGER.log(Level.SEVERE, "Erreur fatale lors de la mise à jour du fournisseur", e);
+                    throw new RuntimeException("Erreur lors de la mise à jour du fournisseur", e);
+                }
             }
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur de connexion lors de la mise à jour du fournisseur", e);
-            throw new RuntimeException("Erreur de connexion lors de la mise à jour du fournisseur", e);
         }
     }
 
@@ -134,29 +180,42 @@ public class FournisseurController {
         LOGGER.info("Tentative de suppression du fournisseur ID: " + fournisseur.getId());
         String sql = "UPDATE fournisseurs SET supprime = true WHERE id = ? AND supprime = false";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        for (int attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
+            try (Connection conn = DatabaseManager.getConnection();
+                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            conn.setAutoCommit(false);
-            try {
-                pstmt.setInt(1, fournisseur.getId());
-                int rowsUpdated = pstmt.executeUpdate();
+                conn.setAutoCommit(false);
+                try {
+                    pstmt.setInt(1, fournisseur.getId());
+                    int rowsUpdated = pstmt.executeUpdate();
 
-                if (rowsUpdated == 0) {
-                    throw new IllegalStateException("Fournisseur non trouvé ou déjà supprimé: " + fournisseur.getId());
+                    if (rowsUpdated == 0) {
+                        throw new IllegalStateException("Fournisseur non trouvé ou déjà supprimé: " + fournisseur.getId());
+                    }
+
+                    fournisseurs.remove(fournisseur);
+                    conn.commit();
+                    LOGGER.info("Fournisseur supprimé avec succès, ID: " + fournisseur.getId());
+                    return;
+                } catch (SQLException e) {
+                    conn.rollback();
+                    if (attempt == MAX_RETRY_ATTEMPTS) {
+                        LOGGER.log(Level.SEVERE, "Échec définitif de la suppression du fournisseur après " + MAX_RETRY_ATTEMPTS + " tentatives", e);
+                        throw new RuntimeException("Erreur lors de la suppression du fournisseur", e);
+                    }
+                    LOGGER.warning("Tentative " + attempt + " échouée, nouvelle tentative dans " + RETRY_DELAY_MS + "ms");
+                    Thread.sleep(RETRY_DELAY_MS);
                 }
-
-                fournisseurs.remove(fournisseur);
-                conn.commit();
-                LOGGER.info("Fournisseur supprimé avec succès, ID: " + fournisseur.getId());
-            } catch (SQLException e) {
-                conn.rollback();
-                LOGGER.log(Level.SEVERE, "Erreur lors de la suppression du fournisseur", e);
-                throw new RuntimeException("Erreur lors de la suppression du fournisseur", e);
+            } catch (SQLException | InterruptedException e) {
+                if (e instanceof InterruptedException) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException("Opération interrompue", e);
+                }
+                if (attempt == MAX_RETRY_ATTEMPTS) {
+                    LOGGER.log(Level.SEVERE, "Erreur fatale lors de la suppression du fournisseur", e);
+                    throw new RuntimeException("Erreur lors de la suppression du fournisseur", e);
+                }
             }
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur de connexion lors de la suppression du fournisseur", e);
-            throw new RuntimeException("Erreur de connexion lors de la suppression du fournisseur", e);
         }
     }
 
@@ -172,54 +231,83 @@ public class FournisseurController {
                     "(LOWER(nom) LIKE LOWER(?) OR LOWER(contact) LIKE LOWER(?) OR " +
                     "LOWER(telephone) LIKE LOWER(?) OR LOWER(email) LIKE LOWER(?))";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        for (int attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
+            try (Connection conn = DatabaseManager.getConnection();
+                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            String searchTerm = "%" + terme.toLowerCase() + "%";
-            for (int i = 1; i <= 4; i++) {
-                pstmt.setString(i, searchTerm);
-            }
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    resultats.add(creerFournisseurDepuisResultSet(rs));
+                String searchTerm = "%" + terme.toLowerCase() + "%";
+                for (int i = 1; i <= 4; i++) {
+                    pstmt.setString(i, searchTerm);
                 }
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    while (rs.next()) {
+                        resultats.add(creerFournisseurDepuisResultSet(rs));
+                    }
+                }
+                LOGGER.info("Recherche terminée, " + resultats.size() + " résultats trouvés");
+                return resultats;
+            } catch (SQLException e) {
+                if (attempt == MAX_RETRY_ATTEMPTS) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors de la recherche des fournisseurs", e);
+                    throw new RuntimeException("Erreur lors de la recherche des fournisseurs", e);
+                }
+                LOGGER.warning("Tentative " + attempt + " échouée, nouvelle tentative dans " + RETRY_DELAY_MS + "ms");
+                try {
+                    Thread.sleep(RETRY_DELAY_MS);
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    LOGGER.severe("Interruption pendant la tentative de reconnexion");
+                    throw new RuntimeException("Opération interrompue", ex);
+                }
+
             }
-            LOGGER.info("Recherche terminée, " + resultats.size() + " résultats trouvés");
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la recherche des fournisseurs", e);
-            throw new RuntimeException("Erreur lors de la recherche des fournisseurs", e);
         }
         return resultats;
     }
 
     private void validateFournisseur(Fournisseur fournisseur) {
+        List<String> errors = new ArrayList<>();
+
         if (fournisseur == null) {
             throw new IllegalArgumentException("Le fournisseur ne peut pas être null");
         }
+
+        // Validation du nom
         if (fournisseur.getNom() == null || fournisseur.getNom().trim().isEmpty()) {
-            throw new IllegalArgumentException("Le nom du fournisseur est obligatoire");
+            errors.add("Le nom du fournisseur est obligatoire");
+        } else if (fournisseur.getNom().length() > 100) {
+            errors.add("Le nom du fournisseur est trop long (max 100 caractères)");
         }
-        if (fournisseur.getEmail() != null && !fournisseur.getEmail().isEmpty() && 
-            !EMAIL_PATTERN.matcher(fournisseur.getEmail()).matches()) {
-            throw new IllegalArgumentException("Format d'email invalide");
+
+        // Validation du contact
+        if (fournisseur.getContact() != null && fournisseur.getContact().length() > 100) {
+            errors.add("Le nom du contact est trop long (max 100 caractères)");
         }
+
+        // Validation de l'email
+        if (fournisseur.getEmail() != null && !fournisseur.getEmail().isEmpty()) {
+            if (fournisseur.getEmail().length() > 100) {
+                errors.add("L'email est trop long (max 100 caractères)");
+            } else if (!EMAIL_PATTERN.matcher(fournisseur.getEmail()).matches()) {
+                errors.add("Format d'email invalide");
+            }
+        }
+
+        // Validation du téléphone
         if (fournisseur.getTelephone() != null && !fournisseur.getTelephone().isEmpty() && 
             !PHONE_PATTERN.matcher(fournisseur.getTelephone()).matches()) {
-            throw new IllegalArgumentException("Format de téléphone invalide");
+            errors.add("Format de téléphone invalide");
         }
-        // Validation de la longueur des champs
-        if (fournisseur.getNom().length() > 100) {
-            throw new IllegalArgumentException("Le nom du fournisseur est trop long (max 100 caractères)");
-        }
-        if (fournisseur.getContact() != null && fournisseur.getContact().length() > 100) {
-            throw new IllegalArgumentException("Le nom du contact est trop long (max 100 caractères)");
-        }
-        if (fournisseur.getEmail() != null && fournisseur.getEmail().length() > 100) {
-            throw new IllegalArgumentException("L'email est trop long (max 100 caractères)");
-        }
+
+        // Validation de l'adresse
         if (fournisseur.getAdresse() != null && fournisseur.getAdresse().length() > 255) {
-            throw new IllegalArgumentException("L'adresse est trop longue (max 255 caractères)");
+            errors.add("L'adresse est trop longue (max 255 caractères)");
+        }
+
+        // Si des erreurs sont présentes, les regrouper dans un message
+        if (!errors.isEmpty()) {
+            throw new IllegalArgumentException(String.join("\n", errors));
         }
     }
 
@@ -232,24 +320,31 @@ public class FournisseurController {
         pstmt.setString(6, sanitizeInput(fournisseur.getStatut()));
     }
 
-    private Fournisseur creerFournisseurDepuisResultSet(ResultSet rs) throws SQLException {
-        Fournisseur fournisseur = new Fournisseur(
-            rs.getInt("id"),
-            rs.getString("nom"),
-            rs.getString("contact"),
-            rs.getString("telephone"),
-            rs.getString("email"),
-            rs.getString("adresse")
-        );
-        fournisseur.setStatut(rs.getString("statut"));
-        return fournisseur;
-    }
-
     private String sanitizeInput(String input) {
         if (input == null) {
             return "";
         }
         // Échapper les caractères spéciaux HTML et SQL
-        return input.replaceAll("[<>\"'%;)(&+]", "");
+        return input.replaceAll("[<>\"'%;)(&+]", "")
+                   .trim()
+                   .replaceAll("\\s+", " ");
+    }
+
+    private Fournisseur creerFournisseurDepuisResultSet(ResultSet rs) throws SQLException {
+        try {
+            Fournisseur fournisseur = new Fournisseur(
+                rs.getInt("id"),
+                rs.getString("nom"),
+                rs.getString("contact"),
+                rs.getString("telephone"),
+                rs.getString("email"),
+                rs.getString("adresse")
+            );
+            fournisseur.setStatut(rs.getString("statut"));
+            return fournisseur;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la création d'un fournisseur depuis le ResultSet", e);
+            throw e;
+        }
     }
 }

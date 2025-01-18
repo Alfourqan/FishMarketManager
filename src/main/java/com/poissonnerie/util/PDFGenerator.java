@@ -17,6 +17,15 @@ import java.util.stream.Collectors;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.io.File;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.Optional;
 
 public class PDFGenerator {
     private static final Logger LOGGER = Logger.getLogger(PDFGenerator.class.getName());
@@ -24,6 +33,8 @@ public class PDFGenerator {
     private static final float MARGIN = 14.17f; // 5mm en points
     private static final int MAX_FILE_SIZE_MB = 10;
     private static final long MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+    private static final Set<String> FORMATS_IMAGE_AUTORISES = new HashSet<>(Arrays.asList("jpg", "jpeg", "png", "gif"));
+    private static final int MAX_IMAGE_SIZE = 1000; // pixels
 
     // Utility methods
     private static String truncateString(String str, int length) {
@@ -45,8 +56,9 @@ public class PDFGenerator {
 
     private static String sanitizeInput(String input) {
         if (input == null) return "";
-        // Échapper les caractères spéciaux
-        return input.replaceAll("[<>\"'%;)(&+]", "");
+        return input.replaceAll("[<>\"'%;)(&+]", "")
+                   .trim()
+                   .replaceAll("\\s+", " ");
     }
 
     private static void validateFilePath(String cheminFichier) {
@@ -54,16 +66,98 @@ public class PDFGenerator {
             throw new IllegalArgumentException("Le chemin du fichier ne peut pas être vide");
         }
 
-        File file = new File(cheminFichier);
-        File parentDir = file.getParentFile();
+        try {
+            Path path = Paths.get(cheminFichier).normalize();
+            File file = path.toFile();
+            File parentDir = file.getParentFile();
 
-        if (parentDir != null && !parentDir.exists() && !parentDir.mkdirs()) {
-            throw new SecurityException("Impossible de créer le répertoire pour le fichier PDF");
-        }
+            // Vérification du chemin absolu
+            if (!path.isAbsolute()) {
+                path = path.toAbsolutePath();
+            }
 
-        if (file.exists() && !file.canWrite()) {
-            throw new SecurityException("Permissions insuffisantes pour écrire le fichier PDF");
+            // Vérification que le chemin est dans le répertoire de l'application
+            Path baseDir = Paths.get(System.getProperty("user.dir")).normalize();
+            if (!path.startsWith(baseDir)) {
+                throw new SecurityException("Accès non autorisé en dehors du répertoire de l'application");
+            }
+
+            if (parentDir != null && !parentDir.exists() && !parentDir.mkdirs()) {
+                throw new SecurityException("Impossible de créer le répertoire pour le fichier PDF");
+            }
+
+            if (file.exists()) {
+                if (!file.canWrite()) {
+                    throw new SecurityException("Permissions insuffisantes pour écrire le fichier PDF");
+                }
+                checkFileSize(file.getAbsolutePath());
+            }
+        } catch (SecurityException e) {
+            LOGGER.log(Level.SEVERE, "Erreur de sécurité lors de la validation du chemin", e);
+            throw e;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la validation du chemin", e);
+            throw new IllegalArgumentException("Chemin de fichier invalide: " + e.getMessage());
         }
+    }
+
+    private static void validateImage(String logoPath) {
+        try {
+            if (logoPath == null || logoPath.trim().isEmpty()) {
+                return;
+            }
+
+            Path path = Paths.get(logoPath).normalize();
+            if (!path.isAbsolute()) {
+                path = path.toAbsolutePath();
+            }
+
+            // Vérification du chemin
+            Path baseDir = Paths.get(System.getProperty("user.dir")).normalize();
+            if (!path.startsWith(baseDir)) {
+                throw new SecurityException("Accès non autorisé en dehors du répertoire de l'application");
+            }
+
+            File file = path.toFile();
+            if (!file.exists() || !file.isFile()) {
+                throw new IllegalArgumentException("Le fichier image n'existe pas");
+            }
+
+            // Vérification de la taille du fichier
+            if (file.length() > MAX_FILE_SIZE_BYTES) {
+                throw new IllegalArgumentException("La taille du fichier image dépasse la limite de " + MAX_FILE_SIZE_MB + "MB");
+            }
+
+            // Vérification du format
+            String extension = getFileExtension(file.getName()).toLowerCase();
+            if (!FORMATS_IMAGE_AUTORISES.contains(extension)) {
+                throw new IllegalArgumentException("Format d'image non autorisé. Formats acceptés : " + 
+                    String.join(", ", FORMATS_IMAGE_AUTORISES));
+            }
+
+            // Vérification du contenu
+            BufferedImage image = ImageIO.read(file);
+            if (image == null) {
+                throw new IllegalArgumentException("Le fichier n'est pas une image valide");
+            }
+
+            // Vérification des dimensions
+            if (image.getWidth() > MAX_IMAGE_SIZE || image.getHeight() > MAX_IMAGE_SIZE) {
+                throw new IllegalArgumentException("Les dimensions de l'image dépassent la limite de " + 
+                    MAX_IMAGE_SIZE + "x" + MAX_IMAGE_SIZE + " pixels");
+            }
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la validation de l'image", e);
+            throw new IllegalArgumentException("Image invalide: " + e.getMessage());
+        }
+    }
+
+    private static String getFileExtension(String filename) {
+        return Optional.ofNullable(filename)
+            .filter(f -> f.contains("."))
+            .map(f -> f.substring(filename.lastIndexOf(".") + 1))
+            .orElse("");
     }
 
     private static void checkFileSize(String cheminFichier) {
@@ -99,6 +193,7 @@ public class PDFGenerator {
 
             // En-tête avec logo si configuré
             String logoPath = configController.getValeur(ConfigurationParam.CLE_LOGO_PATH);
+            validateImage(logoPath); // Validate the logo image
             if (logoPath != null && !logoPath.isEmpty()) {
                 try {
                     Image logo = Image.getInstance(logoPath);
