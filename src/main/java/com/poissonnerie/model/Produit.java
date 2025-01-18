@@ -60,15 +60,30 @@ public class Produit {
         this.stock = nouveauStock;
     }
 
+    /**
+     * Détermine si le stock est bas selon les règles métier.
+     * Le stock est considéré bas uniquement s'il est supérieur à 0
+     * mais inférieur ou égal au seuil d'alerte.
+     */
     public boolean estStockBas() {
         return this.stock > 0 && this.stock <= this.seuilAlerte;
     }
 
+    public boolean estEnRupture() {
+        return this.stock == 0;
+    }
+
+    /**
+     * Retourne le statut détaillé du stock pour l'interface utilisateur.
+     * Cette méthode utilise des seuils plus larges pour une meilleure expérience utilisateur.
+     */
     public String getStatutStock() {
-        if (this.stock <= 0) {
+        if (this.stock == 0) {
             return "RUPTURE";
         } else if (this.stock <= this.seuilAlerte) {
             return "BAS";
+        } else if (this.stock <= this.seuilAlerte * 2) {
+            return "ATTENTION";
         } else {
             return "NORMAL";
         }
@@ -80,6 +95,8 @@ public class Produit {
                 return "⛔ RUPTURE DE STOCK";
             case "BAS":
                 return String.format("⚠️ Stock critique: %d (seuil: %d)", stock, seuilAlerte);
+            case "ATTENTION":
+                return String.format("⚠️ Stock à surveiller: %d (seuil: %d)", stock, seuilAlerte);
             default:
                 return String.format("✓ Stock normal: %d", stock);
         }

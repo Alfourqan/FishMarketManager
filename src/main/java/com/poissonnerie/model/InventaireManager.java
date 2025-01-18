@@ -46,7 +46,7 @@ public class InventaireManager {
             throw new IllegalArgumentException("Le produit ne peut pas être null");
         }
 
-        LOGGER.info(String.format("Ajustement du stock pour %s: %d -> %d",
+        LOGGER.info(String.format("Ajustement du stock pour %s: %d → %d",
             produit.getNom(), produit.getStock(), produit.getStock() + quantite));
 
         int ancienStock = produit.getStock();
