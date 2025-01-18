@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Vente {
     private static final Logger LOGGER = Logger.getLogger(Vente.class.getName());
@@ -37,6 +37,90 @@ public class Vente {
         this.credit = credit;
         this.total = total;
         this.lignes = new ArrayList<>();
+    }
+
+    // Getters et setters avec validations
+    public int getId() { return id; }
+    public void setId(int id) { 
+        if (id <= 0) {
+            throw new IllegalArgumentException("L'ID doit être positif");
+        }
+        this.id = id; 
+    }
+
+    public LocalDateTime getDate() { return date; }
+    public Client getClient() { return client; }
+    public boolean isCredit() { return credit; }
+
+    public double getTotal() { return total; }
+    public void setTotal(double total) {
+        if (total < 0) {
+            throw new IllegalArgumentException("Le total ne peut pas être négatif");
+        }
+
+        // Si nous avons des lignes, vérifier que le total correspond
+        if (!lignes.isEmpty() && Math.abs(total - getMontantTotal()) > 0.01) {
+            throw new IllegalStateException(
+                String.format("Le total de la vente (%.2f) ne correspond pas à la somme des lignes (%.2f)",
+                    total, getMontantTotal())
+            );
+        }
+
+        LOGGER.log(Level.INFO, 
+            String.format("Modification du total de la vente %d: %.2f → %.2f", 
+                id, this.total, total));
+        this.total = total;
+    }
+
+    public List<LigneVente> getLignes() {
+        return Collections.unmodifiableList(lignes);
+    }
+
+    public void setLignes(List<LigneVente> lignes) {
+        if (lignes == null) {
+            throw new IllegalArgumentException("La liste des lignes ne peut pas être null");
+        }
+
+        // Vérifier chaque ligne si la liste n'est pas vide
+        if (!lignes.isEmpty()) {
+            for (LigneVente ligne : lignes) {
+                if (ligne == null) {
+                    throw new IllegalArgumentException("Les lignes de vente ne peuvent pas être null");
+                }
+                validateLigne(ligne);
+            }
+        }
+
+        LOGGER.log(Level.INFO, 
+            String.format("Mise à jour des lignes de la vente %d: %d lignes", 
+                id, lignes.size()));
+        this.lignes = new ArrayList<>(lignes);
+    }
+
+    // Méthode pour calculer le montant total de la vente
+    public double getMontantTotal() {
+        if (lignes == null || lignes.isEmpty()) {
+            return 0.0;
+        }
+        return lignes.stream()
+            .mapToDouble(ligne -> ligne.getQuantite() * ligne.getPrixUnitaire())
+            .sum();
+    }
+
+    private void validateLigne(LigneVente ligne) {
+        if (ligne.getProduit() == null) {
+            throw new IllegalArgumentException("Le produit ne peut pas être null");
+        }
+        if (ligne.getQuantite() <= 0) {
+            throw new IllegalArgumentException(
+                String.format("La quantité doit être positive pour l'article %s",
+                    ligne.getProduit().getNom()));
+        }
+        if (ligne.getPrixUnitaire() <= 0) {
+            throw new IllegalArgumentException(
+                String.format("Le prix unitaire doit être positif pour l'article %s",
+                    ligne.getProduit().getNom()));
+        }
     }
 
     // Classe interne pour les lignes de vente
@@ -81,22 +165,20 @@ public class Vente {
         public Produit getProduit() { return produit; }
 
         public int getQuantite() { return quantite; }
-
         public void setQuantite(int quantite) {
-            LOGGER.log(Level.INFO, 
-                String.format("Modification de la quantité pour %s: %d -> %d", 
-                    produit.getNom(), this.quantite, quantite));
             validateQuantite(quantite);
+            LOGGER.log(Level.INFO, 
+                String.format("Modification de la quantité pour %s: %d → %d", 
+                    produit.getNom(), this.quantite, quantite));
             this.quantite = quantite;
         }
 
         public double getPrixUnitaire() { return prixUnitaire; }
-
         public void setPrixUnitaire(double prixUnitaire) {
-            LOGGER.log(Level.INFO, 
-                String.format("Modification du prix unitaire pour %s: %.2f -> %.2f", 
-                    produit.getNom(), this.prixUnitaire, prixUnitaire));
             validatePrixUnitaire(prixUnitaire);
+            LOGGER.log(Level.INFO, 
+                String.format("Modification du prix unitaire pour %s: %.2f → %.2f", 
+                    produit.getNom(), this.prixUnitaire, prixUnitaire));
             this.prixUnitaire = prixUnitaire;
         }
 
@@ -116,76 +198,6 @@ public class Vente {
         @Override
         public int hashCode() {
             return Objects.hash(produit, quantite, prixUnitaire, dateModification);
-        }
-    }
-
-    // Getters et setters avec validations
-    public int getId() { return id; }
-    public void setId(int id) { 
-        if (id <= 0) {
-            throw new IllegalArgumentException("L'ID doit être positif");
-        }
-        this.id = id; 
-    }
-
-    public LocalDateTime getDate() { return date; }
-    public Client getClient() { return client; }
-    public boolean isCredit() { return credit; }
-
-    public double getTotal() { return total; }
-    public void setTotal(double total) {
-        if (total < 0) {
-            throw new IllegalArgumentException("Le total ne peut pas être négatif");
-        }
-        LOGGER.log(Level.INFO, 
-            String.format("Modification du total de la vente %d: %.2f -> %.2f", 
-                id, this.total, total));
-        this.total = total;
-    }
-
-    public List<LigneVente> getLignes() {
-        return Collections.unmodifiableList(lignes);
-    }
-
-    public void setLignes(List<LigneVente> lignes) {
-        if (lignes == null) {
-            throw new IllegalArgumentException("La liste des lignes ne peut pas être null");
-        }
-        if (lignes.isEmpty()) {
-            throw new IllegalArgumentException("Une vente doit avoir au moins une ligne");
-        }
-        // Vérifier chaque ligne
-        for (LigneVente ligne : lignes) {
-            if (ligne == null) {
-                throw new IllegalArgumentException("Les lignes de vente ne peuvent pas être null");
-            }
-        }
-
-        LOGGER.log(Level.INFO, 
-            String.format("Mise à jour des lignes de la vente %d: %d lignes", 
-                id, lignes.size()));
-        this.lignes = new ArrayList<>(lignes);
-        validateTotal();
-    }
-
-    // Méthode pour calculer le montant total de la vente
-    public double getMontantTotal() {
-        if (lignes == null || lignes.isEmpty()) {
-            return 0.0;
-        }
-        return lignes.stream()
-            .mapToDouble(ligne -> ligne.getQuantite() * ligne.getPrixUnitaire())
-            .sum();
-    }
-
-    // Valider que le total correspond à la somme des lignes
-    private void validateTotal() {
-        double calculatedTotal = getMontantTotal();
-        if (Math.abs(calculatedTotal - total) > 0.01) { // Tolérance pour les erreurs d'arrondi
-            throw new IllegalStateException(
-                String.format("Le total de la vente (%.2f) ne correspond pas à la somme des lignes (%.2f)",
-                    total, calculatedTotal)
-            );
         }
     }
 

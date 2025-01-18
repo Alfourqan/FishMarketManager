@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.poissonnerie.test.TestFournisseur" time="0.353" tests="10" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.poissonnerie.test.TestFournisseur" time="0.377" tests="10" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="21"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -13,7 +13,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="US"/>
     <property name="sun.boot.library.path" value="/nix/store/2vwkssqpzykk37r996cafq7x63imf4sp-openjdk-21+35/lib/openjdk/lib"/>
-    <property name="sun.java.command" value="/home/runner/workspace/target/surefire/surefirebooter-20250118232551433_3.jar /home/runner/workspace/target/surefire 2025-01-18T23-25-51_353-jvmRun1 surefire-20250118232551433_1tmp surefire_0-20250118232551433_2tmp"/>
+    <property name="sun.java.command" value="/home/runner/workspace/target/surefire/surefirebooter-20250118235828319_3.jar /home/runner/workspace/target/surefire 2025-01-18T23-58-28_205-jvmRun1 surefire-20250118235828319_1tmp surefire_0-20250118235828319_2tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="/home/runner/workspace/target/test-classes:/home/runner/workspace/target/classes:/home/runner/.m2/repository/com/itextpdf/itextpdf/5.5.13.3/itextpdf-5.5.13.3.jar:/home/runner/.m2/repository/org/xerial/sqlite-jdbc/3.44.1.0/sqlite-jdbc-3.44.1.0.jar:/home/runner/.m2/repository/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar:/home/runner/.m2/repository/com/formdev/flatlaf/3.2.1/flatlaf-3.2.1.jar:/home/runner/.m2/repository/com/formdev/flatlaf-intellij-themes/3.2.1/flatlaf-intellij-themes-3.2.1.jar:/home/runner/.m2/repository/com/formdev/flatlaf-extras/3.2.1/flatlaf-extras-3.2.1.jar:/home/runner/.m2/repository/com/github/weisj/jsvg/1.1.0/jsvg-1.1.0.jar:/home/runner/.m2/repository/org/kordamp/ikonli/ikonli-core/12.3.1/ikonli-core-12.3.1.jar:/home/runner/.m2/repository/org/kordamp/ikonli/ikonli-swing/12.3.1/ikonli-swing-12.3.1.jar:/home/runner/.m2/repository/org/kordamp/ikonli/ikonli-materialdesign-pack/12.3.1/ikonli-materialdesign-pack-12.3.1.jar:/home/runner/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.9.2/junit-jupiter-api-5.9.2.jar:/home/runner/.m2/repository/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar:/home/runner/.m2/repository/org/junit/platform/junit-platform-commons/1.9.2/junit-platform-commons-1.9.2.jar:/home/runner/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/runner/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.9.2/junit-jupiter-engine-5.9.2.jar:/home/runner/.m2/repository/org/junit/platform/junit-platform-engine/1.9.2/junit-platform-engine-1.9.2.jar:/home/runner/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.9.2/junit-jupiter-params-5.9.2.jar:"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -28,7 +28,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
-    <property name="surefire.real.class.path" value="/home/runner/workspace/target/surefire/surefirebooter-20250118232551433_3.jar"/>
+    <property name="surefire.real.class.path" value="/home/runner/workspace/target/surefire/surefirebooter-20250118235828319_3.jar"/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="21+35-nixos"/>
     <property name="user.name" value="runner"/>
@@ -54,76 +54,76 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="65.0"/>
   </properties>
-  <testcase name="testValidationFournisseurValide" classname="com.poissonnerie.test.TestFournisseur" time="0.278">
-    <system-err><![CDATA[Jan 18, 2025 11:25:51 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
+  <testcase name="testValidationFournisseurValide" classname="com.poissonnerie.test.TestFournisseur" time="0.315">
+    <system-err><![CDATA[Jan 18, 2025 11:58:28 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
 INFO: Tentative d'ajout d'un nouveau fournisseur: Fournisseur Test
-Jan 18, 2025 11:25:51 PM com.poissonnerie.util.DatabaseManager initializeConnection
+Jan 18, 2025 11:58:28 PM com.poissonnerie.util.DatabaseManager initializeConnection
 INFO: Initialisation d'une nouvelle connexion à la base de données
 SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
 SLF4J: Defaulting to no-operation (NOP) logger implementation
 SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
-Jan 18, 2025 11:25:52 PM com.poissonnerie.util.DatabaseManager initializeConnection
+Jan 18, 2025 11:58:29 PM com.poissonnerie.util.DatabaseManager initializeConnection
 INFO: Configuration des PRAGMA SQLite effectuée
-Jan 18, 2025 11:25:52 PM com.poissonnerie.util.DatabaseManager initializeConnection
+Jan 18, 2025 11:58:29 PM com.poissonnerie.util.DatabaseManager initializeConnection
 INFO: Connexion à la base de données établie avec succès
-Jan 18, 2025 11:25:52 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
-INFO: Fournisseur ajouté avec succès, ID: 13
+Jan 18, 2025 11:58:29 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
+INFO: Fournisseur ajouté avec succès, ID: 31
 ]]></system-err>
   </testcase>
-  <testcase name="testValidationLongueurMaximale" classname="com.poissonnerie.test.TestFournisseur" time="0.002">
-    <system-err><![CDATA[Jan 18, 2025 11:25:52 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
+  <testcase name="testValidationLongueurMaximale" classname="com.poissonnerie.test.TestFournisseur" time="0.003">
+    <system-err><![CDATA[Jan 18, 2025 11:58:29 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
 INFO: Tentative d'ajout d'un nouveau fournisseur: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-Jan 18, 2025 11:25:52 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
+Jan 18, 2025 11:58:29 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
 INFO: Tentative d'ajout d'un nouveau fournisseur: Nom valide
 ]]></system-err>
   </testcase>
-  <testcase name="testRechercheTermeNull" classname="com.poissonnerie.test.TestFournisseur" time="0.002">
-    <system-err><![CDATA[Jan 18, 2025 11:25:52 PM com.poissonnerie.controller.FournisseurController rechercherFournisseurs
+  <testcase name="testRechercheTermeNull" classname="com.poissonnerie.test.TestFournisseur" time="0.001">
+    <system-err><![CDATA[Jan 18, 2025 11:58:29 PM com.poissonnerie.controller.FournisseurController rechercherFournisseurs
 WARNING: Tentative de recherche avec un terme vide
 ]]></system-err>
   </testcase>
   <testcase name="testRechercheTermeVide" classname="com.poissonnerie.test.TestFournisseur" time="0.002">
-    <system-err><![CDATA[Jan 18, 2025 11:25:52 PM com.poissonnerie.controller.FournisseurController rechercherFournisseurs
+    <system-err><![CDATA[Jan 18, 2025 11:58:29 PM com.poissonnerie.controller.FournisseurController rechercherFournisseurs
 WARNING: Tentative de recherche avec un terme vide
 ]]></system-err>
   </testcase>
-  <testcase name="testValidationTelephoneInvalide" classname="com.poissonnerie.test.TestFournisseur" time="0.001">
-    <system-err><![CDATA[Jan 18, 2025 11:25:52 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
+  <testcase name="testValidationTelephoneInvalide" classname="com.poissonnerie.test.TestFournisseur" time="0.002">
+    <system-err><![CDATA[Jan 18, 2025 11:58:29 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
 INFO: Tentative d'ajout d'un nouveau fournisseur: Fournisseur Test
 ]]></system-err>
   </testcase>
   <testcase name="testValidationFournisseurNull" classname="com.poissonnerie.test.TestFournisseur" time="0.002">
-    <system-err><![CDATA[Jan 18, 2025 11:25:52 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
+    <system-err><![CDATA[Jan 18, 2025 11:58:29 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
 SEVERE: Tentative d'ajout d'un fournisseur null
 ]]></system-err>
   </testcase>
-  <testcase name="testSanitizationEntrees" classname="com.poissonnerie.test.TestFournisseur" time="0.03">
-    <system-err><![CDATA[Jan 18, 2025 11:25:52 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
+  <testcase name="testSanitizationEntrees" classname="com.poissonnerie.test.TestFournisseur" time="0.022">
+    <system-err><![CDATA[Jan 18, 2025 11:58:29 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
 INFO: Tentative d'ajout d'un nouveau fournisseur: Test<script>alert('xss')</script>
-Jan 18, 2025 11:25:52 PM com.poissonnerie.util.DatabaseManager needsNewConnection
+Jan 18, 2025 11:58:29 PM com.poissonnerie.util.DatabaseManager needsNewConnection
 WARNING: Connexion détectée comme invalide ou fermée
-Jan 18, 2025 11:25:52 PM com.poissonnerie.util.DatabaseManager initializeConnection
+Jan 18, 2025 11:58:29 PM com.poissonnerie.util.DatabaseManager initializeConnection
 INFO: Initialisation d'une nouvelle connexion à la base de données
-Jan 18, 2025 11:25:52 PM com.poissonnerie.util.DatabaseManager initializeConnection
+Jan 18, 2025 11:58:29 PM com.poissonnerie.util.DatabaseManager initializeConnection
 INFO: Configuration des PRAGMA SQLite effectuée
-Jan 18, 2025 11:25:52 PM com.poissonnerie.util.DatabaseManager initializeConnection
+Jan 18, 2025 11:58:29 PM com.poissonnerie.util.DatabaseManager initializeConnection
 INFO: Connexion à la base de données établie avec succès
-Jan 18, 2025 11:25:52 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
-INFO: Fournisseur ajouté avec succès, ID: 14
+Jan 18, 2025 11:58:29 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
+INFO: Fournisseur ajouté avec succès, ID: 32
 ]]></system-err>
   </testcase>
   <testcase name="testValidationNomVide" classname="com.poissonnerie.test.TestFournisseur" time="0.002">
-    <system-err><![CDATA[Jan 18, 2025 11:25:52 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
+    <system-err><![CDATA[Jan 18, 2025 11:58:29 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
 INFO: Tentative d'ajout d'un nouveau fournisseur: 
 ]]></system-err>
   </testcase>
   <testcase name="testValidationEmailInvalide" classname="com.poissonnerie.test.TestFournisseur" time="0.002">
-    <system-err><![CDATA[Jan 18, 2025 11:25:52 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
+    <system-err><![CDATA[Jan 18, 2025 11:58:29 PM com.poissonnerie.controller.FournisseurController ajouterFournisseur
 INFO: Tentative d'ajout d'un nouveau fournisseur: Fournisseur Test
 ]]></system-err>
   </testcase>
-  <testcase name="testSuppressionFournisseurInvalide" classname="com.poissonnerie.test.TestFournisseur" time="0.002">
-    <system-err><![CDATA[Jan 18, 2025 11:25:52 PM com.poissonnerie.controller.FournisseurController supprimerFournisseur
+  <testcase name="testSuppressionFournisseurInvalide" classname="com.poissonnerie.test.TestFournisseur" time="0.001">
+    <system-err><![CDATA[Jan 18, 2025 11:58:29 PM com.poissonnerie.controller.FournisseurController supprimerFournisseur
 WARNING: Tentative de suppression d'un fournisseur invalide
 ]]></system-err>
   </testcase>

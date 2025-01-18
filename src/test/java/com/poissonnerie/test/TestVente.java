@@ -109,11 +109,12 @@ public class TestVente {
         produitTest = new Produit(1, "Produit Test", "Catégorie Test", 10.0, 15.0, 100, 10);
 
         // Créer une vente de test valide
-        List<Vente.LigneVente> lignes = new ArrayList<>();
+        venteTest = new Vente(1, LocalDateTime.now(), clientTest, false, 0.0); // Initialiser avec total = 0
+        ArrayList<Vente.LigneVente> lignes = new ArrayList<>();
         lignes.add(new Vente.LigneVente(produitTest, 2, 15.0));
-
-        venteTest = new Vente(1, LocalDateTime.now(), clientTest, false, 30.0);
         venteTest.setLignes(lignes);
+        // Mettre à jour le total après avoir ajouté les lignes
+        venteTest.setTotal(venteTest.getMontantTotal());
     }
 
     @Test
@@ -138,7 +139,7 @@ public class TestVente {
         venteTest.setLignes(new ArrayList<>());
         assertThrows(IllegalArgumentException.class,
             () -> controller.enregistrerVente(venteTest),
-            "Une vente sans lignes devrait lever une exception");
+            "Une vente sans lignes devrait être rejetée");
     }
 
     @Test
@@ -221,11 +222,15 @@ public class TestVente {
     @Test
     @DisplayName("Test de la validation du total calculé")
     void testValidationTotalCalcule() {
-        Vente.LigneVente ligne = new Vente.LigneVente(produitTest, 2, 15.0);
-        Vente vente = new Vente(1, LocalDateTime.now(), clientTest, false, 40.0); // Total incorrect
+        // Créer une vente avec un total incorrect
+        Vente vente = new Vente(1, LocalDateTime.now(), clientTest, false, 0.0);
+        ArrayList<Vente.LigneVente> lignes = new ArrayList<>();
+        lignes.add(new Vente.LigneVente(produitTest, 2, 15.0));
+        vente.setLignes(lignes);
 
+        double totalCalcule = vente.getMontantTotal();
         assertThrows(IllegalStateException.class,
-            () -> vente.setLignes(Arrays.asList(ligne)),
+            () -> vente.setTotal(totalCalcule + 10.0),
             "Un total incorrect devrait lever une exception");
     }
 }

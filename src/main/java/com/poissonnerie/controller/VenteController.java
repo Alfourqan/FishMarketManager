@@ -9,18 +9,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import java.util.concurrent.locks.ReentrantLock;
-import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 public class VenteController {
     private static final Logger LOGGER = Logger.getLogger(VenteController.class.getName());
     private final List<Vente> ventes;
     private static final double LIMITE_CREDIT_MAX = 5000.0;
-    private static final int MAX_RETRY_ATTEMPTS = 3;
-    private static final long RETRY_DELAY_MS = 1000;
-    private static final ReentrantLock stockLock = new ReentrantLock();
-    private static final long LOCK_TIMEOUT_SECONDS = 10;
     private static final int TRANSACTION_TIMEOUT_SECONDS = 30;
+
+    // Motifs de validation
+    private static final Pattern NUMERIC_PATTERN = Pattern.compile("^[0-9]+$");
+    private static final Pattern DECIMAL_PATTERN = Pattern.compile("^\\d+(\\.\\d{1,2})?$");
+    private static final int MAX_LIGNES_VENTE = 100;
 
     public VenteController() {
         this.ventes = new ArrayList<>();
@@ -32,8 +32,9 @@ public class VenteController {
         try (Connection conn = DatabaseManager.getConnection();
              Statement stmt = conn.createStatement()) {
 
-            // Activer les contraintes de clé étrangère
+            // Activer les contraintes de clé étrangère et configurer le timeout
             stmt.execute("PRAGMA foreign_keys = ON");
+            stmt.execute("PRAGMA busy_timeout = " + (TRANSACTION_TIMEOUT_SECONDS * 1000));
 
             // Mettre à jour la table ventes si nécessaire
             stmt.execute("CREATE TABLE IF NOT EXISTS ventes (" +
@@ -41,7 +42,7 @@ public class VenteController {
                         "date BIGINT NOT NULL, " +
                         "client_id INTEGER, " +
                         "credit BOOLEAN NOT NULL, " +
-                        "total DOUBLE NOT NULL, " +
+                        "total DOUBLE NOT NULL CHECK (total >= 0), " +
                         "supprime BOOLEAN DEFAULT false, " +
                         "FOREIGN KEY (client_id) REFERENCES clients(id))");
 
@@ -50,8 +51,8 @@ public class VenteController {
                         "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                         "vente_id INTEGER NOT NULL, " +
                         "produit_id INTEGER NOT NULL, " +
-                        "quantite INTEGER NOT NULL, " +
-                        "prix_unitaire DOUBLE NOT NULL, " +
+                        "quantite INTEGER NOT NULL CHECK (quantite > 0), " +
+                        "prix_unitaire DOUBLE NOT NULL CHECK (prix_unitaire > 0), " +
                         "supprime BOOLEAN DEFAULT false, " +
                         "FOREIGN KEY (vente_id) REFERENCES ventes(id), " +
                         "FOREIGN KEY (produit_id) REFERENCES produits(id))");
@@ -63,8 +64,8 @@ public class VenteController {
 
             LOGGER.info("Tables mises à jour avec succès");
         } catch (SQLException e) {
-            LOGGER.log(Level.WARNING, "Erreur lors de l'initialisation des tables", e);
-            // Continue même si l'initialisation échoue car les tables peuvent déjà exister
+            LOGGER.log(Level.SEVERE, "Erreur fatale lors de l'initialisation des tables", e);
+            throw new RuntimeException("Erreur lors de l'initialisation de la base de données", e);
         }
     }
 
@@ -76,80 +77,68 @@ public class VenteController {
         LOGGER.info("Chargement des ventes en cours...");
         ventes.clear();
 
-        for (int attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
-            try (Connection conn = DatabaseManager.getConnection()) {
-                conn.setAutoCommit(false);
-                // Définir un timeout de transaction
-                try (Statement stmt = conn.createStatement()) {
-                    stmt.execute("PRAGMA busy_timeout = " + (TRANSACTION_TIMEOUT_SECONDS * 1000));
-                }
+        try (Connection conn = DatabaseManager.getConnection()) {
+            String sql = "SELECT v.*, c.* FROM ventes v LEFT JOIN clients c ON v.client_id = c.id " +
+                        "WHERE v.supprime = false ORDER BY v.date DESC LIMIT 1000";
 
-                try {
-                    String sql = "SELECT v.*, c.* FROM ventes v LEFT JOIN clients c ON v.client_id = c.id " +
-                               "WHERE v.supprime = false ORDER BY v.date DESC";
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery(sql)) {
 
-                    try (Statement stmt = conn.createStatement();
-                         ResultSet rs = stmt.executeQuery(sql)) {
-
-                        while (rs.next()) {
-                            Client client = null;
-                            if (rs.getObject("client_id") != null) {
-                                client = creerClientDepuisResultSet(rs);
-                            }
-
-                            long timestamp = rs.getLong("date");
-                            LocalDateTime date = LocalDateTime.ofInstant(
-                                Instant.ofEpochMilli(timestamp),
-                                java.time.ZoneId.systemDefault()
-                            );
-
-                            Vente vente = new Vente(
-                                rs.getInt("id"),
-                                date,
-                                client,
-                                rs.getBoolean("credit"),
-                                rs.getDouble("total")
-                            );
-
-                            chargerLignesVente(conn, vente);
-                            ventes.add(vente);
-                        }
-
-                        conn.commit();
-                        LOGGER.info("Ventes chargées avec succès: " + ventes.size() + " ventes");
-                        return;
+                while (rs.next()) {
+                    Client client = null;
+                    if (rs.getObject("client_id") != null) {
+                        client = creerClientDepuisResultSet(rs);
                     }
-                } catch (SQLException e) {
-                    conn.rollback();
-                    if (attempt == MAX_RETRY_ATTEMPTS) {
-                        LOGGER.log(Level.SEVERE, "Échec définitif du chargement des ventes après " + MAX_RETRY_ATTEMPTS + " tentatives", e);
-                        throw new RuntimeException("Erreur lors du chargement des ventes", e);
-                    }
-                    LOGGER.warning("Tentative " + attempt + " échouée, nouvelle tentative dans " + RETRY_DELAY_MS + "ms");
-                    Thread.sleep(RETRY_DELAY_MS);
+
+                    long timestamp = rs.getLong("date");
+                    LocalDateTime date = LocalDateTime.ofInstant(
+                        Instant.ofEpochMilli(timestamp),
+                        java.time.ZoneId.systemDefault()
+                    );
+
+                    Vente vente = new Vente(
+                        rs.getInt("id"),
+                        date,
+                        client,
+                        rs.getBoolean("credit"),
+                        rs.getDouble("total")
+                    );
+
+                    chargerLignesVente(conn, vente);
+                    ventes.add(vente);
                 }
-            } catch (SQLException | InterruptedException e) {
-                if (e instanceof InterruptedException) {
-                    Thread.currentThread().interrupt();
-                    throw new RuntimeException("Opération interrompue", e);
-                }
-                if (attempt == MAX_RETRY_ATTEMPTS) {
-                    LOGGER.log(Level.SEVERE, "Erreur fatale lors du chargement des ventes", e);
-                    throw new RuntimeException("Erreur lors du chargement des ventes", e);
-                }
+
+                LOGGER.info("Ventes chargées avec succès: " + ventes.size() + " ventes");
+            } catch (SQLException e) {
+                LOGGER.log(Level.SEVERE, "Échec du chargement des ventes", e);
+                throw new RuntimeException("Erreur lors du chargement des ventes", e);
             }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erreur fatale lors du chargement des ventes", e);
+            throw new RuntimeException("Erreur lors du chargement des ventes", e);
         }
     }
 
     private Client creerClientDepuisResultSet(ResultSet rs) throws SQLException {
         try {
-            return new Client(
-                rs.getInt("client_id"),
-                sanitizeInput(rs.getString("nom")),
-                sanitizeInput(rs.getString("telephone")),
-                sanitizeInput(rs.getString("adresse")),
-                rs.getDouble("solde")
-            );
+            int clientId = rs.getInt("client_id");
+            String nom = sanitizeInput(rs.getString("nom"));
+            String telephone = sanitizeInput(rs.getString("telephone"));
+            String adresse = sanitizeInput(rs.getString("adresse"));
+            double solde = rs.getDouble("solde");
+
+            // Validation supplémentaire des données
+            if (clientId <= 0) {
+                throw new SQLException("ID client invalide: " + clientId);
+            }
+            if (nom == null || nom.trim().isEmpty()) {
+                throw new SQLException("Nom client invalide");
+            }
+            if (solde < 0 || solde > LIMITE_CREDIT_MAX) {
+                throw new SQLException("Solde client invalide: " + solde);
+            }
+
+            return new Client(clientId, nom, telephone, adresse, solde);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la création d'un client depuis le ResultSet", e);
             throw e;
@@ -171,13 +160,24 @@ public class VenteController {
                     Produit produit = creerProduitDepuisResultSet(rs);
                     validateProduit(produit);
 
-                    Vente.LigneVente ligne = new Vente.LigneVente(
-                        produit,
-                        rs.getInt("quantite"),
-                        rs.getDouble("prix_unitaire")
-                    );
+                    int quantite = rs.getInt("quantite");
+                    double prixUnitaire = rs.getDouble("prix_unitaire");
+
+                    // Validation supplémentaire
+                    if (quantite <= 0) {
+                        throw new SQLException("Quantité invalide: " + quantite);
+                    }
+                    if (prixUnitaire <= 0) {
+                        throw new SQLException("Prix unitaire invalide: " + prixUnitaire);
+                    }
+
+                    Vente.LigneVente ligne = new Vente.LigneVente(produit, quantite, prixUnitaire);
                     lignes.add(ligne);
                 }
+            }
+
+            if (lignes.size() > MAX_LIGNES_VENTE) {
+                throw new SQLException("Nombre maximum de lignes dépassé: " + lignes.size());
             }
 
             vente.setLignes(lignes);
@@ -195,19 +195,39 @@ public class VenteController {
         if (produit.getPrixAchat() < 0) {
             throw new IllegalStateException("Prix d'achat invalide pour le produit: " + produit.getId());
         }
+        if (produit.getStock() < 0) {
+            throw new IllegalStateException("Stock invalide pour le produit: " + produit.getId());
+        }
     }
 
     private Produit creerProduitDepuisResultSet(ResultSet rs) throws SQLException {
         try {
-            return new Produit(
-                rs.getInt("produit_id"),
-                sanitizeInput(rs.getString("nom")),
-                sanitizeInput(rs.getString("categorie")),
-                rs.getDouble("prix_achat"),
-                rs.getDouble("prix_vente"),
-                rs.getInt("stock"),
-                rs.getInt("seuil_alerte")
-            );
+            int produitId = rs.getInt("produit_id");
+            String nom = sanitizeInput(rs.getString("nom"));
+            String categorie = sanitizeInput(rs.getString("categorie"));
+            double prixAchat = rs.getDouble("prix_achat");
+            double prixVente = rs.getDouble("prix_vente");
+            int stock = rs.getInt("stock");
+            int seuilAlerte = rs.getInt("seuil_alerte");
+
+            // Validation supplémentaire
+            if (produitId <= 0) {
+                throw new SQLException("ID produit invalide: " + produitId);
+            }
+            if (nom == null || nom.trim().isEmpty()) {
+                throw new SQLException("Nom produit invalide");
+            }
+            if (prixAchat < 0 || prixVente <= 0 || prixVente < prixAchat) {
+                throw new SQLException("Prix invalides: achat=" + prixAchat + ", vente=" + prixVente);
+            }
+            if (stock < 0) {
+                throw new SQLException("Stock invalide: " + stock);
+            }
+            if (seuilAlerte < 0) {
+                throw new SQLException("Seuil d'alerte invalide: " + seuilAlerte);
+            }
+
+            return new Produit(produitId, nom, categorie, prixAchat, prixVente, stock, seuilAlerte);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la création d'un produit depuis le ResultSet", e);
             throw e;
@@ -218,10 +238,14 @@ public class VenteController {
         if (input == null) {
             return "";
         }
-        // Échappement des caractères spéciaux HTML et SQL
-        return input.replaceAll("[<>\"'%;)(&+\\[\\]{}]", "")
-                   .trim()
-                   .replaceAll("\\s+", " ");
+        // Nettoyer les caractères spéciaux et les caractères de contrôle
+        String cleaned = input.replaceAll("[\\p{Cntrl}\\p{Zl}\\p{Zp}]", "")
+                            .replaceAll("[<>\"'%;)(&+\\[\\]{}]", "")
+                            .trim()
+                            .replaceAll("\\s+", " ");
+
+        // Limiter la longueur
+        return cleaned.length() > 255 ? cleaned.substring(0, 255) : cleaned;
     }
 
     private void validateStock(Connection conn, Vente.LigneVente ligne) throws SQLException {
@@ -246,83 +270,63 @@ public class VenteController {
         LOGGER.info("Début de l'enregistrement de la vente...");
         validateVente(vente);
 
-        boolean lockAcquired = false;
-        try {
-            // Tentative d'acquisition du verrou avec timeout
-            if (!stockLock.tryLock(LOCK_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
-                throw new RuntimeException("Impossible d'acquérir le verrou pour la mise à jour du stock");
+        try (Connection conn = DatabaseManager.getConnection()) {
+            // Démarrer une transaction IMMEDIATE pour un meilleur contrôle de concurrence
+            try (Statement stmt = conn.createStatement()) {
+                stmt.execute("BEGIN IMMEDIATE TRANSACTION");
             }
-            lockAcquired = true;
+            conn.setAutoCommit(false);
 
-            for (int attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
-                try (Connection conn = DatabaseManager.getConnection()) {
-                    conn.setAutoCommit(false);
-
-                    // Définir un timeout de transaction
-                    try (Statement stmt = conn.createStatement()) {
-                        stmt.execute("PRAGMA busy_timeout = " + (TRANSACTION_TIMEOUT_SECONDS * 1000));
-                    }
-
-                    try {
-                        // Vérifier le stock pour chaque ligne avant de commencer la transaction
-                        for (Vente.LigneVente ligne : vente.getLignes()) {
-                            validateStock(conn, ligne);
-                        }
-
-                        // Insérer la vente
-                        int venteId = insererVente(conn, vente);
-                        vente.setId(venteId);
-
-                        // Insérer les lignes de vente et mettre à jour les stocks
-                        for (Vente.LigneVente ligne : vente.getLignes()) {
-                            enregistrerLigneVente(conn, venteId, ligne);
-                            mettreAJourStock(conn, ligne);
-                        }
-
-                        // Mettre à jour le solde client si vente à crédit
-                        if (vente.isCredit() && vente.getClient() != null) {
-                            mettreAJourSoldeClient(conn, vente);
-                        }
-
-                        conn.commit();
-                        ventes.add(vente);
-                        LOGGER.info("Vente enregistrée avec succès, ID: " + vente.getId());
-                        return;
-
-                    } catch (SQLException e) {
-                        conn.rollback();
-                        LOGGER.log(Level.SEVERE, "Erreur SQL lors de l'enregistrement de la vente", e);
-                        if (attempt == MAX_RETRY_ATTEMPTS) {
-                            throw new RuntimeException("Erreur lors de l'enregistrement de la vente: " + e.getMessage(), e);
-                        }
-                        LOGGER.warning("Tentative " + attempt + " échouée, nouvelle tentative dans " + RETRY_DELAY_MS + "ms");
-                        Thread.sleep(RETRY_DELAY_MS);
-                    }
-                } catch (SQLException | InterruptedException e) {
-                    if (e instanceof InterruptedException) {
-                        Thread.currentThread().interrupt();
-                        throw new RuntimeException("Opération interrompue", e);
-                    }
-                    if (attempt == MAX_RETRY_ATTEMPTS) {
-                        LOGGER.log(Level.SEVERE, "Erreur fatale lors de l'enregistrement de la vente", e);
-                        throw new RuntimeException("Erreur lors de l'enregistrement de la vente: " + e.getMessage(), e);
-                    }
+            try {
+                // Définir un timeout de transaction
+                try (Statement stmt = conn.createStatement()) {
+                    stmt.execute("PRAGMA busy_timeout = " + (TRANSACTION_TIMEOUT_SECONDS * 1000));
                 }
+
+                // Vérifier le stock pour chaque ligne avant de commencer la transaction
+                for (Vente.LigneVente ligne : vente.getLignes()) {
+                    validateStock(conn, ligne);
+                }
+
+                // Insérer la vente
+                int venteId = insererVente(conn, vente);
+                vente.setId(venteId);
+
+                // Insérer les lignes de vente et mettre à jour les stocks
+                for (Vente.LigneVente ligne : vente.getLignes()) {
+                    enregistrerLigneVente(conn, venteId, ligne);
+                    mettreAJourStock(conn, ligne);
+                }
+
+                // Mettre à jour le solde client si vente à crédit
+                if (vente.isCredit() && vente.getClient() != null) {
+                    mettreAJourSoldeClient(conn, vente);
+                }
+
+                conn.commit();
+                ventes.add(vente);
+                LOGGER.info("Vente enregistrée avec succès, ID: " + vente.getId());
+
+            } catch (SQLException | IllegalStateException e) {
+                try {
+                    conn.rollback();
+                    LOGGER.log(Level.WARNING, "Transaction annulée", e);
+                } catch (SQLException ex) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors du rollback", ex);
+                }
+                LOGGER.log(Level.SEVERE, "Erreur SQL lors de l'enregistrement de la vente", e);
+                throw new RuntimeException("Erreur lors de l'enregistrement de la vente: " + e.getMessage(), e);
             }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new RuntimeException("Interruption pendant l'attente du verrou", e);
-        } finally {
-            if (lockAcquired) {
-                stockLock.unlock();
-            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erreur fatale lors de l'enregistrement de la vente", e);
+            throw new RuntimeException("Erreur lors de l'enregistrement de la vente: " + e.getMessage(), e);
         }
     }
 
     private int insererVente(Connection conn, Vente vente) throws SQLException {
-        String sql = "INSERT INTO ventes (date, client_id, credit, total, supprime) VALUES (?, ?, ?, ?, false)";
+        String sql = "INSERT INTO ventes (date, client_id, credit, total) VALUES (?, ?, ?, ?)";
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             long timestamp = vente.getDate().atZone(java.time.ZoneId.systemDefault())
                 .toInstant().toEpochMilli();
             pstmt.setLong(1, timestamp);
@@ -335,12 +339,11 @@ public class VenteController {
             pstmt.setBoolean(3, vente.isCredit());
             pstmt.setDouble(4, vente.getTotal());
 
-            int rowsAffected = pstmt.executeUpdate();
-            if (rowsAffected == 0) {
-                throw new SQLException("L'insertion de la vente a échoué, aucune ligne affectée.");
-            }
+            pstmt.executeUpdate();
 
-            try (ResultSet rs = pstmt.getGeneratedKeys()) {
+            // Utiliser last_insert_rowid() de SQLite pour obtenir l'ID généré
+            try (Statement stmt = conn.createStatement();
+                 ResultSet rs = stmt.executeQuery("SELECT last_insert_rowid()")) {
                 if (rs.next()) {
                     return rs.getInt(1);
                 }
@@ -350,8 +353,7 @@ public class VenteController {
     }
 
     private void enregistrerLigneVente(Connection conn, int venteId, Vente.LigneVente ligne) throws SQLException {
-        String sql = "INSERT INTO lignes_vente (vente_id, produit_id, quantite, prix_unitaire, supprime) " +
-                    "VALUES (?, ?, ?, ?, false)";
+        String sql = "INSERT INTO lignes_vente (vente_id, produit_id, quantite, prix_unitaire) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, venteId);
@@ -359,17 +361,13 @@ public class VenteController {
             pstmt.setInt(3, ligne.getQuantite());
             pstmt.setDouble(4, ligne.getPrixUnitaire());
 
-            int rowsAffected = pstmt.executeUpdate();
-            if (rowsAffected == 0) {
-                throw new SQLException("L'insertion de la ligne de vente a échoué");
-            }
+            pstmt.executeUpdate();
             LOGGER.info("Ligne de vente enregistrée pour le produit: " + ligne.getProduit().getId());
         }
     }
 
     private void mettreAJourStock(Connection conn, Vente.LigneVente ligne) throws SQLException {
-        String sql = "UPDATE produits SET stock = stock - ? " +
-                    "WHERE id = ? AND supprime = false AND stock >= ?";
+        String sql = "UPDATE produits SET stock = stock - ? WHERE id = ? AND supprime = false AND stock >= ?";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, ligne.getQuantite());
@@ -385,20 +383,38 @@ public class VenteController {
     }
 
     private void mettreAJourSoldeClient(Connection conn, Vente vente) throws SQLException {
-        String sql = "UPDATE clients SET solde = solde + ? " +
-                    "WHERE id = ? AND supprime = false AND (solde + ?) <= ?";
+        // Vérifier d'abord si le nouveau solde ne dépassera pas la limite
+        String checkSql = "SELECT solde FROM clients WHERE id = ? AND supprime = false";
+        double nouveauSolde;
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setDouble(1, vente.getTotal());
+        try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+            checkStmt.setInt(1, vente.getClient().getId());
+            try (ResultSet rs = checkStmt.executeQuery()) {
+                if (!rs.next()) {
+                    throw new SQLException("Client introuvable");
+                }
+                nouveauSolde = rs.getDouble("solde") + vente.getTotal();
+                if (nouveauSolde > LIMITE_CREDIT_MAX) {
+                    throw new SQLException(String.format(
+                        "Limite de crédit dépassée. Solde actuel: %.2f, Montant vente: %.2f, Limite: %.2f",
+                        rs.getDouble("solde"), vente.getTotal(), LIMITE_CREDIT_MAX));
+                }
+            }
+        }
+
+        // Mettre à jour le solde
+        String updateSql = "UPDATE clients SET solde = ? WHERE id = ? AND supprime = false";
+        try (PreparedStatement pstmt = conn.prepareStatement(updateSql)) {
+            pstmt.setDouble(1, nouveauSolde);
             pstmt.setInt(2, vente.getClient().getId());
-            pstmt.setDouble(3, vente.getTotal());
-            pstmt.setDouble(4, LIMITE_CREDIT_MAX);
 
             int rowsAffected = pstmt.executeUpdate();
             if (rowsAffected == 0) {
-                throw new SQLException("Impossible de mettre à jour le solde client: limite de crédit dépassée");
+                throw new SQLException("Impossible de mettre à jour le solde client");
             }
-            LOGGER.info("Solde client mis à jour pour le client " + vente.getClient().getId());
+            LOGGER.info(String.format(
+                "Solde client mis à jour pour le client %d: %.2f → %.2f",
+                vente.getClient().getId(), nouveauSolde - vente.getTotal(), nouveauSolde));
         }
     }
 
@@ -411,13 +427,15 @@ public class VenteController {
             throw new IllegalArgumentException("La vente ne peut pas être null");
         }
 
-        LOGGER.fine("Validation des lignes de vente...");
         if (vente.getLignes() == null || vente.getLignes().isEmpty()) {
             LOGGER.warning("Tentative de validation d'une vente sans lignes");
-            erreurs.add("Une vente doit contenir au moins une ligne");
+            throw new IllegalArgumentException("Une vente doit avoir au moins une ligne");
         }
 
-        LOGGER.fine("Validation de la date...");
+        if (vente.getLignes().size() > MAX_LIGNES_VENTE) {
+            erreurs.add("Nombre maximum de lignes dépassé: " + vente.getLignes().size());
+        }
+
         if (vente.getDate() == null) {
             LOGGER.warning("Tentative de validation d'une vente sans date");
             erreurs.add("La date de vente est obligatoire");
@@ -426,78 +444,39 @@ public class VenteController {
             erreurs.add("La date de vente ne peut pas être dans le futur");
         }
 
-        LOGGER.fine("Validation du mode de paiement...");
-        if (vente.isCredit()) {
-            if (vente.getClient() == null) {
-                LOGGER.warning("Tentative de vente à crédit sans client");
-                erreurs.add("Un client est requis pour une vente à crédit");
-            } else {
-                LOGGER.fine("Vérification de la limite de crédit pour le client " + vente.getClient().getId());
-                double nouveauSolde = vente.getClient().getSolde() + vente.getTotal();
-                if (nouveauSolde > LIMITE_CREDIT_MAX) {
-                    LOGGER.warning(String.format(
-                        "Dépassement de la limite de crédit pour le client %d. Nouveau solde: %.2f, Limite: %.2f",
-                        vente.getClient().getId(), nouveauSolde, LIMITE_CREDIT_MAX));
-                    erreurs.add(String.format("Le crédit maximum autorisé (%.2f€) serait dépassé", LIMITE_CREDIT_MAX));
-                }
-            }
+        if (vente.isCredit() && vente.getClient() == null) {
+            LOGGER.warning("Tentative de vente à crédit sans client");
+            erreurs.add("Un client est requis pour une vente à crédit");
         }
 
-        LOGGER.fine("Validation du montant total...");
         if (vente.getTotal() < 0) {
             LOGGER.warning("Tentative de validation d'une vente avec un total négatif: " + vente.getTotal());
             erreurs.add("Le total de la vente ne peut pas être négatif");
         }
 
-        if (vente.getLignes() != null) {
-            LOGGER.fine("Validation détaillée des lignes de vente...");
-            for (Vente.LigneVente ligne : vente.getLignes()) {
-                if (ligne == null || ligne.getProduit() == null) {
-                    LOGGER.warning("Ligne de vente ou produit null détecté");
-                    erreurs.add("Les lignes de vente et leurs produits ne peuvent pas être null");
-                    continue;
-                }
-
-                String produitNom = sanitizeInput(ligne.getProduit().getNom());
-                if (ligne.getQuantite() <= 0) {
-                    LOGGER.warning(String.format(
-                        "Quantité invalide (%d) détectée pour le produit %s",
-                        ligne.getQuantite(), produitNom));
-                    erreurs.add(String.format("La quantité doit être positive pour l'article %s",
-                        produitNom));
-                }
-                if (ligne.getPrixUnitaire() <= 0) {
-                    LOGGER.warning(String.format(
-                        "Prix unitaire invalide (%.2f) détecté pour le produit %s",
-                        ligne.getPrixUnitaire(), produitNom));
-                    erreurs.add(String.format("Le prix unitaire doit être positif pour l'article %s",
-                        produitNom));
-                }
-
-                // Vérification supplémentaire de la cohérence des prix
-                double ecartPrixAutorise = 0.01; // 1% d'écart maximum autorisé
-                double ecartPrix = Math.abs(ligne.getPrixUnitaire() - ligne.getProduit().getPrixVente())
-                                 / ligne.getProduit().getPrixVente();
-                if (ecartPrix > ecartPrixAutorise) {
-                    LOGGER.warning(String.format(
-                        "Écart de prix suspect détecté pour %s: prix unitaire=%.2f, prix catalogue=%.2f",
-                        produitNom, ligne.getPrixUnitaire(), ligne.getProduit().getPrixVente()));
-                    erreurs.add(String.format(
-                        "Le prix unitaire pour l'article %s diffère significativement du prix catalogue",
-                        produitNom));
-                }
+        // Vérifier chaque ligne de vente
+        for (Vente.LigneVente ligne : vente.getLignes()) {
+            if (ligne == null) {
+                erreurs.add("Une ligne de vente ne peut pas être null");
+                continue;
             }
-        }
 
-        // Vérification du total calculé
-        LOGGER.fine("Vérification de la cohérence du total...");
-        double calculatedTotal = vente.getMontantTotal();
-        if (Math.abs(calculatedTotal - vente.getTotal()) > 0.01) {
-            String message = String.format(
-                "Le total de la vente (%.2f) ne correspond pas à la somme des lignes (%.2f)",
-                vente.getTotal(), calculatedTotal);
-            LOGGER.warning(message);
-            erreurs.add(message);
+            if (ligne.getProduit() == null) {
+                erreurs.add("Le produit ne peut pas être null");
+                continue;
+            }
+
+            if (ligne.getQuantite() <= 0) {
+                erreurs.add(String.format(
+                    "La quantité doit être positive pour l'article %s (quantité: %d)",
+                    sanitizeInput(ligne.getProduit().getNom()), ligne.getQuantite()));
+            }
+
+            if (ligne.getPrixUnitaire() <= 0) {
+                erreurs.add(String.format(
+                    "Le prix unitaire doit être positif pour l'article %s (prix: %.2f)",
+                    sanitizeInput(ligne.getProduit().getNom()), ligne.getPrixUnitaire()));
+            }
         }
 
         if (!erreurs.isEmpty()) {
