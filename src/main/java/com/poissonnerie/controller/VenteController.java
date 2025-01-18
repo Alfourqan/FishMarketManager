@@ -152,61 +152,110 @@ public class VenteController {
     }
 
     private void validateVente(Vente vente) {
+        LOGGER.info("Début de la validation de la vente...");
         List<String> erreurs = new ArrayList<>();
 
         if (vente == null) {
+            LOGGER.severe("Tentative de validation d'une vente null");
             throw new IllegalArgumentException("La vente ne peut pas être null");
         }
+
+        LOGGER.fine("Validation des lignes de vente...");
         if (vente.getLignes() == null || vente.getLignes().isEmpty()) {
+            LOGGER.warning("Tentative de validation d'une vente sans lignes");
             erreurs.add("Une vente doit contenir au moins une ligne");
         }
+
+        LOGGER.fine("Validation de la date...");
         if (vente.getDate() == null) {
+            LOGGER.warning("Tentative de validation d'une vente sans date");
             erreurs.add("La date de vente est obligatoire");
         } else if (vente.getDate().isAfter(LocalDateTime.now())) {
+            LOGGER.warning("Tentative de validation d'une vente avec une date future: " + vente.getDate());
             erreurs.add("La date de vente ne peut pas être dans le futur");
         }
-        if (vente.isCredit() && vente.getClient() == null) {
-            erreurs.add("Un client est requis pour une vente à crédit");
+
+        LOGGER.fine("Validation du mode de paiement...");
+        if (vente.isCredit()) {
+            if (vente.getClient() == null) {
+                LOGGER.warning("Tentative de vente à crédit sans client");
+                erreurs.add("Un client est requis pour une vente à crédit");
+            } else {
+                LOGGER.fine("Vérification de la limite de crédit pour le client " + vente.getClient().getId());
+                double nouveauSolde = vente.getClient().getSolde() + vente.getTotal();
+                if (nouveauSolde > LIMITE_CREDIT_MAX) {
+                    LOGGER.warning(String.format(
+                        "Dépassement de la limite de crédit pour le client %d. Nouveau solde: %.2f, Limite: %.2f",
+                        vente.getClient().getId(), nouveauSolde, LIMITE_CREDIT_MAX));
+                    erreurs.add(String.format("Le crédit maximum autorisé (%.2f€) serait dépassé", LIMITE_CREDIT_MAX));
+                }
+            }
         }
+
+        LOGGER.fine("Validation du montant total...");
         if (vente.getTotal() < 0) {
+            LOGGER.warning("Tentative de validation d'une vente avec un total négatif: " + vente.getTotal());
             erreurs.add("Le total de la vente ne peut pas être négatif");
         }
 
-        // Validation du crédit client
-        if (vente.isCredit() && vente.getClient() != null) {
-            double nouveauSolde = vente.getClient().getSolde() + vente.getTotal();
-            if (nouveauSolde > LIMITE_CREDIT_MAX) {
-                erreurs.add(String.format("Le crédit maximum autorisé (%.2f€) serait dépassé", LIMITE_CREDIT_MAX));
-            }
-        }
-
         if (vente.getLignes() != null) {
+            LOGGER.fine("Validation détaillée des lignes de vente...");
             for (Vente.LigneVente ligne : vente.getLignes()) {
                 if (ligne == null || ligne.getProduit() == null) {
+                    LOGGER.warning("Ligne de vente ou produit null détecté");
                     erreurs.add("Les lignes de vente et leurs produits ne peuvent pas être null");
                     continue;
                 }
+
+                String produitNom = sanitizeInput(ligne.getProduit().getNom());
                 if (ligne.getQuantite() <= 0) {
+                    LOGGER.warning(String.format(
+                        "Quantité invalide (%d) détectée pour le produit %s",
+                        ligne.getQuantite(), produitNom));
                     erreurs.add(String.format("La quantité doit être positive pour l'article %s",
-                        sanitizeInput(ligne.getProduit().getNom())));
+                        produitNom));
                 }
                 if (ligne.getPrixUnitaire() <= 0) {
+                    LOGGER.warning(String.format(
+                        "Prix unitaire invalide (%.2f) détecté pour le produit %s",
+                        ligne.getPrixUnitaire(), produitNom));
                     erreurs.add(String.format("Le prix unitaire doit être positif pour l'article %s",
-                        sanitizeInput(ligne.getProduit().getNom())));
+                        produitNom));
+                }
+
+                // Vérification supplémentaire de la cohérence des prix
+                double ecartPrixAutorise = 0.01; // 1% d'écart maximum autorisé
+                double ecartPrix = Math.abs(ligne.getPrixUnitaire() - ligne.getProduit().getPrixVente())
+                                 / ligne.getProduit().getPrixVente();
+                if (ecartPrix > ecartPrixAutorise) {
+                    LOGGER.warning(String.format(
+                        "Écart de prix suspect détecté pour %s: prix unitaire=%.2f, prix catalogue=%.2f",
+                        produitNom, ligne.getPrixUnitaire(), ligne.getProduit().getPrixVente()));
+                    erreurs.add(String.format(
+                        "Le prix unitaire pour l'article %s diffère significativement du prix catalogue",
+                        produitNom));
                 }
             }
         }
 
-        // Vérifier que le total correspond à la somme des lignes
+        // Vérification du total calculé
+        LOGGER.fine("Vérification de la cohérence du total...");
         double calculatedTotal = vente.getMontantTotal();
         if (Math.abs(calculatedTotal - vente.getTotal()) > 0.01) {
-            erreurs.add(String.format("Le total de la vente (%.2f) ne correspond pas à la somme des lignes (%.2f)",
-                vente.getTotal(), calculatedTotal));
+            String message = String.format(
+                "Le total de la vente (%.2f) ne correspond pas à la somme des lignes (%.2f)",
+                vente.getTotal(), calculatedTotal);
+            LOGGER.warning(message);
+            erreurs.add(message);
         }
 
         if (!erreurs.isEmpty()) {
-            throw new IllegalArgumentException(String.join("\n", erreurs));
+            String erreursConcatenees = String.join("\n", erreurs);
+            LOGGER.severe("Validation échouée avec les erreurs suivantes:\n" + erreursConcatenees);
+            throw new IllegalArgumentException(erreursConcatenees);
         }
+
+        LOGGER.info("Validation de la vente réussie");
     }
 
     private String sanitizeInput(String input) {
@@ -219,7 +268,7 @@ public class VenteController {
     }
 
     private void validateStock(Connection conn, Vente.LigneVente ligne) throws SQLException {
-        String sql = "SELECT stock FROM produits WHERE id = ? AND stock >= ? FOR UPDATE";
+        String sql = "SELECT stock FROM produits WHERE id = ? AND stock >= ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, ligne.getProduit().getId());
             pstmt.setInt(2, ligne.getQuantite());
@@ -306,7 +355,9 @@ public class VenteController {
 
     private int insererVente(Connection conn, Vente vente) throws SQLException {
         String sql = "INSERT INTO ventes (date, client_id, credit, total) VALUES (?, ?, ?, ?)";
-        try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
+        // Première étape : insérer la vente
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             long timestamp = vente.getDate().atZone(java.time.ZoneId.systemDefault())
                 .toInstant().toEpochMilli();
             pstmt.setLong(1, timestamp);
@@ -323,13 +374,15 @@ public class VenteController {
             if (rowsAffected == 0) {
                 throw new SQLException("L'insertion de la vente a échoué, aucune ligne affectée.");
             }
+        }
 
-            try (ResultSet rs = pstmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    return rs.getInt(1);
-                }
-                throw new SQLException("Impossible de récupérer l'ID de la vente");
+        // Deuxième étape : récupérer l'ID généré
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT last_insert_rowid()")) {
+            if (rs.next()) {
+                return rs.getInt(1);
             }
+            throw new SQLException("Impossible de récupérer l'ID de la vente");
         }
     }
 

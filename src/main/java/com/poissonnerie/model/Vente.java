@@ -5,8 +5,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class Vente {
+    private static final Logger LOGGER = Logger.getLogger(Vente.class.getName());
     private int id;
     private final LocalDateTime date;
     private final Client client;
@@ -39,29 +42,65 @@ public class Vente {
     // Classe interne pour les lignes de vente
     public static class LigneVente {
         private final Produit produit;
-        private final int quantite;
-        private final double prixUnitaire;
+        private int quantite;
+        private double prixUnitaire;
+        private final LocalDateTime dateModification;
 
         public LigneVente(Produit produit, int quantite, double prixUnitaire) {
             if (produit == null) {
                 throw new IllegalArgumentException("Le produit ne peut pas être null");
             }
-            if (quantite <= 0) {
-                throw new IllegalArgumentException("La quantité doit être supérieure à 0");
-            }
-            if (prixUnitaire <= 0) {
-                throw new IllegalArgumentException("Le prix unitaire doit être supérieur à 0");
-            }
+            validateQuantite(quantite);
+            validatePrixUnitaire(prixUnitaire);
 
             this.produit = produit;
             this.quantite = quantite;
             this.prixUnitaire = prixUnitaire;
+            this.dateModification = LocalDateTime.now();
         }
 
-        // Getters - Pas de setters pour garantir l'immutabilité
+        private void validateQuantite(int quantite) {
+            if (quantite <= 0) {
+                throw new IllegalArgumentException("La quantité doit être supérieure à 0");
+            }
+            if (produit != null && quantite > produit.getStock()) {
+                throw new IllegalArgumentException(
+                    String.format("La quantité demandée (%d) dépasse le stock disponible (%d) pour %s",
+                        quantite, produit.getStock(), produit.getNom())
+                );
+            }
+        }
+
+        private void validatePrixUnitaire(double prixUnitaire) {
+            if (prixUnitaire <= 0) {
+                throw new IllegalArgumentException("Le prix unitaire doit être supérieur à 0");
+            }
+        }
+
+        // Getters et setters avec validation
         public Produit getProduit() { return produit; }
+
         public int getQuantite() { return quantite; }
+
+        public void setQuantite(int quantite) {
+            LOGGER.log(Level.INFO, 
+                String.format("Modification de la quantité pour %s: %d -> %d", 
+                    produit.getNom(), this.quantite, quantite));
+            validateQuantite(quantite);
+            this.quantite = quantite;
+        }
+
         public double getPrixUnitaire() { return prixUnitaire; }
+
+        public void setPrixUnitaire(double prixUnitaire) {
+            LOGGER.log(Level.INFO, 
+                String.format("Modification du prix unitaire pour %s: %.2f -> %.2f", 
+                    produit.getNom(), this.prixUnitaire, prixUnitaire));
+            validatePrixUnitaire(prixUnitaire);
+            this.prixUnitaire = prixUnitaire;
+        }
+
+        public LocalDateTime getDateModification() { return dateModification; }
 
         @Override
         public boolean equals(Object o) {
@@ -70,12 +109,13 @@ public class Vente {
             LigneVente that = (LigneVente) o;
             return quantite == that.quantite &&
                    Double.compare(that.prixUnitaire, prixUnitaire) == 0 &&
-                   Objects.equals(produit, that.produit);
+                   Objects.equals(produit, that.produit) &&
+                   Objects.equals(dateModification, that.dateModification);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(produit, quantite, prixUnitaire);
+            return Objects.hash(produit, quantite, prixUnitaire, dateModification);
         }
     }
 
@@ -97,6 +137,9 @@ public class Vente {
         if (total < 0) {
             throw new IllegalArgumentException("Le total ne peut pas être négatif");
         }
+        LOGGER.log(Level.INFO, 
+            String.format("Modification du total de la vente %d: %.2f -> %.2f", 
+                id, this.total, total));
         this.total = total;
     }
 
@@ -118,6 +161,9 @@ public class Vente {
             }
         }
 
+        LOGGER.log(Level.INFO, 
+            String.format("Mise à jour des lignes de la vente %d: %d lignes", 
+                id, lignes.size()));
         this.lignes = new ArrayList<>(lignes);
         validateTotal();
     }

@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.poissonnerie.test.TestInventaire" time="0.035" tests="10" errors="0" skipped="0" failures="1">
+  <properties>
+    <property name="java.specification.version" value="21"/>
+    <property name="sun.jnu.encoding" value="UTF-8"/>
+    <property name="java.class.path" value="/home/runner/workspace/target/test-classes:/home/runner/workspace/target/classes:/home/runner/.m2/repository/com/itextpdf/itextpdf/5.5.13.3/itextpdf-5.5.13.3.jar:/home/runner/.m2/repository/org/xerial/sqlite-jdbc/3.44.1.0/sqlite-jdbc-3.44.1.0.jar:/home/runner/.m2/repository/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar:/home/runner/.m2/repository/com/formdev/flatlaf/3.2.1/flatlaf-3.2.1.jar:/home/runner/.m2/repository/com/formdev/flatlaf-intellij-themes/3.2.1/flatlaf-intellij-themes-3.2.1.jar:/home/runner/.m2/repository/com/formdev/flatlaf-extras/3.2.1/flatlaf-extras-3.2.1.jar:/home/runner/.m2/repository/com/github/weisj/jsvg/1.1.0/jsvg-1.1.0.jar:/home/runner/.m2/repository/org/kordamp/ikonli/ikonli-core/12.3.1/ikonli-core-12.3.1.jar:/home/runner/.m2/repository/org/kordamp/ikonli/ikonli-swing/12.3.1/ikonli-swing-12.3.1.jar:/home/runner/.m2/repository/org/kordamp/ikonli/ikonli-materialdesign-pack/12.3.1/ikonli-materialdesign-pack-12.3.1.jar:/home/runner/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.9.2/junit-jupiter-api-5.9.2.jar:/home/runner/.m2/repository/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar:/home/runner/.m2/repository/org/junit/platform/junit-platform-commons/1.9.2/junit-platform-commons-1.9.2.jar:/home/runner/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/runner/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.9.2/junit-jupiter-engine-5.9.2.jar:/home/runner/.m2/repository/org/junit/platform/junit-platform-engine/1.9.2/junit-platform-engine-1.9.2.jar:/home/runner/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.9.2/junit-jupiter-params-5.9.2.jar:"/>
+    <property name="java.vm.vendor" value="Oracle Corporation"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="java.vendor.url" value="https://openjdk.org/"/>
+    <property name="user.timezone" value="GMT"/>
+    <property name="os.name" value="Linux"/>
+    <property name="java.vm.specification.version" value="21"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="US"/>
+    <property name="sun.boot.library.path" value="/nix/store/2vwkssqpzykk37r996cafq7x63imf4sp-openjdk-21+35/lib/openjdk/lib"/>
+    <property name="sun.java.command" value="/home/runner/workspace/target/surefire/surefirebooter-20250118223448750_3.jar /home/runner/workspace/target/surefire 2025-01-18T22-34-48_676-jvmRun1 surefire-20250118223448750_1tmp surefire_0-20250118223448750_2tmp"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="surefire.test.class.path" value="/home/runner/workspace/target/test-classes:/home/runner/workspace/target/classes:/home/runner/.m2/repository/com/itextpdf/itextpdf/5.5.13.3/itextpdf-5.5.13.3.jar:/home/runner/.m2/repository/org/xerial/sqlite-jdbc/3.44.1.0/sqlite-jdbc-3.44.1.0.jar:/home/runner/.m2/repository/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar:/home/runner/.m2/repository/com/formdev/flatlaf/3.2.1/flatlaf-3.2.1.jar:/home/runner/.m2/repository/com/formdev/flatlaf-intellij-themes/3.2.1/flatlaf-intellij-themes-3.2.1.jar:/home/runner/.m2/repository/com/formdev/flatlaf-extras/3.2.1/flatlaf-extras-3.2.1.jar:/home/runner/.m2/repository/com/github/weisj/jsvg/1.1.0/jsvg-1.1.0.jar:/home/runner/.m2/repository/org/kordamp/ikonli/ikonli-core/12.3.1/ikonli-core-12.3.1.jar:/home/runner/.m2/repository/org/kordamp/ikonli/ikonli-swing/12.3.1/ikonli-swing-12.3.1.jar:/home/runner/.m2/repository/org/kordamp/ikonli/ikonli-materialdesign-pack/12.3.1/ikonli-materialdesign-pack-12.3.1.jar:/home/runner/.m2/repository/org/junit/jupiter/junit-jupiter-api/5.9.2/junit-jupiter-api-5.9.2.jar:/home/runner/.m2/repository/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar:/home/runner/.m2/repository/org/junit/platform/junit-platform-commons/1.9.2/junit-platform-commons-1.9.2.jar:/home/runner/.m2/repository/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar:/home/runner/.m2/repository/org/junit/jupiter/junit-jupiter-engine/5.9.2/junit-jupiter-engine-5.9.2.jar:/home/runner/.m2/repository/org/junit/platform/junit-platform-engine/1.9.2/junit-platform-engine-1.9.2.jar:/home/runner/.m2/repository/org/junit/jupiter/junit-jupiter-params/5.9.2/junit-jupiter-params-5.9.2.jar:"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="/home/runner"/>
+    <property name="user.language" value="en"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2023-09-19"/>
+    <property name="java.home" value="/nix/store/2vwkssqpzykk37r996cafq7x63imf4sp-openjdk-21+35/lib/openjdk"/>
+    <property name="file.separator" value="/"/>
+    <property name="basedir" value="/home/runner/workspace"/>
+    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="surefire.real.class.path" value="/home/runner/workspace/target/surefire/surefirebooter-20250118223448750_3.jar"/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="java.runtime.version" value="21+35-nixos"/>
+    <property name="user.name" value="runner"/>
+    <property name="stdout.encoding" value="UTF-8"/>
+    <property name="path.separator" value=":"/>
+    <property name="os.version" value="6.2.16"/>
+    <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.vm.name" value="OpenJDK 64-Bit Server VM"/>
+    <property name="localRepository" value="/home/runner/.m2/repository"/>
+    <property name="java.vendor.url.bug" value="https://bugreport.java.com/bugreport/"/>
+    <property name="java.io.tmpdir" value="/tmp"/>
+    <property name="java.version" value="21"/>
+    <property name="user.dir" value="/home/runner/workspace"/>
+    <property name="os.arch" value="amd64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="native.encoding" value="UTF-8"/>
+    <property name="java.library.path" value="/usr/java/packages/lib:/usr/lib64:/lib64:/lib:/usr/lib"/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="stderr.encoding" value="UTF-8"/>
+    <property name="java.vendor" value="N/A"/>
+    <property name="java.vm.version" value="21+35-nixos"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+    <property name="java.class.version" value="65.0"/>
+  </properties>
+  <testcase name="testStockBas" classname="com.poissonnerie.test.TestInventaire" time="0.011">
+    <system-out><![CDATA[ℹ️ Stock ajusté: Saumon frais 10 → 4
+🚨 ALERTE: Stock bas pour Saumon frais
+]]></system-out>
+    <system-err><![CDATA[Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager ajouterObserver
+INFO: Observer ajouté. Total observers: 1
+Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager ajusterStock
+INFO: Ajustement du stock pour Saumon frais: 10 -> 4
+Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager ajusterStock
+WARNING: Stock bas pour Saumon frais
+]]></system-err>
+  </testcase>
+  <testcase name="testAjusterStockProduitNull" classname="com.poissonnerie.test.TestInventaire" time="0.002">
+    <system-err><![CDATA[Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager ajouterObserver
+INFO: Observer ajouté. Total observers: 1
+Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager ajusterStock
+SEVERE: Tentative d'ajustement de stock avec un produit null
+]]></system-err>
+  </testcase>
+  <testcase name="testGetProduitsEnRupture" classname="com.poissonnerie.test.TestInventaire" time="0.002">
+    <system-err><![CDATA[Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager ajouterObserver
+INFO: Observer ajouté. Total observers: 1
+Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager getProduitsEnRupture
+WARNING: Liste de produits null passée à getProduitsEnRupture
+Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager getProduitsEnRupture
+INFO: Produit en rupture détecté: Thon
+]]></system-err>
+  </testcase>
+  <testcase name="testAjustementInvalide" classname="com.poissonnerie.test.TestInventaire" time="0.004">
+    <system-err><![CDATA[Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager ajouterObserver
+INFO: Observer ajouté. Total observers: 1
+Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager ajusterStock
+INFO: Ajustement du stock pour Saumon frais: 10 -> -1
+Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager ajusterStock
+SEVERE: Erreur lors de l'ajustement du stock
+java.lang.IllegalArgumentException: Stock insuffisant. Stock actuel: 10, Quantité demandée: 11
+	at com.poissonnerie.model.Produit.ajusterStock(Produit.java:57)
+	at com.poissonnerie.model.InventaireManager.ajusterStock(InventaireManager.java:54)
+	at com.poissonnerie.test.TestInventaire.lambda$testAjustementInvalide$0(TestInventaire.java:85)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:53)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:39)
+	at org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3099)
+	at com.poissonnerie.test.TestInventaire.testAjustementInvalide(TestInventaire.java:84)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:217)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:213)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:138)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:68)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:147)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:127)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:90)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:55)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:102)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:54)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:114)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:86)
+	at org.junit.platform.launcher.core.DefaultLauncherSession$DelegatingLauncher.execute(DefaultLauncherSession.java:86)
+	at org.apache.maven.surefire.junitplatform.LazyLauncher.execute(LazyLauncher.java:50)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:184)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:148)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:122)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
+
+]]></system-err>
+  </testcase>
+  <testcase name="testAjouterObserverNull" classname="com.poissonnerie.test.TestInventaire" time="0.001">
+    <system-err><![CDATA[Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager ajouterObserver
+INFO: Observer ajouté. Total observers: 1
+Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager ajouterObserver
+WARNING: Tentative d'ajout d'un observer null
+]]></system-err>
+  </testcase>
+  <testcase name="testAjustementStockNormal" classname="com.poissonnerie.test.TestInventaire" time="0.001">
+    <system-out><![CDATA[ℹ️ Stock ajusté: Saumon frais 10 → 7
+]]></system-out>
+    <system-err><![CDATA[Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager ajouterObserver
+INFO: Observer ajouté. Total observers: 1
+Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager ajusterStock
+INFO: Ajustement du stock pour Saumon frais: 10 -> 7
+]]></system-err>
+  </testcase>
+  <testcase name="testReapprovisionnement" classname="com.poissonnerie.test.TestInventaire" time="0.002">
+    <system-out><![CDATA[ℹ️ Stock ajusté: Saumon frais 10 → 2
+🚨 ALERTE: Stock bas pour Saumon frais
+ℹ️ Stock ajusté: Saumon frais 2 → 10
+]]></system-out>
+    <system-err><![CDATA[Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager ajouterObserver
+INFO: Observer ajouté. Total observers: 1
+Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager ajusterStock
+INFO: Ajustement du stock pour Saumon frais: 10 -> 2
+Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager ajusterStock
+WARNING: Stock bas pour Saumon frais
+Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager ajusterStock
+INFO: Ajustement du stock pour Saumon frais: 2 -> 10
+]]></system-err>
+  </testcase>
+  <testcase name="testRetirerObserverNull" classname="com.poissonnerie.test.TestInventaire" time="0.001">
+    <system-err><![CDATA[Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager ajouterObserver
+INFO: Observer ajouté. Total observers: 1
+Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager retirerObserver
+WARNING: Tentative de retrait d'un observer null
+]]></system-err>
+  </testcase>
+  <testcase name="testGetProduitsBas" classname="com.poissonnerie.test.TestInventaire" time="0.001">
+    <failure message="Doit retourner le bon nombre de produits en stock bas ==&gt; expected: &lt;2&gt; but was: &lt;1&gt;" type="org.opentest4j.AssertionFailedError"><![CDATA[org.opentest4j.AssertionFailedError: Doit retourner le bon nombre de produits en stock bas ==> expected: <2> but was: <1>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
+	at org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
+	at org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
+	at org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:560)
+	at com.poissonnerie.test.TestInventaire.testGetProduitsBas(TestInventaire.java:129)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:727)
+	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147)
+	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestMethod(TimeoutExtension.java:86)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)
+	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92)
+	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:217)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:213)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:138)
+	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:68)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
+	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
+	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
+	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
+	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
+	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:147)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:127)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:90)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:55)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:102)
+	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:54)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:114)
+	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:86)
+	at org.junit.platform.launcher.core.DefaultLauncherSession$DelegatingLauncher.execute(DefaultLauncherSession.java:86)
+	at org.apache.maven.surefire.junitplatform.LazyLauncher.execute(LazyLauncher.java:50)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.execute(JUnitPlatformProvider.java:184)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invokeAllTests(JUnitPlatformProvider.java:148)
+	at org.apache.maven.surefire.junitplatform.JUnitPlatformProvider.invoke(JUnitPlatformProvider.java:122)
+	at org.apache.maven.surefire.booter.ForkedBooter.runSuitesInProcess(ForkedBooter.java:385)
+	at org.apache.maven.surefire.booter.ForkedBooter.execute(ForkedBooter.java:162)
+	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
+	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
+]]></failure>
+    <system-err><![CDATA[Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager ajouterObserver
+INFO: Observer ajouté. Total observers: 1
+Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager getProduitsBas
+WARNING: Liste de produits null passée à getProduitsBas
+Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager getProduitsBas
+INFO: Produit en stock bas détecté: Thon
+]]></system-err>
+  </testcase>
+  <testcase name="testRuptureStock" classname="com.poissonnerie.test.TestInventaire" time="0.002">
+    <system-out><![CDATA[ℹ️ Stock ajusté: Saumon frais 10 → 0
+⛔ ALERTE CRITIQUE: Rupture de stock pour Saumon frais
+]]></system-out>
+    <system-err><![CDATA[Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager ajouterObserver
+INFO: Observer ajouté. Total observers: 1
+Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager ajusterStock
+INFO: Ajustement du stock pour Saumon frais: 10 -> 0
+Jan 18, 2025 10:34:51 PM com.poissonnerie.model.InventaireManager ajusterStock
+WARNING: Rupture de stock pour Saumon frais
+]]></system-err>
+  </testcase>
+</testsuite>
