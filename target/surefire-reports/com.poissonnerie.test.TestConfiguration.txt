@@ -1,11 +1,11 @@
 -------------------------------------------------------------------------------
 Test set: com.poissonnerie.test.TestConfiguration
 -------------------------------------------------------------------------------
-Tests run: 6, Failures: 0, Errors: 6, Skipped: 0, Time elapsed: 0.354 s <<< FAILURE! - in com.poissonnerie.test.TestConfiguration
-com.poissonnerie.test.TestConfiguration.testValidationCles  Time elapsed: 0.271 s  <<< ERROR!
-java.lang.IllegalStateException: Impossible de crypter la valeur
-	at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:182)
-	at com.poissonnerie.model.ConfigurationParam.<init>(ConfigurationParam.java:34)
+Tests run: 6, Failures: 0, Errors: 6, Skipped: 0, Time elapsed: 0.433 s <<< FAILURE! - in com.poissonnerie.test.TestConfiguration
+com.poissonnerie.test.TestConfiguration.testValidationCles  Time elapsed: 0.348 s  <<< ERROR!
+java.lang.IllegalStateException: Impossible de traiter la valeur: Format de SIRET invalide
+	at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:185)
+	at com.poissonnerie.model.ConfigurationParam.<init>(ConfigurationParam.java:33)
 	at com.poissonnerie.controller.ConfigurationController.chargerConfigurations(ConfigurationController.java:43)
 	at com.poissonnerie.controller.ConfigurationController.reinitialiserConfigurations(ConfigurationController.java:139)
 	at com.poissonnerie.test.TestConfiguration.setUp(TestConfiguration.java:18)
@@ -83,14 +83,14 @@ java.lang.IllegalStateException: Impossible de crypter la valeur
 	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
 	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
 Caused by: java.lang.IllegalArgumentException: Format de SIRET invalide
-	at com.poissonnerie.model.ConfigurationParam.validateValeur(ConfigurationParam.java:79)
-	at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:174)
+	at com.poissonnerie.model.ConfigurationParam.validateValeur(ConfigurationParam.java:109)
+	at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:177)
 	... 77 more
 
-com.poissonnerie.test.TestConfiguration.testSecuriteSQL  Time elapsed: 0.012 s  <<< ERROR!
-java.lang.IllegalStateException: Impossible de crypter la valeur
-	at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:182)
-	at com.poissonnerie.model.ConfigurationParam.<init>(ConfigurationParam.java:34)
+com.poissonnerie.test.TestConfiguration.testSecuriteSQL  Time elapsed: 0.01 s  <<< ERROR!
+java.lang.IllegalStateException: Impossible de traiter la valeur: Format de SIRET invalide
+	at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:185)
+	at com.poissonnerie.model.ConfigurationParam.<init>(ConfigurationParam.java:33)
 	at com.poissonnerie.controller.ConfigurationController.chargerConfigurations(ConfigurationController.java:43)
 	at com.poissonnerie.controller.ConfigurationController.reinitialiserConfigurations(ConfigurationController.java:139)
 	at com.poissonnerie.test.TestConfiguration.setUp(TestConfiguration.java:18)
@@ -168,14 +168,14 @@ java.lang.IllegalStateException: Impossible de crypter la valeur
 	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
 	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
 Caused by: java.lang.IllegalArgumentException: Format de SIRET invalide
-	at com.poissonnerie.model.ConfigurationParam.validateValeur(ConfigurationParam.java:79)
-	at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:174)
+	at com.poissonnerie.model.ConfigurationParam.validateValeur(ConfigurationParam.java:109)
+	at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:177)
 	... 77 more
 
-com.poissonnerie.test.TestConfiguration.testReinitialisationConfigurations  Time elapsed: 0.01 s  <<< ERROR!
-java.lang.IllegalStateException: Impossible de crypter la valeur
-	at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:182)
-	at com.poissonnerie.model.ConfigurationParam.<init>(ConfigurationParam.java:34)
+com.poissonnerie.test.TestConfiguration.testReinitialisationConfigurations  Time elapsed: 0.015 s  <<< ERROR!
+java.lang.IllegalStateException: Impossible de traiter la valeur: Format de SIRET invalide
+	at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:185)
+	at com.poissonnerie.model.ConfigurationParam.<init>(ConfigurationParam.java:33)
 	at com.poissonnerie.controller.ConfigurationController.chargerConfigurations(ConfigurationController.java:43)
 	at com.poissonnerie.controller.ConfigurationController.reinitialiserConfigurations(ConfigurationController.java:139)
 	at com.poissonnerie.test.TestConfiguration.setUp(TestConfiguration.java:18)
@@ -253,14 +253,14 @@ java.lang.IllegalStateException: Impossible de crypter la valeur
 	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
 	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
 Caused by: java.lang.IllegalArgumentException: Format de SIRET invalide
-	at com.poissonnerie.model.ConfigurationParam.validateValeur(ConfigurationParam.java:79)
-	at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:174)
+	at com.poissonnerie.model.ConfigurationParam.validateValeur(ConfigurationParam.java:109)
+	at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:177)
 	... 77 more
 
-com.poissonnerie.test.TestConfiguration.testValidationEntreesSpeciales  Time elapsed: 0.01 s  <<< ERROR!
-java.lang.IllegalStateException: Impossible de crypter la valeur
-	at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:182)
-	at com.poissonnerie.model.ConfigurationParam.<init>(ConfigurationParam.java:34)
+com.poissonnerie.test.TestConfiguration.testValidationEntreesSpeciales  Time elapsed: 0.008 s  <<< ERROR!
+java.lang.IllegalStateException: Impossible de traiter la valeur: Format de SIRET invalide
+	at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:185)
+	at com.poissonnerie.model.ConfigurationParam.<init>(ConfigurationParam.java:33)
 	at com.poissonnerie.controller.ConfigurationController.chargerConfigurations(ConfigurationController.java:43)
 	at com.poissonnerie.controller.ConfigurationController.reinitialiserConfigurations(ConfigurationController.java:139)
 	at com.poissonnerie.test.TestConfiguration.setUp(TestConfiguration.java:18)
@@ -338,14 +338,14 @@ java.lang.IllegalStateException: Impossible de crypter la valeur
 	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
 	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
 Caused by: java.lang.IllegalArgumentException: Format de SIRET invalide
-	at com.poissonnerie.model.ConfigurationParam.validateValeur(ConfigurationParam.java:79)
-	at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:174)
+	at com.poissonnerie.model.ConfigurationParam.validateValeur(ConfigurationParam.java:109)
+	at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:177)
 	... 77 more
 
 com.poissonnerie.test.TestConfiguration.testConfigurationsSensibles  Time elapsed: 0.008 s  <<< ERROR!
-java.lang.IllegalStateException: Impossible de crypter la valeur
-	at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:182)
-	at com.poissonnerie.model.ConfigurationParam.<init>(ConfigurationParam.java:34)
+java.lang.IllegalStateException: Impossible de traiter la valeur: Format de SIRET invalide
+	at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:185)
+	at com.poissonnerie.model.ConfigurationParam.<init>(ConfigurationParam.java:33)
 	at com.poissonnerie.controller.ConfigurationController.chargerConfigurations(ConfigurationController.java:43)
 	at com.poissonnerie.controller.ConfigurationController.reinitialiserConfigurations(ConfigurationController.java:139)
 	at com.poissonnerie.test.TestConfiguration.setUp(TestConfiguration.java:18)
@@ -423,14 +423,14 @@ java.lang.IllegalStateException: Impossible de crypter la valeur
 	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
 	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
 Caused by: java.lang.IllegalArgumentException: Format de SIRET invalide
-	at com.poissonnerie.model.ConfigurationParam.validateValeur(ConfigurationParam.java:79)
-	at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:174)
+	at com.poissonnerie.model.ConfigurationParam.validateValeur(ConfigurationParam.java:109)
+	at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:177)
 	... 77 more
 
-com.poissonnerie.test.TestConfiguration.testLimitesValeurs  Time elapsed: 0.008 s  <<< ERROR!
-java.lang.IllegalStateException: Impossible de crypter la valeur
-	at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:182)
-	at com.poissonnerie.model.ConfigurationParam.<init>(ConfigurationParam.java:34)
+com.poissonnerie.test.TestConfiguration.testLimitesValeurs  Time elapsed: 0.009 s  <<< ERROR!
+java.lang.IllegalStateException: Impossible de traiter la valeur: Format de SIRET invalide
+	at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:185)
+	at com.poissonnerie.model.ConfigurationParam.<init>(ConfigurationParam.java:33)
 	at com.poissonnerie.controller.ConfigurationController.chargerConfigurations(ConfigurationController.java:43)
 	at com.poissonnerie.controller.ConfigurationController.reinitialiserConfigurations(ConfigurationController.java:139)
 	at com.poissonnerie.test.TestConfiguration.setUp(TestConfiguration.java:18)
@@ -508,7 +508,7 @@ java.lang.IllegalStateException: Impossible de crypter la valeur
 	at org.apache.maven.surefire.booter.ForkedBooter.run(ForkedBooter.java:507)
 	at org.apache.maven.surefire.booter.ForkedBooter.main(ForkedBooter.java:495)
 Caused by: java.lang.IllegalArgumentException: Format de SIRET invalide
-	at com.poissonnerie.model.ConfigurationParam.validateValeur(ConfigurationParam.java:79)
-	at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:174)
+	at com.poissonnerie.model.ConfigurationParam.validateValeur(ConfigurationParam.java:109)
+	at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:177)
 	... 77 more
 

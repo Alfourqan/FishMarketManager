@@ -13,6 +13,7 @@ com/poissonnerie/view/InventaireViewSwing$2.class
 com/poissonnerie/view/InventaireViewSwing$ButtonEditor.class
 com/poissonnerie/view/InventaireViewSwing$ButtonRenderer.class
 com/poissonnerie/controller/CaisseController.class
+com/poissonnerie/view/InventaireViewSwing$ButtonEditor$1.class
 com/poissonnerie/model/Produit.class
 com/poissonnerie/util/DatabaseManager.class
 com/poissonnerie/model/InventaireManager.class

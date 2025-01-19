@@ -203,58 +203,6 @@ public class InventaireViewSwing {
         statusLabel.setText(timestamp + " - " + message);
     }
 
-    private void refreshTable() {
-        tableModel.setRowCount(0);
-
-        for (Produit produit : produitController.getProduits()) {
-            // Icône d'état
-            FontIcon icon;
-            if (produit.getStock() == 0) {
-                icon = FontIcon.of(MaterialDesign.MDI_ALERT);
-                icon.setIconColor(new Color(220, 53, 69)); // Rouge pour rupture
-            } else if (produit.getStock() <= produit.getSeuilAlerte()) {
-                icon = FontIcon.of(MaterialDesign.MDI_ALERT_CIRCLE);
-                icon.setIconColor(new Color(255, 193, 7)); // Jaune pour stock bas
-            } else {
-                icon = FontIcon.of(MaterialDesign.MDI_CHECKBOX_MARKED_CIRCLE);
-                icon.setIconColor(new Color(40, 167, 69)); // Vert pour stock normal
-            }
-
-            // Bouton d'ajustement
-            JButton ajusterBtn = createStyledButton("Ajuster", MaterialDesign.MDI_PENCIL, new Color(255,165,0));
-            ajusterBtn.addActionListener(e -> showAjustementDialog(produit));
-
-            tableModel.addRow(new Object[]{
-                icon,
-                produit.getNom(),
-                produit.getCategorie(),
-                produit.getStock(),
-                produit.getSeuilAlerte(),
-                ajusterBtn
-            });
-        }
-
-        // Renderer spécial pour les boutons
-        tableInventaire.getColumn("Actions").setCellRenderer(new ButtonRenderer());
-        tableInventaire.getColumn("Actions").setCellEditor(new ButtonEditor());
-    }
-
-    private void loadData() {
-        try {
-            updateStatus("Chargement des données...");
-            produitController.chargerProduits();
-            refreshTable();
-            updateStatus("Données chargées avec succès");
-        } catch (Exception e) {
-            updateStatus("Erreur: " + e.getMessage());
-            JOptionPane.showMessageDialog(mainPanel,
-                "Erreur lors du chargement des données : " + e.getMessage(),
-                "Erreur",
-                JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    // Classes utilitaires pour le rendu des boutons dans la table
     private class ButtonRenderer extends JButton implements javax.swing.table.TableCellRenderer {
         public ButtonRenderer() {
             setOpaque(true);
@@ -277,29 +225,119 @@ public class InventaireViewSwing {
 
     private class ButtonEditor extends DefaultCellEditor {
         protected JButton button;
+        private String label;
+        private boolean isPushed;
+        private ActionListener actionListener;
 
         public ButtonEditor() {
             super(new JTextField());
             button = new JButton();
             button.setOpaque(true);
-            button.addActionListener((ActionEvent e) -> fireEditingStopped());
+            button.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    fireEditingStopped();
+                }
+            });
         }
 
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value,
-                                                   boolean isSelected, int row, int column) {
+                                                  boolean isSelected, int row, int column) {
             if (value instanceof JButton) {
                 JButton btn = (JButton) value;
                 button.setText(btn.getText());
                 button.setIcon(btn.getIcon());
                 button.setBackground(btn.getBackground());
                 button.setForeground(btn.getForeground());
+
+                // Supprimer l'ancien listener s'il existe
+                if (actionListener != null) {
+                    button.removeActionListener(actionListener);
+                }
+
+                // Récupérer le nouveau listener
                 ActionListener[] listeners = btn.getActionListeners();
                 if (listeners.length > 0) {
-                    button.addActionListener(listeners[0]);
+                    actionListener = listeners[0];
+                    button.addActionListener(actionListener);
                 }
             }
+            isPushed = true;
             return button;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            if (isPushed) {
+                // Exécuter l'action après que l'édition soit terminée
+                if (actionListener != null) {
+                    actionListener.actionPerformed(new ActionEvent(button, ActionEvent.ACTION_PERFORMED, ""));
+                }
+            }
+            isPushed = false;
+            return button;
+        }
+
+        @Override
+        public boolean stopCellEditing() {
+            isPushed = false;
+            return super.stopCellEditing();
+        }
+    }
+
+    private void refreshTable() {
+        tableModel.setRowCount(0);
+
+        for (Produit produit : produitController.getProduits()) {
+            // Icône d'état
+            FontIcon icon;
+            if (produit.getStock() == 0) {
+                icon = FontIcon.of(MaterialDesign.MDI_ALERT);
+                icon.setIconColor(new Color(220, 53, 69));
+            } else if (produit.estStockBas()) {
+                icon = FontIcon.of(MaterialDesign.MDI_ALERT_CIRCLE);
+                icon.setIconColor(new Color(255, 193, 7));
+            } else {
+                icon = FontIcon.of(MaterialDesign.MDI_CHECKBOX_MARKED_CIRCLE);
+                icon.setIconColor(new Color(40, 167, 69));
+            }
+
+            // Créer un nouveau bouton pour chaque ligne
+            JButton ajusterBtn = createStyledButton("Ajuster", MaterialDesign.MDI_PENCIL, new Color(255, 165, 0));
+            final Produit produitFinal = produit; // Pour utilisation dans le lambda
+            ajusterBtn.addActionListener(e -> showAjustementDialog(produitFinal));
+
+            tableModel.addRow(new Object[]{
+                icon,
+                produit.getNom(),
+                produit.getCategorie(),
+                produit.getStock(),
+                produit.getSeuilAlerte(),
+                ajusterBtn
+            });
+        }
+
+        // Configurer les renderers et editors
+        tableInventaire.getColumn("Actions").setCellRenderer(new ButtonRenderer());
+        tableInventaire.getColumn("Actions").setCellEditor(new ButtonEditor());
+
+        // Forcer la mise à jour de l'affichage
+        tableInventaire.repaint();
+    }
+
+    private void loadData() {
+        try {
+            updateStatus("Chargement des données...");
+            produitController.chargerProduits();
+            refreshTable();
+            updateStatus("Données chargées avec succès");
+        } catch (Exception e) {
+            updateStatus("Erreur: " + e.getMessage());
+            JOptionPane.showMessageDialog(mainPanel,
+                "Erreur lors du chargement des données : " + e.getMessage(),
+                "Erreur",
+                JOptionPane.ERROR_MESSAGE);
         }
     }
 

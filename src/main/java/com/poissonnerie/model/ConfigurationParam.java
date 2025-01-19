@@ -14,8 +14,7 @@ public class ConfigurationParam {
     private static final Logger LOGGER = Logger.getLogger(ConfigurationParam.class.getName());
     private static final int MAX_VALUE_LENGTH = 1000;
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
-        "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$",
-        Pattern.CASE_INSENSITIVE
+        "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
     );
     private static final Pattern PHONE_PATTERN = Pattern.compile("^\\+?[0-9. ()-]{10,}$");
     private static final Pattern SIRET_PATTERN = Pattern.compile("^[0-9]{14}$");
@@ -31,7 +30,7 @@ public class ConfigurationParam {
         this.cle = validateCle(cle);
         this.description = validateDescription(description);
         this.estCrypte = needsEncryption(cle);
-        setValeur(valeur); // Utilise setValeur pour appliquer la validation immédiate
+        setValeur(valeur);
     }
 
     private static String validateCle(String cle) {
@@ -53,12 +52,12 @@ public class ConfigurationParam {
             throw new IllegalArgumentException("La valeur ne peut pas être null");
         }
 
-        String cleanValue = valeur.trim();
-
-        // Validation de la longueur avant tout autre traitement
-        if (cleanValue.length() > MAX_VALUE_LENGTH) {
+        // Vérification de la longueur avant tout traitement
+        if (valeur.length() > MAX_VALUE_LENGTH) {
             throw new IllegalArgumentException("La valeur ne peut pas dépasser " + MAX_VALUE_LENGTH + " caractères");
         }
+
+        String cleanValue = valeur.trim();
 
         // Validation spécifique selon le type de configuration
         switch (cle) {
@@ -66,55 +65,59 @@ public class ConfigurationParam {
                 if (!EMAIL_PATTERN.matcher(cleanValue).matches()) {
                     throw new IllegalArgumentException("Format d'email invalide");
                 }
-                return cleanValue; // Pas de sanitization pour l'email
-
-            case CLE_TELEPHONE_ENTREPRISE:
-                if (!PHONE_PATTERN.matcher(cleanValue).matches()) {
-                    throw new IllegalArgumentException("Format de téléphone invalide");
-                }
-                break;
-
-            case CLE_SIRET_ENTREPRISE:
-                if (!SIRET_PATTERN.matcher(cleanValue).matches()) {
-                    throw new IllegalArgumentException("Format de SIRET invalide");
-                }
-                break;
+                return cleanValue; // Retourne l'email sans modification pour préserver sa validité
 
             case CLE_TAUX_TVA:
                 try {
-                    // Nettoyage plus permissif pour les caractères spéciaux
-                    String numericValue = cleanValue
-                        .replaceAll("[^0-9.,]", "") // Garde uniquement les chiffres et les séparateurs décimaux
-                        .replace(",", ".")          // Normalise le séparateur décimal
-                        .replaceAll("\\.+", ".");   // Évite les points multiples
+                    // Extraction des chiffres et du point décimal uniquement
+                    String sanitizedValue = cleanValue.replaceAll("[^0-9.]", "");
 
-                    if (numericValue.isEmpty()) {
+                    if (sanitizedValue.isEmpty()) {
                         throw new IllegalArgumentException("Le taux de TVA doit contenir au moins un chiffre");
                     }
 
-                    double taux = Double.parseDouble(numericValue);
+                    // Vérification du format numérique
+                    if (!sanitizedValue.matches("^\\d*\\.?\\d+$")) {
+                        throw new IllegalArgumentException("Format de taux TVA invalide");
+                    }
+
+                    double taux = Double.parseDouble(sanitizedValue);
                     if (taux < 0 || taux > 100) {
                         throw new IllegalArgumentException("Le taux de TVA doit être entre 0 et 100");
                     }
 
-                    return String.format("%.2f", taux); // Retourne directement la valeur normalisée
+                    return String.format("%.2f", taux);
                 } catch (NumberFormatException e) {
                     throw new IllegalArgumentException("Le taux de TVA doit être un nombre valide");
                 }
 
             case CLE_TVA_ENABLED:
-                if (!cleanValue.equalsIgnoreCase("true") && !cleanValue.equalsIgnoreCase("false")) {
+                String lowercaseValue = cleanValue.toLowerCase();
+                if (!lowercaseValue.equals("true") && !lowercaseValue.equals("false")) {
                     throw new IllegalArgumentException("La valeur doit être 'true' ou 'false'");
                 }
-                break;
+                return lowercaseValue;
+
+            case CLE_TELEPHONE_ENTREPRISE:
+                if (!PHONE_PATTERN.matcher(cleanValue).matches()) {
+                    throw new IllegalArgumentException("Format de téléphone invalide");
+                }
+                return cleanValue;
+
+            case CLE_SIRET_ENTREPRISE:
+                if (!SIRET_PATTERN.matcher(cleanValue).matches()) {
+                    throw new IllegalArgumentException("Format de SIRET invalide");
+                }
+                return cleanValue;
 
             case CLE_FORMAT_RECU:
                 if (!cleanValue.equals("COMPACT") && !cleanValue.equals("DETAILLE")) {
                     throw new IllegalArgumentException("Le format du reçu doit être 'COMPACT' ou 'DETAILLE'");
                 }
-                break;
+                return cleanValue;
         }
 
+        // Pour les autres types de configuration, appliquer le nettoyage standard
         return sanitizeInput(cleanValue);
     }
 
@@ -122,25 +125,25 @@ public class ConfigurationParam {
         if (description == null) {
             return "";
         }
-        description = description.trim();
-        if (description.length() > 200) {
+        String cleanDesc = description.trim();
+        if (cleanDesc.length() > 200) {
             throw new IllegalArgumentException("La description ne peut pas dépasser 200 caractères");
         }
-        return sanitizeInput(description);
+        return sanitizeInput(cleanDesc);
     }
 
     private static String sanitizeInput(String input) {
         if (input == null) {
             return "";
         }
-        // Échappement des caractères spéciaux
-        return input
-            .replaceAll("[<>'\"]", "_")           // Caractères HTML basiques
-            .replaceAll("&(?![a-zA-Z0-9#]+;)", "_") // & non suivi d'une entité HTML
-            .replaceAll("(?i)javascript:", "")     // Protection XSS
-            .replaceAll("(?i)data:", "")          // Protection contre les données embarquées
-            .replaceAll("(?i)vbscript:", "")      // Protection supplémentaire
-            .replaceAll("\\\\", "/");             // Normalisation des chemins
+        // Nettoyage des caractères spéciaux et les caractères de contrôle
+        String cleaned = input.replaceAll("[\\p{Cntrl}\\p{Zl}\\p{Zp}]", "")
+                            .replaceAll("[<>\"'%;)(&+\\[\\]{}]", "")
+                            .trim()
+                            .replaceAll("\\s+", " ");
+
+        // Limiter la longueur
+        return cleaned.length() > 255 ? cleaned.substring(0, 255) : cleaned;
     }
 
     private static boolean needsEncryption(String cle) {
@@ -152,7 +155,7 @@ public class ConfigurationParam {
     public void setId(int id) { this.id = id; }
 
     public String getCle() { return cle; }
-    public void setCle(String cle) { 
+    public void setCle(String cle) {
         this.cle = validateCle(cle);
         this.estCrypte = needsEncryption(cle);
     }
@@ -165,21 +168,21 @@ public class ConfigurationParam {
             return valeur;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors du décryptage de la valeur", e);
-            throw new IllegalStateException("Impossible de décrypter la valeur", e);
+            throw new IllegalStateException("Impossible de décrypter la valeur: " + e.getMessage(), e);
         }
     }
 
     public void setValeur(String valeur) {
         try {
             String validatedValue = validateValeur(valeur, this.cle);
-            if (estCrypte && !validatedValue.isEmpty()) {
+            if (estCrypte && validatedValue != null && !validatedValue.isEmpty()) {
                 this.valeur = encryptValue(validatedValue);
             } else {
                 this.valeur = validatedValue;
             }
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du cryptage de la valeur", e);
-            throw new IllegalStateException("Impossible de crypter la valeur", e);
+            LOGGER.log(Level.SEVERE, "Erreur lors du traitement de la valeur", e);
+            throw new IllegalStateException("Impossible de traiter la valeur: " + e.getMessage(), e);
         }
     }
 
@@ -188,7 +191,7 @@ public class ConfigurationParam {
         this.description = validateDescription(description);
     }
 
-    // Constantes
+    // Constantes pour les clés de configuration
     public static final String CLE_TAUX_TVA = "TAUX_TVA";
     public static final String CLE_TVA_ENABLED = "TVA_ENABLED";
     public static final String CLE_EMAIL = "EMAIL_ENTREPRISE";
@@ -209,29 +212,59 @@ public class ConfigurationParam {
 
     // Méthodes de cryptage/décryptage
     private static final String ALGORITHM = "AES";
-    private static final String SECRET_KEY = System.getenv().getOrDefault("CONFIG_SECRET_KEY", "defaultSecretKey12345");
 
-    private static String encryptValue(String value) throws Exception {
-        SecretKeySpec key = generateKey();
-        Cipher cipher = Cipher.getInstance(ALGORITHM);
-        cipher.init(Cipher.ENCRYPT_MODE, key);
-        byte[] encryptedBytes = cipher.doFinal(value.getBytes());
-        return Base64.getEncoder().encodeToString(encryptedBytes);
-    }
-
-    private static String decryptValue(String encrypted) throws Exception {
-        SecretKeySpec key = generateKey();
-        Cipher cipher = Cipher.getInstance(ALGORITHM);
-        cipher.init(Cipher.DECRYPT_MODE, key);
-        byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encrypted));
-        return new String(decryptedBytes);
+    private static String getSecretKey() {
+        String key = System.getenv().getOrDefault("CONFIG_SECRET_KEY", null);
+        if (key == null || key.trim().isEmpty()) {
+            key = "poissonnerie_secure_key_" + java.time.LocalDate.now().getYear();
+            LOGGER.warning("Utilisation de la clé de cryptage par défaut");
+        }
+        return key;
     }
 
     private static SecretKeySpec generateKey() throws Exception {
-        byte[] key = SECRET_KEY.getBytes(StandardCharsets.UTF_8);
-        MessageDigest sha = MessageDigest.getInstance("SHA-1");
-        key = sha.digest(key);
-        key = java.util.Arrays.copyOf(key, 16);
-        return new SecretKeySpec(key, ALGORITHM);
+        try {
+            String secretKey = getSecretKey();
+            byte[] key = secretKey.getBytes(StandardCharsets.UTF_8);
+            MessageDigest sha = MessageDigest.getInstance("SHA-256");
+            key = sha.digest(key);
+            key = java.util.Arrays.copyOf(key, 16);
+            return new SecretKeySpec(key, ALGORITHM);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération de la clé: " + e.getMessage(), e);
+            throw new IllegalStateException("Erreur de génération de clé: " + e.getMessage(), e);
+        }
+    }
+
+    private static String encryptValue(String value) throws Exception {
+        if (value == null || value.isEmpty()) {
+            return value;
+        }
+        try {
+            SecretKeySpec key = generateKey();
+            Cipher cipher = Cipher.getInstance(ALGORITHM);
+            cipher.init(Cipher.ENCRYPT_MODE, key);
+            byte[] encryptedBytes = cipher.doFinal(value.getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(encryptedBytes);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors du cryptage: " + e.getMessage(), e);
+            throw new IllegalStateException("Erreur de cryptage: " + e.getMessage(), e);
+        }
+    }
+
+    private static String decryptValue(String encrypted) throws Exception {
+        if (encrypted == null || encrypted.isEmpty()) {
+            return encrypted;
+        }
+        try {
+            SecretKeySpec key = generateKey();
+            Cipher cipher = Cipher.getInstance(ALGORITHM);
+            cipher.init(Cipher.DECRYPT_MODE, key);
+            byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encrypted));
+            return new String(decryptedBytes, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors du décryptage: " + e.getMessage(), e);
+            throw new IllegalStateException("Erreur de décryptage: " + e.getMessage(), e);
+        }
     }
 }
