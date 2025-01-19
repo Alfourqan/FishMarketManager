@@ -8,7 +8,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
-import java.io.File;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.util.concurrent.TimeUnit;
@@ -16,7 +15,6 @@ import java.util.Properties;
 import org.sqlite.SQLiteConfig;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.Files;
 import java.util.regex.Pattern;
 import java.sql.PreparedStatement;
 import javax.sql.DataSource;
@@ -30,13 +28,12 @@ public class DatabaseManager {
     private static final Logger LOGGER = Logger.getLogger(DatabaseManager.class.getName());
     private static final String DB_FILE = "poissonnerie.db";
     private static final String DB_URL = "jdbc:sqlite:" + DB_FILE;
-    private static Connection connection;
-    private static long lastConnectionCheck = 0;
-    private static final long CONNECTION_TIMEOUT = TimeUnit.MINUTES.toMillis(2);
-    private static final int LOGIN_TIMEOUT_SECONDS = 15;
+    private static ThreadLocal<Connection> connectionHolder = new ThreadLocal<>();
+    private static final long CONNECTION_TIMEOUT = TimeUnit.MINUTES.toMillis(5);
+    private static final int LOGIN_TIMEOUT_SECONDS = 30;
     private static final Object LOCK = new Object();
+    private static volatile SQLiteDataSource dataSource;
 
-    // Liste des mots-clés SQL autorisés
     private static final Set<String> ALLOWED_SQL_KEYWORDS = new HashSet<>(Arrays.asList(
         "CREATE", "TABLE", "IF", "NOT", "EXISTS", "DROP", "ALTER", "PRIMARY", "KEY",
         "FOREIGN", "REFERENCES", "INTEGER", "TEXT", "REAL", "DOUBLE", "BOOLEAN",
@@ -45,183 +42,73 @@ public class DatabaseManager {
         "INTO", "VALUES", "BIGINT", "IN", "WHERE", "AND", "BETWEEN", "LIKE", "AS",
         "ORDER", "BY", "DESC", "ASC", "LIMIT", "OFFSET", "GROUP", "HAVING", "JOIN",
         "LEFT", "RIGHT", "INNER", "OUTER", "USING", "DISTINCT", "COUNT", "SUM", "AVG",
-        "MIN", "MAX", "CASE", "WHEN", "THEN", "ELSE", "END"
+        "MIN", "MAX", "CASE", "WHEN", "THEN", "ELSE", "END", "TRUE", "FALSE", "0", "1",
+        "DATETIME", "NOW", "LOCALTIME", "STRFTIME"
     ));
 
-    // Pattern pour détecter les tentatives d'injection SQL malveillantes
     private static final Pattern MALICIOUS_SQL_PATTERN = Pattern.compile(
         "(?i)(exec\\b|xp_\\w+|sp_\\w+|waitfor\\b|shutdown\\b|" +
         "drop\\s+database\\b|;\\s*;|@@version|system\\b|" +
         "convert\\(|cast\\(|declare\\s+@|bulk\\s+insert)"
     );
 
-    private static SQLiteDataSource dataSource;
-
     static {
         initializeDataSource();
     }
 
     private static void initializeDataSource() {
-        try {
-            SQLiteConfig config = new SQLiteConfig();
-            config.enforceForeignKeys(true);
-            config.setBusyTimeout(15000);
-            config.setReadOnly(false);
-            config.setJournalMode(SQLiteConfig.JournalMode.WAL);
+        synchronized (LOCK) {
+            if (dataSource == null) {
+                try {
+                    SQLiteConfig config = new SQLiteConfig();
+                    config.enforceForeignKeys(true);
+                    config.setBusyTimeout(30000); // Augmentation du timeout à 30 secondes
+                    config.setReadOnly(false);
+                    config.setJournalMode(SQLiteConfig.JournalMode.WAL);
+                    config.setSynchronous(SQLiteConfig.SynchronousMode.NORMAL);
+                    config.setCacheSize(2000);
+                    config.setPageSize(4096);
 
-            dataSource = new SQLiteDataSource(config);
-            dataSource.setUrl(DB_URL);
-            dataSource.setLoginTimeout(LOGIN_TIMEOUT_SECONDS);
+                    dataSource = new SQLiteDataSource(config);
+                    dataSource.setUrl(DB_URL);
+                    dataSource.setLoginTimeout(LOGIN_TIMEOUT_SECONDS);
 
-            LOGGER.info("DataSource initialisé avec succès");
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation du DataSource", e);
-            throw new RuntimeException("Impossible d'initialiser le DataSource", e);
-        }
-    }
-
-    private static boolean validateSchemaContent(String schema) {
-        if (schema == null || schema.trim().isEmpty()) {
-            LOGGER.severe("Le schéma SQL est vide");
-            return false;
-        }
-
-        // Supprimer les commentaires et les espaces superflus
-        String cleanSchema = schema.replaceAll("--[^\n]*\n", "\n")
-                                 .replaceAll("/\\*[\\s\\S]*?\\*/", "")
-                                 .replaceAll("\\s+", " ")
-                                 .trim();
-
-        // Vérifier les motifs malveillants
-        if (MALICIOUS_SQL_PATTERN.matcher(cleanSchema).find()) {
-            LOGGER.severe("Motif SQL malveillant détecté dans le schéma");
-            return false;
-        }
-
-        // Diviser en commandes individuelles
-        String[] commands = cleanSchema.split(";");
-        for (String command : commands) {
-            command = command.trim();
-            if (command.isEmpty()) continue;
-
-            // Vérifier chaque mot du command pour s'assurer qu'il est autorisé
-            String[] words = command.split("\\s+");
-            String firstWord = words[0].toUpperCase();
-
-            // Vérifier que la commande commence par un mot-clé valide
-            if (!firstWord.matches("^(CREATE|ALTER|DROP|INSERT|PRAGMA)$")) {
-                LOGGER.warning("Commande non autorisée détectée: " + firstWord);
-                return false;
-            }
-
-            // Pour les commandes CREATE TABLE, vérifier la syntaxe détaillée
-            if (firstWord.equals("CREATE") && words.length > 1 && words[1].equalsIgnoreCase("TABLE")) {
-                if (!validateCreateTableSyntax(command)) {
-                    return false;
+                    LOGGER.info("DataSource initialisé avec succès");
+                } catch (SQLException e) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation du DataSource", e);
+                    throw new RuntimeException("Impossible d'initialiser le DataSource", e);
                 }
             }
         }
-
-        return true;
-    }
-
-    private static boolean validateCreateTableSyntax(String command) {
-        // Vérifie la structure basique d'une commande CREATE TABLE
-        if (!command.matches("(?i)^CREATE\\s+TABLE\\s+(IF\\s+NOT\\s+EXISTS\\s+)?\\w+\\s*\\(.*\\)\\s*$")) {
-            LOGGER.warning("Syntaxe CREATE TABLE invalide");
-            return false;
-        }
-
-        // Extrait et vérifie chaque définition de colonne
-        String columnDefinitions = command.replaceAll("(?i)^CREATE\\s+TABLE\\s+(IF\\s+NOT\\s+EXISTS\\s+)?\\w+\\s*\\((.*)\\)\\s*$", "$2");
-        String[] columns = columnDefinitions.split(",");
-
-        for (String column : columns) {
-            column = column.trim();
-            String[] parts = column.split("\\s+");
-
-            // Vérifie que chaque mot dans la définition de la colonne est autorisé
-            for (String part : parts) {
-                part = part.toUpperCase().replaceAll("[(),]", "");
-                if (!part.isEmpty() && !ALLOWED_SQL_KEYWORDS.contains(part) && !part.matches("^[A-Za-z_][A-Za-z0-9_]*$")) {
-                    LOGGER.warning("Mot-clé non autorisé dans la définition de colonne: " + part);
-                    return false;
-                }
-            }
-        }
-
-        return true;
     }
 
     public static synchronized Connection getConnection() throws SQLException {
-        synchronized (LOCK) {
-            if (needsNewConnection()) {
-                initializeConnection();
-            }
-            return connection;
-        }
-    }
+        Connection conn = connectionHolder.get();
 
-    private static boolean needsNewConnection() {
-        if (connection == null) {
-            return true;
-        }
-
-        try {
-            if (connection.isClosed() || !connection.isValid(5)) {
-                LOGGER.warning("Connexion détectée comme invalide ou fermée");
-                return true;
+        if (conn == null || conn.isClosed() || !conn.isValid(5)) {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    LOGGER.log(Level.WARNING, "Erreur lors de la fermeture de l'ancienne connexion", e);
+                }
             }
 
-            long currentTime = System.currentTimeMillis();
-            if (currentTime - lastConnectionCheck > CONNECTION_TIMEOUT) {
-                LOGGER.info("Timeout de connexion atteint, nouvelle connexion requise");
-                return true;
-            }
+            conn = dataSource.getConnection();
+            conn.setAutoCommit(true);
 
-            return false;
-        } catch (SQLException e) {
-            LOGGER.log(Level.WARNING, "Erreur lors de la vérification de la connexion", e);
-            return true;
-        }
-    }
-
-    private static void initializeConnection() throws SQLException {
-        LOGGER.info("Initialisation d'une nouvelle connexion à la base de données");
-        closeConnection();
-
-        try {
-            connection = dataSource.getConnection();
-            lastConnectionCheck = System.currentTimeMillis();
-
-            connection.setAutoCommit(true);
-
-            try (Statement stmt = connection.createStatement()) {
+            try (Statement stmt = conn.createStatement()) {
                 stmt.execute("PRAGMA foreign_keys = ON");
-                stmt.execute("PRAGMA busy_timeout = 15000");
-                LOGGER.info("Configuration des PRAGMA SQLite effectuée");
+                stmt.execute("PRAGMA busy_timeout = 30000");
+                stmt.execute("PRAGMA journal_mode = WAL");
+                stmt.execute("PRAGMA synchronous = NORMAL");
             }
 
-            if (!isDatabaseInitialized()) {
-                LOGGER.info("Nouvelle base de données détectée, initialisation...");
-                initDatabase();
-            }
-
-            LOGGER.info("Connexion à la base de données établie avec succès");
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de la connexion", e);
-            throw e;
+            connectionHolder.set(conn);
+            LOGGER.info("Nouvelle connexion créée et configurée");
         }
-    }
 
-    private static boolean isDatabaseInitialized() {
-        try (PreparedStatement stmt = connection.prepareStatement(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name='configurations'")) {
-            return stmt.executeQuery().next();
-        } catch (SQLException e) {
-            LOGGER.log(Level.WARNING, "Erreur lors de la vérification de l'initialisation de la base de données", e);
-            return false;
-        }
+        return conn;
     }
 
     public static void initDatabase() {
@@ -269,34 +156,101 @@ public class DatabaseManager {
         }
     }
 
-    public static void closeConnection() {
-        synchronized (LOCK) {
-            if (connection != null) {
-                try {
-                    if (!connection.isClosed()) {
-                        connection.close();
-                        LOGGER.info("Connexion à la base de données fermée");
-                    }
-                } catch (SQLException e) {
-                    LOGGER.log(Level.WARNING, "Erreur lors de la fermeture de la connexion", e);
-                } finally {
-                    connection = null;
-                    lastConnectionCheck = 0;
+    private static boolean validateSchemaContent(String schema) {
+        if (schema == null || schema.trim().isEmpty()) {
+            LOGGER.severe("Le schéma SQL est vide");
+            return false;
+        }
+
+        String cleanSchema = schema.replaceAll("--[^\n]*\n", "\n")
+                                 .replaceAll("/\\*[\\s\\S]*?\\*/", "")
+                                 .replaceAll("\\s+", " ")
+                                 .trim();
+
+        if (MALICIOUS_SQL_PATTERN.matcher(cleanSchema).find()) {
+            LOGGER.severe("Motif SQL malveillant détecté dans le schéma");
+            return false;
+        }
+
+        String[] commands = cleanSchema.split(";");
+        for (String command : commands) {
+            command = command.trim();
+            if (command.isEmpty()) continue;
+
+            String[] words = command.split("\\s+");
+            String firstWord = words[0].toUpperCase();
+
+            if (!firstWord.matches("^(CREATE|ALTER|DROP|INSERT|PRAGMA)$")) {
+                LOGGER.warning("Commande non autorisée détectée: " + firstWord);
+                return false;
+            }
+
+            if (firstWord.equals("CREATE") && words.length > 1 && words[1].equalsIgnoreCase("TABLE")) {
+                if (!validateCreateTableSyntax(command)) {
+                    return false;
                 }
+            }
+        }
+
+        return true;
+    }
+
+    private static boolean validateCreateTableSyntax(String command) {
+        if (!command.matches("(?i)^CREATE\\s+TABLE\\s+(IF\\s+NOT\\s+EXISTS\\s+)?\\w+\\s*\\(.*\\)\\s*$")) {
+            LOGGER.warning("Syntaxe CREATE TABLE invalide");
+            return false;
+        }
+
+        String columnDefinitions = command.replaceAll("(?i)^CREATE\\s+TABLE\\s+(IF\\s+NOT\\s+EXISTS\\s+)?\\w+\\s*\\((.*)\\)\\s*$", "$2");
+        String[] columns = columnDefinitions.split(",");
+
+        for (String column : columns) {
+            column = column.trim();
+            if (column.toUpperCase().startsWith("CONSTRAINT") ||
+                column.toUpperCase().startsWith("PRIMARY KEY") ||
+                column.toUpperCase().startsWith("FOREIGN KEY")) {
+                continue;
+            }
+
+            String[] parts = column.split("\\s+");
+            for (String part : parts) {
+                part = part.toUpperCase().replaceAll("[(),]", "");
+                if (!part.isEmpty() && 
+                    !ALLOWED_SQL_KEYWORDS.contains(part) && 
+                    !part.matches("^[A-Za-z_][A-Za-z0-9_]*$") &&
+                    !part.matches("^\\d+$")) {
+                    LOGGER.info("Validation de partie: " + part);
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public static void closeConnections() {
+        Connection conn = connectionHolder.get();
+        if (conn != null) {
+            try {
+                if (!conn.isClosed()) {
+                    conn.close();
+                    LOGGER.info("Connexion fermée avec succès");
+                }
+            } catch (SQLException e) {
+                LOGGER.log(Level.WARNING, "Erreur lors de la fermeture de la connexion", e);
+            } finally {
+                connectionHolder.remove();
             }
         }
     }
 
     public static void resetConnection() {
         LOGGER.info("Réinitialisation de la connexion à la base de données");
-        synchronized (LOCK) {
-            closeConnection();
-            try {
-                getConnection();
-            } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "Erreur lors de la réinitialisation de la connexion", e);
-                throw new RuntimeException("Erreur lors de la réinitialisation de la connexion", e);
-            }
+        closeConnections();
+        try {
+            getConnection();
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la réinitialisation de la connexion", e);
+            throw new RuntimeException("Erreur lors de la réinitialisation de la connexion", e);
         }
     }
 

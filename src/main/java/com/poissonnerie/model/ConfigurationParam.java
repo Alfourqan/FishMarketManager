@@ -13,7 +13,7 @@ import java.util.logging.Level;
 public class ConfigurationParam {
     private static final Logger LOGGER = Logger.getLogger(ConfigurationParam.class.getName());
     private static final int MAX_VALUE_LENGTH = 1000;
-    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
     private static final Pattern PHONE_PATTERN = Pattern.compile("^\\+?[0-9. ()-]{10,}$");
     private static final Pattern SIRET_PATTERN = Pattern.compile("^[0-9]{14}$");
 
@@ -26,7 +26,8 @@ public class ConfigurationParam {
     public ConfigurationParam(int id, String cle, String valeur, String description) {
         this.id = id;
         this.cle = validateCle(cle);
-        this.valeur = validateValeur(valeur, cle);
+        // Stocke la valeur brute, la validation sera faite lors de la mise à jour
+        this.valeur = valeur != null ? valeur.trim() : "";
         this.description = validateDescription(description);
         this.estCrypte = needsEncryption(cle);
     }
@@ -45,7 +46,7 @@ public class ConfigurationParam {
         return cle;
     }
 
-    private static String validateValeur(String valeur, String cle) {
+    public static String validateValeur(String valeur, String cle) {
         if (valeur == null) {
             return "";
         }
@@ -114,7 +115,7 @@ public class ConfigurationParam {
         return CLES_SENSIBLES.contains(cle);
     }
 
-    // Getters et setters
+    // Getters et setters avec validation appropriée
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -137,6 +138,7 @@ public class ConfigurationParam {
     }
 
     public void setValeur(String valeur) {
+        // Validation complète lors de la mise à jour
         String validatedValue = validateValeur(valeur, this.cle);
         if (estCrypte && validatedValue != null && !validatedValue.isEmpty()) {
             try {

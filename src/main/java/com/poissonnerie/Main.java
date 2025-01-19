@@ -141,7 +141,7 @@ public class Main {
     private static void cleanupAndExit(JFrame frame) {
         try {
             LOGGER.info("Fermeture de l'application...");
-            DatabaseManager.closeConnection();
+            DatabaseManager.closeConnections();
             frame.dispose();
             System.exit(0);
         } catch (Exception e) {
