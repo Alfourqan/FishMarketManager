@@ -1,0 +1,198 @@
+[WARNING] COMPILATION WARNING : 
+[INFO] -------------------------------------------------------------
+[WARNING] system modules path not set in conjunction with -source 17
+[INFO] 1 warning
+[INFO] -------------------------------------------------------------
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[5,29] package org.junit.jupiter.api does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[6,29] package org.junit.jupiter.api does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[7,29] package org.junit.jupiter.api does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[8,29] package org.junit.jupiter.api does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[9,36] package org.junit.jupiter.api does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[16,6] cannot find symbol
+  symbol:   class BeforeEach
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[24,6] cannot find symbol
+  symbol:   class AfterEach
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[30,6] cannot find symbol
+  symbol:   class Test
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[31,6] cannot find symbol
+  symbol:   class DisplayName
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[48,6] cannot find symbol
+  symbol:   class Test
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[49,6] cannot find symbol
+  symbol:   class DisplayName
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[60,6] cannot find symbol
+  symbol:   class Test
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[61,6] cannot find symbol
+  symbol:   class DisplayName
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[98,6] cannot find symbol
+  symbol:   class Test
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[99,6] cannot find symbol
+  symbol:   class DisplayName
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[113,6] cannot find symbol
+  symbol:   class Test
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[114,6] cannot find symbol
+  symbol:   class DisplayName
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[128,6] cannot find symbol
+  symbol:   class Test
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[129,6] cannot find symbol
+  symbol:   class DisplayName
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[40,9] cannot find symbol
+  symbol:   method assertDoesNotThrow(()->contro[...]nfig),java.lang.String)
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[44,9] cannot find symbol
+  symbol:   method assertFalse(boolean,java.lang.String)
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[51,9] cannot find symbol
+  symbol:   method assertThrows(java.lang.Class<java.lang.IllegalArgumentException>,()->new Co[...]est"),java.lang.String)
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[55,9] cannot find symbol
+  symbol:   method assertThrows(java.lang.Class<java.lang.IllegalArgumentException>,()->new Co[...]est"),java.lang.String)
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[71,9] cannot find symbol
+  symbol:   method assertDoesNotThrow(()->contro[...]iret),java.lang.String)
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[82,9] cannot find symbol
+  symbol:   method assertDoesNotThrow(()->contro[...]mail),java.lang.String)
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[93,9] cannot find symbol
+  symbol:   method assertThrows(java.lang.Class<java.lang.IllegalArgumentException>,()->contro[...]lide),java.lang.String)
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[103,9] cannot find symbol
+  symbol:   method assertThrows(java.lang.Class<java.lang.IllegalArgumentException>,()->new Co[...]est"),java.lang.String)
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[108,9] cannot find symbol
+  symbol:   method assertThrows(java.lang.Class<java.lang.IllegalArgumentException>,()->new Co[...]est"),java.lang.String)
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[118,9] cannot find symbol
+  symbol:   method assertEquals(java.lang.String,java.lang.String,java.lang.String)
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[121,9] cannot find symbol
+  symbol:   method assertEquals(java.lang.String,java.lang.String,java.lang.String)
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[124,9] cannot find symbol
+  symbol:   method assertEquals(java.lang.String,java.lang.String,java.lang.String)
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[131,9] cannot find symbol
+  symbol:   method assertThrows(java.lang.Class<java.lang.IllegalArgumentException>,()->contro[...]QL")),java.lang.String)
+  location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/model/ConfigurationParam.java:[180,5] method does not override or implement a method from a supertype
+[INFO] 33 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  2.938 s
+[INFO] Finished at: 2025-01-19T03:07:54Z
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project gestion-poissonnerie: Compilation failure: Compilation failure: 
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[5,29] package org.junit.jupiter.api does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[6,29] package org.junit.jupiter.api does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[7,29] package org.junit.jupiter.api does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[8,29] package org.junit.jupiter.api does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[9,36] package org.junit.jupiter.api does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[16,6] cannot find symbol
+[ERROR]   symbol:   class BeforeEach
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[24,6] cannot find symbol
+[ERROR]   symbol:   class AfterEach
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[30,6] cannot find symbol
+[ERROR]   symbol:   class Test
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[31,6] cannot find symbol
+[ERROR]   symbol:   class DisplayName
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[48,6] cannot find symbol
+[ERROR]   symbol:   class Test
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[49,6] cannot find symbol
+[ERROR]   symbol:   class DisplayName
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[60,6] cannot find symbol
+[ERROR]   symbol:   class Test
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[61,6] cannot find symbol
+[ERROR]   symbol:   class DisplayName
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[98,6] cannot find symbol
+[ERROR]   symbol:   class Test
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[99,6] cannot find symbol
+[ERROR]   symbol:   class DisplayName
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[113,6] cannot find symbol
+[ERROR]   symbol:   class Test
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[114,6] cannot find symbol
+[ERROR]   symbol:   class DisplayName
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[128,6] cannot find symbol
+[ERROR]   symbol:   class Test
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[129,6] cannot find symbol
+[ERROR]   symbol:   class DisplayName
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[40,9] cannot find symbol
+[ERROR]   symbol:   method assertDoesNotThrow(()->contro[...]nfig),java.lang.String)
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[44,9] cannot find symbol
+[ERROR]   symbol:   method assertFalse(boolean,java.lang.String)
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[51,9] cannot find symbol
+[ERROR]   symbol:   method assertThrows(java.lang.Class<java.lang.IllegalArgumentException>,()->new Co[...]est"),java.lang.String)
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[55,9] cannot find symbol
+[ERROR]   symbol:   method assertThrows(java.lang.Class<java.lang.IllegalArgumentException>,()->new Co[...]est"),java.lang.String)
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[71,9] cannot find symbol
+[ERROR]   symbol:   method assertDoesNotThrow(()->contro[...]iret),java.lang.String)
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[82,9] cannot find symbol
+[ERROR]   symbol:   method assertDoesNotThrow(()->contro[...]mail),java.lang.String)
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[93,9] cannot find symbol
+[ERROR]   symbol:   method assertThrows(java.lang.Class<java.lang.IllegalArgumentException>,()->contro[...]lide),java.lang.String)
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[103,9] cannot find symbol
+[ERROR]   symbol:   method assertThrows(java.lang.Class<java.lang.IllegalArgumentException>,()->new Co[...]est"),java.lang.String)
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[108,9] cannot find symbol
+[ERROR]   symbol:   method assertThrows(java.lang.Class<java.lang.IllegalArgumentException>,()->new Co[...]est"),java.lang.String)
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[118,9] cannot find symbol
+[ERROR]   symbol:   method assertEquals(java.lang.String,java.lang.String,java.lang.String)
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[121,9] cannot find symbol
+[ERROR]   symbol:   method assertEquals(java.lang.String,java.lang.String,java.lang.String)
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[124,9] cannot find symbol
+[ERROR]   symbol:   method assertEquals(java.lang.String,java.lang.String,java.lang.String)
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/test/TestConfiguration.java:[131,9] cannot find symbol
+[ERROR]   symbol:   method assertThrows(java.lang.Class<java.lang.IllegalArgumentException>,()->contro[...]QL")),java.lang.String)
+[ERROR]   location: class com.poissonnerie.test.TestConfiguration
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/model/ConfigurationParam.java:[180,5] method does not override or implement a method from a supertype
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

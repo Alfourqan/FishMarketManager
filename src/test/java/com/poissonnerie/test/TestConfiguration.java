@@ -8,8 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.List;
-
 public class TestConfiguration {
     private ConfigurationController controller;
 
@@ -32,7 +30,7 @@ public class TestConfiguration {
     void testValidationEntreesSpeciales() {
         ConfigurationParam config = new ConfigurationParam(
             1,
-            "TAUX_TVA",
+            ConfigurationParam.CLE_TAUX_TVA,
             "<script>alert('xss')</script>20.0",
             "Description test"
         );
@@ -40,7 +38,7 @@ public class TestConfiguration {
         assertDoesNotThrow(() -> controller.mettreAJourConfiguration(config),
             "Les caractères spéciaux devraient être échappés");
 
-        String valeur = controller.getValeur("TAUX_TVA");
+        String valeur = controller.getValeur(ConfigurationParam.CLE_TAUX_TVA);
         assertFalse(valeur.contains("<script>"),
             "Les balises script devraient être échappées");
     }
@@ -60,7 +58,6 @@ public class TestConfiguration {
     @Test
     @DisplayName("Test des configurations sensibles")
     void testConfigurationsSensibles() {
-        // Test SIRET valide
         ConfigurationParam configSiret = new ConfigurationParam(
             1,
             ConfigurationParam.CLE_SIRET_ENTREPRISE,
@@ -71,7 +68,6 @@ public class TestConfiguration {
         assertDoesNotThrow(() -> controller.mettreAJourConfiguration(configSiret),
             "Un SIRET valide devrait être accepté");
 
-        // Test email valide
         ConfigurationParam configEmail = new ConfigurationParam(
             2,
             ConfigurationParam.CLE_EMAIL,
@@ -82,7 +78,6 @@ public class TestConfiguration {
         assertDoesNotThrow(() -> controller.mettreAJourConfiguration(configEmail),
             "Un email valide devrait être accepté");
 
-        // Test email invalide
         ConfigurationParam configEmailInvalide = new ConfigurationParam(
             3,
             ConfigurationParam.CLE_EMAIL,
@@ -98,15 +93,13 @@ public class TestConfiguration {
     @Test
     @DisplayName("Test des limites de valeurs")
     void testLimitesValeurs() {
-        // Test avec une valeur trop longue
         String longValue = "a".repeat(1001);
         assertThrows(IllegalArgumentException.class,
-            () -> new ConfigurationParam(1, "TAUX_TVA", longValue, "Test"),
+            () -> new ConfigurationParam(1, ConfigurationParam.CLE_TAUX_TVA, longValue, "Test"),
             "Une valeur trop longue devrait être rejetée");
 
-        // Test avec un taux TVA invalide
         assertThrows(IllegalArgumentException.class,
-            () -> new ConfigurationParam(1, "TAUX_TVA", "101.0", "Test"),
+            () -> new ConfigurationParam(1, ConfigurationParam.CLE_TAUX_TVA, "101.0", "Test"),
             "Un taux TVA > 100 devrait être rejeté");
     }
 
@@ -131,7 +124,7 @@ public class TestConfiguration {
         assertThrows(IllegalArgumentException.class,
             () -> controller.mettreAJourConfiguration(new ConfigurationParam(
                 1,
-                "TAUX_TVA",
+                ConfigurationParam.CLE_TAUX_TVA,
                 "20.0; DROP TABLE configurations;--",
                 "Test injection SQL"
             )),

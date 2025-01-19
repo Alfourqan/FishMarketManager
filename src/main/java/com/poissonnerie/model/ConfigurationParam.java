@@ -177,7 +177,6 @@ public class ConfigurationParam {
         }
     }
 
-    @Override
     public void setValeur(String valeur) {
         try {
             String validatedValue = validateValeur(valeur, this.cle);
