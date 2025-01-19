@@ -271,10 +271,6 @@ public class VenteController {
         validateVente(vente);
 
         try (Connection conn = DatabaseManager.getConnection()) {
-            // Démarrer une transaction IMMEDIATE pour un meilleur contrôle de concurrence
-            try (Statement stmt = conn.createStatement()) {
-                stmt.execute("BEGIN IMMEDIATE TRANSACTION");
-            }
             conn.setAutoCommit(false);
 
             try {
