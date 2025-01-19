@@ -21,19 +21,19 @@ public class AccueilViewSwing {
     private JLabel encaissementsJourLabel;
     private JLabel chiffreAffairesLabel;
 
-    // Couleurs thématiques
-    private static final Color SUCCESS_COLOR = new Color(76, 175, 80);  // Vert
-    private static final Color DANGER_COLOR = new Color(244, 67, 54);   // Rouge
-    private static final Color INFO_COLOR = new Color(33, 150, 243);    // Bleu
-    private static final Color DARK_COLOR = new Color(33, 33, 33);      // Noir
-    private static final Font TITLE_FONT = new Font("Segoe UI", Font.BOLD, 20);
-    private static final Font VALUE_FONT = new Font("Segoe UI", Font.BOLD, 24);
-    private static final Font REGULAR_FONT = new Font("Segoe UI", Font.PLAIN, 14);
+    // Couleurs et polices
+    private static final Color BACKGROUND_COLOR = Color.WHITE;
+    private static final Color PRIMARY_COLOR = new Color(0, 135, 136);
+    private static final Color SUCCESS_COLOR = new Color(76, 175, 80);
+    private static final Color WARNING_COLOR = new Color(255, 152, 0);
+    private static final Color DANGER_COLOR = new Color(244, 67, 54);
+    private static final Font TITLE_FONT = new Font("Arial", Font.BOLD, 16);
+    private static final Font VALUE_FONT = new Font("Arial", Font.BOLD, 24);
 
     public AccueilViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        mainPanel.setBackground(Color.WHITE);
+        mainPanel.setBackground(BACKGROUND_COLOR);
 
         venteController = new VenteController();
         produitController = new ProduitController();
@@ -44,22 +44,28 @@ public class AccueilViewSwing {
     }
 
     private void initializeComponents() {
-        // Panel principal pour les KPIs avec GridLayout 2x2
-        JPanel kpiPanel = new JPanel(new GridLayout(2, 2, 20, 20));
-        kpiPanel.setBackground(Color.WHITE);
+        // Panel principal avec GridLayout 2x2
+        JPanel kpiPanel = new JPanel(new GridLayout(2, 2, 15, 15));
+        kpiPanel.setBackground(BACKGROUND_COLOR);
+
+        // Initialisation des labels
+        ventesJourLabel = new JLabel("0.00 €", SwingConstants.CENTER);
+        produitsRuptureLabel = new JLabel("0", SwingConstants.CENTER);
+        encaissementsJourLabel = new JLabel("0.00 €", SwingConstants.CENTER);
+        chiffreAffairesLabel = new JLabel("0.00 €", SwingConstants.CENTER);
 
         // Création des cartes KPI
-        kpiPanel.add(createKPIPanel("Ventes (Aujourd'hui)", ventesJourLabel = new JLabel("0.00 €"), SUCCESS_COLOR));
-        kpiPanel.add(createKPIPanel("Produits en rupture", produitsRuptureLabel = new JLabel("0"), DANGER_COLOR));
-        kpiPanel.add(createKPIPanel("Encaissements (Aujourd'hui)", encaissementsJourLabel = new JLabel("0.00 €"), INFO_COLOR));
-        kpiPanel.add(createKPIPanel("Chiffre d'affaires", chiffreAffairesLabel = new JLabel("0.00 €"), DARK_COLOR));
+        kpiPanel.add(createKPIPanel("Ventes du jour", ventesJourLabel, SUCCESS_COLOR));
+        kpiPanel.add(createKPIPanel("Produits en rupture", produitsRuptureLabel, DANGER_COLOR));
+        kpiPanel.add(createKPIPanel("Encaissements du jour", encaissementsJourLabel, WARNING_COLOR));
+        kpiPanel.add(createKPIPanel("Chiffre d'affaires", chiffreAffairesLabel, PRIMARY_COLOR));
 
         // Bouton d'actualisation
-        JButton refreshButton = createStyledButton("Actualiser", INFO_COLOR);
+        JButton refreshButton = createStyledButton("Actualiser", PRIMARY_COLOR);
         refreshButton.addActionListener(e -> loadData());
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.setBackground(BACKGROUND_COLOR);
         buttonPanel.add(refreshButton);
 
         // Layout final
@@ -68,18 +74,17 @@ public class AccueilViewSwing {
     }
 
     private JPanel createKPIPanel(String title, JLabel valueLabel, Color color) {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout(10, 10));
+        JPanel panel = new JPanel(new BorderLayout(5, 10));
         panel.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(color, 2),
             BorderFactory.createEmptyBorder(15, 15, 15, 15)
         ));
-        panel.setBackground(Color.WHITE);
+        panel.setBackground(BACKGROUND_COLOR);
 
         // Titre
-        JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(REGULAR_FONT);
-        titleLabel.setForeground(new Color(33, 33, 33));
+        JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
+        titleLabel.setFont(TITLE_FONT);
+        titleLabel.setForeground(color);
 
         // Valeur
         valueLabel.setFont(VALUE_FONT);
@@ -94,15 +99,14 @@ public class AccueilViewSwing {
     private void loadData() {
         SwingUtilities.invokeLater(() -> {
             try {
-                // Désactiver l'interface pendant le chargement
                 mainPanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-                // Charger les données
+                // Chargement des données
                 venteController.chargerVentes();
                 produitController.chargerProduits();
                 caisseController.chargerMouvements();
 
-                // Calculer les KPIs
+                // Mise à jour des KPIs
                 updateVentesJour();
                 updateProduitsRupture();
                 updateEncaissementsJour();
@@ -155,7 +159,7 @@ public class AccueilViewSwing {
 
     private JButton createStyledButton(String text, Color color) {
         JButton button = new JButton(text);
-        button.setFont(REGULAR_FONT);
+        button.setFont(TITLE_FONT);
         button.setBackground(color);
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
