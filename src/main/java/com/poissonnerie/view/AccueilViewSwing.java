@@ -7,6 +7,8 @@ import java.awt.*;
 import java.time.LocalDate;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import org.kordamp.ikonli.materialdesign.MaterialDesign;
+import org.kordamp.ikonli.swing.FontIcon;
 
 public class AccueilViewSwing {
     private static final Logger LOGGER = Logger.getLogger(AccueilViewSwing.class.getName());
@@ -54,14 +56,14 @@ public class AccueilViewSwing {
         encaissementsJourLabel = new JLabel("0.00 €", SwingConstants.CENTER);
         chiffreAffairesLabel = new JLabel("0.00 €", SwingConstants.CENTER);
 
-        // Création des cartes KPI
-        kpiPanel.add(createKPIPanel("Ventes du jour", ventesJourLabel, SUCCESS_COLOR));
-        kpiPanel.add(createKPIPanel("Produits en rupture", produitsRuptureLabel, DANGER_COLOR));
-        kpiPanel.add(createKPIPanel("Encaissements du jour", encaissementsJourLabel, WARNING_COLOR));
-        kpiPanel.add(createKPIPanel("Chiffre d'affaires", chiffreAffairesLabel, PRIMARY_COLOR));
+        // Création des cartes KPI avec icônes
+        kpiPanel.add(createKPIPanel("Ventes du jour", ventesJourLabel, SUCCESS_COLOR, MaterialDesign.MDI_CART));
+        kpiPanel.add(createKPIPanel("Produits en rupture", produitsRuptureLabel, DANGER_COLOR, MaterialDesign.MDI_ALERT_CIRCLE));
+        kpiPanel.add(createKPIPanel("Encaissements du jour", encaissementsJourLabel, WARNING_COLOR, MaterialDesign.MDI_CASH));
+        kpiPanel.add(createKPIPanel("Chiffre d'affaires", chiffreAffairesLabel, PRIMARY_COLOR, MaterialDesign.MDI_CHART_LINE));
 
-        // Bouton d'actualisation
-        JButton refreshButton = createStyledButton("Actualiser", PRIMARY_COLOR);
+        // Bouton d'actualisation avec icône
+        JButton refreshButton = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH, PRIMARY_COLOR);
         refreshButton.addActionListener(e -> loadData());
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -73,7 +75,7 @@ public class AccueilViewSwing {
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    private JPanel createKPIPanel(String title, JLabel valueLabel, Color color) {
+    private JPanel createKPIPanel(String title, JLabel valueLabel, Color color, MaterialDesign icon) {
         JPanel panel = new JPanel(new BorderLayout(5, 10));
         panel.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(color, 2),
@@ -81,16 +83,29 @@ public class AccueilViewSwing {
         ));
         panel.setBackground(BACKGROUND_COLOR);
 
+        // Panel pour le titre avec icône
+        JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        titlePanel.setBackground(BACKGROUND_COLOR);
+
+        // Icône
+        FontIcon fontIcon = FontIcon.of(icon);
+        fontIcon.setIconSize(24);
+        fontIcon.setIconColor(color);
+        JLabel iconLabel = new JLabel(fontIcon);
+
         // Titre
-        JLabel titleLabel = new JLabel(title, SwingConstants.CENTER);
+        JLabel titleLabel = new JLabel(title);
         titleLabel.setFont(TITLE_FONT);
         titleLabel.setForeground(color);
+
+        titlePanel.add(iconLabel);
+        titlePanel.add(titleLabel);
 
         // Valeur
         valueLabel.setFont(VALUE_FONT);
         valueLabel.setForeground(color);
 
-        panel.add(titleLabel, BorderLayout.NORTH);
+        panel.add(titlePanel, BorderLayout.NORTH);
         panel.add(valueLabel, BorderLayout.CENTER);
 
         return panel;
@@ -157,8 +172,15 @@ public class AccueilViewSwing {
         chiffreAffairesLabel.setText(String.format("%.2f €", totalCA));
     }
 
-    private JButton createStyledButton(String text, Color color) {
+    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
         JButton button = new JButton(text);
+
+        // Ajout de l'icône
+        FontIcon icon = FontIcon.of(iconCode);
+        icon.setIconSize(18);
+        icon.setIconColor(Color.WHITE);
+        button.setIcon(icon);
+
         button.setFont(TITLE_FONT);
         button.setBackground(color);
         button.setForeground(Color.WHITE);
