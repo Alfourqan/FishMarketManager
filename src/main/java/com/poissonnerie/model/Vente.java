@@ -16,6 +16,7 @@ public class Vente {
     private final boolean credit;
     private double total;
     private List<LigneVente> lignes;
+    private static final double TAUX_TVA_DEFAULT = 20.0; // 20% par défaut
 
     public Vente(int id, LocalDateTime date, Client client, boolean credit, double total) {
         if (date == null) {
@@ -200,6 +201,41 @@ public class Vente {
             return Objects.hash(produit, quantite, prixUnitaire, dateModification);
         }
     }
+
+    // Nouvelles méthodes pour PDFGenerator
+    public List<Produit> getProduits() {
+        List<Produit> produits = new ArrayList<>();
+        for (LigneVente ligne : getLignes()) {
+            produits.add(ligne.getProduit());
+        }
+        return produits;
+    }
+
+    public String getStatut() {
+        if (credit && client != null) {
+            return client.getStatutCreances().toString();
+        }
+        return "COMPTANT";
+    }
+
+    public double getTotalHT() {
+        double totalHT = 0.0;
+        for (LigneVente ligne : getLignes()) {
+            totalHT += ligne.getQuantite() * ligne.getPrixUnitaire() / (1 + (getTauxTVA() / 100));
+        }
+        return Math.round(totalHT * 100.0) / 100.0;
+    }
+
+    public double getTauxTVA() {
+        // On pourrait récupérer le taux de TVA depuis la configuration
+        return TAUX_TVA_DEFAULT;
+    }
+
+    public double getMontantTVA() {
+        double totalHT = getTotalHT();
+        return Math.round((total - totalHT) * 100.0) / 100.0;
+    }
+
 
     @Override
     public boolean equals(Object o) {

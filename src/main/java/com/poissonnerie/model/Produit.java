@@ -8,6 +8,7 @@ public class Produit {
     private double prixVente;
     private int stock;
     private int seuilAlerte;
+    private String reference;
 
     public Produit(int id, String nom, String categorie, double prixAchat, double prixVente, int stock, int seuilAlerte) {
         this.id = id;
@@ -17,6 +18,7 @@ public class Produit {
         this.prixVente = prixVente;
         this.stock = stock;
         this.seuilAlerte = seuilAlerte;
+        this.reference = generateReference();
     }
 
     // Getters et setters
@@ -35,6 +37,9 @@ public class Produit {
     public double getPrixVente() { return prixVente; }
     public void setPrixVente(double prixVente) { this.prixVente = prixVente; }
 
+    // Méthode pour PDFGenerator
+    public double getPrix() { return prixVente; }
+
     public double getMarge() { return prixVente - prixAchat; }
     public double getTauxMarge() { return prixAchat > 0 ? ((prixVente - prixAchat) / prixAchat) * 100 : 0; }
 
@@ -43,6 +48,13 @@ public class Produit {
 
     public int getSeuilAlerte() { return seuilAlerte; }
     public void setSeuilAlerte(int seuil) { this.seuilAlerte = seuil; }
+
+    public String getReference() { return reference; }
+
+    private String generateReference() {
+        return String.format("P%04d-%s", id, 
+            categorie.substring(0, Math.min(3, categorie.length())).toUpperCase());
+    }
 
     // Alias de getStock() pour maintenir la compatibilité
     public int getQuantite() { 
@@ -104,8 +116,9 @@ public class Produit {
 
     @Override
     public String toString() {
-        return String.format("%s - Achat: %.2f€, Vente: %.2f€ (%s) %s",
+        return String.format("%s (Réf: %s) - Achat: %.2f€, Vente: %.2f€ (%s) %s",
             nom,
+            reference,
             prixAchat,
             prixVente,
             categorie,

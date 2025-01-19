@@ -30,6 +30,7 @@ com/poissonnerie/view/MainViewSwing.class
 com/poissonnerie/model/Vente$LigneVente.class
 com/poissonnerie/view/InventaireViewSwing$1.class
 com/poissonnerie/controller/VenteController.class
+com/poissonnerie/model/Client$StatutCreances.class
 com/poissonnerie/view/ProduitViewSwing$2.class
 com/poissonnerie/view/FournisseurViewSwing$4.class
 com/poissonnerie/model/InventaireManager$InventaireObserver.class
