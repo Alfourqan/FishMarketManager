@@ -1,0 +1,98 @@
+SEVERE: Erreur fatale lors de l'initialisation de la base de données
+java.sql.SQLException: Erreur lors de l'initialisation de la base de données
+    at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:173)
+    at com.poissonnerie.Main.initializeDatabaseWithRetry(Main.java:105)
+    at com.poissonnerie.Main.initializeComponents(Main.java:84)
+    at com.poissonnerie.Main.lambda$initializeApplication$2(Main.java:51)
+    at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: java.lang.SecurityException: Le schéma SQL contient des caractères non autorisés
+    at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:150)
+    ... 4 more
+
+Jan 19, 2025 1:17:39 AM com.poissonnerie.Main initializeDatabaseWithRetry
+WARNING: Tentative 1 échouée: Erreur fatale lors de l'initialisation de la base de données
+Jan 19, 2025 1:17:40 AM com.poissonnerie.util.DatabaseManager initDatabase
+INFO: Début de l'initialisation de la base de données
+Jan 19, 2025 1:17:40 AM com.poissonnerie.util.DatabaseManager needsNewConnection
+WARNING: Connexion détectée comme invalide ou fermée
+Jan 19, 2025 1:17:40 AM com.poissonnerie.util.DatabaseManager initializeConnection
+INFO: Initialisation d'une nouvelle connexion à la base de données
+Jan 19, 2025 1:17:40 AM com.poissonnerie.util.DatabaseManager initializeConnection
+INFO: Configuration des PRAGMA SQLite effectuée
+Jan 19, 2025 1:17:40 AM com.poissonnerie.util.DatabaseManager initializeConnection
+INFO: Connexion à la base de données établie avec succès
+Jan 19, 2025 1:17:40 AM com.poissonnerie.util.DatabaseManager initDatabase
+SEVERE: Erreur lors de l'initialisation, rollback effectué
+java.lang.SecurityException: Le schéma SQL contient des caractères non autorisés
+    at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:150)
+    at com.poissonnerie.Main.initializeDatabaseWithRetry(Main.java:105)
+    at com.poissonnerie.Main.initializeComponents(Main.java:84)
+    at com.poissonnerie.Main.lambda$initializeApplication$2(Main.java:51)
+    at java.base/java.lang.Thread.run(Thread.java:1583)
+
+Jan 19, 2025 1:17:40 AM com.poissonnerie.util.DatabaseManager initDatabase
+SEVERE: Erreur fatale lors de l'initialisation de la base de données
+java.sql.SQLException: Erreur lors de l'initialisation de la base de données
+    at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:173)
+    at com.poissonnerie.Main.initializeDatabaseWithRetry(Main.java:105)
+    at com.poissonnerie.Main.initializeComponents(Main.java:84)
+    at com.poissonnerie.Main.lambda$initializeApplication$2(Main.java:51)
+    at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: java.lang.SecurityException: Le schéma SQL contient des caractères non autorisés
+    at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:150)
+    ... 4 more
+
+Jan 19, 2025 1:17:40 AM com.poissonnerie.Main initializeDatabaseWithRetry
+WARNING: Tentative 2 échouée: Erreur fatale lors de l'initialisation de la base de données
+Jan 19, 2025 1:17:41 AM com.poissonnerie.util.DatabaseManager initDatabase
+INFO: Début de l'initialisation de la base de données
+Jan 19, 2025 1:17:41 AM com.poissonnerie.util.DatabaseManager needsNewConnection
+WARNING: Connexion détectée comme invalide ou fermée
+Jan 19, 2025 1:17:41 AM com.poissonnerie.util.DatabaseManager initializeConnection
+INFO: Initialisation d'une nouvelle connexion à la base de données
+Jan 19, 2025 1:17:41 AM com.poissonnerie.util.DatabaseManager initializeConnection
+INFO: Configuration des PRAGMA SQLite effectuée
+Jan 19, 2025 1:17:41 AM com.poissonnerie.util.DatabaseManager initializeConnection
+INFO: Connexion à la base de données établie avec succès
+Jan 19, 2025 1:17:41 AM com.poissonnerie.util.DatabaseManager initDatabase
+SEVERE: Erreur lors de l'initialisation, rollback effectué
+java.lang.SecurityException: Le schéma SQL contient des caractères non autorisés
+    at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:150)
+    at com.poissonnerie.Main.initializeDatabaseWithRetry(Main.java:105)
+    at com.poissonnerie.Main.initializeComponents(Main.java:84)
+    at com.poissonnerie.Main.lambda$initializeApplication$2(Main.java:51)
+    at java.base/java.lang.Thread.run(Thread.java:1583)
+
+Jan 19, 2025 1:17:41 AM com.poissonnerie.util.DatabaseManager initDatabase
+SEVERE: Erreur fatale lors de l'initialisation de la base de données
+java.sql.SQLException: Erreur lors de l'initialisation de la base de données
+    at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:173)
+    at com.poissonnerie.Main.initializeDatabaseWithRetry(Main.java:105)
+    at com.poissonnerie.Main.initializeComponents(Main.java:84)
+    at com.poissonnerie.Main.lambda$initializeApplication$2(Main.java:51)
+    at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: java.lang.SecurityException: Le schéma SQL contient des caractères non autorisés
+    at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:150)
+    ... 4 more
+
+Jan 19, 2025 1:17:41 AM com.poissonnerie.Main initializeDatabaseWithRetry
+WARNING: Tentative 3 échouée: Erreur fatale lors de l'initialisation de la base de données
+Jan 19, 2025 1:17:41 AM com.poissonnerie.Main handleError
+SEVERE: Erreur lors de l'initialisation: Échec de l'initialisation de la base de données après 3 tentatives
+Type: Exception
+java.lang.Exception: Échec de l'initialisation de la base de données après 3 tentatives
+    at com.poissonnerie.Main.initializeDatabaseWithRetry(Main.java:116)
+    at com.poissonnerie.Main.initializeComponents(Main.java:84)
+    at com.poissonnerie.Main.lambda$initializeApplication$2(Main.java:51)
+    at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: java.lang.RuntimeException: Erreur fatale lors de l'initialisation de la base de données
+    at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:177)
+    at com.poissonnerie.Main.initializeDatabaseWithRetry(Main.java:105)
+    ... 3 more
+Caused by: java.sql.SQLException: Erreur lors de l'initialisation de la base de données
+    at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:173)
+    ... 4 more
+Caused by: java.lang.SecurityException: Le schéma SQL contient des caractères non autorisés
+    at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:150)
+    ... 4 more
+

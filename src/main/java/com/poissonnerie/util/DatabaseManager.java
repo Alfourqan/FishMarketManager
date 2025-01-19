@@ -21,6 +21,8 @@ import java.util.regex.Pattern;
 import java.sql.PreparedStatement;
 import javax.sql.DataSource;
 import org.sqlite.SQLiteDataSource;
+import java.util.Arrays;
+import java.util.List;
 
 public class DatabaseManager {
     private static final Logger LOGGER = Logger.getLogger(DatabaseManager.class.getName());
@@ -28,10 +30,28 @@ public class DatabaseManager {
     private static final String DB_URL = "jdbc:sqlite:" + DB_FILE;
     private static Connection connection;
     private static long lastConnectionCheck = 0;
-    private static final long CONNECTION_TIMEOUT = TimeUnit.MINUTES.toMillis(2); // Réduit à 2 minutes
-    private static final int LOGIN_TIMEOUT_SECONDS = 15; // Réduit à 15 secondes
+    private static final long CONNECTION_TIMEOUT = TimeUnit.MINUTES.toMillis(2);
+    private static final int LOGIN_TIMEOUT_SECONDS = 15;
     private static final Object LOCK = new Object();
-    private static final Pattern SQL_INJECTION_PATTERN = Pattern.compile("[';\"\\-\\/*]");
+
+    // Liste des mots-clés SQL autorisés
+    private static final List<String> ALLOWED_SQL_KEYWORDS = Arrays.asList(
+        "CREATE", "TABLE", "DROP", "ALTER", "PRIMARY", "KEY", "FOREIGN",
+        "REFERENCES", "INTEGER", "TEXT", "DOUBLE", "BOOLEAN", "DEFAULT",
+        "NOT", "NULL", "AUTOINCREMENT", "INDEX", "UNIQUE", "CHECK",
+        "CONSTRAINT", "ON", "DELETE", "CASCADE", "UPDATE", "SET"
+    );
+
+    // Pattern pour détecter les tentatives d'injection SQL malveillantes
+    private static final Pattern MALICIOUS_SQL_PATTERN = Pattern.compile(
+        "(?i)(\\b(INSERT|UPDATE|DELETE)\\b.*\\bINTO\\b.*|" +
+        "\\bDROP\\b.*\\bTABLE\\b.*|" +
+        "\\bALTER\\b.*\\bTABLE\\b.*\\bDROP\\b|" +
+        "--.*|/\\*.*\\*/|;.*;|@@|" +
+        "\\bEXEC\\b|\\bXP_\\w+|" +
+        "\\bSYSDATETIME\\b|\\bCURRENT_USER\\b)"
+    );
+
     private static SQLiteDataSource dataSource;
 
     static {
@@ -42,7 +62,7 @@ public class DatabaseManager {
         try {
             SQLiteConfig config = new SQLiteConfig();
             config.enforceForeignKeys(true);
-            config.setBusyTimeout(15000); // 15 secondes
+            config.setBusyTimeout(15000);
             config.setReadOnly(false);
             config.setJournalMode(SQLiteConfig.JournalMode.WAL);
 
@@ -128,6 +148,31 @@ public class DatabaseManager {
         }
     }
 
+    private static boolean validateSchemaContent(String schema) {
+        // Vérifier si le schéma est vide
+        if (schema == null || schema.trim().isEmpty()) {
+            LOGGER.severe("Le schéma SQL est vide");
+            return false;
+        }
+
+        // Vérifier les motifs malveillants
+        if (MALICIOUS_SQL_PATTERN.matcher(schema).find()) {
+            LOGGER.severe("Motif SQL malveillant détecté dans le schéma");
+            return false;
+        }
+
+        // Vérifier que seuls les mots-clés autorisés sont utilisés
+        String[] words = schema.toUpperCase().split("\\s+");
+        for (String word : words) {
+            if (word.matches("^[A-Z_]+$") && !ALLOWED_SQL_KEYWORDS.contains(word)) {
+                LOGGER.warning("Mot-clé SQL non autorisé détecté : " + word);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public static void initDatabase() {
         LOGGER.info("Début de l'initialisation de la base de données");
 
@@ -141,13 +186,8 @@ public class DatabaseManager {
                     .lines()
                     .collect(Collectors.joining("\n"));
 
-                if (schema.trim().isEmpty()) {
-                    throw new SQLException("Le fichier schema.sql est vide ou n'a pas pu être lu");
-                }
-
-                // Validation du schéma SQL
-                if (SQL_INJECTION_PATTERN.matcher(schema).find()) {
-                    throw new SecurityException("Le schéma SQL contient des caractères non autorisés");
+                if (!validateSchemaContent(schema)) {
+                    throw new SecurityException("Le schéma SQL contient des éléments non autorisés");
                 }
 
                 try (Statement stmt = conn.createStatement()) {
@@ -170,11 +210,11 @@ public class DatabaseManager {
             } catch (Exception e) {
                 conn.rollback();
                 LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation, rollback effectué", e);
-                throw new SQLException("Erreur lors de l'initialisation de la base de données", e);
+                throw new SQLException("Erreur lors de l'initialisation de la base de données: " + e.getMessage(), e);
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur fatale lors de l'initialisation de la base de données", e);
-            throw new RuntimeException("Erreur fatale lors de l'initialisation de la base de données", e);
+            throw new RuntimeException("Erreur fatale lors de l'initialisation de la base de données: " + e.getMessage(), e);
         }
     }
 
@@ -213,8 +253,8 @@ public class DatabaseManager {
         if (input == null || input.trim().isEmpty()) {
             throw new IllegalArgumentException("L'entrée SQL ne peut pas être vide");
         }
-        if (SQL_INJECTION_PATTERN.matcher(input).find()) {
-            throw new SecurityException("L'entrée SQL contient des caractères non autorisés");
+        if (MALICIOUS_SQL_PATTERN.matcher(input).find()) {
+            throw new SecurityException("L'entrée SQL contient des motifs non autorisés");
         }
     }
 }
