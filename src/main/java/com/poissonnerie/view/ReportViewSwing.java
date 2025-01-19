@@ -36,7 +36,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Map;
 
-
 public class ReportViewSwing {
     private static final Logger LOGGER = Logger.getLogger(ReportViewSwing.class.getName());
 
@@ -109,6 +108,11 @@ public class ReportViewSwing {
         });
 
         return button;
+    }
+
+    // Added missing method required by MainViewSwing
+    public JPanel getMainPanel() {
+        return mainPanel;
     }
 
     private void initializeComponents() {
@@ -366,6 +370,7 @@ public class ReportViewSwing {
 
         return panel;
     }
+
 
     private void updateCharts() {
         statistiquesPanel.removeAll();

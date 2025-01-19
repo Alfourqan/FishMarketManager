@@ -101,7 +101,8 @@ public class VenteController {
                         date,
                         client,
                         rs.getBoolean("credit"),
-                        rs.getDouble("total")
+                        rs.getDouble("total"),
+                        rs.getBoolean("credit") ? Vente.ModePaiement.CREDIT : Vente.ModePaiement.ESPECES
                     );
 
                     chargerLignesVente(conn, vente);

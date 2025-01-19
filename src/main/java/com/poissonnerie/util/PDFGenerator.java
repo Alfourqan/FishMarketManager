@@ -183,4 +183,73 @@ public class PDFGenerator {
             throw new RuntimeException("Erreur lors de la génération du rapport PDF", e);
         }
     }
+
+    public static void genererRapportFinancier(
+            Map<String, Double> chiffreAffaires,
+            Map<String, Double> couts,
+            Map<String, Double> benefices,
+            Map<String, Double> marges,
+            String cheminFichier) {
+        try (Document document = new Document()) {
+            PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
+            document.open();
+
+            // Titre principal
+            Paragraph titrePrincipal = new Paragraph("Rapport Financier", TITLE_FONT);
+            titrePrincipal.setAlignment(Element.ALIGN_CENTER);
+            document.add(titrePrincipal);
+            document.add(Chunk.NEWLINE);
+
+            // Section Chiffre d'affaires
+            ajouterSectionFinanciere(document, "Chiffre d'Affaires", chiffreAffaires);
+            document.add(Chunk.NEWLINE);
+
+            // Section Coûts
+            ajouterSectionFinanciere(document, "Coûts", couts);
+            document.add(Chunk.NEWLINE);
+
+            // Section Bénéfices
+            ajouterSectionFinanciere(document, "Bénéfices", benefices);
+            document.add(Chunk.NEWLINE);
+
+            // Section Marges
+            ajouterSectionFinanciere(document, "Marges", marges);
+
+            LOGGER.info("Rapport financier PDF généré avec succès: " + cheminFichier);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport financier PDF", e);
+            throw new RuntimeException("Erreur lors de la génération du rapport PDF", e);
+        }
+    }
+
+    private static void ajouterSectionFinanciere(Document document, String titre, Map<String, Double> donnees) throws DocumentException {
+        // Titre de la section
+        Paragraph titreParagraph = new Paragraph(titre, SUBTITLE_FONT);
+        titreParagraph.setSpacingBefore(10f);
+        document.add(titreParagraph);
+
+        // Tableau des données
+        PdfPTable table = new PdfPTable(2);
+        table.setWidthPercentage(100);
+        table.setSpacingBefore(5f);
+        table.setSpacingAfter(10f);
+
+        // En-têtes
+        PdfPCell headerCell1 = new PdfPCell(new Phrase("Indicateur", SUBTITLE_FONT));
+        PdfPCell headerCell2 = new PdfPCell(new Phrase("Montant", SUBTITLE_FONT));
+        headerCell1.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        headerCell2.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        headerCell1.setHorizontalAlignment(Element.ALIGN_CENTER);
+        headerCell2.setHorizontalAlignment(Element.ALIGN_CENTER);
+        table.addCell(headerCell1);
+        table.addCell(headerCell2);
+
+        // Données
+        for (Map.Entry<String, Double> entry : donnees.entrySet()) {
+            table.addCell(new Phrase(entry.getKey(), NORMAL_FONT));
+            table.addCell(new Phrase(String.format("%.2f €", entry.getValue()), NORMAL_FONT));
+        }
+
+        document.add(table);
+    }
 }

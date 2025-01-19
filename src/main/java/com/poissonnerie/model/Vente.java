@@ -22,9 +22,17 @@ public class Vente {
             this.libelle = libelle;
         }
 
-        @Override
-        public String toString() {
+        public String getLibelle() {
             return libelle;
+        }
+
+        public static ModePaiement fromString(String text) {
+            for (ModePaiement mode : ModePaiement.values()) {
+                if (mode.libelle.equalsIgnoreCase(text)) {
+                    return mode;
+                }
+            }
+            throw new IllegalArgumentException("Mode de paiement invalide: " + text);
         }
     }
 
@@ -229,7 +237,7 @@ public class Vente {
         }
     }
 
-    // Nouvelles méthodes pour PDFGenerator
+    // Méthodes pour PDFGenerator et statistiques
     public List<Produit> getProduits() {
         List<Produit> produits = new ArrayList<>();
         for (LigneVente ligne : getLignes()) {
@@ -242,7 +250,7 @@ public class Vente {
         if (credit && client != null) {
             return client.getStatutCreances().toString();
         }
-        return "COMPTANT";
+        return modePaiement.getLibelle();
     }
 
     public double getTotalHT() {
@@ -254,7 +262,6 @@ public class Vente {
     }
 
     public double getTauxTVA() {
-        // On pourrait récupérer le taux de TVA depuis la configuration
         return TAUX_TVA_DEFAULT;
     }
 
@@ -262,7 +269,6 @@ public class Vente {
         double totalHT = getTotalHT();
         return Math.round((total - totalHT) * 100.0) / 100.0;
     }
-
 
     @Override
     public boolean equals(Object o) {

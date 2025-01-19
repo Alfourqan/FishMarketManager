@@ -291,7 +291,8 @@ public class VenteViewSwing {
                             LocalDateTime.now(),
                             selectedClient,
                             creditCheck.isSelected(),
-                            calculateTotal()
+                            calculateTotal(),
+                            creditCheck.isSelected() ? Vente.ModePaiement.CREDIT : Vente.ModePaiement.ESPECES
                     );
                     vente.setLignes(new ArrayList<>(panier));
 
