@@ -89,8 +89,8 @@ public class PDFGenerator {
 
         // Remplacer les caractères non autorisés
         String sanitized = filename.replaceAll("[^a-zA-Z0-9.-]", "_")
-                                 .replaceAll("\\.\\.", "_")
-                                 .replaceAll("\\s+", "_");
+                                    .replaceAll("\\.\\.", "_")
+                                    .replaceAll("\\s+", "_");
 
         // Tronquer si trop long
         if (sanitized.length() > MAX_FILENAME_LENGTH) {
@@ -311,7 +311,7 @@ public class PDFGenerator {
             for (Vente v : ventes) {
                 table.addCell(v.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
                 table.addCell(sanitizeInput(v.getClient().getNom()));
-                table.addCell(String.valueOf(v.getProduits().size()));
+                table.addCell(String.valueOf(v.getLignes().size()));
                 table.addCell(String.format("%.2f €", v.getTotal()));
                 table.addCell(v.getStatut().toString());
             }
@@ -447,45 +447,35 @@ public class PDFGenerator {
         }
     }
 
-    public static void genererPreviewTicket(Vente vente) {
+    public static String genererPreviewTicket(Vente vente) {
         try {
-            Document document = new Document(new Rectangle(TICKET_WIDTH, PageSize.A4.getHeight()));
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            PdfWriter.getInstance(document, baos);
-            document.open();
+            StringBuilder preview = new StringBuilder();
+            preview.append("=== TICKET DE CAISSE ===\n\n");
+            preview.append("Date: ").append(vente.getDate().format(
+                DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))).append("\n");
+            preview.append("Client: ").append(vente.getClient() != null ? 
+                sanitizeInput(vente.getClient().getNom()) : "Vente comptant").append("\n\n");
 
-            // En-tête du ticket
-            Paragraph header = new Paragraph("TICKET DE CAISSE", 
-                new Font(BaseFont.createFont(), 12, Font.BOLD));
-            header.setAlignment(Element.ALIGN_CENTER);
-            document.add(header);
+            // En-tête du tableau
+            preview.append(String.format("%-30s %8s %10s %12s\n", "Produit", "Qté", "P.U.", "Total"));
+            preview.append("-".repeat(64)).append("\n");
 
-            // Détails de la vente
-            document.add(new Paragraph("Date: " + vente.getDate().format(
-                DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))));
-            document.add(new Paragraph("Client: " + sanitizeInput(vente.getClient().getNom())));
-
-            // Tableau des produits
-            PdfPTable table = new PdfPTable(3);
-            table.setWidthPercentage(100);
-
-            for (Map.Entry<Produit, Integer> entry : vente.getProduits().entrySet()) {
-                table.addCell(sanitizeInput(entry.getKey().getNom()));
-                table.addCell(String.valueOf(entry.getValue()));
-                table.addCell(String.format("%.2f €", 
-                    entry.getKey().getPrix() * entry.getValue()));
+            // Détails des produits
+            for (Vente.LigneVente ligne : vente.getLignes()) {
+                preview.append(String.format("%-30s %8d %10.2f€ %12.2f€\n",
+                    truncateString(sanitizeInput(ligne.getProduit().getNom()), 30),
+                    ligne.getQuantite(),
+                    ligne.getPrixUnitaire(),
+                    ligne.getQuantite() * ligne.getPrixUnitaire()));
             }
 
-            document.add(table);
+            preview.append("-".repeat(64)).append("\n");
+            preview.append(String.format("%52s %10.2f€\n", "Total:", vente.getTotal()));
+            preview.append("\nMerci de votre visite !\n");
+            preview.append("=".repeat(64));
 
-            // Total
-            Paragraph total = new Paragraph("Total: " + String.format("%.2f €", vente.getTotal()),
-                new Font(BaseFont.createFont(), 12, Font.BOLD));
-            total.setAlignment(Element.ALIGN_RIGHT);
-            document.add(total);
-
-            document.close();
             LOGGER.info("Preview du ticket généré avec succès");
+            return preview.toString();
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du preview du ticket", e);
             throw new RuntimeException("Erreur lors de la génération du preview du ticket", e);
@@ -500,36 +490,39 @@ public class PDFGenerator {
             document.open();
 
             // En-tête du ticket
-            Paragraph header = new Paragraph("TICKET DE CAISSE", 
+            Paragraph titleHeader = new Paragraph("TICKET DE CAISSE", 
                 new Font(BaseFont.createFont(), 12, Font.BOLD));
-            header.setAlignment(Element.ALIGN_CENTER);
-            document.add(header);
+            titleHeader.setAlignment(Element.ALIGN_CENTER);
+            document.add(titleHeader);
 
             // Informations de l'entreprise
             document.add(new Paragraph("Date: " + vente.getDate().format(
                 DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))));
             document.add(new Paragraph("N° Ticket: " + vente.getId()));
-            document.add(new Paragraph("Client: " + sanitizeInput(vente.getClient().getNom())));
+            document.add(new Paragraph("Client: " + (vente.getClient() != null ? 
+                sanitizeInput(vente.getClient().getNom()) : "Vente comptant")));
 
             // Tableau des produits
             PdfPTable table = new PdfPTable(4);
             table.setWidthPercentage(100);
 
+            // En-têtes du tableau
             Stream.of("Produit", "Qté", "P.U.", "Total")
                 .forEach(columnTitle -> {
-                    PdfPCell header = new PdfPCell();
-                    header.setBackgroundColor(BaseColor.LIGHT_GRAY);
-                    header.setBorderWidth(1);
-                    header.setPhrase(new Phrase(columnTitle));
-                    table.addCell(header);
+                    PdfPCell cell = new PdfPCell();
+                    cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+                    cell.setBorderWidth(1);
+                    cell.setPhrase(new Phrase(columnTitle));
+                    table.addCell(cell);
                 });
 
-            for (Map.Entry<Produit, Integer> entry : vente.getProduits().entrySet()) {
-                table.addCell(sanitizeInput(entry.getKey().getNom()));
-                table.addCell(String.valueOf(entry.getValue()));
-                table.addCell(String.format("%.2f €", entry.getKey().getPrix()));
+            // Détails des produits
+            for (Vente.LigneVente ligne : vente.getLignes()) {
+                table.addCell(sanitizeInput(ligne.getProduit().getNom()));
+                table.addCell(String.valueOf(ligne.getQuantite()));
+                table.addCell(String.format("%.2f €", ligne.getPrixUnitaire()));
                 table.addCell(String.format("%.2f €", 
-                    entry.getKey().getPrix() * entry.getValue()));
+                    ligne.getQuantite() * ligne.getPrixUnitaire()));
             }
 
             document.add(table);
@@ -553,4 +546,5 @@ public class PDFGenerator {
             throw new RuntimeException("Erreur lors de la génération du ticket", e);
         }
     }
+
 }
