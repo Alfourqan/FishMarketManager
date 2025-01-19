@@ -1,0 +1,28 @@
+[INFO] Scanning for projects...
+[ERROR] [ERROR] Some problems were encountered while processing the POMs:
+[ERROR] 'dependencies.dependency.type' for com.itextpdf:itextpdf: is missing. @ line 11, column 13
+[ERROR] 'dependencies.dependency.type' for org.xerial:sqlite-jdbc: is missing. @ line 17, column 13
+[ERROR] 'dependencies.dependency.type' for com.formdev:flatlaf: is missing. @ line 23, column 13
+[ERROR] 'dependencies.dependency.type' for com.formdev:flatlaf-intellij-themes: is missing. @ line 29, column 13
+[ERROR] 'dependencies.dependency.type' for com.formdev:flatlaf-extras: is missing. @ line 35, column 13
+[ERROR] 'dependencies.dependency.type' for org.kordamp.ikonli:ikonli-core: is missing. @ line 41, column 13
+[ERROR] 'dependencies.dependency.type' for org.kordamp.ikonli:ikonli-swing: is missing. @ line 47, column 13
+[ERROR] 'dependencies.dependency.type' for org.kordamp.ikonli:ikonli-materialdesign-pack: is missing. @ line 53, column 13
+ @ 
+[ERROR] The build could not read 1 project -> [Help 1]
+[ERROR]   
+[ERROR]   The project com.poissonnerie:gestion-poissonnerie:1.0-SNAPSHOT (/home/runner/workspace/pom.xml) has 8 errors
+[ERROR]     'dependencies.dependency.type' for com.itextpdf:itextpdf: is missing. @ line 11, column 13
+[ERROR]     'dependencies.dependency.type' for org.xerial:sqlite-jdbc: is missing. @ line 17, column 13
+[ERROR]     'dependencies.dependency.type' for com.formdev:flatlaf: is missing. @ line 23, column 13
+[ERROR]     'dependencies.dependency.type' for com.formdev:flatlaf-intellij-themes: is missing. @ line 29, column 13
+[ERROR]     'dependencies.dependency.type' for com.formdev:flatlaf-extras: is missing. @ line 35, column 13
+[ERROR]     'dependencies.dependency.type' for org.kordamp.ikonli:ikonli-core: is missing. @ line 41, column 13
+[ERROR]     'dependencies.dependency.type' for org.kordamp.ikonli:ikonli-swing: is missing. @ line 47, column 13
+[ERROR]     'dependencies.dependency.type' for org.kordamp.ikonli:ikonli-materialdesign-pack: is missing. @ line 53, column 13
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/ProjectBuildingException
