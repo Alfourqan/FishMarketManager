@@ -39,11 +39,10 @@ public class Vente {
         this.credit = credit;
         this.total = total;
         this.lignes = new ArrayList<>();
-        // Par défaut, si c'est une vente à crédit, mode crédit, sinon comptant
         this.modePaiement = credit ? ModePaiement.CREDIT : ModePaiement.ESPECES;
     }
 
-    // Getters et setters avec validations
+    // Getters et setters
     public int getId() { return id; }
     public void setId(int id) { 
         if (id <= 0) {
@@ -55,28 +54,8 @@ public class Vente {
     public LocalDateTime getDate() { return date; }
     public Client getClient() { return client; }
     public boolean isCredit() { return credit; }
-
-    public double getTotal() { return total; }
-    public void setTotal(double total) {
-        if (total < 0) {
-            throw new IllegalArgumentException("Le total ne peut pas être négatif");
-        }
-
-        // Si nous avons des lignes, vérifier que le total correspond
-        if (!lignes.isEmpty() && Math.abs(total - getMontantTotal()) > 0.01) {
-            throw new IllegalStateException(
-                String.format("Le total de la vente (%.2f) ne correspond pas à la somme des lignes (%.2f)",
-                    total, getMontantTotal())
-            );
-        }
-
-        LOGGER.log(Level.INFO, 
-            String.format("Modification du total de la vente %d: %.2f → %.2f", 
-                id, this.total, total));
-        this.total = total;
-    }
-
     public ModePaiement getModePaiement() { return modePaiement; }
+
     public void setModePaiement(ModePaiement modePaiement) {
         if (modePaiement == null) {
             throw new IllegalArgumentException("Le mode de paiement ne peut pas être null");
@@ -95,8 +74,6 @@ public class Vente {
         if (lignes == null) {
             throw new IllegalArgumentException("La liste des lignes ne peut pas être null");
         }
-
-        // Vérifier chaque ligne si la liste n'est pas vide
         if (!lignes.isEmpty()) {
             for (LigneVente ligne : lignes) {
                 if (ligne == null) {
@@ -105,24 +82,22 @@ public class Vente {
                 validateLigne(ligne);
             }
         }
-
         LOGGER.log(Level.INFO, 
             String.format("Mise à jour des lignes de la vente %d: %d lignes", 
                 id, lignes.size()));
         this.lignes = new ArrayList<>(lignes);
     }
 
-    // Méthode pour calculer le montant total TTC de la vente
+    // Méthodes de calcul avec TVA
     public double getMontantTotal() {
         if (lignes == null || lignes.isEmpty()) {
             return 0.0;
         }
-        return lignes.stream()
+        return Math.round(lignes.stream()
             .mapToDouble(ligne -> ligne.getQuantite() * ligne.getPrixUnitaire())
-            .sum();
+            .sum() * 100.0) / 100.0;
     }
 
-    // Méthode pour calculer le montant HT de la vente
     public double getMontantTotalHT() {
         if (lignes == null || lignes.isEmpty()) {
             return 0.0;
@@ -131,13 +106,10 @@ public class Vente {
         return Math.round((totalTTC / (1 + (getTauxTVA() / 100))) * 100.0) / 100.0;
     }
 
-    // Méthode pour obtenir le taux de TVA applicable
     public double getTauxTVA() {
-        // On pourrait récupérer le taux de TVA depuis la configuration
         return TAUX_TVA_DEFAULT;
     }
 
-    // Méthode pour calculer le montant de TVA
     public double getMontantTVA() {
         if (lignes == null || lignes.isEmpty()) {
             return 0.0;
@@ -145,6 +117,24 @@ public class Vente {
         double totalTTC = getMontantTotal();
         double totalHT = getMontantTotalHT();
         return Math.round((totalTTC - totalHT) * 100.0) / 100.0;
+    }
+
+    public double getTotal() { return total; }
+
+    public void setTotal(double total) {
+        if (total < 0) {
+            throw new IllegalArgumentException("Le total ne peut pas être négatif");
+        }
+        if (!lignes.isEmpty() && Math.abs(total - getMontantTotal()) > 0.01) {
+            throw new IllegalStateException(
+                String.format("Le total de la vente (%.2f) ne correspond pas à la somme des lignes (%.2f)",
+                    total, getMontantTotal())
+            );
+        }
+        LOGGER.log(Level.INFO, 
+            String.format("Modification du total de la vente %d: %.2f → %.2f", 
+                id, this.total, total));
+        this.total = total;
     }
 
     private void validateLigne(LigneVente ligne) {
@@ -163,7 +153,6 @@ public class Vente {
         }
     }
 
-    // Classe interne pour les lignes de vente
     public static class LigneVente {
         private final Produit produit;
         private int quantite;
@@ -201,10 +190,10 @@ public class Vente {
             }
         }
 
-        // Getters et setters avec validation
+        // Getters et setters
         public Produit getProduit() { return produit; }
-
         public int getQuantite() { return quantite; }
+
         public void setQuantite(int quantite) {
             validateQuantite(quantite);
             LOGGER.log(Level.INFO, 
@@ -214,6 +203,7 @@ public class Vente {
         }
 
         public double getPrixUnitaire() { return prixUnitaire; }
+
         public void setPrixUnitaire(double prixUnitaire) {
             validatePrixUnitaire(prixUnitaire);
             LOGGER.log(Level.INFO, 
@@ -241,7 +231,6 @@ public class Vente {
         }
     }
 
-    // Nouvelles méthodes pour PDFGenerator
     public List<Produit> getProduits() {
         List<Produit> produits = new ArrayList<>();
         for (LigneVente ligne : getLignes()) {
@@ -256,25 +245,6 @@ public class Vente {
         }
         return "COMPTANT";
     }
-
-    public double getTotalHT() {
-        double totalHT = 0.0;
-        for (LigneVente ligne : getLignes()) {
-            totalHT += ligne.getQuantite() * ligne.getPrixUnitaire() / (1 + (getTauxTVA() / 100));
-        }
-        return Math.round(totalHT * 100.0) / 100.0;
-    }
-
-    public double getTauxTVA() {
-        // On pourrait récupérer le taux de TVA depuis la configuration
-        return TAUX_TVA_DEFAULT;
-    }
-
-    public double getMontantTVA() {
-        double totalHT = getTotalHT();
-        return Math.round((total - totalHT) * 100.0) / 100.0;
-    }
-
 
     @Override
     public boolean equals(Object o) {

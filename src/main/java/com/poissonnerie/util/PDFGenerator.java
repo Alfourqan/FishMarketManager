@@ -23,10 +23,7 @@ import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Optional;
+import java.util.*;
 import java.security.MessageDigest;
 import java.util.UUID;
 import java.io.IOException;
@@ -35,17 +32,20 @@ import java.util.DoubleSummaryStatistics;
 
 public class PDFGenerator {
     private static final Logger LOGGER = Logger.getLogger(PDFGenerator.class.getName());
-    private static final float TICKET_WIDTH = 170.079f; // 6 cm en points
-    private static final float MARGIN = 14.17f; // 5mm en points
+    private static final float TICKET_WIDTH = 170.079f;
+    private static final float MARGIN = 14.17f;
     private static final int MAX_FILE_SIZE_MB = 10;
     private static final long MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
     private static final Set<String> FORMATS_IMAGE_AUTORISES = new HashSet<>(Arrays.asList("jpg", "jpeg", "png", "gif"));
-    private static final int MAX_IMAGE_SIZE = 1000; // pixels
+    private static final int MAX_IMAGE_SIZE = 1000;
     private static final String OUTPUT_DIR = "generated_pdfs";
     private static final int MAX_FILENAME_LENGTH = 255;
-    
+
+    // Nouvelles constantes pour l'analyse
+    private static final int SEUIL_ALERTE_STOCK = 10;
+    private static final double SEUIL_ALERTE_CA = 1000.0;
+
     static {
-        // Création du répertoire de sortie s'il n'existe pas
         try {
             Path outputPath = Paths.get(OUTPUT_DIR);
             if (!Files.exists(outputPath)) {
@@ -293,60 +293,143 @@ public class PDFGenerator {
             PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
             document.open();
 
-            // Titre et période
-            Paragraph title = new Paragraph("Rapport des Ventes", 
-                new Font(BaseFont.createFont(), 16, Font.BOLD));
-            title.setAlignment(Element.ALIGN_CENTER);
-            document.add(title);
-            document.add(new Paragraph("Période: du " + dateDebut.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) +
-                " au " + dateFin.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
-            document.add(Chunk.NEWLINE);
+            // En-tête avec période
+            ajouterEnTeteRapport(document, "Rapport des Ventes", dateDebut, dateFin);
 
-            // Statistiques
+            // Statistiques globales
             Map<String, Object> stats = ReportStatisticsManager.analyserVentes(ventes, dateDebut, dateFin, null);
-            document.add(new Paragraph("Analyses des Ventes:", 
-                new Font(BaseFont.createFont(), 14, Font.BOLD)));
-            document.add(new Paragraph("Chiffre d'affaires total: " + 
-                String.format("%.2f €", ((Number)stats.get("chiffreAffaires")).doubleValue())));
+            ajouterStatistiquesVentes(document, stats);
 
-            // Ventes par mode de paiement
-            document.add(new Paragraph("Répartition par Mode de Paiement:", 
-                new Font(BaseFont.createFont(), 14, Font.BOLD)));
-            Map<ModePaiement, DoubleSummaryStatistics> statsParMode = 
-                (Map<ModePaiement, DoubleSummaryStatistics>) stats.get("statsParMode");
-            for (Map.Entry<ModePaiement, DoubleSummaryStatistics> entry : statsParMode.entrySet()) {
-                document.add(new Paragraph(entry.getKey() + ": " + 
-                    String.format("%.2f €", entry.getValue().getSum())));
-            }
-            document.add(Chunk.NEWLINE);
+            // Analyse des tendances
+            ajouterAnalyseTendances(document, ventes, dateDebut, dateFin);
 
-            // Tableau des ventes
-            PdfPTable table = new PdfPTable(5);
-            table.setWidthPercentage(100);
+            // Tableau détaillé des ventes
+            ajouterTableauVentes(document, ventes);
 
-            Stream.of("Date", "Client", "Produits", "Total", "Statut")
-                .forEach(columnTitle -> {
-                    PdfPCell header = new PdfPCell();
-                    header.setBackgroundColor(BaseColor.LIGHT_GRAY);
-                    header.setBorderWidth(2);
-                    header.setPhrase(new Phrase(columnTitle));
-                    table.addCell(header);
-                });
+            // Graphiques et visualisations
+            ajouterVisualisationsVentes(document, stats);
 
-            for (Vente v : ventes) {
-                table.addCell(v.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-                table.addCell(sanitizeInput(v.getClient() != null ? v.getClient().getNom() : "Vente comptant"));
-                table.addCell(String.valueOf(v.getLignes().size()));
-                table.addCell(String.format("%.2f €", v.getMontantTotal()));
-                table.addCell(v.getStatut().toString());
-            }
-
-            document.add(table);
             document.close();
             LOGGER.info("Rapport des ventes généré avec succès: " + cheminFichier);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport des ventes", e);
             throw new RuntimeException("Erreur lors de la génération du rapport des ventes", e);
+        }
+    }
+
+    private static void ajouterEnTeteRapport(Document document, String titre, LocalDate dateDebut, LocalDate dateFin) 
+            throws DocumentException, IOException {
+        Font titleFont = new Font(BaseFont.createFont(), 16, Font.BOLD);
+        Paragraph header = new Paragraph(titre, titleFont);
+        header.setAlignment(Element.ALIGN_CENTER);
+        document.add(header);
+
+        Paragraph period = new Paragraph("Période: du " + 
+            dateDebut.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) +
+            " au " + dateFin.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        period.setAlignment(Element.ALIGN_CENTER);
+        document.add(period);
+        document.add(Chunk.NEWLINE);
+    }
+
+    private static void ajouterStatistiquesVentes(Document document, Map<String, Object> stats) 
+            throws DocumentException {
+        Font sectionFont = new Font(BaseFont.createFont(), 14, Font.BOLD);
+
+        // Chiffres clés
+        document.add(new Paragraph("Chiffres Clés:", sectionFont));
+        document.add(new Paragraph("Chiffre d'affaires total: " + 
+            String.format("%.2f €", ((Number)stats.get("chiffreAffaires")).doubleValue())));
+        document.add(new Paragraph("Nombre total de ventes: " + stats.get("nombreVentes")));
+        document.add(new Paragraph("Panier moyen: " + 
+            String.format("%.2f €", ((Number)stats.get("panierMoyen")).doubleValue())));
+
+        // Répartition par mode de paiement
+        document.add(new Paragraph("Répartition par Mode de Paiement:", sectionFont));
+        Map<ModePaiement, DoubleSummaryStatistics> statsParMode = 
+            (Map<ModePaiement, DoubleSummaryStatistics>) stats.get("statsParMode");
+        for (Map.Entry<ModePaiement, DoubleSummaryStatistics> entry : statsParMode.entrySet()) {
+            document.add(new Paragraph(String.format("%s: %.2f € (%d ventes)", 
+                entry.getKey(), 
+                entry.getValue().getSum(),
+                entry.getValue().getCount())));
+        }
+        document.add(Chunk.NEWLINE);
+    }
+
+    private static void ajouterAnalyseTendances(Document document, List<Vente> ventes, 
+            LocalDate dateDebut, LocalDate dateFin) throws DocumentException {
+        Font sectionFont = new Font(BaseFont.createFont(), 14, Font.BOLD);
+        document.add(new Paragraph("Analyse des Tendances:", sectionFont));
+
+        // Analyse par période
+        Map<LocalDate, List<Vente>> ventesParJour = ventes.stream()
+            .collect(Collectors.groupingBy(v -> v.getDate().toLocalDate()));
+
+        // Calculer les moyennes et tendances
+        DoubleSummaryStatistics statsJournalieres = ventesParJour.values().stream()
+            .mapToDouble(list -> list.stream()
+                .mapToDouble(Vente::getMontantTotal)
+                .sum())
+            .summaryStatistics();
+
+        document.add(new Paragraph("Statistiques Journalières:"));
+        document.add(new Paragraph(String.format("- Moyenne: %.2f €", statsJournalieres.getAverage())));
+        document.add(new Paragraph(String.format("- Maximum: %.2f €", statsJournalieres.getMax())));
+        document.add(new Paragraph(String.format("- Minimum: %.2f €", statsJournalieres.getMin())));
+        document.add(Chunk.NEWLINE);
+    }
+
+    private static void ajouterTableauVentes(Document document, List<Vente> ventes) 
+            throws DocumentException {
+        PdfPTable table = new PdfPTable(5);
+        table.setWidthPercentage(100);
+
+        // En-têtes
+        Stream.of("Date", "Client", "Produits", "Total", "Statut")
+            .forEach(columnTitle -> {
+                PdfPCell header = new PdfPCell();
+                header.setBackgroundColor(BaseColor.LIGHT_GRAY);
+                header.setBorderWidth(2);
+                header.setPhrase(new Phrase(columnTitle));
+                table.addCell(header);
+            });
+
+        // Données
+        for (Vente v : ventes) {
+            table.addCell(v.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            table.addCell(sanitizeInput(v.getClient() != null ? v.getClient().getNom() : "Vente comptant"));
+            table.addCell(String.valueOf(v.getLignes().size()));
+            table.addCell(String.format("%.2f €", v.getMontantTotal()));
+            table.addCell(v.getStatut().toString());
+        }
+
+        document.add(table);
+        document.add(Chunk.NEWLINE);
+    }
+
+    private static void ajouterVisualisationsVentes(Document document, Map<String, Object> stats) 
+            throws DocumentException {
+        Font sectionFont = new Font(BaseFont.createFont(), 14, Font.BOLD);
+        document.add(new Paragraph("Analyses Supplémentaires:", sectionFont));
+
+        // Analyse de la répartition des ventes
+        Map<String, Double> repartition = (Map<String, Double>) stats.get("repartitionVentes");
+        if (repartition != null) {
+            document.add(new Paragraph("Répartition des Ventes:"));
+            for (Map.Entry<String, Double> entry : repartition.entrySet()) {
+                document.add(new Paragraph(String.format("- %s: %.1f%%", 
+                    entry.getKey(), entry.getValue())));
+            }
+        }
+
+        // Alertes et recommandations
+        List<String> alertes = (List<String>) stats.get("alertes");
+        if (alertes != null && !alertes.isEmpty()) {
+            document.add(new Paragraph("Alertes et Recommandations:", sectionFont));
+            for (String alerte : alertes) {
+                document.add(new Paragraph("- " + alerte));
+            }
         }
     }
 
