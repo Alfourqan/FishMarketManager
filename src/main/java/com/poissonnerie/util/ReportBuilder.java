@@ -5,7 +5,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.ChartUtils;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
 import com.itextpdf.text.*;
@@ -28,10 +28,10 @@ public class ReportBuilder {
     private static final Logger LOGGER = Logger.getLogger(ReportBuilder.class.getName());
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final NumberFormat CURRENCY_FORMATTER = NumberFormat.getCurrencyInstance(Locale.FRANCE);
-    private static final Font TITLE_FONT = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD);
-    private static final Font SUBTITLE_FONT = new Font(Font.FontFamily.HELVETICA, 14, Font.BOLD);
-    private static final Font NORMAL_FONT = new Font(Font.FontFamily.HELVETICA, 12, Font.NORMAL);
-    private static final Font SMALL_FONT = new Font(Font.FontFamily.HELVETICA, 10, Font.NORMAL);
+    private static final com.itextpdf.text.Font TITLE_FONT = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 18, com.itextpdf.text.Font.BOLD);
+    private static final com.itextpdf.text.Font SUBTITLE_FONT = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 14, com.itextpdf.text.Font.BOLD);
+    private static final com.itextpdf.text.Font NORMAL_FONT = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.NORMAL);
+    private static final com.itextpdf.text.Font SMALL_FONT = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10, com.itextpdf.text.Font.NORMAL);
 
     public void genererRapportStocks(String cheminFichier, List<Produit> produits, String categorie, 
                                      boolean formatPDF) {
@@ -110,22 +110,21 @@ public class ReportBuilder {
         document.open();
 
         // En-tête du rapport
-        Font titleFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD);
-        document.add(new Paragraph("Rapport des Stocks", titleFont));
+        document.add(new Paragraph("Rapport des Stocks", TITLE_FONT));
         document.add(new Paragraph("Généré le " + LocalDateTime.now().format(DATE_FORMATTER)));
         document.add(Chunk.NEWLINE);
 
         // Statistiques globales
-        document.add(new Paragraph("Statistiques Globales"));
+        document.add(new Paragraph("Statistiques globales", SUBTITLE_FONT));
         document.add(new Paragraph("Total produits: " + stats.get("totalProduits")));
-        document.add(new Paragraph("Valeur totale: " + String.format("%.2f €", stats.get("valeurTotaleStock"))));
+        document.add(new Paragraph("Valeur totale: " + CURRENCY_FORMATTER.format(stats.get("valeurTotaleStock"))));
         document.add(Chunk.NEWLINE);
 
         // Produits sous alerte
         @SuppressWarnings("unchecked")
         List<Produit> produitsSousAlerte = (List<Produit>) stats.get("produitsSousAlerte");
         if (produitsSousAlerte != null && !produitsSousAlerte.isEmpty()) {
-            document.add(new Paragraph("Produits sous seuil d'alerte"));
+            document.add(new Paragraph("Produits sous seuil d'alerte", SUBTITLE_FONT));
             PdfPTable table = new PdfPTable(4);
             table.setWidthPercentage(100);
             ajouterEnteteTableauProduits(table);
@@ -149,7 +148,7 @@ public class ReportBuilder {
 
         // En-tête
         Row headerRow = sheet.createRow(0);
-        String[] headers = {"Référence", "Désignation", "Stock", "Prix", "Catégorie"};
+        String[] headers = {"ID", "Nom", "Stock", "Prix", "Catégorie"};
         for (int i = 0; i < headers.length; i++) {
             Cell cell = headerRow.createCell(i);
             cell.setCellValue(headers[i]);
@@ -179,9 +178,9 @@ public class ReportBuilder {
     }
 
     private void ajouterEnteteTableauProduits(PdfPTable table) {
-        String[] headers = {"Référence", "Désignation", "Stock", "Prix"};
+        String[] headers = {"ID", "Nom", "Stock", "Prix"};
         for (String header : headers) {
-            PdfPCell cell = new PdfPCell(new Phrase(header));
+            PdfPCell cell = new PdfPCell(new Phrase(header, SMALL_FONT));
             cell.setHorizontalAlignment(Element.ALIGN_CENTER);
             cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
             table.addCell(cell);
@@ -189,10 +188,10 @@ public class ReportBuilder {
     }
 
     private void ajouterLigneProduit(PdfPTable table, Produit produit) {
-        table.addCell(produit.getReference());
-        table.addCell(produit.getDesignation());
+        table.addCell(String.valueOf(produit.getId()));
+        table.addCell(produit.getNom());
         table.addCell(String.valueOf(produit.getStock()));
-        table.addCell(String.format("%.2f €", produit.getPrixVente()));
+        table.addCell(CURRENCY_FORMATTER.format(produit.getPrixVente()));
     }
 
     private CellStyle creerStyleEnTete(Workbook workbook) {
@@ -203,7 +202,7 @@ public class ReportBuilder {
         style.setBorderTop(BorderStyle.THIN);
         style.setBorderRight(BorderStyle.THIN);
         style.setBorderLeft(BorderStyle.THIN);
-        Font font = workbook.createFont();
+        org.apache.poi.ss.usermodel.Font font = workbook.createFont();
         font.setBold(true);
         style.setFont(font);
         return style;
@@ -220,11 +219,11 @@ public class ReportBuilder {
 
     private void ajouterLigneProduitExcel(Row row, Produit produit, CellStyle style) {
         Cell cell = row.createCell(0);
-        cell.setCellValue(produit.getReference());
+        cell.setCellValue(produit.getId());
         cell.setCellStyle(style);
 
         cell = row.createCell(1);
-        cell.setCellValue(produit.getDesignation());
+        cell.setCellValue(produit.getNom());
         cell.setCellStyle(style);
 
         cell = row.createCell(2);
@@ -258,8 +257,7 @@ public class ReportBuilder {
         int width = 600;
         int height = 400;
         File chartFile = new File(cheminFichier);
-        ChartUtilities.saveChartAsJPEG(chartFile, chart, width, height);
-
+        ChartUtils.saveChartAsJPEG(chartFile, chart, width, height);
     }
 
     private void genererRapportVentesPDF(String cheminFichier, Map<String, Object> stats, 
@@ -310,10 +308,10 @@ public class ReportBuilder {
 
     private void genererRapportVentesExcel(String cheminFichier, Map<String, Object> stats,
                                          LocalDate debut, LocalDate fin) throws Exception {
-        // Implement Excel report generation for sales
+        // TODO: Implement Excel report generation for sales data
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Rapport Ventes");
-        // Add code to populate the sheet with sales data
+        // Add implementation here
 
         try (FileOutputStream fileOut = new FileOutputStream(cheminFichier)) {
             workbook.write(fileOut);
@@ -379,10 +377,10 @@ public class ReportBuilder {
     }
 
     private void genererRapportCreancesExcel(String cheminFichier, Map<String, Object> stats) throws Exception {
-        // Implement Excel report generation for receivables
+        // TODO: Implement Excel report generation for receivables
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Rapport Créances");
-        // Add code to populate the sheet with receivables data
+        // Add implementation here
 
         try (FileOutputStream fileOut = new FileOutputStream(cheminFichier)) {
             workbook.write(fileOut);
@@ -455,10 +453,10 @@ public class ReportBuilder {
 
     private void genererRapportFinancierExcel(String cheminFichier, Map<String, Object> stats,
                                              LocalDate debut, LocalDate fin) throws Exception {
-        // Implement Excel report generation for finances
+        // TODO: Implement Excel report generation for finances
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Rapport Financier");
-        // Add code to populate the sheet with financial data
+        // Add implementation here
 
         try (FileOutputStream fileOut = new FileOutputStream(cheminFichier)) {
             workbook.write(fileOut);
