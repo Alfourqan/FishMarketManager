@@ -14,6 +14,13 @@ import java.util.logging.Level;
 import java.util.concurrent.TimeUnit;
 import java.util.Properties;
 import org.sqlite.SQLiteConfig;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.util.regex.Pattern;
+import java.sql.PreparedStatement;
+import javax.sql.DataSource;
+import org.sqlite.SQLiteDataSource;
 
 public class DatabaseManager {
     private static final Logger LOGGER = Logger.getLogger(DatabaseManager.class.getName());
@@ -21,9 +28,34 @@ public class DatabaseManager {
     private static final String DB_URL = "jdbc:sqlite:" + DB_FILE;
     private static Connection connection;
     private static long lastConnectionCheck = 0;
-    private static final long CONNECTION_TIMEOUT = TimeUnit.MINUTES.toMillis(5);
-    private static final int LOGIN_TIMEOUT_SECONDS = 30;
+    private static final long CONNECTION_TIMEOUT = TimeUnit.MINUTES.toMillis(2); // Réduit à 2 minutes
+    private static final int LOGIN_TIMEOUT_SECONDS = 15; // Réduit à 15 secondes
     private static final Object LOCK = new Object();
+    private static final Pattern SQL_INJECTION_PATTERN = Pattern.compile("[';\"\\-\\/*]");
+    private static SQLiteDataSource dataSource;
+
+    static {
+        initializeDataSource();
+    }
+
+    private static void initializeDataSource() {
+        try {
+            SQLiteConfig config = new SQLiteConfig();
+            config.enforceForeignKeys(true);
+            config.setBusyTimeout(15000); // 15 secondes
+            config.setReadOnly(false);
+            config.setJournalMode(SQLiteConfig.JournalMode.WAL);
+
+            dataSource = new SQLiteDataSource(config);
+            dataSource.setUrl(DB_URL);
+            dataSource.setLoginTimeout(LOGIN_TIMEOUT_SECONDS);
+
+            LOGGER.info("DataSource initialisé avec succès");
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation du DataSource", e);
+            throw new RuntimeException("Impossible d'initialiser le DataSource", e);
+        }
+    }
 
     public static synchronized Connection getConnection() throws SQLException {
         synchronized (LOCK) {
@@ -40,13 +72,11 @@ public class DatabaseManager {
         }
 
         try {
-            // Vérifier si la connexion est fermée ou invalide
             if (connection.isClosed() || !connection.isValid(5)) {
                 LOGGER.warning("Connexion détectée comme invalide ou fermée");
                 return true;
             }
 
-            // Vérifier le timeout de la connexion
             long currentTime = System.currentTimeMillis();
             if (currentTime - lastConnectionCheck > CONNECTION_TIMEOUT) {
                 LOGGER.info("Timeout de connexion atteint, nouvelle connexion requise");
@@ -62,51 +92,39 @@ public class DatabaseManager {
 
     private static void initializeConnection() throws SQLException {
         LOGGER.info("Initialisation d'une nouvelle connexion à la base de données");
-        closeConnection(); // Fermer la connexion existante si elle existe
+        closeConnection();
 
         try {
-            Class.forName("org.sqlite.JDBC");
-
-            // Configuration de SQLite
-            SQLiteConfig config = new SQLiteConfig();
-            config.enforceForeignKeys(true);
-            config.setBusyTimeout(30000); // 30 secondes
-            config.setReadOnly(false);
-            config.setJournalMode(SQLiteConfig.JournalMode.WAL);
-
-            // Configuration des timeouts
-            Properties props = config.toProperties();
-            props.setProperty("timeout", String.valueOf(LOGIN_TIMEOUT_SECONDS));
-
-            // Vérifier si la base de données existe
-            boolean needInit = !new File(DB_FILE).exists();
-
-            // Établir la connexion avec les propriétés configurées
-            connection = DriverManager.getConnection(DB_URL, props);
+            connection = dataSource.getConnection();
             lastConnectionCheck = System.currentTimeMillis();
 
-            // Configuration de la connexion
             connection.setAutoCommit(true);
 
-            // Active les clés étrangères
             try (Statement stmt = connection.createStatement()) {
                 stmt.execute("PRAGMA foreign_keys = ON");
-                stmt.execute("PRAGMA busy_timeout = 30000");
+                stmt.execute("PRAGMA busy_timeout = 15000");
                 LOGGER.info("Configuration des PRAGMA SQLite effectuée");
             }
 
-            if (needInit) {
+            if (!isDatabaseInitialized()) {
                 LOGGER.info("Nouvelle base de données détectée, initialisation...");
                 initDatabase();
             }
 
             LOGGER.info("Connexion à la base de données établie avec succès");
-        } catch (ClassNotFoundException e) {
-            LOGGER.log(Level.SEVERE, "Driver SQLite non trouvé", e);
-            throw new SQLException("Driver SQLite non trouvé", e);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de la connexion", e);
             throw e;
+        }
+    }
+
+    private static boolean isDatabaseInitialized() {
+        try (PreparedStatement stmt = connection.prepareStatement(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='configurations'")) {
+            return stmt.executeQuery().next();
+        } catch (SQLException e) {
+            LOGGER.log(Level.WARNING, "Erreur lors de la vérification de l'initialisation de la base de données", e);
+            return false;
         }
     }
 
@@ -116,7 +134,6 @@ public class DatabaseManager {
         try (Connection conn = getConnection()) {
             conn.setAutoCommit(false);
             try {
-                // Lecture du fichier schema.sql
                 String schema = new BufferedReader(
                     new InputStreamReader(
                         DatabaseManager.class.getClassLoader().getResourceAsStream("schema.sql"),
@@ -128,12 +145,12 @@ public class DatabaseManager {
                     throw new SQLException("Le fichier schema.sql est vide ou n'a pas pu être lu");
                 }
 
-                // Exécution des requêtes SQL
-                try (Statement stmt = conn.createStatement()) {
-                    // Activation des clés étrangères
-                    stmt.execute("PRAGMA foreign_keys = ON");
+                // Validation du schéma SQL
+                if (SQL_INJECTION_PATTERN.matcher(schema).find()) {
+                    throw new SecurityException("Le schéma SQL contient des caractères non autorisés");
+                }
 
-                    // Exécution de chaque requête SQL
+                try (Statement stmt = conn.createStatement()) {
                     for (String sql : schema.split(";")) {
                         sql = sql.trim();
                         if (!sql.isEmpty()) {
@@ -189,6 +206,15 @@ public class DatabaseManager {
                 LOGGER.log(Level.SEVERE, "Erreur lors de la réinitialisation de la connexion", e);
                 throw new RuntimeException("Erreur lors de la réinitialisation de la connexion", e);
             }
+        }
+    }
+
+    public static void validateSqlInput(String input) {
+        if (input == null || input.trim().isEmpty()) {
+            throw new IllegalArgumentException("L'entrée SQL ne peut pas être vide");
+        }
+        if (SQL_INJECTION_PATTERN.matcher(input).find()) {
+            throw new SecurityException("L'entrée SQL contient des caractères non autorisés");
         }
     }
 }
