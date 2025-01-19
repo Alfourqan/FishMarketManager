@@ -5,9 +5,6 @@ import com.poissonnerie.model.Produit;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import org.kordamp.ikonli.materialdesign.MaterialDesign;
-import org.kordamp.ikonli.Ikon;
-import org.kordamp.ikonli.swing.FontIcon;
 
 public class ProduitViewSwing {
     private final JPanel mainPanel;
@@ -20,17 +17,12 @@ public class ProduitViewSwing {
         mainPanel = new JPanel(new BorderLayout(10, 10));
         controller = new ProduitController();
 
-        // Création du modèle de table avec icône de statut
-        String[] columnNames = {"", "Nom", "Catégorie", "Prix Achat (€)", "Prix Vente (€)", "Marge (%)", "Stock", "Seuil d'alerte"};
+        // Création du modèle de table
+        String[] columnNames = {"Nom", "Catégorie", "Prix Achat (€)", "Prix Vente (€)", "Marge (%)", "Stock", "Seuil d'alerte"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
-            }
-
-            @Override
-            public Class<?> getColumnClass(int column) {
-                return column == 0 ? Icon.class : Object.class;
             }
         };
         tableProduits = new JTable(tableModel);
@@ -41,7 +33,6 @@ public class ProduitViewSwing {
     }
 
     private void setupTableStyle() {
-        // Style moderne pour la table
         tableProduits.setShowGrid(true);
         tableProduits.setGridColor(new Color(230, 230, 230));
         tableProduits.setBackground(Color.WHITE);
@@ -52,10 +43,6 @@ public class ProduitViewSwing {
         tableProduits.setRowHeight(40);
         tableProduits.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         tableProduits.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
-
-        // Ajustement des colonnes
-        tableProduits.getColumnModel().getColumn(0).setMaxWidth(30);
-        tableProduits.getColumnModel().getColumn(0).setMinWidth(30);
     }
 
     private void initializeComponents() {
@@ -74,7 +61,7 @@ public class ProduitViewSwing {
         contentPanel.add(headerPanel, BorderLayout.NORTH);
         contentPanel.add(actionPanel, BorderLayout.CENTER);
 
-        // ScrollPane pour la table avec style moderne
+        // ScrollPane pour la table
         JScrollPane scrollPane = new JScrollPane(tableProduits);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getViewport().setBackground(Color.WHITE);
@@ -87,12 +74,10 @@ public class ProduitViewSwing {
         JPanel headerPanel = new JPanel(new BorderLayout(15, 0));
         headerPanel.setOpaque(false);
 
-        // Titre avec icône
         JLabel titleLabel = new JLabel("Gestion des Produits");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
         titleLabel.setForeground(new Color(33, 33, 33));
 
-        // Barre de recherche
         searchField = createSearchField();
 
         headerPanel.add(titleLabel, BorderLayout.WEST);
@@ -110,11 +95,9 @@ public class ProduitViewSwing {
         ));
         field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 
-        // Placeholder et style
         field.setText("Rechercher un produit...");
         field.setForeground(Color.GRAY);
 
-        // Gestionnaire d'événements pour le placeholder
         field.addFocusListener(new java.awt.event.FocusAdapter() {
             public void focusGained(java.awt.event.FocusEvent evt) {
                 if (field.getText().equals("Rechercher un produit...")) {
@@ -130,15 +113,6 @@ public class ProduitViewSwing {
             }
         });
 
-        // Événement de recherche (à implémenter)
-        field.addActionListener(e -> {
-            String searchTerm = field.getText();
-            if (!searchTerm.equals("Rechercher un produit...")) {
-                // TODO: Implémenter la recherche
-                // updateTableWithSearch(searchTerm);
-            }
-        });
-
         return field;
     }
 
@@ -146,19 +120,16 @@ public class ProduitViewSwing {
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         actionPanel.setOpaque(false);
 
-        // Création des boutons avec style moderne
-        JButton ajouterBtn = createStyledButton("Nouveau", MaterialDesign.MDI_PLUS_BOX, new Color(76, 175, 80));
-        JButton modifierBtn = createStyledButton("Modifier", MaterialDesign.MDI_PENCIL_BOX, new Color(33, 150, 243));
-        JButton supprimerBtn = createStyledButton("Supprimer", MaterialDesign.MDI_MINUS_BOX, new Color(244, 67, 54));
-        JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH, new Color(156, 39, 176));
+        JButton ajouterBtn = createStyledButton("Nouveau", new Color(76, 175, 80));
+        JButton modifierBtn = createStyledButton("Modifier", new Color(33, 150, 243));
+        JButton supprimerBtn = createStyledButton("Supprimer", new Color(244, 67, 54));
+        JButton actualiserBtn = createStyledButton("Actualiser", new Color(156, 39, 176));
 
-        // Ajout des gestionnaires d'événements
         ajouterBtn.addActionListener(e -> showProduitDialog(null));
         modifierBtn.addActionListener(e -> modifierProduitSelectionne());
         supprimerBtn.addActionListener(e -> supprimerProduitSelectionne());
         actualiserBtn.addActionListener(e -> loadData());
 
-        // Ajout des boutons au panel
         actionPanel.add(ajouterBtn);
         actionPanel.add(modifierBtn);
         actionPanel.add(supprimerBtn);
@@ -193,13 +164,8 @@ public class ProduitViewSwing {
         }
     }
 
-    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
-        FontIcon icon = FontIcon.of(iconCode);
-        icon.setIconSize(18);
-        icon.setIconColor(Color.WHITE);
-
+    private JButton createStyledButton(String text, Color color) {
         JButton button = new JButton(text);
-        button.setIcon(icon);
         button.setFont(new Font("Segoe UI", Font.BOLD, 13));
         button.setBackground(color);
         button.setForeground(Color.WHITE);
@@ -208,7 +174,6 @@ public class ProduitViewSwing {
         button.setMargin(new Insets(8, 16, 8, 16));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // Effet de survol
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(color.darker());
@@ -219,17 +184,6 @@ public class ProduitViewSwing {
         });
 
         return button;
-    }
-
-    private JTextField createStyledTextField() {
-        JTextField field = new JTextField(20);
-        field.setPreferredSize(new Dimension(250, 30));
-        field.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200)),
-            BorderFactory.createEmptyBorder(5, 8, 5, 8)
-        ));
-        field.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        return field;
     }
 
     private void showProduitDialog(Produit produit) {
@@ -244,7 +198,6 @@ public class ProduitViewSwing {
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Champs du formulaire avec style moderne
         JTextField nomField = createStyledTextField();
         JComboBox<String> categorieCombo = new JComboBox<>(new String[]{"Frais", "Surgelé", "Transformé"});
         JTextField prixAchatField = createStyledTextField();
@@ -252,7 +205,6 @@ public class ProduitViewSwing {
         JTextField stockField = createStyledTextField();
         JTextField seuilField = createStyledTextField();
 
-        // Layout
         addFormField(panel, gbc, "Nom:", nomField, 0);
         addFormField(panel, gbc, "Catégorie:", categorieCombo, 1);
         addFormField(panel, gbc, "Prix d'achat (€):", prixAchatField, 2);
@@ -260,7 +212,6 @@ public class ProduitViewSwing {
         addFormField(panel, gbc, "Stock:", stockField, 4);
         addFormField(panel, gbc, "Seuil d'alerte:", seuilField, 5);
 
-        // Pré-remplissage si modification
         if (produit != null) {
             nomField.setText(produit.getNom());
             categorieCombo.setSelectedItem(produit.getCategorie());
@@ -270,12 +221,10 @@ public class ProduitViewSwing {
             seuilField.setText(String.valueOf(produit.getSeuilAlerte()));
         }
 
-        // Boutons avec style moderne
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
-        JButton okButton = createStyledButton("Enregistrer", MaterialDesign.MDI_CONTENT_SAVE, new Color(76, 175, 80));
-        JButton cancelButton = createStyledButton("Annuler", MaterialDesign.MDI_CLOSE, new Color(158, 158, 158));
+        JButton okButton = createStyledButton("Enregistrer", new Color(76, 175, 80));
+        JButton cancelButton = createStyledButton("Annuler", new Color(158, 158, 158));
 
-        // Gestionnaires d'événements
         okButton.addActionListener(evt -> {
             try {
                 validateAndSaveProduit(produit, nomField, categorieCombo, prixAchatField,
@@ -291,7 +240,6 @@ public class ProduitViewSwing {
         buttonPanel.add(okButton);
         buttonPanel.add(cancelButton);
 
-        // Finalisation du dialog
         JPanel contentPane = new JPanel(new BorderLayout(10, 10));
         contentPane.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
         contentPane.add(panel, BorderLayout.CENTER);
@@ -302,6 +250,17 @@ public class ProduitViewSwing {
         dialog.setLocationRelativeTo(mainPanel);
         dialog.setResizable(false);
         dialog.setVisible(true);
+    }
+
+    private JTextField createStyledTextField() {
+        JTextField field = new JTextField(20);
+        field.setPreferredSize(new Dimension(250, 30));
+        field.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(5, 8, 5, 8)
+        ));
+        field.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        return field;
     }
 
     private void addFormField(JPanel panel, GridBagConstraints gbc, String labelText,
@@ -330,7 +289,6 @@ public class ProduitViewSwing {
         String stockText = stockField.getText().trim();
         String seuilText = seuilField.getText().trim();
 
-        // Validation
         if (nom.isEmpty()) throw new IllegalArgumentException("Le nom est obligatoire");
 
         double prixAchat = validateDouble(prixAchatText, "Prix d'achat invalide");
@@ -346,7 +304,6 @@ public class ProduitViewSwing {
         int seuil = validateInt(seuilText, "Seuil d'alerte invalide");
         if (seuil < 0) throw new IllegalArgumentException("Le seuil d'alerte ne peut pas être négatif");
 
-        // Sauvegarde
         if (produit == null) {
             controller.ajouterProduit(new Produit(0, nom, categorie, prixAchat, prixVente, stock, seuil));
         } else {
@@ -400,17 +357,10 @@ public class ProduitViewSwing {
     private void refreshTable() {
         tableModel.setRowCount(0);
         for (Produit produit : controller.getProduits()) {
-            FontIcon icon;
-            if (produit.getStock() <= produit.getSeuilAlerte()) {
-                icon = FontIcon.of(MaterialDesign.MDI_ALERT_CIRCLE);
-                icon.setIconColor(new Color(220, 53, 69)); // Rouge pour stock bas
-            } else {
-                icon = FontIcon.of(MaterialDesign.MDI_PACKAGE_VARIANT);
-                icon.setIconColor(new Color(40, 167, 69)); // Vert pour stock normal
-            }
+            Color textColor = produit.getStock() <= produit.getSeuilAlerte() ?
+                new Color(220, 53, 69) : new Color(40, 167, 69);
 
             tableModel.addRow(new Object[]{
-                icon,
                 produit.getNom(),
                 produit.getCategorie(),
                 String.format("%.2f €", produit.getPrixAchat()),

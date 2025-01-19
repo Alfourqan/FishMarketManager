@@ -130,7 +130,7 @@ public class AccueilViewSwing {
 
     private void updateProduitsRupture() {
         long produitsRupture = produitController.getProduits().stream()
-            .filter(p -> p.getQuantite() == 0)
+            .filter(p -> p.getStock() <= 0)
             .count();
         produitsRuptureLabel.setText(String.valueOf(produitsRupture));
     }

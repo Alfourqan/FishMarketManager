@@ -12,8 +12,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import org.kordamp.ikonli.materialdesign.MaterialDesign;
-import org.kordamp.ikonli.swing.FontIcon;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -33,16 +31,11 @@ public class InventaireViewSwing {
         LOGGER.info("Initialisation de InventaireViewSwing");
 
         // Configuration de la table
-        String[] columnNames = {"", "Nom", "Catégorie", "Stock actuel", "Seuil d'alerte", "Actions"};
+        String[] columnNames = {"Nom", "Catégorie", "Stock actuel", "Seuil d'alerte", "Actions"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
-            }
-
-            @Override
-            public Class<?> getColumnClass(int column) {
-                return column == 0 ? Icon.class : Object.class;
             }
         };
 
@@ -92,8 +85,8 @@ public class InventaireViewSwing {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonPanel.setOpaque(false);
 
-        // Création des boutons avec style moderne
-        JButton refreshBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH, new Color(156, 39, 176));
+        // Création des boutons
+        JButton refreshBtn = createStyledButton("Actualiser", new Color(156, 39, 176));
         buttonPanel.add(refreshBtn);
 
         // Label de statut
@@ -105,8 +98,7 @@ public class InventaireViewSwing {
 
         // Configuration de la table
         JScrollPane scrollPane = new JScrollPane(tableInventaire);
-        tableInventaire.getColumnModel().getColumn(0).setMaxWidth(30);  // Colonne icône
-        tableInventaire.getColumnModel().getColumn(5).setMaxWidth(150); // Colonne actions
+        tableInventaire.getColumnModel().getColumn(4).setMaxWidth(150); // Colonne actions
 
         // Événements
         refreshBtn.addActionListener(e -> loadData());
@@ -147,8 +139,8 @@ public class InventaireViewSwing {
 
             // Boutons avec style moderne
             JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-            JButton okButton = createStyledButton("Valider", MaterialDesign.MDI_CHECK_CIRCLE, new Color(76, 175, 80));
-            JButton cancelButton = createStyledButton("Annuler", MaterialDesign.MDI_CLOSE_CIRCLE, new Color(244, 67, 54));
+            JButton okButton = createStyledButton("Valider", new Color(76, 175, 80));
+            JButton cancelButton = createStyledButton("Annuler", new Color(244, 67, 54));
 
             okButton.addActionListener(e -> {
                 try {
@@ -203,13 +195,8 @@ public class InventaireViewSwing {
         }
     }
 
-    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
-        FontIcon icon = FontIcon.of(iconCode);
-        icon.setIconSize(18);
-        icon.setIconColor(Color.WHITE);
-
+    private JButton createStyledButton(String text, Color color) {
         JButton button = new JButton(text);
-        button.setIcon(icon);
         button.setFont(new Font("Segoe UI", Font.BOLD, 13));
         button.setBackground(color);
         button.setForeground(Color.WHITE);
@@ -239,115 +226,17 @@ public class InventaireViewSwing {
         });
     }
 
-    private class ButtonRenderer extends JButton implements javax.swing.table.TableCellRenderer {
-        public ButtonRenderer() {
-            setOpaque(true);
-        }
-
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value,
-                                                     boolean isSelected, boolean hasFocus,
-                                                     int row, int column) {
-            if (value instanceof JButton) {
-                JButton btn = (JButton) value;
-                setText(btn.getText());
-                setIcon(btn.getIcon());
-                setBackground(btn.getBackground());
-                setForeground(btn.getForeground());
-            }
-            return this;
-        }
-    }
-
-    private class ButtonEditor extends DefaultCellEditor {
-        protected JButton button;
-        private String label;
-        private boolean isPushed;
-        private ActionListener actionListener;
-
-        public ButtonEditor() {
-            super(new JTextField());
-            button = new JButton();
-            button.setOpaque(true);
-            button.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    fireEditingStopped();
-                }
-            });
-        }
-
-        @Override
-        public Component getTableCellEditorComponent(JTable table, Object value,
-                                                  boolean isSelected, int row, int column) {
-            if (value instanceof JButton) {
-                JButton btn = (JButton) value;
-                button.setText(btn.getText());
-                button.setIcon(btn.getIcon());
-                button.setBackground(btn.getBackground());
-                button.setForeground(btn.getForeground());
-
-                // Supprimer l'ancien listener s'il existe
-                if (actionListener != null) {
-                    button.removeActionListener(actionListener);
-                }
-
-                // Récupérer le nouveau listener
-                ActionListener[] listeners = btn.getActionListeners();
-                if (listeners.length > 0) {
-                    actionListener = listeners[0];
-                    button.addActionListener(actionListener);
-                }
-            }
-            isPushed = true;
-            return button;
-        }
-
-        @Override
-        public Object getCellEditorValue() {
-            if (isPushed) {
-                // Exécuter l'action après que l'édition soit terminée
-                if (actionListener != null) {
-                    actionListener.actionPerformed(new ActionEvent(button, ActionEvent.ACTION_PERFORMED, ""));
-                }
-            }
-            isPushed = false;
-            return button;
-        }
-
-        @Override
-        public boolean stopCellEditing() {
-            isPushed = false;
-            return super.stopCellEditing();
-        }
-    }
-
     private void refreshTable() {
         LOGGER.info("Rafraîchissement de la table d'inventaire");
         SwingUtilities.invokeLater(() -> {
             try {
                 tableModel.setRowCount(0);
                 for (Produit produit : produitController.getProduits()) {
-                    // Icône d'état
-                    FontIcon icon;
-                    if (produit.getStock() == 0) {
-                        icon = FontIcon.of(MaterialDesign.MDI_ALERT);
-                        icon.setIconColor(new Color(220, 53, 69));
-                    } else if (produit.estStockBas()) {
-                        icon = FontIcon.of(MaterialDesign.MDI_ALERT_CIRCLE);
-                        icon.setIconColor(new Color(255, 193, 7));
-                    } else {
-                        icon = FontIcon.of(MaterialDesign.MDI_CHECKBOX_MARKED_CIRCLE);
-                        icon.setIconColor(new Color(40, 167, 69));
-                    }
-
-                    // Créer un nouveau bouton pour chaque ligne
-                    JButton ajusterBtn = createStyledButton("Ajuster", MaterialDesign.MDI_PENCIL, new Color(255, 165, 0));
+                    JButton ajusterBtn = createStyledButton("Ajuster", new Color(255, 165, 0));
                     final Produit produitFinal = produit;
                     ajusterBtn.addActionListener(e -> showAjustementDialog(produitFinal));
 
                     tableModel.addRow(new Object[]{
-                        icon,
                         produit.getNom(),
                         produit.getCategorie(),
                         produit.getStock(),
@@ -392,5 +281,87 @@ public class InventaireViewSwing {
 
     public JPanel getMainPanel() {
         return mainPanel;
+    }
+
+    // Classes internes pour le rendu des boutons dans la table
+    private class ButtonRenderer extends JButton implements javax.swing.table.TableCellRenderer {
+        public ButtonRenderer() {
+            setOpaque(true);
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                                                     boolean isSelected, boolean hasFocus,
+                                                     int row, int column) {
+            if (value instanceof JButton) {
+                JButton btn = (JButton) value;
+                setText(btn.getText());
+                setBackground(btn.getBackground());
+                setForeground(btn.getForeground());
+            }
+            return this;
+        }
+    }
+
+    private class ButtonEditor extends DefaultCellEditor {
+        protected JButton button;
+        private String label;
+        private boolean isPushed;
+        private ActionListener actionListener;
+
+        public ButtonEditor() {
+            super(new JTextField());
+            button = new JButton();
+            button.setOpaque(true);
+            button.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    fireEditingStopped();
+                }
+            });
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value,
+                                                   boolean isSelected, int row, int column) {
+            if (value instanceof JButton) {
+                JButton btn = (JButton) value;
+                button.setText(btn.getText());
+                button.setBackground(btn.getBackground());
+                button.setForeground(btn.getForeground());
+
+                // Supprimer l'ancien listener s'il existe
+                if (actionListener != null) {
+                    button.removeActionListener(actionListener);
+                }
+
+                // Récupérer le nouveau listener
+                ActionListener[] listeners = btn.getActionListeners();
+                if (listeners.length > 0) {
+                    actionListener = listeners[0];
+                    button.addActionListener(actionListener);
+                }
+            }
+            isPushed = true;
+            return button;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            if (isPushed) {
+                // Exécuter l'action après que l'édition soit terminée
+                if (actionListener != null) {
+                    actionListener.actionPerformed(new ActionEvent(button, ActionEvent.ACTION_PERFORMED, ""));
+                }
+            }
+            isPushed = false;
+            return button;
+        }
+
+        @Override
+        public boolean stopCellEditing() {
+            isPushed = false;
+            return super.stopCellEditing();
+        }
     }
 }
