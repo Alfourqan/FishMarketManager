@@ -41,6 +41,12 @@ public class CaisseViewSwing {
         mainPanel.setBackground(new Color(248, 250, 252));
         controller = new CaisseController();
 
+        // Initialisation du label de solde
+        soldeLabel = new JLabel("Solde: 0.00 €");
+        soldeLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        soldeLabel.setForeground(new Color(30, 41, 59));
+        soldeLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+
         String[] columnNames = {"Date", "Type", "Montant", "Description"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
