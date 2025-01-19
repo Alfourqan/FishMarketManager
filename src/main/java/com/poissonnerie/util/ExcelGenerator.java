@@ -49,10 +49,8 @@ public class ExcelGenerator {
 
     public static void genererRapportStocks(List<Produit> produits, Map<String, Double> statistiques, String cheminFichier) {
         try (XSSFWorkbook workbook = new XSSFWorkbook()) {
-            // Feuille principale des stocks
             XSSFSheet stockSheet = workbook.createSheet("État des Stocks");
 
-            // En-tête
             Row headerRow = stockSheet.createRow(0);
             String[] headers = {"Référence", "Nom", "Catégorie", "Prix d'achat", "Prix de vente", "Stock", "Seuil Alerte", "Statut"};
 
@@ -63,21 +61,19 @@ public class ExcelGenerator {
                 stockSheet.setColumnWidth(i, 256 * 15);
             }
 
-            // Données
             int rowNum = 1;
             for (Produit p : produits) {
                 Row row = stockSheet.createRow(rowNum++);
-                row.createCell(0).setCellValue(String.valueOf(p.getId()));
+                row.createCell(0).setCellValue(p.getId());
                 row.createCell(1).setCellValue(p.getNom());
                 row.createCell(2).setCellValue(p.getCategorie());
                 row.createCell(3).setCellValue(p.getPrixAchat());
                 row.createCell(4).setCellValue(p.getPrixVente());
-                row.createCell(5).setCellValue(p.getStock());
+                row.createCell(5).setCellValue(p.getQuantite());
                 row.createCell(6).setCellValue(p.getSeuilAlerte());
-                row.createCell(7).setCellValue(p.getStock() <= p.getSeuilAlerte() ? "ALERTE" : "OK");
+                row.createCell(7).setCellValue(p.getQuantite() <= p.getSeuilAlerte() ? "ALERTE" : "OK");
             }
 
-            // Feuille de statistiques
             if (statistiques != null && !statistiques.isEmpty()) {
                 XSSFSheet statsSheet = workbook.createSheet("Statistiques");
                 rowNum = 0;
@@ -93,7 +89,6 @@ public class ExcelGenerator {
                 }
             }
 
-            // Sauvegarde du fichier
             try (FileOutputStream fileOut = new FileOutputStream(cheminFichier)) {
                 workbook.write(fileOut);
             }
@@ -105,9 +100,81 @@ public class ExcelGenerator {
         }
     }
 
+    public static void genererRapportCreances(List<Client> clients, String cheminFichier) {
+        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+            XSSFSheet sheet = workbook.createSheet("Créances");
+
+            Row headerRow = sheet.createRow(0);
+            String[] headers = {"Client", "Téléphone", "Solde", "Dernière transaction"};
+
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
+                applyHeaderStyle(workbook, (XSSFCell)cell);
+                sheet.setColumnWidth(i, 256 * 15);
+            }
+
+            int rowNum = 1;
+            for (Client c : clients) {
+                if (c.getSolde() > 0) {
+                    Row row = sheet.createRow(rowNum++);
+                    row.createCell(0).setCellValue(c.getNom());
+                    row.createCell(1).setCellValue(c.getTelephone());
+                    row.createCell(2).setCellValue(c.getSolde());
+                    row.createCell(3).setCellValue(c.getDerniereTransaction() != null ? 
+                        c.getDerniereTransaction().format(DATE_TIME_FORMATTER) : "-");
+                }
+            }
+
+            try (FileOutputStream fileOut = new FileOutputStream(cheminFichier)) {
+                workbook.write(fileOut);
+            }
+
+            LOGGER.info("Rapport Excel des créances généré avec succès: " + cheminFichier);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport Excel des créances", e);
+            throw new RuntimeException("Erreur lors de la génération du rapport Excel", e);
+        }
+    }
+
+    public static void genererRapportFournisseurs(List<Fournisseur> fournisseurs, String cheminFichier) {
+        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+            XSSFSheet sheet = workbook.createSheet("Fournisseurs");
+
+            Row headerRow = sheet.createRow(0);
+            String[] headers = {"Nom", "Contact", "Téléphone", "Email", "Dernière commande"};
+
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
+                applyHeaderStyle(workbook, (XSSFCell)cell);
+                sheet.setColumnWidth(i, 256 * 15);
+            }
+
+            int rowNum = 1;
+            for (Fournisseur f : fournisseurs) {
+                Row row = sheet.createRow(rowNum++);
+                row.createCell(0).setCellValue(f.getNom());
+                row.createCell(1).setCellValue(f.getContact());
+                row.createCell(2).setCellValue(f.getTelephone());
+                row.createCell(3).setCellValue(f.getEmail());
+                row.createCell(4).setCellValue(f.getDerniereCommande() != null ? 
+                    f.getDerniereCommande().format(DATE_TIME_FORMATTER) : "-");
+            }
+
+            try (FileOutputStream fileOut = new FileOutputStream(cheminFichier)) {
+                workbook.write(fileOut);
+            }
+
+            LOGGER.info("Rapport Excel des fournisseurs généré avec succès: " + cheminFichier);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport Excel des fournisseurs", e);
+            throw new RuntimeException("Erreur lors de la génération du rapport Excel", e);
+        }
+    }
+
     public static void genererRapportVentes(List<Vente> ventes, Map<String, Double> analyses, String cheminFichier) {
         try (XSSFWorkbook workbook = new XSSFWorkbook()) {
-            // Feuille principale des ventes
             XSSFSheet venteSheet = workbook.createSheet("Ventes");
 
             Row headerRow = venteSheet.createRow(0);
@@ -120,7 +187,6 @@ public class ExcelGenerator {
                 venteSheet.setColumnWidth(i, 256 * 15);
             }
 
-            // Données des ventes
             int rowNum = 1;
             for (Vente v : ventes) {
                 Row row = venteSheet.createRow(rowNum++);
@@ -130,10 +196,9 @@ public class ExcelGenerator {
                 row.createCell(3).setCellValue(v.getTotalHT());
                 row.createCell(4).setCellValue(v.getMontantTVA());
                 row.createCell(5).setCellValue(v.getTotal());
-                row.createCell(6).setCellValue("COMPTANT"); // Valeur par défaut
+                row.createCell(6).setCellValue(v.getModePaiement().getLibelle());
             }
 
-            // Feuille d'analyses
             if (analyses != null && !analyses.isEmpty()) {
                 XSSFSheet analyseSheet = workbook.createSheet("Analyses");
                 rowNum = 0;
@@ -160,79 +225,6 @@ public class ExcelGenerator {
         }
     }
 
-    public static void genererRapportCreances(List<Client> clients, String cheminFichier) {
-        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
-            XSSFSheet sheet = workbook.createSheet("Créances");
-            
-            Row headerRow = sheet.createRow(0);
-            String[] headers = {"Client", "Téléphone", "Solde", "Dernière transaction"};
-            
-            for (int i = 0; i < headers.length; i++) {
-                Cell cell = headerRow.createCell(i);
-                cell.setCellValue(headers[i]);
-                applyHeaderStyle(workbook, (XSSFCell)cell);
-                sheet.setColumnWidth(i, 256 * 15);
-            }
-        
-            int rowNum = 1;
-            for (Client c : clients) {
-                if (c.getSolde() > 0) {
-                    Row row = sheet.createRow(rowNum++);
-                    row.createCell(0).setCellValue(c.getNom());
-                    row.createCell(1).setCellValue(c.getTelephone());
-                    row.createCell(2).setCellValue(c.getSolde());
-                    // La date de dernière transaction serait à implémenter
-                    row.createCell(3).setCellValue("-");
-                }
-            }
-        
-            try (FileOutputStream fileOut = new FileOutputStream(cheminFichier)) {
-                workbook.write(fileOut);
-            }
-            
-            LOGGER.info("Rapport Excel des créances généré avec succès: " + cheminFichier);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport Excel des créances", e);
-            throw new RuntimeException("Erreur lors de la génération du rapport Excel", e);
-        }
-    }
-    
-    public static void genererRapportFournisseurs(List<Fournisseur> fournisseurs, String cheminFichier) {
-        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
-            XSSFSheet sheet = workbook.createSheet("Fournisseurs");
-            
-            Row headerRow = sheet.createRow(0);
-            String[] headers = {"Nom", "Contact", "Téléphone", "Email", "Dernière commande"};
-            
-            for (int i = 0; i < headers.length; i++) {
-                Cell cell = headerRow.createCell(i);
-                cell.setCellValue(headers[i]);
-                applyHeaderStyle(workbook, (XSSFCell)cell);
-                sheet.setColumnWidth(i, 256 * 15);
-            }
-        
-            int rowNum = 1;
-            for (Fournisseur f : fournisseurs) {
-                Row row = sheet.createRow(rowNum++);
-                row.createCell(0).setCellValue(f.getNom());
-                row.createCell(1).setCellValue(f.getContact());
-                row.createCell(2).setCellValue(f.getTelephone());
-                row.createCell(3).setCellValue(f.getEmail());
-                // La date de dernière commande serait à implémenter
-                row.createCell(4).setCellValue("-");
-            }
-        
-            try (FileOutputStream fileOut = new FileOutputStream(cheminFichier)) {
-                workbook.write(fileOut);
-            }
-            
-            LOGGER.info("Rapport Excel des fournisseurs généré avec succès: " + cheminFichier);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport Excel des fournisseurs", e);
-            throw new RuntimeException("Erreur lors de la génération du rapport Excel", e);
-        }
-    }
-
     public static void genererRapportFinancier(
             Map<String, Double> chiffreAffaires,
             Map<String, Double> couts,
@@ -240,19 +232,15 @@ public class ExcelGenerator {
             Map<String, Double> marges,
             String cheminFichier) {
         try (XSSFWorkbook workbook = new XSSFWorkbook()) {
-            // Feuille du chiffre d'affaires
             XSSFSheet caSheet = workbook.createSheet("Chiffre d'Affaires");
             creerFeuilleFinanciere(workbook, caSheet, "Évolution du Chiffre d'Affaires", chiffreAffaires);
 
-            // Feuille des coûts
             XSSFSheet coutsSheet = workbook.createSheet("Coûts");
             creerFeuilleFinanciere(workbook, coutsSheet, "Détail des Coûts", couts);
 
-            // Feuille des bénéfices
             XSSFSheet beneficesSheet = workbook.createSheet("Bénéfices");
             creerFeuilleFinanciere(workbook, beneficesSheet, "Analyse des Bénéfices", benefices);
 
-            // Feuille des marges
             XSSFSheet margesSheet = workbook.createSheet("Marges");
             creerFeuilleFinanciere(workbook, margesSheet, "Analyse des Marges", marges);
 
@@ -288,7 +276,6 @@ public class ExcelGenerator {
             row.createCell(1).setCellValue(entry.getValue());
         }
 
-        // Ajustement automatique de la largeur des colonnes
         for (int i = 0; i < headers.length; i++) {
             sheet.autoSizeColumn(i);
         }

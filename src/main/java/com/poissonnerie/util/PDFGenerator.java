@@ -17,6 +17,164 @@ public class PDFGenerator {
     private static final Font NORMAL_FONT = new Font(Font.FontFamily.HELVETICA, 12, Font.NORMAL);
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
+    public static void genererRapportFinancier(
+            Map<String, Double> chiffreAffaires,
+            Map<String, Double> couts,
+            Map<String, Double> benefices,
+            Map<String, Double> marges,
+            String cheminFichier) {
+        Document document = new Document();
+        try {
+            PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
+            document.open();
+
+            // Titre principal
+            Paragraph titrePrincipal = new Paragraph("Rapport Financier", TITLE_FONT);
+            titrePrincipal.setAlignment(Element.ALIGN_CENTER);
+            document.add(titrePrincipal);
+            document.add(Chunk.NEWLINE);
+
+            // Section Chiffre d'affaires
+            ajouterSectionFinanciere(document, "Chiffre d'Affaires", chiffreAffaires);
+            document.add(Chunk.NEWLINE);
+
+            // Section Coûts
+            ajouterSectionFinanciere(document, "Coûts", couts);
+            document.add(Chunk.NEWLINE);
+
+            // Section Bénéfices
+            ajouterSectionFinanciere(document, "Bénéfices", benefices);
+            document.add(Chunk.NEWLINE);
+
+            // Section Marges
+            ajouterSectionFinanciere(document, "Marges", marges);
+
+            LOGGER.info("Rapport financier PDF généré avec succès: " + cheminFichier);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport financier PDF", e);
+            throw new RuntimeException("Erreur lors de la génération du rapport PDF", e);
+        } finally {
+            if (document != null && document.isOpen()) {
+                document.close();
+            }
+        }
+    }
+
+    public static void genererReglementCreance(Client client, double montantPaye, double nouveauSolde, String cheminFichier) {
+        Document document = new Document();
+        try {
+            PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
+            document.open();
+
+            // En-tête
+            Paragraph titre = new Paragraph("Reçu de Paiement - Créance", TITLE_FONT);
+            titre.setAlignment(Element.ALIGN_CENTER);
+            document.add(titre);
+            document.add(Chunk.NEWLINE);
+
+            // Informations client
+            document.add(new Paragraph("Client: " + client.getNom(), SUBTITLE_FONT));
+            document.add(new Paragraph("Téléphone: " + client.getTelephone(), NORMAL_FONT));
+            document.add(Chunk.NEWLINE);
+
+            // Détails du paiement
+            document.add(new Paragraph("Détails du paiement:", SUBTITLE_FONT));
+            document.add(new Paragraph("Montant payé: " + String.format("%.2f €", montantPaye), NORMAL_FONT));
+            document.add(new Paragraph("Nouveau solde: " + String.format("%.2f €", nouveauSolde), NORMAL_FONT));
+            document.add(new Paragraph("Date: " + DATE_FORMATTER.format(java.time.LocalDateTime.now()), NORMAL_FONT));
+
+            LOGGER.info("Reçu de paiement créance généré avec succès: " + cheminFichier);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du reçu de paiement", e);
+            throw new RuntimeException("Erreur lors de la génération du reçu", e);
+        } finally {
+            if (document != null && document.isOpen()) {
+                document.close();
+            }
+        }
+    }
+
+    public static String genererPreviewTicket(Vente vente) {
+        Document document = new Document(PageSize.A4);
+        String tempFile = "preview_ticket_" + System.currentTimeMillis() + ".pdf";
+        try {
+            PdfWriter.getInstance(document, new FileOutputStream(tempFile));
+            document.open();
+            genererContenuTicket(document, vente);
+            return tempFile;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération de la prévisualisation du ticket", e);
+            throw new RuntimeException("Erreur lors de la génération de la prévisualisation", e);
+        } finally {
+            if (document != null && document.isOpen()) {
+                document.close();
+            }
+        }
+    }
+
+    public static void genererTicket(Vente vente, String cheminFichier) {
+        Document document = new Document(PageSize.A4);
+        try {
+            PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
+            document.open();
+            genererContenuTicket(document, vente);
+            LOGGER.info("Ticket de vente généré avec succès: " + cheminFichier);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du ticket", e);
+            throw new RuntimeException("Erreur lors de la génération du ticket", e);
+        } finally {
+            if (document != null && document.isOpen()) {
+                document.close();
+            }
+        }
+    }
+
+    private static void genererContenuTicket(Document document, Vente vente) throws DocumentException {
+        // En-tête
+        Paragraph titre = new Paragraph("Ticket de Vente", TITLE_FONT);
+        titre.setAlignment(Element.ALIGN_CENTER);
+        document.add(titre);
+        document.add(Chunk.NEWLINE);
+
+        // Informations vente
+        document.add(new Paragraph("Date: " + vente.getDate().format(DATE_FORMATTER), NORMAL_FONT));
+        if (vente.getClient() != null) {
+            document.add(new Paragraph("Client: " + vente.getClient().getNom(), NORMAL_FONT));
+        }
+        document.add(Chunk.NEWLINE);
+
+        // Tableau des produits
+        PdfPTable table = new PdfPTable(4);
+        table.setWidthPercentage(100);
+
+        // En-têtes
+        String[] headers = {"Produit", "Quantité", "Prix unitaire", "Total"};
+        for (String header : headers) {
+            PdfPCell cell = new PdfPCell(new Phrase(header, SUBTITLE_FONT));
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+            table.addCell(cell);
+        }
+
+        // Lignes de vente
+        for (LigneVente ligne : vente.getLignes()) {
+            table.addCell(new Phrase(ligne.getProduit().getNom(), NORMAL_FONT));
+            table.addCell(new Phrase(String.valueOf(ligne.getQuantite()), NORMAL_FONT));
+            table.addCell(new Phrase(String.format("%.2f €", ligne.getPrixUnitaire()), NORMAL_FONT));
+            table.addCell(new Phrase(String.format("%.2f €", ligne.getTotal()), NORMAL_FONT));
+        }
+
+        document.add(table);
+        document.add(Chunk.NEWLINE);
+
+        // Totaux
+        document.add(new Paragraph("Total HT: " + String.format("%.2f €", vente.getTotalHT()), NORMAL_FONT));
+        document.add(new Paragraph("TVA: " + String.format("%.2f €", vente.getMontantTVA()), NORMAL_FONT));
+        Paragraph totalTTC = new Paragraph("Total TTC: " + String.format("%.2f €", vente.getTotal()), SUBTITLE_FONT);
+        totalTTC.setAlignment(Element.ALIGN_RIGHT);
+        document.add(totalTTC);
+    }
+
     public static void genererRapportVentes(List<Vente> ventes, String cheminFichier) {
         try (Document document = new Document()) {
             PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
@@ -184,43 +342,6 @@ public class PDFGenerator {
         }
     }
 
-    public static void genererRapportFinancier(
-            Map<String, Double> chiffreAffaires,
-            Map<String, Double> couts,
-            Map<String, Double> benefices,
-            Map<String, Double> marges,
-            String cheminFichier) {
-        try (Document document = new Document()) {
-            PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
-            document.open();
-
-            // Titre principal
-            Paragraph titrePrincipal = new Paragraph("Rapport Financier", TITLE_FONT);
-            titrePrincipal.setAlignment(Element.ALIGN_CENTER);
-            document.add(titrePrincipal);
-            document.add(Chunk.NEWLINE);
-
-            // Section Chiffre d'affaires
-            ajouterSectionFinanciere(document, "Chiffre d'Affaires", chiffreAffaires);
-            document.add(Chunk.NEWLINE);
-
-            // Section Coûts
-            ajouterSectionFinanciere(document, "Coûts", couts);
-            document.add(Chunk.NEWLINE);
-
-            // Section Bénéfices
-            ajouterSectionFinanciere(document, "Bénéfices", benefices);
-            document.add(Chunk.NEWLINE);
-
-            // Section Marges
-            ajouterSectionFinanciere(document, "Marges", marges);
-
-            LOGGER.info("Rapport financier PDF généré avec succès: " + cheminFichier);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport financier PDF", e);
-            throw new RuntimeException("Erreur lors de la génération du rapport PDF", e);
-        }
-    }
 
     private static void ajouterSectionFinanciere(Document document, String titre, Map<String, Double> donnees) throws DocumentException {
         // Titre de la section
