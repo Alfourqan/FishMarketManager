@@ -4,6 +4,7 @@ import com.poissonnerie.controller.ProduitController;
 import com.poissonnerie.model.Produit;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 
 public class ProduitViewSwing {
@@ -33,16 +34,64 @@ public class ProduitViewSwing {
     }
 
     private void setupTableStyle() {
-        tableProduits.setShowGrid(true);
+        // Configuration de base du tableau
+        tableProduits.setShowGrid(false);
         tableProduits.setGridColor(new Color(230, 230, 230));
         tableProduits.setBackground(Color.WHITE);
         tableProduits.setSelectionBackground(new Color(232, 240, 254));
         tableProduits.setSelectionForeground(new Color(33, 33, 33));
-        tableProduits.getTableHeader().setBackground(new Color(245, 246, 247));
-        tableProduits.getTableHeader().setForeground(new Color(66, 66, 66));
-        tableProduits.setRowHeight(40);
+        tableProduits.setRowHeight(35);
         tableProduits.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        tableProduits.setIntercellSpacing(new Dimension(0, 0));
+
+        // Configuration des cellules avec alternance de couleurs
+        DefaultTableCellRenderer cellRenderer = new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value,
+                        isSelected, hasFocus, row, column);
+                if (!isSelected) {
+                    c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(245, 245, 245));
+                }
+                // Padding des cellules ajusté
+                ((JLabel) c).setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 16));
+                ((JLabel) c).setHorizontalAlignment(JLabel.LEFT);
+                return c;
+            }
+        };
+
+        // Appliquer le renderer à toutes les colonnes
+        for (int i = 0; i < tableProduits.getColumnCount(); i++) {
+            tableProduits.getColumnModel().getColumn(i).setCellRenderer(cellRenderer);
+        }
+
+        // Style de l'en-tête
+        tableProduits.getTableHeader().setBackground(new Color(33, 33, 33));
+        tableProduits.getTableHeader().setForeground(Color.WHITE);
         tableProduits.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
+        tableProduits.getTableHeader().setPreferredSize(new Dimension(tableProduits.getTableHeader().getPreferredSize().width, 40));
+
+        // Configuration du rendu de l'en-tête
+        ((DefaultTableCellRenderer) tableProduits.getTableHeader().getDefaultRenderer()).setHorizontalAlignment(JLabel.LEFT);
+        tableProduits.getTableHeader().setBorder(BorderFactory.createEmptyBorder());
+
+        // Style de l'en-tête avec padding
+        DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                JLabel label = (JLabel) super.getTableCellRendererComponent(table, value,
+                        isSelected, hasFocus, row, column);
+                label.setBackground(new Color(33, 33, 33));
+                label.setForeground(Color.WHITE);
+                label.setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 16));
+                label.setHorizontalAlignment(JLabel.LEFT);
+                return label;
+            }
+        };
+
+        tableProduits.getTableHeader().setDefaultRenderer(headerRenderer);
     }
 
     private void initializeComponents() {

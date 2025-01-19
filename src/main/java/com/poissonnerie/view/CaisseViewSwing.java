@@ -55,16 +55,7 @@ public class CaisseViewSwing {
             }
         };
         tableMouvements = new JTable(tableModel);
-
-        // Style moderne pour la table et ses en-têtes
-        tableMouvements.setShowGrid(true);
-        tableMouvements.setGridColor(new Color(226, 232, 240));
-        tableMouvements.setBackground(Color.WHITE);
-        tableMouvements.setSelectionBackground(new Color(219, 234, 254));
-        tableMouvements.setSelectionForeground(new Color(15, 23, 42));
-        tableMouvements.setRowHeight(45);
-        tableMouvements.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        tableMouvements.setIntercellSpacing(new Dimension(1, 1));
+        setupTableStyle(); // Appel de notre nouvelle méthode de style
 
         initializeComponents();
         loadData();
@@ -147,57 +138,6 @@ public class CaisseViewSwing {
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getViewport().setBackground(Color.WHITE);
 
-        // Style amélioré des en-têtes avec icônes
-        JTableHeader header = tableMouvements.getTableHeader();
-        header.setDefaultRenderer(new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value,
-                    boolean isSelected, boolean hasFocus, int row, int column) {
-                JLabel label = (JLabel) super.getTableCellRendererComponent(table, value,
-                        isSelected, hasFocus, row, column);
-
-                // Configuration du style amélioré
-                label.setHorizontalAlignment(JLabel.LEFT);
-                label.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createMatteBorder(0, 0, 3, 0, new Color(203, 213, 225)),
-                    BorderFactory.createEmptyBorder(12, 16, 12, 16)
-                ));
-                label.setFont(new Font("Segoe UI Semibold", Font.BOLD, 14));
-                label.setBackground(new Color(243, 244, 246));
-                label.setForeground(new Color(31, 41, 55));
-                label.setOpaque(true);
-
-                // Ajout des icônes avec style amélioré
-                FontIcon icon = null;
-                switch (column) {
-                    case 0: // Date
-                        icon = FontIcon.of(MaterialDesign.MDI_CALENDAR_CLOCK);
-                        break;
-                    case 1: // Type
-                        icon = FontIcon.of(MaterialDesign.MDI_TAG_MULTIPLE);
-                        break;
-                    case 2: // Montant
-                        icon = FontIcon.of(MaterialDesign.MDI_CURRENCY_EUR);
-                        break;
-                    case 3: // Description
-                        icon = FontIcon.of(MaterialDesign.MDI_INFORMATION);
-                        break;
-                }
-
-                if (icon != null) {
-                    icon.setIconSize(18);
-                    icon.setIconColor(new Color(31, 41, 55));
-                    label.setIcon(icon);
-                    label.setIconTextGap(12);
-                }
-
-                return label;
-            }
-        });
-
-        // Définir une hauteur plus importante pour les en-têtes
-        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 56));
-
 
         // Event handlers
         ouvrirBtn.addActionListener(e -> ouvrirCaisse());
@@ -207,6 +147,64 @@ public class CaisseViewSwing {
 
         mainPanel.add(topPanel, BorderLayout.NORTH);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
+    }
+
+    private void setupTableStyle() {
+        // Configuration de base du tableau
+        tableMouvements.setShowGrid(false);
+        tableMouvements.setGridColor(new Color(230, 230, 230));
+        tableMouvements.setBackground(Color.WHITE);
+        tableMouvements.setSelectionBackground(new Color(232, 240, 254));
+        tableMouvements.setSelectionForeground(new Color(33, 33, 33));
+        tableMouvements.setRowHeight(35);
+        tableMouvements.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        tableMouvements.setIntercellSpacing(new Dimension(0, 0));
+
+        // Configuration des cellules avec alternance de couleurs
+        DefaultTableCellRenderer cellRenderer = new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value,
+                        isSelected, hasFocus, row, column);
+                if (!isSelected) {
+                    c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(245, 245, 245));
+                }
+                // Padding des cellules ajusté
+                ((JLabel) c).setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 16));
+                ((JLabel) c).setHorizontalAlignment(JLabel.LEFT);
+                return c;
+            }
+        };
+
+        // Appliquer le renderer à toutes les colonnes
+        for (int i = 0; i < tableMouvements.getColumnCount(); i++) {
+            tableMouvements.getColumnModel().getColumn(i).setCellRenderer(cellRenderer);
+        }
+
+        // Style de l'en-tête simplifié
+        JTableHeader header = tableMouvements.getTableHeader();
+        header.setBackground(new Color(33, 33, 33));
+        header.setForeground(Color.WHITE);
+        header.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 40));
+
+        // Configuration du rendu de l'en-tête
+        DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                JLabel label = (JLabel) super.getTableCellRendererComponent(table, value,
+                        isSelected, hasFocus, row, column);
+                label.setBackground(new Color(33, 33, 33));
+                label.setForeground(Color.WHITE);
+                label.setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 16));
+                label.setHorizontalAlignment(JLabel.LEFT);
+                return label;
+            }
+        };
+
+        header.setDefaultRenderer(headerRenderer);
     }
 
     private void ouvrirCaisse() {

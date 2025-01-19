@@ -5,6 +5,8 @@ import com.poissonnerie.model.Fournisseur;
 import com.poissonnerie.util.PDFGenerator;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.io.File;
 import java.time.LocalDateTime;
@@ -38,17 +40,61 @@ public class FournisseurViewSwing {
     }
 
     private void setupTableStyle() {
-        tableFournisseurs.setShowGrid(true);
+        // Configuration de base du tableau
+        tableFournisseurs.setShowGrid(false);
         tableFournisseurs.setGridColor(new Color(230, 230, 230));
-        tableFournisseurs.setBackground(new Color(252, 252, 252));
+        tableFournisseurs.setBackground(Color.WHITE);
         tableFournisseurs.setSelectionBackground(new Color(232, 240, 254));
         tableFournisseurs.setSelectionForeground(new Color(33, 33, 33));
-        tableFournisseurs.getTableHeader().setBackground(new Color(245, 246, 247));
-        tableFournisseurs.getTableHeader().setForeground(new Color(66, 66, 66));
-        tableFournisseurs.setRowHeight(40);
+        tableFournisseurs.setRowHeight(35);
         tableFournisseurs.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        tableFournisseurs.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
-        tableFournisseurs.setIntercellSpacing(new Dimension(10, 5));
+        tableFournisseurs.setIntercellSpacing(new Dimension(0, 0));
+
+        // Configuration des cellules avec alternance de couleurs
+        DefaultTableCellRenderer cellRenderer = new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value,
+                        isSelected, hasFocus, row, column);
+                if (!isSelected) {
+                    c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(245, 245, 245));
+                }
+                // Padding des cellules ajusté
+                ((JLabel) c).setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 16));
+                ((JLabel) c).setHorizontalAlignment(JLabel.LEFT);
+                return c;
+            }
+        };
+
+        // Appliquer le renderer à toutes les colonnes
+        for (int i = 0; i < tableFournisseurs.getColumnCount(); i++) {
+            tableFournisseurs.getColumnModel().getColumn(i).setCellRenderer(cellRenderer);
+        }
+
+        // Style de l'en-tête simplifié
+        JTableHeader header = tableFournisseurs.getTableHeader();
+        header.setBackground(new Color(33, 33, 33));
+        header.setForeground(Color.WHITE);
+        header.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 40));
+
+        // Configuration du rendu de l'en-tête
+        DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                JLabel label = (JLabel) super.getTableCellRendererComponent(table, value,
+                        isSelected, hasFocus, row, column);
+                label.setBackground(new Color(33, 33, 33));
+                label.setForeground(Color.WHITE);
+                label.setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 16));
+                label.setHorizontalAlignment(JLabel.LEFT);
+                return label;
+            }
+        };
+
+        header.setDefaultRenderer(headerRenderer);
 
         // Ajustement des colonnes
         tableFournisseurs.getColumnModel().getColumn(0).setMaxWidth(60);
@@ -296,7 +342,7 @@ public class FournisseurViewSwing {
     }
 
     private void addFormField(JPanel panel, GridBagConstraints gbc, String labelText,
-                            JComponent field, int row) {
+                             JComponent field, int row) {
         gbc.gridx = 0;
         gbc.gridy = row;
         gbc.weightx = 0;
@@ -311,8 +357,8 @@ public class FournisseurViewSwing {
     }
 
     private void validateAndSaveFournisseur(Fournisseur fournisseur, JTextField nomField,
-                                          JTextField contactField, JTextField telephoneField,
-                                          JTextField emailField, JTextArea adresseArea) {
+                                           JTextField contactField, JTextField telephoneField,
+                                           JTextField emailField, JTextArea adresseArea) {
         String nom = nomField.getText().trim();
         String contact = contactField.getText().trim();
         String telephone = telephoneField.getText().trim();
