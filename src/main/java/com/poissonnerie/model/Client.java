@@ -8,6 +8,7 @@ public class Client {
     private String telephone;
     private String adresse;
     private double solde;
+    private LocalDateTime derniereTransaction;
     private LocalDateTime derniereVente;
     private double totalCreances;
     private StatutCreances statutCreances;
@@ -36,44 +37,37 @@ public class Client {
         this.adresse = adresse;
         this.solde = solde;
         this.totalCreances = solde;
+        this.derniereTransaction = null;
+        this.derniereVente = null;
         updateStatutCreances();
     }
 
-    // Getters et setters existants
+    // Getters
     public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
-
     public String getNom() { return nom; }
-    public void setNom(String nom) { this.nom = nom; }
-
     public String getTelephone() { return telephone; }
-    public void setTelephone(String telephone) { this.telephone = telephone; }
-
     public String getAdresse() { return adresse; }
-    public void setAdresse(String adresse) { this.adresse = adresse; }
-
     public double getSolde() { return solde; }
+    public LocalDateTime getDerniereTransaction() { return derniereTransaction; }
+    public LocalDateTime getDerniereVente() { return derniereVente; }
+    public double getTotalCreances() { return totalCreances; }
+    public StatutCreances getStatutCreances() { return statutCreances; }
+
+    // Setters
+    public void setId(int id) { this.id = id; }
+    public void setNom(String nom) { this.nom = nom; }
+    public void setTelephone(String telephone) { this.telephone = telephone; }
+    public void setAdresse(String adresse) { this.adresse = adresse; }
     public void setSolde(double solde) { 
         this.solde = solde;
         this.totalCreances = solde;
+        this.derniereTransaction = LocalDateTime.now();
         updateStatutCreances();
     }
-
-    // Nouvelles méthodes pour PDFGenerator
-    public LocalDateTime getDerniereVente() {
-        return derniereVente;
-    }
-
-    public void setDerniereVente(LocalDateTime derniereVente) {
-        this.derniereVente = derniereVente;
-    }
-
-    public double getTotalCreances() {
-        return totalCreances;
-    }
-
-    public StatutCreances getStatutCreances() {
-        return statutCreances;
+    public void setDerniereTransaction(LocalDateTime date) { this.derniereTransaction = date; }
+    public void setDerniereVente(LocalDateTime date) { 
+        this.derniereVente = date; 
+        this.derniereTransaction = date;
     }
 
     private void updateStatutCreances() {

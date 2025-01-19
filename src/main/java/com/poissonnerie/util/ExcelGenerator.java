@@ -105,7 +105,7 @@ public class ExcelGenerator {
             XSSFSheet sheet = workbook.createSheet("Créances");
 
             Row headerRow = sheet.createRow(0);
-            String[] headers = {"Client", "Téléphone", "Solde", "Dernière transaction"};
+            String[] headers = {"Client", "Téléphone", "Solde", "Dernière transaction", "Statut"};
 
             for (int i = 0; i < headers.length; i++) {
                 Cell cell = headerRow.createCell(i);
@@ -121,8 +121,11 @@ public class ExcelGenerator {
                     row.createCell(0).setCellValue(c.getNom());
                     row.createCell(1).setCellValue(c.getTelephone());
                     row.createCell(2).setCellValue(c.getSolde());
-                    row.createCell(3).setCellValue(c.getDerniereTransaction() != null ? 
-                        c.getDerniereTransaction().format(DATE_TIME_FORMATTER) : "-");
+
+                    LocalDateTime derniereTransaction = c.getDerniereTransaction();
+                    row.createCell(3).setCellValue(derniereTransaction != null ? 
+                        DATE_TIME_FORMATTER.format(derniereTransaction) : "-");
+                    row.createCell(4).setCellValue(c.getStatutCreances().toString());
                 }
             }
 
@@ -142,7 +145,7 @@ public class ExcelGenerator {
             XSSFSheet sheet = workbook.createSheet("Fournisseurs");
 
             Row headerRow = sheet.createRow(0);
-            String[] headers = {"Nom", "Contact", "Téléphone", "Email", "Dernière commande"};
+            String[] headers = {"Nom", "Contact", "Téléphone", "Email", "Dernière commande", "Statut"};
 
             for (int i = 0; i < headers.length; i++) {
                 Cell cell = headerRow.createCell(i);
@@ -158,8 +161,11 @@ public class ExcelGenerator {
                 row.createCell(1).setCellValue(f.getContact());
                 row.createCell(2).setCellValue(f.getTelephone());
                 row.createCell(3).setCellValue(f.getEmail());
-                row.createCell(4).setCellValue(f.getDerniereCommande() != null ? 
-                    f.getDerniereCommande().format(DATE_TIME_FORMATTER) : "-");
+
+                LocalDateTime derniereCommande = f.getDerniereCommande();
+                row.createCell(4).setCellValue(derniereCommande != null ? 
+                    DATE_TIME_FORMATTER.format(derniereCommande) : "-");
+                row.createCell(5).setCellValue(f.getStatut());
             }
 
             try (FileOutputStream fileOut = new FileOutputStream(cheminFichier)) {

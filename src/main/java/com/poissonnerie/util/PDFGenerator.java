@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.time.LocalDateTime;
 
 public class PDFGenerator {
     private static final Logger LOGGER = Logger.getLogger(PDFGenerator.class.getName());
@@ -23,8 +24,9 @@ public class PDFGenerator {
             Map<String, Double> benefices,
             Map<String, Double> marges,
             String cheminFichier) {
-        Document document = new Document();
+        Document document = null;
         try {
+            document = new Document();
             PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
             document.open();
 
@@ -34,19 +36,13 @@ public class PDFGenerator {
             document.add(titrePrincipal);
             document.add(Chunk.NEWLINE);
 
-            // Section Chiffre d'affaires
+            // Sections du rapport
             ajouterSectionFinanciere(document, "Chiffre d'Affaires", chiffreAffaires);
             document.add(Chunk.NEWLINE);
-
-            // Section Coûts
             ajouterSectionFinanciere(document, "Coûts", couts);
             document.add(Chunk.NEWLINE);
-
-            // Section Bénéfices
             ajouterSectionFinanciere(document, "Bénéfices", benefices);
             document.add(Chunk.NEWLINE);
-
-            // Section Marges
             ajouterSectionFinanciere(document, "Marges", marges);
 
             LOGGER.info("Rapport financier PDF généré avec succès: " + cheminFichier);
@@ -61,8 +57,9 @@ public class PDFGenerator {
     }
 
     public static void genererReglementCreance(Client client, double montantPaye, double nouveauSolde, String cheminFichier) {
-        Document document = new Document();
+        Document document = null;
         try {
+            document = new Document();
             PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
             document.open();
 
@@ -95,9 +92,10 @@ public class PDFGenerator {
     }
 
     public static String genererPreviewTicket(Vente vente) {
-        Document document = new Document(PageSize.A4);
+        Document document = null;
         String tempFile = "preview_ticket_" + System.currentTimeMillis() + ".pdf";
         try {
+            document = new Document(PageSize.A4);
             PdfWriter.getInstance(document, new FileOutputStream(tempFile));
             document.open();
             genererContenuTicket(document, vente);
@@ -113,8 +111,9 @@ public class PDFGenerator {
     }
 
     public static void genererTicket(Vente vente, String cheminFichier) {
-        Document document = new Document(PageSize.A4);
+        Document document = null;
         try {
+            document = new Document(PageSize.A4);
             PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
             document.open();
             genererContenuTicket(document, vente);
@@ -137,7 +136,7 @@ public class PDFGenerator {
         document.add(Chunk.NEWLINE);
 
         // Informations vente
-        document.add(new Paragraph("Date: " + vente.getDate().format(DATE_FORMATTER), NORMAL_FONT));
+        document.add(new Paragraph("Date: " + DATE_FORMATTER.format(vente.getDate()), NORMAL_FONT));
         if (vente.getClient() != null) {
             document.add(new Paragraph("Client: " + vente.getClient().getNom(), NORMAL_FONT));
         }
@@ -176,7 +175,9 @@ public class PDFGenerator {
     }
 
     public static void genererRapportVentes(List<Vente> ventes, String cheminFichier) {
-        try (Document document = new Document()) {
+        Document document = null;
+        try {
+            document = new Document();
             PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
             document.open();
 
@@ -215,11 +216,17 @@ public class PDFGenerator {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF des ventes", e);
             throw new RuntimeException("Erreur lors de la génération du rapport PDF", e);
+        } finally {
+            if (document != null && document.isOpen()) {
+                document.close();
+            }
         }
     }
 
     public static void genererRapportStocks(List<Produit> produits, String cheminFichier) {
-        try (Document document = new Document()) {
+        Document document = null;
+        try {
+            document = new Document();
             PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
             document.open();
 
@@ -257,11 +264,17 @@ public class PDFGenerator {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF des stocks", e);
             throw new RuntimeException("Erreur lors de la génération du rapport PDF", e);
+        } finally {
+            if (document != null && document.isOpen()) {
+                document.close();
+            }
         }
     }
 
     public static void genererRapportCreances(List<Client> clients, String cheminFichier) {
-        try (Document document = new Document()) {
+        Document document = null;
+        try {
+            document = new Document();
             PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
             document.open();
 
@@ -299,11 +312,17 @@ public class PDFGenerator {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF des créances", e);
             throw new RuntimeException("Erreur lors de la génération du rapport PDF", e);
+        } finally {
+            if (document != null && document.isOpen()) {
+                document.close();
+            }
         }
     }
 
     public static void genererRapportFournisseurs(List<Fournisseur> fournisseurs, String cheminFichier) {
-        try (Document document = new Document()) {
+        Document document = null;
+        try {
+            document = new Document();
             PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
             document.open();
 
@@ -339,9 +358,12 @@ public class PDFGenerator {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF des fournisseurs", e);
             throw new RuntimeException("Erreur lors de la génération du rapport PDF", e);
+        } finally {
+            if (document != null && document.isOpen()) {
+                document.close();
+            }
         }
     }
-
 
     private static void ajouterSectionFinanciere(Document document, String titre, Map<String, Double> donnees) throws DocumentException {
         // Titre de la section
