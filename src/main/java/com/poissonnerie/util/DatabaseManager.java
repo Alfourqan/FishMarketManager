@@ -23,6 +23,8 @@ import javax.sql.DataSource;
 import org.sqlite.SQLiteDataSource;
 import java.util.Arrays;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class DatabaseManager {
     private static final Logger LOGGER = Logger.getLogger(DatabaseManager.class.getName());
@@ -35,34 +37,22 @@ public class DatabaseManager {
     private static final Object LOCK = new Object();
 
     // Liste des mots-clés SQL autorisés
-    private static final List<String> ALLOWED_SQL_KEYWORDS = Arrays.asList(
-        "CREATE", "TABLE", "DROP", "ALTER", "PRIMARY", "KEY", "FOREIGN",
-        "REFERENCES", "INTEGER", "TEXT", "DOUBLE", "BOOLEAN", "DEFAULT",
-        "NOT", "NULL", "AUTOINCREMENT", "INDEX", "UNIQUE", "CHECK",
-        "CONSTRAINT", "ON", "DELETE", "CASCADE", "UPDATE", "SET",
-        "PRAGMA", "INSERT", "OR", "IGNORE", "INTO", "VALUES",
-        "IF", "EXISTS", "REAL", "BIGINT", "IN", "CHECK", "WHERE",
-        "AND", "BETWEEN", "LIKE", "AS", "ORDER", "BY", "DESC", "ASC",
-        "LIMIT", "OFFSET", "GROUP", "HAVING", "JOIN", "LEFT", "RIGHT",
-        "INNER", "OUTER", "USING", "DISTINCT", "COUNT", "SUM", "AVG",
+    private static final Set<String> ALLOWED_SQL_KEYWORDS = new HashSet<>(Arrays.asList(
+        "CREATE", "TABLE", "IF", "NOT", "EXISTS", "DROP", "ALTER", "PRIMARY", "KEY",
+        "FOREIGN", "REFERENCES", "INTEGER", "TEXT", "REAL", "DOUBLE", "BOOLEAN",
+        "DEFAULT", "NULL", "AUTOINCREMENT", "INDEX", "UNIQUE", "CHECK", "CONSTRAINT",
+        "ON", "DELETE", "CASCADE", "UPDATE", "SET", "PRAGMA", "INSERT", "OR", "IGNORE",
+        "INTO", "VALUES", "BIGINT", "IN", "WHERE", "AND", "BETWEEN", "LIKE", "AS",
+        "ORDER", "BY", "DESC", "ASC", "LIMIT", "OFFSET", "GROUP", "HAVING", "JOIN",
+        "LEFT", "RIGHT", "INNER", "OUTER", "USING", "DISTINCT", "COUNT", "SUM", "AVG",
         "MIN", "MAX", "CASE", "WHEN", "THEN", "ELSE", "END"
-    );
+    ));
 
     // Pattern pour détecter les tentatives d'injection SQL malveillantes
     private static final Pattern MALICIOUS_SQL_PATTERN = Pattern.compile(
-        "(?i)(" +
-        "--.*|/\\*.*\\*/|;\\s*;|@@|" +  // Commentaires SQL et commandes système
-        "\\bXP_\\w+\\b|" +           // Procédures stockées étendues SQL Server
-        "\\bSYSDATETIME\\b|" +       // Fonctions système
-        "\\bCURRENT_USER\\b|" +      // Fonctions système
-        "\\bWAITFOR\\b|" +           // Commandes de délai
-        "\\bSHUTDOWN\\b|" +          // Commandes système dangereuses
-        "\\bsp_\\w+\\b|" +           // Procédures stockées SQL Server
-        "\\bxp_\\w+\\b|" +           // Procédures stockées étendues
-        "\\bexec\\b.*\\bsp_\\w+\\b|" + // Exécution de procédures stockées
-        "\\bhackertable\\b|" +       // Mots-clés suspects
-        "\\bdrop\\b.*\\bdatabase\\b" + // Suppression de base de données
-        ")"
+        "(?i)(exec\\b|xp_\\w+|sp_\\w+|waitfor\\b|shutdown\\b|" +
+        "drop\\s+database\\b|;\\s*;|@@version|system\\b|" +
+        "convert\\(|cast\\(|declare\\s+@|bulk\\s+insert)"
     );
 
     private static SQLiteDataSource dataSource;
@@ -88,6 +78,79 @@ public class DatabaseManager {
             LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation du DataSource", e);
             throw new RuntimeException("Impossible d'initialiser le DataSource", e);
         }
+    }
+
+    private static boolean validateSchemaContent(String schema) {
+        if (schema == null || schema.trim().isEmpty()) {
+            LOGGER.severe("Le schéma SQL est vide");
+            return false;
+        }
+
+        // Supprimer les commentaires et les espaces superflus
+        String cleanSchema = schema.replaceAll("--[^\n]*\n", "\n")
+                                 .replaceAll("/\\*[\\s\\S]*?\\*/", "")
+                                 .replaceAll("\\s+", " ")
+                                 .trim();
+
+        // Vérifier les motifs malveillants
+        if (MALICIOUS_SQL_PATTERN.matcher(cleanSchema).find()) {
+            LOGGER.severe("Motif SQL malveillant détecté dans le schéma");
+            return false;
+        }
+
+        // Diviser en commandes individuelles
+        String[] commands = cleanSchema.split(";");
+        for (String command : commands) {
+            command = command.trim();
+            if (command.isEmpty()) continue;
+
+            // Vérifier chaque mot du command pour s'assurer qu'il est autorisé
+            String[] words = command.split("\\s+");
+            String firstWord = words[0].toUpperCase();
+
+            // Vérifier que la commande commence par un mot-clé valide
+            if (!firstWord.matches("^(CREATE|ALTER|DROP|INSERT|PRAGMA)$")) {
+                LOGGER.warning("Commande non autorisée détectée: " + firstWord);
+                return false;
+            }
+
+            // Pour les commandes CREATE TABLE, vérifier la syntaxe détaillée
+            if (firstWord.equals("CREATE") && words.length > 1 && words[1].equalsIgnoreCase("TABLE")) {
+                if (!validateCreateTableSyntax(command)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    private static boolean validateCreateTableSyntax(String command) {
+        // Vérifie la structure basique d'une commande CREATE TABLE
+        if (!command.matches("(?i)^CREATE\\s+TABLE\\s+(IF\\s+NOT\\s+EXISTS\\s+)?\\w+\\s*\\(.*\\)\\s*$")) {
+            LOGGER.warning("Syntaxe CREATE TABLE invalide");
+            return false;
+        }
+
+        // Extrait et vérifie chaque définition de colonne
+        String columnDefinitions = command.replaceAll("(?i)^CREATE\\s+TABLE\\s+(IF\\s+NOT\\s+EXISTS\\s+)?\\w+\\s*\\((.*)\\)\\s*$", "$2");
+        String[] columns = columnDefinitions.split(",");
+
+        for (String column : columns) {
+            column = column.trim();
+            String[] parts = column.split("\\s+");
+
+            // Vérifie que chaque mot dans la définition de la colonne est autorisé
+            for (String part : parts) {
+                part = part.toUpperCase().replaceAll("[(),]", "");
+                if (!part.isEmpty() && !ALLOWED_SQL_KEYWORDS.contains(part) && !part.matches("^[A-Za-z_][A-Za-z0-9_]*$")) {
+                    LOGGER.warning("Mot-clé non autorisé dans la définition de colonne: " + part);
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 
     public static synchronized Connection getConnection() throws SQLException {
@@ -159,23 +222,6 @@ public class DatabaseManager {
             LOGGER.log(Level.WARNING, "Erreur lors de la vérification de l'initialisation de la base de données", e);
             return false;
         }
-    }
-
-    private static boolean validateSchemaContent(String schema) {
-        // Vérifier si le schéma est vide
-        if (schema == null || schema.trim().isEmpty()) {
-            LOGGER.severe("Le schéma SQL est vide");
-            return false;
-        }
-
-        // Vérifier les motifs malveillants
-        String schemaWithoutComments = schema.replaceAll("--[^\n]*\n", "\n");
-        if (MALICIOUS_SQL_PATTERN.matcher(schemaWithoutComments).find()) {
-            LOGGER.severe("Motif SQL malveillant détecté dans le schéma");
-            return false;
-        }
-
-        return true;
     }
 
     public static void initDatabase() {

@@ -70,6 +70,7 @@ INSERT OR IGNORE INTO configurations (cle, valeur, description) VALUES
 ('NOM_ENTREPRISE', '', 'Nom de l''entreprise'),
 ('ADRESSE_ENTREPRISE', '', 'Adresse de l''entreprise'),
 ('TELEPHONE_ENTREPRISE', '', 'Numéro de téléphone de l''entreprise'),
+('EMAIL_ENTREPRISE', '', 'Adresse email de l''entreprise'),
 ('SIRET_ENTREPRISE', '', 'Numéro SIRET de l''entreprise'),
 ('LOGO_PATH', '', 'Chemin vers le logo de l''entreprise'),
 ('FORMAT_RECU', 'COMPACT', 'Format des reçus (COMPACT ou DETAILLE)'),

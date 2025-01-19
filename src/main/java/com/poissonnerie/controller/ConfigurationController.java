@@ -10,43 +10,62 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.security.SecureRandom;
+import java.util.regex.Pattern;
 
 public class ConfigurationController {
     private static final Logger LOGGER = Logger.getLogger(ConfigurationController.class.getName());
     private final List<ConfigurationParam> configurations = new ArrayList<>();
     private final Map<String, String> configCache = new HashMap<>();
+    private static final int MAX_RETRIES = 3;
+    private static final Pattern SAFE_KEY_PATTERN = Pattern.compile("^[A-Z_]{1,50}$");
+    private static final SecureRandom secureRandom = new SecureRandom();
 
     public void chargerConfigurations() {
         configurations.clear();
         configCache.clear();
         String sql = "SELECT * FROM configurations ORDER BY cle";
+        int retryCount = 0;
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        while (retryCount < MAX_RETRIES) {
+            try (Connection conn = DatabaseManager.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            conn.setAutoCommit(false);
-            try {
-                ResultSet rs = stmt.executeQuery();
-                while (rs.next()) {
-                    ConfigurationParam config = new ConfigurationParam(
-                        rs.getInt("id"),
-                        sanitizeInput(rs.getString("cle")),
-                        sanitizeInput(rs.getString("valeur")),
-                        sanitizeInput(rs.getString("description"))
-                    );
-                    configurations.add(config);
-                    configCache.put(config.getCle(), config.getValeur());
+                conn.setAutoCommit(false);
+                try {
+                    ResultSet rs = stmt.executeQuery();
+                    while (rs.next()) {
+                        try {
+                            ConfigurationParam config = new ConfigurationParam(
+                                rs.getInt("id"),
+                                sanitizeInput(rs.getString("cle")),
+                                sanitizeInput(rs.getString("valeur")),
+                                sanitizeInput(rs.getString("description"))
+                            );
+                            configurations.add(config);
+                            configCache.put(config.getCle(), config.getValeur());
+                        } catch (IllegalArgumentException e) {
+                            LOGGER.warning("Configuration invalide ignorée: " + e.getMessage());
+                            // Continue avec la prochaine configuration
+                        }
+                    }
+                    conn.commit();
+                    LOGGER.info("Configurations chargées: " + configurations.size() + " entrées");
+                    break; // Sortie de la boucle si succès
+                } catch (SQLException e) {
+                    conn.rollback();
+                    LOGGER.log(Level.SEVERE, "Erreur lors du chargement des configurations (tentative " + (retryCount + 1) + ")", e);
+                    retryCount++;
+                    if (retryCount >= MAX_RETRIES) {
+                        throw new RuntimeException("Échec du chargement des configurations après " + MAX_RETRIES + " tentatives", e);
+                    }
+                    // Attente exponentielle entre les tentatives
+                    Thread.sleep((long) Math.pow(2, retryCount) * 1000);
                 }
-                conn.commit();
-                LOGGER.info("Configurations chargées: " + configurations.size() + " entrées");
-            } catch (SQLException e) {
-                conn.rollback();
-                LOGGER.log(Level.SEVERE, "Erreur lors du chargement des configurations", e);
-                throw e;
+            } catch (SQLException | InterruptedException e) {
+                LOGGER.log(Level.SEVERE, "Erreur fatale lors du chargement des configurations", e);
+                throw new RuntimeException("Erreur lors du chargement des configurations", e);
             }
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du chargement des configurations", e);
-            throw new RuntimeException("Erreur lors du chargement des configurations", e);
         }
     }
 
@@ -54,7 +73,7 @@ public class ConfigurationController {
         validateConfiguration(config);
 
         String sql = "UPDATE configurations SET valeur = ? WHERE cle = ?";
-        LOGGER.info("Mise à jour de la configuration: " + config.getCle() + " = " + config.getValeur());
+        LOGGER.info("Mise à jour de la configuration: " + config.getCle());
 
         try (Connection conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(false);
@@ -81,7 +100,7 @@ public class ConfigurationController {
             } catch (SQLException e) {
                 conn.rollback();
                 LOGGER.log(Level.SEVERE, "Erreur lors de la mise à jour de la configuration", e);
-                throw e;
+                throw new RuntimeException("Erreur lors de la mise à jour: " + e.getMessage(), e);
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la mise à jour de la configuration", e);
@@ -95,15 +114,25 @@ public class ConfigurationController {
                     "WHEN cle = 'TVA_ENABLED' THEN 'true' " +
                     "WHEN cle = 'FORMAT_RECU' THEN 'COMPACT' " +
                     "WHEN cle = 'PIED_PAGE_RECU' THEN 'Merci de votre visite !' " +
-                    "WHEN cle = 'EN_TETE_RECU' THEN 'Votre Poissonnerie de Confiance' " +
+                    "WHEN cle = 'EN_TETE_RECU' THEN '' " +
                     "ELSE '' END " +
-                    "WHERE cle IN ('TAUX_TVA', 'TVA_ENABLED', 'FORMAT_RECU', 'PIED_PAGE_RECU', " +
-                    "'EN_TETE_RECU', 'NOM_ENTREPRISE', 'ADRESSE_ENTREPRISE', 'TELEPHONE_ENTREPRISE', " +
-                    "'SIRET_ENTREPRISE', 'LOGO_PATH')";
+                    "WHERE cle IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                int paramIndex = 1;
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_TAUX_TVA);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_TVA_ENABLED);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_FORMAT_RECU);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_PIED_PAGE_RECU);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_EN_TETE_RECU);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_NOM_ENTREPRISE);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_ADRESSE_ENTREPRISE);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_TELEPHONE_ENTREPRISE);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_SIRET_ENTREPRISE);
+                stmt.setString(paramIndex, ConfigurationParam.CLE_LOGO_PATH);
+
                 int rowsUpdated = stmt.executeUpdate();
                 conn.commit();
                 LOGGER.info("Configurations réinitialisées: " + rowsUpdated + " entrées mises à jour");
@@ -111,7 +140,7 @@ public class ConfigurationController {
             } catch (SQLException e) {
                 conn.rollback();
                 LOGGER.log(Level.SEVERE, "Erreur lors de la réinitialisation des configurations", e);
-                throw e;
+                throw new RuntimeException("Erreur lors de la réinitialisation: " + e.getMessage(), e);
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la réinitialisation des configurations", e);
@@ -120,11 +149,15 @@ public class ConfigurationController {
     }
 
     public String getValeur(String cle) {
+        if (!SAFE_KEY_PATTERN.matcher(cle).matches()) {
+            LOGGER.warning("Tentative d'accès avec une clé invalide: " + cle);
+            return "";
+        }
         return sanitizeInput(configCache.getOrDefault(cle, ""));
     }
 
     public List<ConfigurationParam> getConfigurations() {
-        return new ArrayList<>(configurations); // Retourne une copie de la liste pour éviter les modifications externes
+        return new ArrayList<>(configurations);
     }
 
     public double getTauxTVA() {
@@ -133,21 +166,28 @@ public class ConfigurationController {
             double tauxTVA = Double.parseDouble(taux);
             if (tauxTVA < 0 || tauxTVA > 100) {
                 LOGGER.warning("Taux TVA invalide: " + tauxTVA);
-                return 0.0;
+                return 20.0; // Valeur par défaut standard
             }
             return tauxTVA;
         } catch (NumberFormatException e) {
             LOGGER.log(Level.WARNING, "Erreur de conversion du taux TVA", e);
-            return 0.0;
+            return 20.0; // Valeur par défaut standard
         }
     }
 
     public Map<String, String> getInfosEntreprise() {
         Map<String, String> infos = new HashMap<>();
-        infos.put("nom", getValeur(ConfigurationParam.CLE_NOM_ENTREPRISE));
-        infos.put("adresse", getValeur(ConfigurationParam.CLE_ADRESSE_ENTREPRISE));
-        infos.put("telephone", getValeur(ConfigurationParam.CLE_TELEPHONE_ENTREPRISE));
-        infos.put("pied_page", getValeur(ConfigurationParam.CLE_PIED_PAGE_RECU));
+        String[] cles = {
+            ConfigurationParam.CLE_NOM_ENTREPRISE,
+            ConfigurationParam.CLE_ADRESSE_ENTREPRISE,
+            ConfigurationParam.CLE_TELEPHONE_ENTREPRISE,
+            ConfigurationParam.CLE_PIED_PAGE_RECU
+        };
+
+        for (String cle : cles) {
+            infos.put(cle.toLowerCase().replace("_entreprise", "")
+                               .replace("_recu", ""), getValeur(cle));
+        }
         return infos;
     }
 
@@ -155,8 +195,8 @@ public class ConfigurationController {
         if (config == null) {
             throw new IllegalArgumentException("La configuration ne peut pas être null");
         }
-        if (config.getCle() == null || config.getCle().trim().isEmpty()) {
-            throw new IllegalArgumentException("La clé de configuration ne peut pas être vide");
+        if (config.getCle() == null || !SAFE_KEY_PATTERN.matcher(config.getCle()).matches()) {
+            throw new IllegalArgumentException("Format de clé de configuration invalide");
         }
         if (config.getValeur() == null) {
             throw new IllegalArgumentException("La valeur de configuration ne peut pas être null");
@@ -173,7 +213,6 @@ public class ConfigurationController {
             case ConfigurationParam.CLE_FORMAT_RECU:
                 validateFormatRecu(config.getValeur());
                 break;
-            // Ajoutez d'autres validations spécifiques ici
         }
     }
 
@@ -204,12 +243,10 @@ public class ConfigurationController {
         if (input == null) {
             return "";
         }
-        // Échapper les caractères spéciaux HTML
-        return input.replaceAll("&", "&amp;")
-                   .replaceAll("<", "&lt;")
-                   .replaceAll(">", "&gt;")
-                   .replaceAll("\"", "&quot;")
-                   .replaceAll("'", "&#x27;")
-                   .replaceAll("/", "&#x2F;");
+        // Échapper les caractères spéciaux HTML et les caractères dangereux
+        return input.replaceAll("[<>\"'&/\\\\]", "_")
+                   .replaceAll("(?i)javascript:", "")
+                   .replaceAll("(?i)data:", "")
+                   .replaceAll("(?i)vbscript:", "");
     }
 }
