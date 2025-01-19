@@ -60,18 +60,6 @@
       <version>2.13.0</version>
     </dependency>
 
-    <!-- Logging -->
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-core</artifactId>
-      <version>2.20.0</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-api</artifactId>
-      <version>2.20.0</version>
-    </dependency>
-
     <!-- Graphiques et icônes -->
     <dependency>
       <groupId>org.jfree</groupId>

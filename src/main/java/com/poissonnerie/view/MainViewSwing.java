@@ -78,9 +78,9 @@ public class MainViewSwing {
             {"Factures", MaterialDesign.MDI_FILE_DOCUMENT},
             {"Fournisseurs", MaterialDesign.MDI_TRUCK_DELIVERY},
             {"Inventaire", MaterialDesign.MDI_CLIPBOARD_TEXT},
-            {"Caisse", MaterialDesign.MDI_CASH_REGISTER},
+            {"Caisse", MaterialDesign.MDI_CASH},
             {"Rapport", MaterialDesign.MDI_CHART_BAR},
-            {"Réglages", MaterialDesign.MDI_COGS},
+            {"Réglages", MaterialDesign.MDI_SETTINGS},
             {"Déconnexion", MaterialDesign.MDI_LOGOUT_VARIANT}
         };
 
