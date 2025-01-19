@@ -6,16 +6,21 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.ChartUtils;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 
+import java.awt.*;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.List;
 import java.util.logging.Level;
@@ -23,6 +28,7 @@ import java.util.logging.Logger;
 import java.io.File;
 import java.text.NumberFormat;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 public class ReportBuilder {
     private static final Logger LOGGER = Logger.getLogger(ReportBuilder.class.getName());
@@ -298,7 +304,7 @@ public class ReportBuilder {
         // Graphique d'évolution des ventes
         String tempGraphFile = "temp_ventes_graph.jpg";
         genererGraphiqueVentes(tempGraphFile, stats);
-        Image graph = Image.getInstance(tempGraphFile);
+        com.itextpdf.text.Image graph = com.itextpdf.text.Image.getInstance(tempGraphFile);
         graph.scaleToFit(500, 300);
         document.add(graph);
         new File(tempGraphFile).delete();
@@ -318,6 +324,13 @@ public class ReportBuilder {
             tableVentes.addCell(v.getModePaiement().toString());
         }
         document.add(tableVentes);
+
+        // Add trend analysis
+        @SuppressWarnings("unchecked")
+        List<Vente> ventesList = (List<Vente>) stats.get("ventesTriees");
+        Map<String, Double> tendances = calculerTendances(ventesList, debut, fin);
+        ajouterGraphiqueTendancesPDF(document, tendances);
+
 
         document.close();
     }
@@ -386,7 +399,7 @@ public class ReportBuilder {
 
         @SuppressWarnings("unchecked")
         Map<ModePaiement, DoubleSummaryStatistics> statsParMode =
-            (Map<ModePaiement, DoubleSummaryStatistics>) stats.get("statsParMode");
+                (Map<ModePaiement, DoubleSummaryStatistics>) stats.get("statsParMode");
 
         rowNum = 1;
         for (Map.Entry<ModePaiement, DoubleSummaryStatistics> entry : statsParMode.entrySet()) {
@@ -397,8 +410,31 @@ public class ReportBuilder {
             row.createCell(3).setCellValue(entry.getValue().getAverage());
         }
 
+        // Add trend analysis sheet
+        Sheet sheetTendances = workbook.createSheet("Analyse des Tendances");
+        Row tendancesHeader = sheetTendances.createRow(0);
+        String[] headersTendances = {"Indicateur", "Valeur", "Variation"};
+
+        for (int i = 0; i < headersTendances.length; i++) {
+            Cell cell = tendancesHeader.createCell(i);
+            cell.setCellValue(headersTendances[i]);
+            cell.setCellStyle(headerStyle);
+        }
+
+        @SuppressWarnings("unchecked")
+        List<Vente> ventesList = (List<Vente>) stats.get("ventesTriees");
+        Map<String, Double> tendances = calculerTendances(ventesList, debut, fin);
+        int tendancesRowNum = 1;
+        for (Map.Entry<String, Double> entry : tendances.entrySet()) {
+            Row row = sheetTendances.createRow(tendancesRowNum++);
+            row.createCell(0).setCellValue(formatIndicateur(entry.getKey()));
+            row.createCell(1).setCellValue(entry.getValue());
+            // Add a formula for variation calculation if needed.
+        }
+
+
         // Ajuster la largeur des colonnes
-        for (Sheet sheet : new Sheet[]{sheetStats, sheetVentes, sheetModes}) {
+        for (Sheet sheet : new Sheet[]{sheetStats, sheetVentes, sheetModes, sheetTendances}) {
             for (int i = 0; i < 5; i++) {
                 sheet.autoSizeColumn(i);
             }
@@ -494,8 +530,8 @@ public class ReportBuilder {
         }
 
         @SuppressWarnings("unchecked")
-        Map<String, DoubleSummaryStatistics> statsParStatut = 
-            (Map<String, DoubleSummaryStatistics>) stats.get("statsParStatut");
+        Map<String, DoubleSummaryStatistics> statsParStatut =
+                (Map<String, DoubleSummaryStatistics>) stats.get("statsParStatut");
 
         int rowNum = 4;
         for (Map.Entry<String, DoubleSummaryStatistics> entry : statsParStatut.entrySet()) {
@@ -525,8 +561,8 @@ public class ReportBuilder {
             Row row = sheet.createRow(rowNum++);
             row.createCell(0).setCellValue(client.getNom());
             row.createCell(1).setCellValue(client.getSolde());
-            row.createCell(2).setCellValue(client.getDerniereVente() != null ? 
-                client.getDerniereVente().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "N/A");
+            row.createCell(2).setCellValue(client.getDerniereVente() != null ?
+                    client.getDerniereVente().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "N/A");
             row.createCell(3).setCellValue(client.getStatutCreances().toString());
         }
 
@@ -551,6 +587,7 @@ public class ReportBuilder {
         // En-tête
         document.add(new Paragraph("Rapport Financier", TITLE_FONT));
         document.add(new Paragraph("Période: " + debut.format(DATE_FORMATTER) + " - " + fin.format(DATE_FORMATTER)));
+        document.add(new Paragraph("Généré le " + LocalDateTime.now().format(DATE_FORMATTER)));
         document.add(Chunk.NEWLINE);
 
         // Résultats globaux
@@ -571,36 +608,20 @@ public class ReportBuilder {
         tableResultats.addCell("Bénéfice net");
         tableResultats.addCell(CURRENCY_FORMATTER.format(beneficeNet));
 
-        if (stats.containsKey("tauxMargeBrute")) {
-            double tauxMarge = (Double) stats.get("tauxMargeBrute");
-            tableResultats.addCell("Taux de marge brute");
-            tableResultats.addCell(String.format("%.2f%%", tauxMarge));
-        }
+        double tauxMarge = (Double) stats.get("tauxMargeBrute");
+        tableResultats.addCell("Taux de marge brute");
+        tableResultats.addCell(String.format("%.2f%%", tauxMarge));
 
         document.add(tableResultats);
         document.add(Chunk.NEWLINE);
 
-        // Évolution quotidienne
-        document.add(new Paragraph("Évolution Quotidienne", SUBTITLE_FONT));
+        // Analyse des tendances
+        document.add(new Paragraph("Analyse des Tendances", SUBTITLE_FONT));
         @SuppressWarnings("unchecked")
-        Map<LocalDate, Double> caParJour = (Map<LocalDate, Double>) stats.get("chiffreAffairesParJour");
-        @SuppressWarnings("unchecked")
-        Map<LocalDate, Double> depensesParJour = (Map<LocalDate, Double>) stats.get("depensesParJour");
+        Map<String, Double> tendances = (Map<String, Double>) stats.get("tendances");
+        ajouterGraphiqueTendancesPDF(document, tendances);
+        document.add(Chunk.NEWLINE);
 
-        PdfPTable tableEvolution = new PdfPTable(3);
-        tableEvolution.setWidthPercentage(100);
-        ajouterEnTeteTableau(tableEvolution, new String[]{"Date", "CA", "Dépenses"});
-
-        Set<LocalDate> dates = new TreeSet<>();
-        dates.addAll(caParJour.keySet());
-        dates.addAll(depensesParJour.keySet());
-
-        for (LocalDate date : dates) {
-            tableEvolution.addCell(date.format(DATE_FORMATTER));
-            tableEvolution.addCell(CURRENCY_FORMATTER.format(caParJour.getOrDefault(date, 0.0)));
-            tableEvolution.addCell(CURRENCY_FORMATTER.format(depensesParJour.getOrDefault(date, 0.0)));
-        }
-        document.add(tableEvolution);
 
         document.close();
     }
@@ -610,70 +631,46 @@ public class ReportBuilder {
         Workbook workbook = new XSSFWorkbook();
         CellStyle headerStyle = creerStyleEnTete(workbook);
         CellStyle dataStyle = creerStyleDonnees(workbook);
+        CellStyle percentStyle = workbook.createCellStyle();
+        percentStyle.setDataFormat(workbook.createDataFormat().getFormat("0.00%"));
 
         // Feuille principale - Vue d'ensemble
         Sheet sheetVueEnsemble = workbook.createSheet("Vue d'ensemble");
-
-        // En-tête
         Row headerRow = sheetVueEnsemble.createRow(0);
         headerRow.createCell(0).setCellValue("Rapport Financier");
         headerRow.createCell(1).setCellValue(debut.format(DATE_FORMATTER) + " au " + fin.format(DATE_FORMATTER));
 
-        // Résultats globaux
+        // Résultats globaux avec formules
         Row row1 = sheetVueEnsemble.createRow(2);
         row1.createCell(0).setCellValue("Chiffre d'affaires total");
-        row1.createCell(1).setCellValue(((Number)stats.get("chiffreAffairesTotal")).doubleValue());
+        Cell caCell = row1.createCell(1);
+        caCell.setCellValue(((Number)stats.get("chiffreAffairesTotal")).doubleValue());
+        caCell.setCellStyle(dataStyle);
 
         Row row2 = sheetVueEnsemble.createRow(3);
         row2.createCell(0).setCellValue("Total des dépenses");
-        row2.createCell(1).setCellValue(((Number)stats.get("depensesTotal")).doubleValue());
+        Cell depensesCell = row2.createCell(1);
+        depensesCell.setCellValue(((Number)stats.get("depensesTotal")).doubleValue());
+        depensesCell.setCellStyle(dataStyle);
 
         Row row3 = sheetVueEnsemble.createRow(4);
         row3.createCell(0).setCellValue("Bénéfice net");
-        row3.createCell(1).setCellValue(((Number)stats.get("beneficeNet")).doubleValue());
+        Cell beneficeCell = row3.createCell(1);
+        // Formule pour calculer le bénéfice
+        beneficeCell.setCellFormula("B3-B4");
+        beneficeCell.setCellStyle(dataStyle);
 
-        if (stats.containsKey("tauxMargeBrute")) {
-            Row row4 = sheetVueEnsemble.createRow(5);
-            row4.createCell(0).setCellValue("Taux de marge brute");
-            row4.createCell(1).setCellValue(((Number)stats.get("tauxMargeBrute")).doubleValue() + "%");
-        }
-
-        // Feuille - Évolution quotidienne
-        Sheet sheetEvolution = workbook.createSheet("Évolution Quotidienne");
-        Row evolutionHeader = sheetEvolution.createRow(0);
-        String[] headers = {"Date", "Chiffre d'affaires", "Dépenses", "Bénéfice"};
-
-        for (int i = 0; i < headers.length; i++) {
-            Cell cell = evolutionHeader.createCell(i);
-            cell.setCellValue(headers[i]);
-            cell.setCellStyle(headerStyle);
-        }
-
-        @SuppressWarnings("unchecked")
-        Map<LocalDate, Double> caParJour = (Map<LocalDate, Double>) stats.get("chiffreAffairesParJour");
-        @SuppressWarnings("unchecked")
-        Map<LocalDate, Double> depensesParJour = (Map<LocalDate, Double>) stats.get("depensesParJour");
-
-        Set<LocalDate> dates = new TreeSet<>();
-        dates.addAll(caParJour.keySet());
-        dates.addAll(depensesParJour.keySet());
-
-        int rowNum = 1;
-        for (LocalDate date : dates) {
-            Row row = sheetEvolution.createRow(rowNum++);
-            double ca = caParJour.getOrDefault(date, 0.0);
-            double depenses = depensesParJour.getOrDefault(date, 0.0);
-
-            row.createCell(0).setCellValue(date.format(DATE_FORMATTER));
-            row.createCell(1).setCellValue(ca);
-            row.createCell(2).setCellValue(depenses);
-            row.createCell(3).setCellValue(ca - depenses);
-        }
+        Row row4 = sheetVueEnsemble.createRow(5);
+        row4.createCell(0).setCellValue("Taux de marge brute");
+        Cell margeCell = row4.createCell(1);
+        // Formule pour calculer le taux de marge
+        margeCell.setCellFormula("(B3-B4)/B3");
+        margeCell.setCellStyle(percentStyle);
 
         // Feuille - Analyse des tendances
         Sheet sheetTendances = workbook.createSheet("Analyse des Tendances");
         Row tendancesHeader = sheetTendances.createRow(0);
-        String[] headersTendances = {"Indicateur", "Valeur", "Variation"};
+        String[] headersTendances = {"Indicateur", "Variation", "Statut"};
 
         for (int i = 0; i < headersTendances.length; i++) {
             Cell cell = tendancesHeader.createCell(i);
@@ -683,18 +680,24 @@ public class ReportBuilder {
 
         @SuppressWarnings("unchecked")
         Map<String, Double> tendances = (Map<String, Double>) stats.get("tendances");
-        if (tendances != null) {
-            rowNum = 1;
-            for (Map.Entry<String, Double> entry : tendances.entrySet()) {
-                Row row = sheetTendances.createRow(rowNum++);
-                row.createCell(0).setCellValue(entry.getKey());
-                row.createCell(1).setCellValue(entry.getValue());
-            }
+        int rowNum = 1;
+        for (Map.Entry<String, Double> entry : tendances.entrySet()) {
+            Row row = sheetTendances.createRow(rowNum++);
+            row.createCell(0).setCellValue(formatIndicateur(entry.getKey()));
+
+            Cell variationCell = row.createCell(1);
+            variationCell.setCellValue(entry.getValue() / 100.0); // Conversion en pourcentage
+            variationCell.setCellStyle(percentStyle);
+
+            // Formule conditionnelle pour le statut
+            Cell statutCell = row.createCell(2);
+            statutCell.setCellFormula(String.format("IF(B%d>0,\"↗ Hausse\",IF(B%d<0,\"↘ Baisse\",\"→ Stable\"))",
+                    rowNum, rowNum));
         }
 
         // Ajuster la largeur des colonnes
-        for (Sheet sheet : new Sheet[]{sheetVueEnsemble, sheetEvolution, sheetTendances}) {
-            for (int i = 0; i < 4; i++) {
+        for (Sheet sheet : new Sheet[]{sheetVueEnsemble, sheetTendances}) {
+            for (int i = 0; i < 3; i++) {
                 sheet.autoSizeColumn(i);
             }
         }
@@ -707,11 +710,148 @@ public class ReportBuilder {
     }
 
     private void ajouterEnTeteTableau(PdfPTable table, String[] headers) {
-        for (String header : headers) {
+        for(String header : headers) {
             PdfPCell cell = new PdfPCell(new Phrase(header, SMALL_FONT));
             cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
             cell.setHorizontalAlignment(Element.ALIGN_CENTER);
             table.addCell(cell);
         }
     }
+
+    private Map<String, Double> calculerTendances(List<Vente> ventes, LocalDate debut, LocalDate fin) {
+        Map<String, Double> tendances = new HashMap<>();
+
+        // Calculer la période précédente
+        long nbJours = ChronoUnit.DAYS.between(debut, fin);
+        LocalDate debutPrecedent = debut.minusDays(nbJours);
+        LocalDate finPrecedent = debut.minusDays(1);
+
+        // Calculer les variations entre périodes
+        List<Vente> ventesPeriodeActuelle = ventes.stream()
+                .filter(v -> !v.getDate().toLocalDate().isBefore(debut) && !v.getDate().toLocalDate().isAfter(fin))
+                .collect(Collectors.toList());
+
+        List<Vente> ventesPeriodePrecedente = ventes.stream()
+                .filter(v -> !v.getDate().toLocalDate().isBefore(debutPrecedent) && !v.getDate().toLocalDate().isAfter(finPrecedent))
+                .collect(Collectors.toList());
+
+        // Calculer les totaux
+        double caActuel = ventesPeriodeActuelle.stream()
+                .mapToDouble(Vente::getMontantTotal)
+                .sum();
+
+        double caPrecedent = ventesPeriodePrecedente.stream()
+                .mapToDouble(Vente::getMontantTotal)
+                .sum();
+
+        // Calculer les variations
+        double variationCA = caPrecedent != 0 ? ((caActuel - caPrecedent) / caPrecedent) * 100 : 100;
+        tendances.put("variationCA", variationCA);
+
+        // Nombre moyen de ventes par jour
+        double nbVentesJourActuel = ventesPeriodeActuelle.size() / (double) nbJours;
+        double nbVentesJourPrecedent = ventesPeriodePrecedente.size() / (double) nbJours;
+        double variationNbVentes = nbVentesJourPrecedent != 0 ?
+                ((nbVentesJourActuel - nbVentesJourPrecedent) / nbVentesJourPrecedent) * 100 : 100;
+        tendances.put("variationNbVentes", variationNbVentes);
+
+        // Panier moyen
+        double panierMoyenActuel = ventesPeriodeActuelle.stream()
+                .mapToDouble(Vente::getMontantTotal)
+                .average()
+                .orElse(0);
+
+        double panierMoyenPrecedent = ventesPeriodePrecedente.stream()
+                .mapToDouble(Vente::getMontantTotal)
+                .average()
+                .orElse(0);
+
+        double variationPanierMoyen = panierMoyenPrecedent != 0 ?
+                ((panierMoyenActuel - panierMoyenPrecedent) / panierMoyenPrecedent) * 100 : 100;
+        tendances.put("variationPanierMoyen", variationPanierMoyen);
+
+        return tendances;
+    }
+
+    private void genererGraphiqueTendances(String cheminFichier, Map<String, Double> tendances) throws Exception {
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+        dataset.addValue(tendances.get("variationCA"), "Variation", "Chiffre d'affaires");
+        dataset.addValue(tendances.get("variationNbVentes"), "Variation", "Nombre de ventes");
+        dataset.addValue(tendances.get("variationPanierMoyen"), "Variation", "Panier moyen");
+
+        JFreeChart chart = ChartFactory.createBarChart(
+                "Analyse des tendances",
+                "Indicateurs",
+                "Variation (%)",
+                dataset,
+                PlotOrientation.VERTICAL,
+                true,
+                true,
+                false
+        );
+
+        // Personnalisation du graphique
+        CategoryPlot plot = chart.getCategoryPlot();
+        plot.setBackgroundPaint(java.awt.Color.WHITE);
+        plot.setRangeGridlinePaint(java.awt.Color.GRAY);
+
+        // Coloration selon la variation (positif/négatif)
+        BarRenderer renderer = (BarRenderer) plot.getRenderer();
+        renderer.setSeriesPaint(0, new java.awt.Color(30, 144, 255));
+
+        ChartUtils.saveChartAsJPEG(new File(cheminFichier), chart, 600, 400);
+    }
+
+    private void ajouterGraphiqueTendancesPDF(Document document, Map<String, Double> tendances) throws Exception {
+        // Création et sauvegarde temporaire du graphique
+        String tempFile = "temp_tendances_graph.jpg";
+        genererGraphiqueTendances(tempFile, tendances);
+
+        // Ajout au document PDF
+        com.itextpdf.text.Image graph = com.itextpdf.text.Image.getInstance(tempFile);
+        graph.scaleToFit(500, 300);
+        document.add(graph);
+
+        // Nettoyage du fichier temporaire
+        new File(tempFile).delete();
+
+        // Ajout d'un tableau récapitulatif
+        document.add(Chunk.NEWLINE);
+        document.add(new Paragraph("Récapitulatif des variations", SUBTITLE_FONT));
+
+        PdfPTable table = new PdfPTable(2);
+        table.setWidthPercentage(100);
+
+        // En-têtes
+        PdfPCell cell = new PdfPCell(new Phrase("Indicateur", SMALL_FONT));
+        cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        table.addCell(cell);
+
+        cell = new PdfPCell(new Phrase("Variation", SMALL_FONT));
+        cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        table.addCell(cell);
+
+        // Données
+        for (Map.Entry<String, Double> entry : tendances.entrySet()) {
+            table.addCell(formatIndicateur(entry.getKey()));
+            table.addCell(String.format("%.1f%%", entry.getValue()));
+        }
+
+        document.add(table);
+    }
+
+    private String formatIndicateur(String key) {
+        switch (key) {
+            case "variationCA":
+                return "Chiffre d'affaires";
+            case "variationNbVentes":
+                return "Nombre de ventes";
+            case "variationPanierMoyen":
+                return "Panier moyen";
+            default:
+                return key;
+        }
+    }
+
 }

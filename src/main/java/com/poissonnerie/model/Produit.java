@@ -54,6 +54,35 @@ public class Produit {
         return prixAchat > 0 ? ((prixVente - prixAchat) / prixAchat) * 100 : 0;
     }
 
+    // Nouvelles méthodes pour la gestion du stock
+    public void ajusterStock(int quantite) {
+        this.stock += quantite;
+        if (this.stock < 0) {
+            this.stock = 0;
+        }
+    }
+
+    public boolean estStockBas() {
+        return this.stock <= this.seuilAlerte;
+    }
+
+    public boolean estEnRupture() {
+        return this.stock <= 0;
+    }
+
+    // Méthodes supplémentaires pour les rapports
+    public String getReference() {
+        return String.format("PR%06d", id);
+    }
+
+    public int getQuantite() {
+        return this.stock;
+    }
+
+    public double getPrix() {
+        return this.prixVente;
+    }
+
     @Override
     public String toString() {
         return String.format("%s (ID: %d) - Prix vente: %.2f€, Stock: %d",

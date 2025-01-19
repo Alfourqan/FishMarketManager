@@ -212,7 +212,7 @@ public class VenteController {
 
     private Produit creerProduitDepuisResultSet(ResultSet rs) throws SQLException {
         try {
-            int produitId = rs.getInt("produit_id");
+            Long produitId = rs.getLong("produit_id");
             String nom = sanitizeInput(rs.getString("nom"));
             String categorie = sanitizeInput(rs.getString("categorie"));
             double prixAchat = rs.getDouble("prix_achat");
@@ -261,7 +261,7 @@ public class VenteController {
     private void validateStock(Connection conn, Vente.LigneVente ligne) throws SQLException {
         String sql = "SELECT stock FROM produits WHERE id = ? AND supprime = false AND stock >= ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, ligne.getProduit().getId());
+            pstmt.setLong(1, ligne.getProduit().getId());
             pstmt.setInt(2, ligne.getQuantite());
 
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -378,7 +378,7 @@ public class VenteController {
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, ligne.getQuantite());
-            pstmt.setInt(2, ligne.getProduit().getId());
+            pstmt.setLong(2, ligne.getProduit().getId());
             pstmt.setInt(3, ligne.getQuantite());
 
             int rowsAffected = pstmt.executeUpdate();

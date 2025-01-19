@@ -31,6 +31,10 @@ args = "Database Init"
 task = "workflow.run"
 args = "Java Build"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Test Rapports"
+
 [[workflows.workflow]]
 name = "Java Application"
 author = "agent"
@@ -100,6 +104,20 @@ task = "packager.installForAll"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "mvn clean compile"
+
+[[workflows.workflow]]
+name = "Test Rapports"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "mvn clean compile exec:java -Dexec.mainClass='com.poissonnerie.Main'"
 
 [deployment]
 run = ["sh", "-c", "mvn clean compile exec:java -Dexec.mainClass='com.poissonnerie.Main'"]

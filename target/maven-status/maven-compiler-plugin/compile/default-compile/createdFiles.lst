@@ -1,0 +1,11 @@
+com/poissonnerie/model/ModePaiement.class
+com/poissonnerie/model/Produit.class
+com/poissonnerie/model/Client.class
+com/poissonnerie/view/ClientViewSwing$3.class
+com/poissonnerie/model/Fournisseur.class
+com/poissonnerie/view/ClientViewSwing$2.class
+com/poissonnerie/model/StatutCreances.class
+com/poissonnerie/view/ClientViewSwing$4.class
+com/poissonnerie/view/ClientViewSwing.class
+com/poissonnerie/controller/ClientController.class
+com/poissonnerie/view/ClientViewSwing$1.class
