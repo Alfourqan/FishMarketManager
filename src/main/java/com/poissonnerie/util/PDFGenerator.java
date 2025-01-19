@@ -10,6 +10,7 @@ import com.poissonnerie.controller.ConfigurationController;
 import java.io.FileOutputStream;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Stream;
 import java.util.Map;
@@ -284,18 +285,40 @@ public class PDFGenerator {
         }
     }
 
-    public static void genererRapportVentes(List<Vente> ventes, String cheminFichier) {
+    public static void genererRapportVentes(List<Vente> ventes, String cheminFichier, 
+            LocalDate dateDebut, LocalDate dateFin) {
         try {
             validateFilePath(cheminFichier);
             Document document = new Document();
             PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
             document.open();
 
+            // Titre et période
             Paragraph title = new Paragraph("Rapport des Ventes", 
                 new Font(BaseFont.createFont(), 16, Font.BOLD));
             title.setAlignment(Element.ALIGN_CENTER);
             document.add(title);
+            document.add(new Paragraph("Période: du " + dateDebut.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) +
+                " au " + dateFin.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
+            document.add(Chunk.NEWLINE);
 
+            // Statistiques
+            Map<String, Object> stats = ReportStatisticsManager.analyserVentes(ventes, dateDebut, dateFin);
+            document.add(new Paragraph("Analyses des Ventes:", 
+                new Font(BaseFont.createFont(), 14, Font.BOLD)));
+            document.add(new Paragraph("Chiffre d'affaires total: " + 
+                String.format("%.2f €", ((Number)stats.get("chiffreAffaires")).doubleValue())));
+
+            // Ventes par mode de paiement
+            document.add(new Paragraph("Répartition par Mode de Paiement:", 
+                new Font(BaseFont.createFont(), 14, Font.BOLD)));
+            Map<ModePaiement, Long> ventesParMode = (Map<ModePaiement, Long>) stats.get("ventesParMode");
+            for (Map.Entry<ModePaiement, Long> entry : ventesParMode.entrySet()) {
+                document.add(new Paragraph(entry.getKey() + ": " + entry.getValue() + " ventes"));
+            }
+            document.add(Chunk.NEWLINE);
+
+            // Tableau des ventes
             PdfPTable table = new PdfPTable(5);
             table.setWidthPercentage(100);
 
@@ -310,7 +333,7 @@ public class PDFGenerator {
 
             for (Vente v : ventes) {
                 table.addCell(v.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-                table.addCell(sanitizeInput(v.getClient().getNom()));
+                table.addCell(sanitizeInput(v.getClient() != null ? v.getClient().getNom() : "Vente comptant"));
                 table.addCell(String.valueOf(v.getLignes().size()));
                 table.addCell(String.format("%.2f €", v.getTotal()));
                 table.addCell(v.getStatut().toString());
@@ -332,11 +355,32 @@ public class PDFGenerator {
             PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
             document.open();
 
+            // Titre principal
             Paragraph title = new Paragraph("État des Stocks", 
                 new Font(BaseFont.createFont(), 16, Font.BOLD));
             title.setAlignment(Element.ALIGN_CENTER);
             document.add(title);
+            document.add(Chunk.NEWLINE);
 
+            // Statistiques globales
+            Map<String, Object> stats = ReportStatisticsManager.analyserStocks(produits);
+            document.add(new Paragraph("Statistiques Globales:", 
+                new Font(BaseFont.createFont(), 14, Font.BOLD)));
+            document.add(new Paragraph("Nombre total de produits: " + stats.get("totalProduits")));
+            document.add(new Paragraph("Valeur totale du stock: " + 
+                String.format("%.2f €", ((Number)stats.get("valeurTotaleStock")).doubleValue())));
+            document.add(Chunk.NEWLINE);
+
+            // Répartition par statut
+            document.add(new Paragraph("Répartition par Statut:", 
+                new Font(BaseFont.createFont(), 14, Font.BOLD)));
+            Map<String, Long> statutsCount = (Map<String, Long>) stats.get("statutsCount");
+            for (Map.Entry<String, Long> entry : statutsCount.entrySet()) {
+                document.add(new Paragraph(entry.getKey() + ": " + entry.getValue()));
+            }
+            document.add(Chunk.NEWLINE);
+
+            // Tableau des produits
             PdfPTable table = new PdfPTable(5);
             table.setWidthPercentage(100);
 
