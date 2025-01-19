@@ -1,1 +1,1 @@
-// This file (src/main/java/com/poissonnerie/controller/model/Client.java) has been removed because it is a duplicate of src/main/java/com/poissonnerie/model/Client.java
+// Ce fichier est déprécié. Utiliser com.poissonnerie.model.Client à la place
