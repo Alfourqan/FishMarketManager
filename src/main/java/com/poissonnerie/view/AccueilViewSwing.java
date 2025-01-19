@@ -21,6 +21,15 @@ public class AccueilViewSwing {
     private JLabel encaissementsJourLabel;
     private JLabel chiffreAffairesLabel;
 
+    // Couleurs thématiques
+    private static final Color SUCCESS_COLOR = new Color(76, 175, 80);  // Vert
+    private static final Color DANGER_COLOR = new Color(244, 67, 54);   // Rouge
+    private static final Color INFO_COLOR = new Color(33, 150, 243);    // Bleu
+    private static final Color DARK_COLOR = new Color(33, 33, 33);      // Noir
+    private static final Font TITLE_FONT = new Font("Segoe UI", Font.BOLD, 20);
+    private static final Font VALUE_FONT = new Font("Segoe UI", Font.BOLD, 24);
+    private static final Font REGULAR_FONT = new Font("Segoe UI", Font.PLAIN, 14);
+
     public AccueilViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -40,20 +49,13 @@ public class AccueilViewSwing {
         kpiPanel.setBackground(Color.WHITE);
 
         // Création des cartes KPI
-        kpiPanel.add(createKPIPanel("Ventes (Aujourd'hui)", ventesJourLabel = new JLabel("0.00 €"), 
-            new Color(76, 175, 80)));
-
-        kpiPanel.add(createKPIPanel("Produits en rupture", produitsRuptureLabel = new JLabel("0"), 
-            new Color(244, 67, 54)));
-
-        kpiPanel.add(createKPIPanel("Encaissements (Aujourd'hui)", encaissementsJourLabel = new JLabel("0.00 €"), 
-            new Color(33, 150, 243)));
-
-        kpiPanel.add(createKPIPanel("Chiffre d'affaires", chiffreAffairesLabel = new JLabel("0.00 €"), 
-            new Color(156, 39, 176)));
+        kpiPanel.add(createKPIPanel("Ventes (Aujourd'hui)", ventesJourLabel = new JLabel("0.00 €"), SUCCESS_COLOR));
+        kpiPanel.add(createKPIPanel("Produits en rupture", produitsRuptureLabel = new JLabel("0"), DANGER_COLOR));
+        kpiPanel.add(createKPIPanel("Encaissements (Aujourd'hui)", encaissementsJourLabel = new JLabel("0.00 €"), INFO_COLOR));
+        kpiPanel.add(createKPIPanel("Chiffre d'affaires", chiffreAffairesLabel = new JLabel("0.00 €"), DARK_COLOR));
 
         // Bouton d'actualisation
-        JButton refreshButton = createStyledButton("Actualiser");
+        JButton refreshButton = createStyledButton("Actualiser", INFO_COLOR);
         refreshButton.addActionListener(e -> loadData());
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -76,11 +78,11 @@ public class AccueilViewSwing {
 
         // Titre
         JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        titleLabel.setFont(REGULAR_FONT);
         titleLabel.setForeground(new Color(33, 33, 33));
 
         // Valeur
-        valueLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        valueLabel.setFont(VALUE_FONT);
         valueLabel.setForeground(color);
 
         panel.add(titleLabel, BorderLayout.NORTH);
@@ -151,10 +153,10 @@ public class AccueilViewSwing {
         chiffreAffairesLabel.setText(String.format("%.2f €", totalCA));
     }
 
-    private JButton createStyledButton(String text) {
+    private JButton createStyledButton(String text, Color color) {
         JButton button = new JButton(text);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        button.setBackground(new Color(33, 150, 243));
+        button.setFont(REGULAR_FONT);
+        button.setBackground(color);
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
         button.setBorderPainted(false);
@@ -163,10 +165,10 @@ public class AccueilViewSwing {
 
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(new Color(33, 150, 243).darker());
+                button.setBackground(color.darker());
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(new Color(33, 150, 243));
+                button.setBackground(color);
             }
         });
 
