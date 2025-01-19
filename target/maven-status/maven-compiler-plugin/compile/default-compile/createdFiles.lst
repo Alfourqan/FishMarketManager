@@ -27,7 +27,9 @@ com/poissonnerie/view/AccueilViewSwing$2.class
 com/poissonnerie/view/AccueilViewSwing.class
 com/poissonnerie/view/MainViewSwing.class
 com/poissonnerie/view/ConfigurationViewSwing$2.class
+schema.sql
 com/poissonnerie/controller/VenteController.class
+com/poissonnerie/view/ProduitViewSwing$5.class
 com/poissonnerie/view/ReportViewSwing$3.class
 com/poissonnerie/view/ProduitViewSwing$2.class
 com/poissonnerie/model/InventaireManager$InventaireObserver.class
@@ -42,9 +44,11 @@ com/poissonnerie/view/ClientViewSwing.class
 com/poissonnerie/view/AccueilViewSwing$1.class
 com/poissonnerie/view/InventaireViewSwing.class
 com/poissonnerie/controller/ProduitController.class
+com/poissonnerie/view/ProduitViewSwing$4.class
 com/poissonnerie/view/CaisseViewSwing$3.class
 com/poissonnerie/view/ReportViewSwing$2.class
 com/poissonnerie/view/ProduitViewSwing.class
+com/poissonnerie/view/FournisseurViewSwing$5.class
 com/poissonnerie/model/ConfigurationParam.class
 com/poissonnerie/view/SplashScreen$2.class
 com/poissonnerie/view/ConfigurationViewSwing.class
@@ -68,4 +72,6 @@ com/poissonnerie/Main$1.class
 com/poissonnerie/model/Client$StatutCreances.class
 com/poissonnerie/view/VenteViewSwing.class
 com/poissonnerie/view/CaisseViewSwing$1.class
+com/poissonnerie/view/CaisseViewSwing$4.class
 com/poissonnerie/util/PDFGenerator.class
+com/poissonnerie/view/FournisseurViewSwing$4.class

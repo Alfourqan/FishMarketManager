@@ -55,8 +55,7 @@ public class CaisseViewSwing {
             }
         };
         tableMouvements = new JTable(tableModel);
-        setupTableStyle(); // Appel de notre nouvelle méthode de style
-
+        setupTableStyle();
         initializeComponents();
         loadData();
         updateCaisseState();
@@ -64,40 +63,27 @@ public class CaisseViewSwing {
 
     private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
         FontIcon icon = FontIcon.of(iconCode);
-        icon.setIconSize(20);
+        icon.setIconSize(18);
         icon.setIconColor(Color.WHITE);
 
         JButton button = new JButton(text);
         button.setIcon(icon);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
         button.setBackground(color);
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
         button.setBorderPainted(false);
-        button.setMargin(new Insets(10, 20, 10, 20));
+        button.setMargin(new Insets(8, 15, 8, 15));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.putClientProperty("JButton.buttonType", "roundRect");
 
         // Effet de survol avec animation
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(color.darker());
-                // Animation de mise à l'échelle
-                Timer timer = new Timer(50, e -> {
-                    button.setMargin(new Insets(9, 19, 9, 19));
-                    button.repaint();
-                });
-                timer.setRepeats(false);
-                timer.start();
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 button.setBackground(color);
-                // Animation de retour à la normale
-                Timer timer = new Timer(50, e -> {
-                    button.setMargin(new Insets(10, 20, 10, 20));
-                    button.repaint();
-                });
-                timer.setRepeats(false);
-                timer.start();
             }
         });
 
@@ -106,38 +92,41 @@ public class CaisseViewSwing {
 
     private void initializeComponents() {
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        mainPanel.setBackground(new Color(248, 250, 252));
 
         // Panel du haut avec style moderne
         JPanel topPanel = new JPanel(new BorderLayout(20, 0));
         topPanel.setBackground(new Color(248, 250, 252));
-        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
+        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         actionPanel.setBackground(new Color(248, 250, 252));
 
         // Création des boutons avec nouveaux styles et animations
         ouvrirBtn = createStyledButton("Ouvrir la caisse", MaterialDesign.MDI_CASH, new Color(34, 197, 94));
         cloturerBtn = createStyledButton("Clôturer la caisse", MaterialDesign.MDI_CLOSE_CIRCLE, new Color(239, 68, 68));
-        ajouterBtn = createStyledButton("Nouveau mouvement", MaterialDesign.MDI_PLUS_CIRCLE, new Color(0, 120, 212));
-        exporterBtn = createStyledButton("Exporter (CSV)", MaterialDesign.MDI_EXPORT, new Color(0, 183, 195));
-
-        actionPanel.add(ouvrirBtn);
-        actionPanel.add(cloturerBtn);
-        actionPanel.add(ajouterBtn);
-        actionPanel.add(exporterBtn);
+        ajouterBtn = createStyledButton("Nouveau mouvement", MaterialDesign.MDI_PLUS_CIRCLE, new Color(59, 130, 246));
+        exporterBtn = createStyledButton("Exporter (CSV)", MaterialDesign.MDI_EXPORT, new Color(99, 102, 241));
 
         // Panel pour le solde avec style moderne
         JPanel soldePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         soldePanel.setBackground(new Color(248, 250, 252));
         soldePanel.add(soldeLabel);
 
+        // Ajout des boutons avec un espacement approprié
+        actionPanel.add(Box.createHorizontalStrut(5));
+        actionPanel.add(ouvrirBtn);
+        actionPanel.add(Box.createHorizontalStrut(10));
+        actionPanel.add(cloturerBtn);
+        actionPanel.add(Box.createHorizontalStrut(10));
+        actionPanel.add(ajouterBtn);
+        actionPanel.add(Box.createHorizontalStrut(10));
+        actionPanel.add(exporterBtn);
+
         topPanel.add(soldePanel, BorderLayout.WEST);
         topPanel.add(actionPanel, BorderLayout.CENTER);
-
-        // Style moderne pour la table (already set in constructor)
 
         JScrollPane scrollPane = new JScrollPane(tableMouvements);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getViewport().setBackground(Color.WHITE);
-
 
         // Event handlers
         ouvrirBtn.addActionListener(e -> ouvrirCaisse());
@@ -156,9 +145,15 @@ public class CaisseViewSwing {
         tableMouvements.setBackground(Color.WHITE);
         tableMouvements.setSelectionBackground(new Color(232, 240, 254));
         tableMouvements.setSelectionForeground(new Color(33, 33, 33));
-        tableMouvements.setRowHeight(35);
-        tableMouvements.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        tableMouvements.setRowHeight(42); // Hauteur confortable pour la lecture
+        tableMouvements.setFont(new Font("Segoe UI", Font.PLAIN, 15)); // Police intermédiaire
         tableMouvements.setIntercellSpacing(new Dimension(0, 0));
+
+        // Configuration des colonnes pour une meilleure lisibilité
+        tableMouvements.getColumnModel().getColumn(0).setPreferredWidth(160); // Date
+        tableMouvements.getColumnModel().getColumn(1).setPreferredWidth(120); // Type
+        tableMouvements.getColumnModel().getColumn(2).setPreferredWidth(140); // Montant
+        tableMouvements.getColumnModel().getColumn(3).setPreferredWidth(280); // Description
 
         // Configuration des cellules avec alternance de couleurs
         DefaultTableCellRenderer cellRenderer = new DefaultTableCellRenderer() {
@@ -171,8 +166,8 @@ public class CaisseViewSwing {
                     c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(245, 245, 245));
                 }
                 // Padding des cellules ajusté
-                ((JLabel) c).setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 16));
-                ((JLabel) c).setHorizontalAlignment(JLabel.LEFT);
+                ((JLabel) c).setBorder(BorderFactory.createEmptyBorder(0, 18, 0, 18));
+                ((JLabel) c).setHorizontalAlignment(column == 2 ? JLabel.RIGHT : JLabel.LEFT);
                 return c;
             }
         };
@@ -182,12 +177,12 @@ public class CaisseViewSwing {
             tableMouvements.getColumnModel().getColumn(i).setCellRenderer(cellRenderer);
         }
 
-        // Style de l'en-tête simplifié
+        // Style de l'en-tête
         JTableHeader header = tableMouvements.getTableHeader();
         header.setBackground(new Color(33, 33, 33));
         header.setForeground(Color.WHITE);
-        header.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 40));
+        header.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 45));
 
         // Configuration du rendu de l'en-tête
         DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer() {
@@ -198,8 +193,8 @@ public class CaisseViewSwing {
                         isSelected, hasFocus, row, column);
                 label.setBackground(new Color(33, 33, 33));
                 label.setForeground(Color.WHITE);
-                label.setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 16));
-                label.setHorizontalAlignment(JLabel.LEFT);
+                label.setBorder(BorderFactory.createEmptyBorder(0, 18, 0, 18));
+                label.setHorizontalAlignment(column == 2 ? JLabel.RIGHT : JLabel.LEFT);
                 return label;
             }
         };
@@ -497,14 +492,14 @@ public class CaisseViewSwing {
         for (MouvementCaisse mouvement : controller.getMouvements()) {
             tableModel.addRow(new Object[]{
                 mouvement.getDate().format(formatter),
-                mouvement.getType(),
-                String.format("%.2f €", mouvement.getMontant()),
+                mouvement.getType().toString(),
+                String.format("%,.2f €", mouvement.getMontant()), // Format monétaire amélioré
                 mouvement.getDescription()
             });
         }
 
-        // Mettre à jour le solde
-        soldeLabel.setText(String.format("Solde: %.2f €", controller.getSoldeCaisse()));
+        // Mettre à jour le solde avec le même format monétaire
+        soldeLabel.setText(String.format("Solde: %,.2f €", controller.getSoldeCaisse()));
         updateCaisseState();
     }
 
