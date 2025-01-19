@@ -112,7 +112,7 @@ public class Vente {
         this.lignes = new ArrayList<>(lignes);
     }
 
-    // Méthode pour calculer le montant total de la vente
+    // Méthode pour calculer le montant total TTC de la vente
     public double getMontantTotal() {
         if (lignes == null || lignes.isEmpty()) {
             return 0.0;
@@ -120,6 +120,31 @@ public class Vente {
         return lignes.stream()
             .mapToDouble(ligne -> ligne.getQuantite() * ligne.getPrixUnitaire())
             .sum();
+    }
+
+    // Méthode pour calculer le montant HT de la vente
+    public double getMontantTotalHT() {
+        if (lignes == null || lignes.isEmpty()) {
+            return 0.0;
+        }
+        double totalTTC = getMontantTotal();
+        return Math.round((totalTTC / (1 + (getTauxTVA() / 100))) * 100.0) / 100.0;
+    }
+
+    // Méthode pour obtenir le taux de TVA applicable
+    public double getTauxTVA() {
+        // On pourrait récupérer le taux de TVA depuis la configuration
+        return TAUX_TVA_DEFAULT;
+    }
+
+    // Méthode pour calculer le montant de TVA
+    public double getMontantTVA() {
+        if (lignes == null || lignes.isEmpty()) {
+            return 0.0;
+        }
+        double totalTTC = getMontantTotal();
+        double totalHT = getMontantTotalHT();
+        return Math.round((totalTTC - totalHT) * 100.0) / 100.0;
     }
 
     private void validateLigne(LigneVente ligne) {

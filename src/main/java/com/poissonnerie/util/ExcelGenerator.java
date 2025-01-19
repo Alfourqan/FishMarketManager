@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.DoubleSummaryStatistics;
 
 public class ExcelGenerator {
     private static final Logger LOGGER = Logger.getLogger(ExcelGenerator.class.getName());
@@ -57,7 +58,7 @@ public class ExcelGenerator {
 
             // Feuille des statistiques
             Sheet sheetStats = workbook.createSheet("Statistiques");
-            Map<String, Object> stats = ReportStatisticsManager.analyserStocks(produits);
+            Map<String, Object> stats = ReportStatisticsManager.analyserStocks(produits, null);
 
             // En-tête des statistiques
             Row statsHeader = sheetStats.createRow(0);
@@ -76,14 +77,14 @@ public class ExcelGenerator {
             valeurRow.createCell(1).setCellValue(((Number) stats.get("valeurTotaleStock")).doubleValue());
 
             // Ajout des graphiques et analyses supplémentaires
-            Map<String, Long> statutsCount = (Map<String, Long>) stats.get("statutsCount");
+            Map<String, List<Produit>> produitsParStatut = (Map<String, List<Produit>>) stats.get("produitsParStatut");
             Row statutHeader = sheetStats.createRow(statsRow++);
             statutHeader.createCell(0).setCellValue("Répartition par statut");
 
-            for (Map.Entry<String, Long> entry : statutsCount.entrySet()) {
+            for (Map.Entry<String, List<Produit>> entry : produitsParStatut.entrySet()) {
                 Row statutRow = sheetStats.createRow(statsRow++);
                 statutRow.createCell(0).setCellValue(entry.getKey());
-                statutRow.createCell(1).setCellValue(entry.getValue());
+                statutRow.createCell(1).setCellValue(entry.getValue().size());
             }
 
             // Écriture du fichier
@@ -118,12 +119,12 @@ public class ExcelGenerator {
                 Row row = sheetVentes.createRow(rowNum++);
                 row.createCell(0).setCellValue(
                     vente.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
-                row.createCell(1).setCellValue(vente.getClient() != null ? 
+                row.createCell(1).setCellValue(vente.getClient() != null ?
                     vente.getClient().getNom() : "Vente comptant");
                 row.createCell(2).setCellValue(vente.getLignes().size());
-                row.createCell(3).setCellValue(vente.getTotalHT());
+                row.createCell(3).setCellValue(vente.getMontantTotalHT());
                 row.createCell(4).setCellValue(vente.getMontantTVA());
-                row.createCell(5).setCellValue(vente.getTotal());
+                row.createCell(5).setCellValue(vente.getMontantTotal());
                 row.createCell(6).setCellValue(vente.getModePaiement().toString());
             }
 
@@ -134,7 +135,7 @@ public class ExcelGenerator {
 
             // Feuille des statistiques
             Sheet sheetStats = workbook.createSheet("Analyses");
-            Map<String, Object> stats = ReportStatisticsManager.analyserVentes(ventes, dateDebut, dateFin);
+            Map<String, Object> stats = ReportStatisticsManager.analyserVentes(ventes, dateDebut, dateFin, null);
 
             // En-tête des analyses
             Row statsHeader = sheetStats.createRow(0);
@@ -152,11 +153,11 @@ public class ExcelGenerator {
             Row modeHeader = sheetStats.createRow(statsRow++);
             modeHeader.createCell(0).setCellValue("Répartition par mode de paiement");
 
-            Map<ModePaiement, Long> ventesParMode = (Map<ModePaiement, Long>) stats.get("ventesParMode");
-            for (Map.Entry<ModePaiement, Long> entry : ventesParMode.entrySet()) {
+            Map<ModePaiement, DoubleSummaryStatistics> statsParMode = (Map<ModePaiement, DoubleSummaryStatistics>) stats.get("statsParMode");
+            for (Map.Entry<ModePaiement, DoubleSummaryStatistics> entry : statsParMode.entrySet()) {
                 Row modeRow = sheetStats.createRow(statsRow++);
                 modeRow.createCell(0).setCellValue(entry.getKey().toString());
-                modeRow.createCell(1).setCellValue(entry.getValue());
+                modeRow.createCell(1).setCellValue(entry.getValue().getSum());
             }
 
             try (FileOutputStream fileOut = new FileOutputStream(nomFichier)) {
@@ -166,70 +167,6 @@ public class ExcelGenerator {
             LOGGER.info("Rapport Excel des ventes généré avec succès: " + nomFichier);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport Excel des ventes", e);
-            throw new RuntimeException("Erreur lors de la génération du rapport Excel", e);
-        }
-    }
-
-    public static void genererRapportCreances(List<Client> clients, String nomFichier) {
-        try (Workbook workbook = new XSSFWorkbook()) {
-            Sheet sheet = workbook.createSheet("État des Créances");
-            CellStyle headerStyle = createHeaderStyle(workbook);
-
-            // En-têtes
-            Row headerRow = sheet.createRow(0);
-            String[] columns = {"Client", "Total Créances", "Dernière Vente", "Statut", "Téléphone"};
-            for (int i = 0; i < columns.length; i++) {
-                Cell cell = headerRow.createCell(i);
-                cell.setCellValue(columns[i]);
-                cell.setCellStyle(headerStyle);
-            }
-
-            // Données
-            int rowNum = 1;
-            for (Client client : clients) {
-                Row row = sheet.createRow(rowNum++);
-                row.createCell(0).setCellValue(client.getNom());
-                row.createCell(1).setCellValue(client.getTotalCreances());
-                row.createCell(2).setCellValue(client.getDerniereVente() != null ? 
-                    client.getDerniereVente().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "N/A");
-                row.createCell(3).setCellValue(client.getStatutCreances().toString());
-                row.createCell(4).setCellValue(client.getTelephone());
-            }
-
-            // Feuille d'analyse
-            Sheet sheetAnalyse = workbook.createSheet("Analyse Créances");
-            Map<String, Object> stats = ReportStatisticsManager.analyserCreances(clients);
-
-            // Statistiques
-            int statsRow = 0;
-            Row totalRow = sheetAnalyse.createRow(statsRow++);
-            totalRow.createCell(0).setCellValue("Total des créances");
-            totalRow.createCell(1).setCellValue(((Number) stats.get("totalCreances")).doubleValue());
-
-            // Répartition par statut
-            statsRow++;
-            Row statutHeader = sheetAnalyse.createRow(statsRow++);
-            statutHeader.createCell(0).setCellValue("Répartition par statut");
-
-            Map<StatutCreances, Long> creancesParStatut = (Map<StatutCreances, Long>) stats.get("creancesParStatut");
-            for (Map.Entry<StatutCreances, Long> entry : creancesParStatut.entrySet()) {
-                Row statutRow = sheetAnalyse.createRow(statsRow++);
-                statutRow.createCell(0).setCellValue(entry.getKey().toString());
-                statutRow.createCell(1).setCellValue(entry.getValue());
-            }
-
-            // Auto-dimensionnement
-            for (int i = 0; i < columns.length; i++) {
-                sheet.autoSizeColumn(i);
-            }
-
-            try (FileOutputStream fileOut = new FileOutputStream(nomFichier)) {
-                workbook.write(fileOut);
-            }
-
-            LOGGER.info("Rapport Excel des créances généré avec succès: " + nomFichier);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport Excel des créances", e);
             throw new RuntimeException("Erreur lors de la génération du rapport Excel", e);
         }
     }

@@ -18,8 +18,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.io.File;
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -33,7 +33,7 @@ public class ReportBuilder {
     private static final com.itextpdf.text.Font NORMAL_FONT = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 12, com.itextpdf.text.Font.NORMAL);
     private static final com.itextpdf.text.Font SMALL_FONT = new com.itextpdf.text.Font(com.itextpdf.text.Font.FontFamily.HELVETICA, 10, com.itextpdf.text.Font.NORMAL);
 
-    public void genererRapportStocks(String cheminFichier, List<Produit> produits, String categorie, 
+    public void genererRapportStocks(String cheminFichier, List<Produit> produits, String categorie,
                                      boolean formatPDF) {
         try {
             Map<String, Object> stats = ReportStatisticsManager.analyserStocks(produits, categorie);
@@ -51,7 +51,7 @@ public class ReportBuilder {
         }
     }
 
-    public void genererRapportVentes(String cheminFichier, List<Vente> ventes, 
+    public void genererRapportVentes(String cheminFichier, List<Vente> ventes,
                                      LocalDate debut, LocalDate fin, ModePaiement modePaiement, boolean formatPDF) {
         try {
             Map<String, Object> stats = ReportStatisticsManager.analyserVentes(ventes, debut, fin, modePaiement);
@@ -86,7 +86,7 @@ public class ReportBuilder {
         }
     }
 
-    public void genererRapportFinancier(String cheminFichier, List<Vente> ventes, 
+    public void genererRapportFinancier(String cheminFichier, List<Vente> ventes,
                                         List<MouvementCaisse> mouvements, LocalDate debut, LocalDate fin, boolean formatPDF) {
         try {
             Map<String, Object> stats = ReportStatisticsManager.analyserFinances(ventes, mouvements, debut, fin);
@@ -260,7 +260,7 @@ public class ReportBuilder {
         ChartUtils.saveChartAsJPEG(chartFile, chart, width, height);
     }
 
-    private void genererRapportVentesPDF(String cheminFichier, Map<String, Object> stats, 
+    private void genererRapportVentesPDF(String cheminFichier, Map<String, Object> stats,
                                          LocalDate debut, LocalDate fin) throws Exception {
         Document document = new Document(PageSize.A4);
         PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
@@ -279,8 +279,8 @@ public class ReportBuilder {
 
         // Analyse par mode de paiement
         @SuppressWarnings("unchecked")
-        Map<ModePaiement, DoubleSummaryStatistics> statsParMode = 
-            (Map<ModePaiement, DoubleSummaryStatistics>) stats.get("statsParMode");
+        Map<ModePaiement, DoubleSummaryStatistics> statsParMode =
+                (Map<ModePaiement, DoubleSummaryStatistics>) stats.get("statsParMode");
         document.add(new Paragraph("Répartition par Mode de Paiement", SUBTITLE_FONT));
 
         PdfPTable tableModes = new PdfPTable(3);
@@ -303,11 +303,27 @@ public class ReportBuilder {
         document.add(graph);
         new File(tempGraphFile).delete();
 
+        // Tableau détaillé des ventes
+        PdfPTable tableVentes = new PdfPTable(5);
+        tableVentes.setWidthPercentage(100);
+        ajouterEnTeteTableau(tableVentes, new String[]{"Date", "Client", "Produits", "Total", "Mode"});
+
+        @SuppressWarnings("unchecked")
+        List<Vente> ventesTriees = (List<Vente>) stats.get("ventesTriees");
+        for (Vente v : ventesTriees) {
+            tableVentes.addCell(v.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            tableVentes.addCell(v.getClient() != null ? v.getClient().getNom() : "Vente comptant");
+            tableVentes.addCell(String.valueOf(v.getLignes().size()));
+            tableVentes.addCell(CURRENCY_FORMATTER.format(v.getMontantTotal()));
+            tableVentes.addCell(v.getModePaiement().toString());
+        }
+        document.add(tableVentes);
+
         document.close();
     }
 
     private void genererRapportVentesExcel(String cheminFichier, Map<String, Object> stats,
-                                         LocalDate debut, LocalDate fin) throws Exception {
+                                            LocalDate debut, LocalDate fin) throws Exception {
         // TODO: Implement Excel report generation for sales data
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Rapport Ventes");
@@ -337,8 +353,8 @@ public class ReportBuilder {
 
         // Analyse par statut
         @SuppressWarnings("unchecked")
-        Map<String, DoubleSummaryStatistics> statsParStatut = 
-            (Map<String, DoubleSummaryStatistics>) stats.get("statsParStatut");
+        Map<String, DoubleSummaryStatistics> statsParStatut =
+                (Map<String, DoubleSummaryStatistics>) stats.get("statsParStatut");
         document.add(new Paragraph("Analyse par Statut", SUBTITLE_FONT));
 
         PdfPTable tableStatuts = new PdfPTable(4);

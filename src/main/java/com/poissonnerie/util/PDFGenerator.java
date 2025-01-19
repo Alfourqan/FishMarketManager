@@ -31,7 +31,7 @@ import java.security.MessageDigest;
 import java.util.UUID;
 import java.io.IOException;
 import java.io.ByteArrayOutputStream;
-
+import java.util.DoubleSummaryStatistics;
 
 public class PDFGenerator {
     private static final Logger LOGGER = Logger.getLogger(PDFGenerator.class.getName());
@@ -303,7 +303,7 @@ public class PDFGenerator {
             document.add(Chunk.NEWLINE);
 
             // Statistiques
-            Map<String, Object> stats = ReportStatisticsManager.analyserVentes(ventes, dateDebut, dateFin);
+            Map<String, Object> stats = ReportStatisticsManager.analyserVentes(ventes, dateDebut, dateFin, null);
             document.add(new Paragraph("Analyses des Ventes:", 
                 new Font(BaseFont.createFont(), 14, Font.BOLD)));
             document.add(new Paragraph("Chiffre d'affaires total: " + 
@@ -312,9 +312,11 @@ public class PDFGenerator {
             // Ventes par mode de paiement
             document.add(new Paragraph("Répartition par Mode de Paiement:", 
                 new Font(BaseFont.createFont(), 14, Font.BOLD)));
-            Map<ModePaiement, Long> ventesParMode = (Map<ModePaiement, Long>) stats.get("ventesParMode");
-            for (Map.Entry<ModePaiement, Long> entry : ventesParMode.entrySet()) {
-                document.add(new Paragraph(entry.getKey() + ": " + entry.getValue() + " ventes"));
+            Map<ModePaiement, DoubleSummaryStatistics> statsParMode = 
+                (Map<ModePaiement, DoubleSummaryStatistics>) stats.get("statsParMode");
+            for (Map.Entry<ModePaiement, DoubleSummaryStatistics> entry : statsParMode.entrySet()) {
+                document.add(new Paragraph(entry.getKey() + ": " + 
+                    String.format("%.2f €", entry.getValue().getSum())));
             }
             document.add(Chunk.NEWLINE);
 
@@ -335,7 +337,7 @@ public class PDFGenerator {
                 table.addCell(v.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
                 table.addCell(sanitizeInput(v.getClient() != null ? v.getClient().getNom() : "Vente comptant"));
                 table.addCell(String.valueOf(v.getLignes().size()));
-                table.addCell(String.format("%.2f €", v.getTotal()));
+                table.addCell(String.format("%.2f €", v.getMontantTotal()));
                 table.addCell(v.getStatut().toString());
             }
 
@@ -363,7 +365,7 @@ public class PDFGenerator {
             document.add(Chunk.NEWLINE);
 
             // Statistiques globales
-            Map<String, Object> stats = ReportStatisticsManager.analyserStocks(produits);
+            Map<String, Object> stats = ReportStatisticsManager.analyserStocks(produits, null); // null pour toutes les catégories
             document.add(new Paragraph("Statistiques Globales:", 
                 new Font(BaseFont.createFont(), 14, Font.BOLD)));
             document.add(new Paragraph("Nombre total de produits: " + stats.get("totalProduits")));
@@ -374,9 +376,9 @@ public class PDFGenerator {
             // Répartition par statut
             document.add(new Paragraph("Répartition par Statut:", 
                 new Font(BaseFont.createFont(), 14, Font.BOLD)));
-            Map<String, Long> statutsCount = (Map<String, Long>) stats.get("statutsCount");
-            for (Map.Entry<String, Long> entry : statutsCount.entrySet()) {
-                document.add(new Paragraph(entry.getKey() + ": " + entry.getValue()));
+            Map<String, List<Produit>> produitsParStatut = (Map<String, List<Produit>>) stats.get("produitsParStatut");
+            for (Map.Entry<String, List<Produit>> entry : produitsParStatut.entrySet()) {
+                document.add(new Paragraph(entry.getKey() + ": " + entry.getValue().size()));
             }
             document.add(Chunk.NEWLINE);
 
@@ -514,7 +516,7 @@ public class PDFGenerator {
             }
 
             preview.append("-".repeat(64)).append("\n");
-            preview.append(String.format("%52s %10.2f€\n", "Total:", vente.getTotal()));
+            preview.append(String.format("%52s %10.2f€\n", "Total:", vente.getMontantTotal()));
             preview.append("\nMerci de votre visite !\n");
             preview.append("=".repeat(64));
 
@@ -572,10 +574,10 @@ public class PDFGenerator {
             document.add(table);
 
             // Total et TVA
-            document.add(new Paragraph("Total HT: " + String.format("%.2f €", vente.getTotalHT())));
+            document.add(new Paragraph("Total HT: " + String.format("%.2f €", vente.getMontantTotalHT())));
             document.add(new Paragraph("TVA (" + vente.getTauxTVA() + "%): " + 
                 String.format("%.2f €", vente.getMontantTVA())));
-            Paragraph total = new Paragraph("Total TTC: " + String.format("%.2f €", vente.getTotal()),
+            Paragraph total = new Paragraph("Total TTC: " + String.format("%.2f €", vente.getMontantTotal()),
                 new Font(BaseFont.createFont(), 12, Font.BOLD));
             total.setAlignment(Element.ALIGN_RIGHT);
             document.add(total);
