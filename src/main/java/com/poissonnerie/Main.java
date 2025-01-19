@@ -230,7 +230,7 @@ public class Main {
         // Configuration des boutons avec style moderne
         UIManager.put("Button.background", primaryColor);
         UIManager.put("Button.foreground", Color.WHITE);
-        UIManager.put("Button.font", new Font("Segoe UI", Font.SEMIBOLD, 14));
+        UIManager.put("Button.font", new Font("Segoe UI", Font.BOLD, 14));
         UIManager.put("Button.margin", new Insets(8, 16, 8, 16));
         UIManager.put("Button.focusPainted", false);
         UIManager.put("Button.select", primaryColor.darker());
@@ -239,7 +239,7 @@ public class Main {
         // Style de la barre latérale
         UIManager.put("SidePanel.background", new Color(17, 24, 39));
         UIManager.put("SidePanel.foreground", Color.WHITE);
-        UIManager.put("SidePanel.font", new Font("Segoe UI", Font.SEMIBOLD, 14));
+        UIManager.put("SidePanel.font", new Font("Segoe UI", Font.BOLD, 14));
         UIManager.put("SidePanel.border", BorderFactory.createEmptyBorder());
 
         // Style des panneaux
@@ -274,7 +274,7 @@ public class Main {
         UIManager.put("Table.rowHeight", 40);
         UIManager.put("TableHeader.background", backgroundColor);
         UIManager.put("TableHeader.foreground", textColor);
-        UIManager.put("TableHeader.font", new Font("Segoe UI", Font.SEMIBOLD, 14));
+        UIManager.put("TableHeader.font", new Font("Segoe UI", Font.BOLD, 14));
 
         // Style des scrollbars
         UIManager.put("ScrollBar.thumb", new Color(203, 213, 225));
@@ -297,6 +297,6 @@ public class Main {
         UIManager.put("TabbedPane.foreground", textColor);
         UIManager.put("TabbedPane.selected", Color.WHITE);
         UIManager.put("TabbedPane.selectedForeground", primaryColor);
-        UIManager.put("TabbedPane.font", new Font("Segoe UI", Font.SEMIBOLD, 14));
+        UIManager.put("TabbedPane.font", new Font("Segoe UI", Font.BOLD, 14));
     }
 }

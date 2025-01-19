@@ -50,7 +50,7 @@ public class CaisseViewSwing {
         tableMouvements = new JTable(tableModel);
         tableMouvements.setRowHeight(40);
         tableMouvements.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        tableMouvements.getTableHeader().setFont(new Font("Segoe UI", Font.SEMIBOLD, 14));
+        tableMouvements.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
 
         // Style moderne pour le solde
         soldeLabel = new JLabel("Solde: 0.00 €");
@@ -70,7 +70,7 @@ public class CaisseViewSwing {
 
         JButton button = new JButton(text);
         button.setIcon(icon);
-        button.setFont(new Font("Segoe UI", Font.SEMIBOLD, 14));
+        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
         button.setBackground(color);
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
@@ -115,9 +115,9 @@ public class CaisseViewSwing {
         actionPanel.setBackground(new Color(248, 250, 252));
 
         // Création des boutons avec nouveaux styles et animations
-        ouvrirBtn = createStyledButton("Ouvrir la caisse", MaterialDesign.MDI_CASH_MULTIPLE, new Color(34, 197, 94));
-        cloturerBtn = createStyledButton("Clôturer la caisse", MaterialDesign.MDI_CASH_LOCK, new Color(239, 68, 68));
-        ajouterBtn = createStyledButton("Nouveau mouvement", MaterialDesign.MDI_CASH_PLUS, new Color(0, 120, 212));
+        ouvrirBtn = createStyledButton("Ouvrir la caisse", MaterialDesign.MDI_CASH, new Color(34, 197, 94));
+        cloturerBtn = createStyledButton("Clôturer la caisse", MaterialDesign.MDI_CLOSE_CIRCLE, new Color(239, 68, 68));
+        ajouterBtn = createStyledButton("Nouveau mouvement", MaterialDesign.MDI_PLUS_CIRCLE, new Color(0, 120, 212));
         exporterBtn = createStyledButton("Exporter (CSV)", MaterialDesign.MDI_EXPORT, new Color(0, 183, 195));
 
         actionPanel.add(ouvrirBtn);
