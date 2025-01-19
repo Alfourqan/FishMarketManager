@@ -37,6 +37,7 @@ public class CaisseViewSwing {
 
     public CaisseViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.setBackground(new Color(248, 250, 252));
         controller = new CaisseController();
 
         String[] columnNames = {"Date", "Type", "Montant", "Description"};
@@ -47,8 +48,15 @@ public class CaisseViewSwing {
             }
         };
         tableMouvements = new JTable(tableModel);
+        tableMouvements.setRowHeight(40);
+        tableMouvements.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        tableMouvements.getTableHeader().setFont(new Font("Segoe UI", Font.SEMIBOLD, 14));
+
+        // Style moderne pour le solde
         soldeLabel = new JLabel("Solde: 0.00 €");
-        soldeLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        soldeLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        soldeLabel.setForeground(new Color(30, 41, 59));
+        soldeLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
 
         initializeComponents();
         loadData();
@@ -57,26 +65,40 @@ public class CaisseViewSwing {
 
     private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
         FontIcon icon = FontIcon.of(iconCode);
-        icon.setIconSize(18);
+        icon.setIconSize(20);
         icon.setIconColor(Color.WHITE);
 
         JButton button = new JButton(text);
         button.setIcon(icon);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        button.setFont(new Font("Segoe UI", Font.SEMIBOLD, 14));
         button.setBackground(color);
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
         button.setBorderPainted(false);
-        button.setMargin(new Insets(8, 16, 8, 16));
+        button.setMargin(new Insets(10, 20, 10, 20));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // Effet de survol
+        // Effet de survol avec animation
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(color.darker());
+                // Animation de mise à l'échelle
+                Timer timer = new Timer(50, e -> {
+                    button.setMargin(new Insets(9, 19, 9, 19));
+                    button.repaint();
+                });
+                timer.setRepeats(false);
+                timer.start();
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 button.setBackground(color);
+                // Animation de retour à la normale
+                Timer timer = new Timer(50, e -> {
+                    button.setMargin(new Insets(10, 20, 10, 20));
+                    button.repaint();
+                });
+                timer.setRepeats(false);
+                timer.start();
             }
         });
 
@@ -84,28 +106,46 @@ public class CaisseViewSwing {
     }
 
     private void initializeComponents() {
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        // Panel du haut avec le solde et les boutons d'action
-        JPanel topPanel = new JPanel(new BorderLayout());
-        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        // Panel du haut avec style moderne
+        JPanel topPanel = new JPanel(new BorderLayout(20, 0));
+        topPanel.setBackground(new Color(248, 250, 252));
+        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
+        actionPanel.setBackground(new Color(248, 250, 252));
 
-        // Boutons de gestion de la caisse avec le nouveau style
-        ouvrirBtn = createStyledButton("Ouvrir la caisse", MaterialDesign.MDI_CASH, new Color(76, 175, 80));
-        cloturerBtn = createStyledButton("Clôturer la caisse", MaterialDesign.MDI_CLOSE_CIRCLE, new Color(244, 67, 54));
-        ajouterBtn = createStyledButton("Nouveau mouvement", MaterialDesign.MDI_PLUS, new Color(33, 150, 243));
-        exporterBtn = createStyledButton("Exporter (CSV)", MaterialDesign.MDI_EXPORT, new Color(156, 39, 176));
+        // Création des boutons avec nouveaux styles et animations
+        ouvrirBtn = createStyledButton("Ouvrir la caisse", MaterialDesign.MDI_CASH_MULTIPLE, new Color(34, 197, 94));
+        cloturerBtn = createStyledButton("Clôturer la caisse", MaterialDesign.MDI_CASH_LOCK, new Color(239, 68, 68));
+        ajouterBtn = createStyledButton("Nouveau mouvement", MaterialDesign.MDI_CASH_PLUS, new Color(0, 120, 212));
+        exporterBtn = createStyledButton("Exporter (CSV)", MaterialDesign.MDI_EXPORT, new Color(0, 183, 195));
 
         actionPanel.add(ouvrirBtn);
         actionPanel.add(cloturerBtn);
         actionPanel.add(ajouterBtn);
         actionPanel.add(exporterBtn);
-        topPanel.add(soldeLabel, BorderLayout.WEST);
+
+        // Panel pour le solde avec style moderne
+        JPanel soldePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        soldePanel.setBackground(new Color(248, 250, 252));
+        soldePanel.add(soldeLabel);
+
+        topPanel.add(soldePanel, BorderLayout.WEST);
         topPanel.add(actionPanel, BorderLayout.CENTER);
 
-        // Table avec scroll
+        // Style moderne pour la table
+        tableMouvements.setShowGrid(true);
+        tableMouvements.setGridColor(new Color(226, 232, 240));
+        tableMouvements.setSelectionBackground(new Color(219, 234, 254));
+        tableMouvements.setSelectionForeground(new Color(30, 41, 59));
+        tableMouvements.getTableHeader().setBackground(new Color(248, 250, 252));
+        tableMouvements.getTableHeader().setForeground(new Color(30, 41, 59));
+        tableMouvements.setBackground(Color.WHITE);
+        tableMouvements.setForeground(new Color(30, 41, 59));
+
         JScrollPane scrollPane = new JScrollPane(tableMouvements);
-        tableMouvements.setFillsViewportHeight(true);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getViewport().setBackground(Color.WHITE);
 
         // Event handlers
         ouvrirBtn.addActionListener(e -> ouvrirCaisse());

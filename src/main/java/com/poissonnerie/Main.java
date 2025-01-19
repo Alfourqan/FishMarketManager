@@ -210,75 +210,93 @@ public class Main {
     }
 
     private static void configureUI() {
-        // Configuration du style global
-        UIManager.put("Button.arc", 8);
-        UIManager.put("Component.arc", 8);
-        UIManager.put("ProgressBar.arc", 8);
-        UIManager.put("TextComponent.arc", 8);
+        // Configuration du style global avec des coins arrondis modernes
+        UIManager.put("Button.arc", 12);
+        UIManager.put("Component.arc", 12);
+        UIManager.put("ProgressBar.arc", 12);
+        UIManager.put("TextComponent.arc", 12);
 
-        // Couleurs modernes selon le design
-        Color primaryColor = new Color(0, 135, 136); // Vert pour l'en-tête
-        Color sidebarColor = new Color(51, 51, 75); // Couleur sombre pour la barre latérale
-        Color primaryTextColor = Color.WHITE;
-        Color darkTextColor = new Color(33, 33, 33);
-        Color backgroundColor = new Color(245, 245, 245);
+        // Palette de couleurs moderne et professionnelle
+        Color primaryColor = new Color(0, 120, 212);     // Bleu professionnel
+        Color secondaryColor = new Color(0, 153, 188);   // Bleu clair
+        Color accentColor = new Color(0, 183, 195);      // Turquoise
+        Color warningColor = new Color(255, 140, 0);     // Orange
+        Color successColor = new Color(34, 197, 94);     // Vert
+        Color errorColor = new Color(239, 68, 68);       // Rouge
+        Color backgroundColor = new Color(248, 250, 252); // Gris très clair
+        Color textColor = new Color(30, 41, 59);         // Gris foncé
+        Color lightTextColor = new Color(148, 163, 184); // Gris clair
 
-        // Configuration des boutons de navigation avec style moderne
-        UIManager.put("ToggleButton.background", sidebarColor);
-        UIManager.put("ToggleButton.foreground", Color.WHITE);
-        UIManager.put("ToggleButton.select", primaryColor);
-        UIManager.put("ToggleButton.selectedForeground", Color.WHITE);
-        UIManager.put("ToggleButton.hoverBackground", sidebarColor.brighter());
-        UIManager.put("ToggleButton.font", new Font("Segoe UI", Font.PLAIN, 14));
-        UIManager.put("ToggleButton.margin", new Insets(12, 20, 12, 20));
-        UIManager.put("ToggleButton.focusable", false);
-
-        // Configuration des boutons standards
+        // Configuration des boutons avec style moderne
         UIManager.put("Button.background", primaryColor);
-        UIManager.put("Button.foreground", primaryTextColor);
-        UIManager.put("Button.hoverBackground", primaryColor.darker());
-        UIManager.put("Button.focusedBackground", primaryColor.darker());
-        UIManager.put("Button.pressedBackground", primaryColor.darker());
-        UIManager.put("Button.selectedBackground", primaryColor.darker());
-
-        // Configuration des menus et en-tête
-        UIManager.put("MenuBar.background", primaryColor);
-        UIManager.put("MenuBar.foreground", primaryTextColor);
-        UIManager.put("Menu.foreground", primaryTextColor);
-        UIManager.put("Menu.selectionBackground", primaryColor.darker());
-        UIManager.put("Menu.selectionForeground", Color.WHITE);
-        UIManager.put("Menu.font", new Font("Segoe UI", Font.BOLD, 14));
-
-        // Style des panneaux et composants
-        UIManager.put("Panel.background", backgroundColor);
-        UIManager.put("Label.foreground", darkTextColor);
-        UIManager.put("Label.font", new Font("Segoe UI", Font.PLAIN, 13));
-
-        // Configuration des champs de texte
-        UIManager.put("TextField.foreground", darkTextColor);
-        UIManager.put("TextField.background", new Color(255, 255, 255));
-        UIManager.put("TextField.font", new Font("Segoe UI", Font.PLAIN, 13));
-        UIManager.put("ComboBox.foreground", darkTextColor);
-        UIManager.put("ComboBox.background", new Color(255, 255, 255));
-        UIManager.put("ComboBox.font", new Font("Segoe UI", Font.PLAIN, 13));
-        UIManager.put("TextArea.foreground", darkTextColor);
-        UIManager.put("TextArea.background", new Color(255, 255, 255));
-        UIManager.put("TextArea.font", new Font("Segoe UI", Font.PLAIN, 13));
-
-        // Marges et padding
+        UIManager.put("Button.foreground", Color.WHITE);
+        UIManager.put("Button.font", new Font("Segoe UI", Font.SEMIBOLD, 14));
         UIManager.put("Button.margin", new Insets(8, 16, 8, 16));
-        UIManager.put("TabbedPane.contentBorderInsets", new Insets(10, 10, 10, 10));
+        UIManager.put("Button.focusPainted", false);
+        UIManager.put("Button.select", primaryColor.darker());
+        UIManager.put("Button.border", BorderFactory.createEmptyBorder(8, 16, 8, 16));
+
+        // Style de la barre latérale
+        UIManager.put("SidePanel.background", new Color(17, 24, 39));
+        UIManager.put("SidePanel.foreground", Color.WHITE);
+        UIManager.put("SidePanel.font", new Font("Segoe UI", Font.SEMIBOLD, 14));
+        UIManager.put("SidePanel.border", BorderFactory.createEmptyBorder());
+
+        // Style des panneaux
+        UIManager.put("Panel.background", backgroundColor);
+        UIManager.put("Panel.font", new Font("Segoe UI", Font.PLAIN, 14));
+        UIManager.put("Panel.border", BorderFactory.createEmptyBorder(12, 12, 12, 12));
+
+        // Style des labels et textes
+        UIManager.put("Label.font", new Font("Segoe UI", Font.PLAIN, 14));
+        UIManager.put("Label.foreground", textColor);
+
+        // Style des champs de texte
+        UIManager.put("TextField.background", Color.WHITE);
+        UIManager.put("TextField.foreground", textColor);
+        UIManager.put("TextField.caretForeground", primaryColor);
+        UIManager.put("TextField.border", BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(203, 213, 225)),
+            BorderFactory.createEmptyBorder(8, 12, 8, 12)
+        ));
+        UIManager.put("TextField.focusedBorder", BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(primaryColor, 2),
+            BorderFactory.createEmptyBorder(7, 11, 7, 11)
+        ));
 
         // Style des tableaux
-        UIManager.put("Table.showHorizontalLines", true);
-        UIManager.put("Table.showVerticalLines", true);
-        UIManager.put("Table.gridColor", new Color(220, 220, 220));
-        UIManager.put("Table.selectionBackground", new Color(207, 216, 233));
-        UIManager.put("Table.selectionForeground", new Color(33, 33, 33));
-        UIManager.put("Table.background", new Color(250, 250, 250));
-        UIManager.put("Table.font", new Font("Segoe UI", Font.PLAIN, 13));
-        UIManager.put("TableHeader.background", new Color(235, 238, 241));
-        UIManager.put("TableHeader.foreground", darkTextColor);
-        UIManager.put("TableHeader.font", new Font("Segoe UI", Font.BOLD, 13));
+        UIManager.put("Table.background", Color.WHITE);
+        UIManager.put("Table.foreground", textColor);
+        UIManager.put("Table.selectionBackground", new Color(219, 234, 254));
+        UIManager.put("Table.selectionForeground", textColor);
+        UIManager.put("Table.gridColor", new Color(226, 232, 240));
+        UIManager.put("Table.font", new Font("Segoe UI", Font.PLAIN, 14));
+        UIManager.put("Table.rowHeight", 40);
+        UIManager.put("TableHeader.background", backgroundColor);
+        UIManager.put("TableHeader.foreground", textColor);
+        UIManager.put("TableHeader.font", new Font("Segoe UI", Font.SEMIBOLD, 14));
+
+        // Style des scrollbars
+        UIManager.put("ScrollBar.thumb", new Color(203, 213, 225));
+        UIManager.put("ScrollBar.thumbDarkShadow", new Color(203, 213, 225));
+        UIManager.put("ScrollBar.thumbHighlight", new Color(203, 213, 225));
+        UIManager.put("ScrollBar.thumbShadow", new Color(203, 213, 225));
+        UIManager.put("ScrollBar.track", backgroundColor);
+        UIManager.put("ScrollBar.width", 12);
+
+        // Style des menus
+        UIManager.put("Menu.background", Color.WHITE);
+        UIManager.put("Menu.foreground", textColor);
+        UIManager.put("Menu.selectionBackground", primaryColor);
+        UIManager.put("Menu.selectionForeground", Color.WHITE);
+        UIManager.put("Menu.border", BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        UIManager.put("Menu.font", new Font("Segoe UI", Font.PLAIN, 14));
+
+        // Style des onglets
+        UIManager.put("TabbedPane.background", backgroundColor);
+        UIManager.put("TabbedPane.foreground", textColor);
+        UIManager.put("TabbedPane.selected", Color.WHITE);
+        UIManager.put("TabbedPane.selectedForeground", primaryColor);
+        UIManager.put("TabbedPane.font", new Font("Segoe UI", Font.SEMIBOLD, 14));
     }
 }
