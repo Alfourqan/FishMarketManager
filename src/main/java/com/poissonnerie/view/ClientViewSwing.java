@@ -82,6 +82,22 @@ public class ClientViewSwing {
         tableClients.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         tableClients.setIntercellSpacing(new Dimension(1, 1));
 
+        // Style des lignes alternées
+        tableClients.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value,
+                        isSelected, hasFocus, row, column);
+                if (!isSelected) {
+                    c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252));
+                }
+                // Ajouter un padding aux cellules
+                ((JLabel) c).setBorder(BorderFactory.createEmptyBorder(0, 12, 0, 12));
+                return c;
+            }
+        });
+
         // Style amélioré des en-têtes avec icônes
         JTableHeader header = tableClients.getTableHeader();
         header.setDefaultRenderer(new DefaultTableCellRenderer() {
@@ -94,12 +110,12 @@ public class ClientViewSwing {
                 // Configuration du style amélioré
                 label.setHorizontalAlignment(JLabel.LEFT);
                 label.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createMatteBorder(0, 0, 3, 0, new Color(203, 213, 225)),
+                    BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(51, 65, 85)),
                     BorderFactory.createEmptyBorder(12, 16, 12, 16)
                 ));
-                label.setFont(new Font("Segoe UI Semibold", Font.BOLD, 14));
-                label.setBackground(new Color(243, 244, 246));
-                label.setForeground(new Color(31, 41, 55));
+                label.setFont(new Font("Segoe UI", Font.BOLD, 14));
+                label.setBackground(new Color(31, 41, 55));
+                label.setForeground(Color.WHITE);
                 label.setOpaque(true);
 
                 // Ajout des icônes avec style amélioré
@@ -121,7 +137,7 @@ public class ClientViewSwing {
 
                 if (icon != null) {
                     icon.setIconSize(18);
-                    icon.setIconColor(new Color(31, 41, 55));
+                    icon.setIconColor(Color.WHITE);
                     label.setIcon(icon);
                     label.setIconTextGap(12);
                 }

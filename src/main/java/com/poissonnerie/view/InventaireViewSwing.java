@@ -7,6 +7,8 @@ import com.poissonnerie.model.InventaireManager.InventaireObserver;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -40,7 +42,56 @@ public class InventaireViewSwing {
         };
 
         tableInventaire = new JTable(tableModel);
-        tableInventaire.setRowHeight(35);
+        tableInventaire.setRowHeight(45);
+        tableInventaire.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        tableInventaire.setShowGrid(true);
+        tableInventaire.setGridColor(new Color(226, 232, 240));
+        tableInventaire.setBackground(Color.WHITE);
+        tableInventaire.setSelectionBackground(new Color(219, 234, 254));
+        tableInventaire.setSelectionForeground(new Color(15, 23, 42));
+        tableInventaire.setIntercellSpacing(new Dimension(1, 1));
+
+        // Style des lignes alternées
+        tableInventaire.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value,
+                        isSelected, hasFocus, row, column);
+                if (!isSelected) {
+                    c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252));
+                }
+                // Ajouter un padding aux cellules
+                ((JLabel) c).setBorder(BorderFactory.createEmptyBorder(0, 12, 0, 12));
+                return c;
+            }
+        });
+
+        // Style amélioré des en-têtes
+        JTableHeader header = tableInventaire.getTableHeader();
+        header.setDefaultRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                JLabel label = (JLabel) super.getTableCellRendererComponent(table, value,
+                        isSelected, hasFocus, row, column);
+
+                // Configuration du style amélioré
+                label.setHorizontalAlignment(JLabel.LEFT);
+                label.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(51, 65, 85)),
+                    BorderFactory.createEmptyBorder(12, 16, 12, 16)
+                ));
+                label.setFont(new Font("Segoe UI", Font.BOLD, 14));
+                label.setBackground(new Color(31, 41, 55));
+                label.setForeground(Color.WHITE);
+                label.setOpaque(true);
+
+                return label;
+            }
+        });
+
+        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 56));
 
         // Observer pour les alertes de stock
         inventaireManager.ajouterObserver(new InventaireObserver() {
@@ -77,9 +128,11 @@ public class InventaireViewSwing {
 
     private void initializeComponents() {
         mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        mainPanel.setBackground(new Color(236, 239, 241));
 
         // Panel du haut avec titre et boutons
         JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBackground(new Color(236, 239, 241));
 
         // Panel des boutons aligné à droite
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
@@ -98,6 +151,8 @@ public class InventaireViewSwing {
 
         // Configuration de la table
         JScrollPane scrollPane = new JScrollPane(tableInventaire);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getViewport().setBackground(Color.WHITE);
         tableInventaire.getColumnModel().getColumn(4).setMaxWidth(150); // Colonne actions
 
         // Événements

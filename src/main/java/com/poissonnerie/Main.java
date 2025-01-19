@@ -238,13 +238,13 @@ public class Main {
         UIManager.put("Table.showGrid", true);
         UIManager.put("Table.intercellSpacing", new Dimension(1, 1));
 
-        // Style amélioré des en-têtes de tableau
-        UIManager.put("TableHeader.background", new Color(241, 245, 249));
-        UIManager.put("TableHeader.foreground", new Color(15, 23, 42));
+        // Style amélioré des en-têtes de tableau avec fond sombre
+        UIManager.put("TableHeader.background", new Color(31, 41, 55));  // Fond sombre
+        UIManager.put("TableHeader.foreground", Color.WHITE);            // Texte blanc
         UIManager.put("TableHeader.font", new Font("Segoe UI", Font.BOLD, 14));
         UIManager.put("TableHeader.height", 50);
         UIManager.put("TableHeader.border", BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(203, 213, 225)),
+            BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(51, 65, 85)),
             BorderFactory.createEmptyBorder(8, 12, 8, 12)
         ));
 
