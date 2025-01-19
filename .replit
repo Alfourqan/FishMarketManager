@@ -21,10 +21,6 @@ args = "Application Poissonnerie"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Test Inventaire"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "Application Java"
 
 [[workflows.workflow.tasks]]
@@ -34,22 +30,6 @@ args = "Database Init"
 [[workflows.workflow.tasks]]
 task = "workflow.run"
 args = "Java Build"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Test Fournisseur"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Test Client"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Test Vente"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Test Configuration"
 
 [[workflows.workflow]]
 name = "Java Application"
@@ -78,20 +58,6 @@ task = "packager.installForAll"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "mvn clean compile exec:java -Dexec.mainClass=\"com.poissonnerie.Main\" -Dexec.systemProperties.SKIP_SIRET_VALIDATION=true -Djava.awt.headless=false -Dexec.cleanupDaemonThreads=false"
-
-[[workflows.workflow]]
-name = "Test Inventaire"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "mvn clean compile exec:java -Dexec.mainClass=\"com.poissonnerie.test.TestInventaire\""
 
 [[workflows.workflow]]
 name = "Application Java"
@@ -134,62 +100,6 @@ task = "packager.installForAll"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "mvn clean compile"
-
-[[workflows.workflow]]
-name = "Test Fournisseur"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "mvn test -Dtest=TestFournisseur"
-
-[[workflows.workflow]]
-name = "Test Client"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "mvn test -Dtest=TestClient"
-
-[[workflows.workflow]]
-name = "Test Vente"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "mvn test -Dtest=TestVente"
-
-[[workflows.workflow]]
-name = "Test Configuration"
-author = "agent"
-
-[workflows.workflow.metadata]
-agentRequireRestartOnSave = false
-
-[[workflows.workflow.tasks]]
-task = "packager.installForAll"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "mvn clean test -Dtest=TestConfiguration"
 
 [deployment]
 run = ["sh", "-c", "mvn clean compile"]
