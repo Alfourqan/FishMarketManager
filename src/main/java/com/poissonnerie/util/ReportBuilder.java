@@ -29,6 +29,34 @@ import java.io.File;
 import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.openxmlformats.schemas.drawingml.x2006.chart.CTChart;
+import org.openxmlformats.schemas.drawingml.x2006.main.CTNonVisualDrawingProps;
+import org.openxmlformats.schemas.drawingml.x2006.spreadsheetDrawing.CTTwoCellAnchor;
+import org.openxmlformats.schemas.drawingml.x2006.spreadsheetDrawing.STEditAs;
+import org.apache.poi.ss.usermodel.charts.*;
+import org.apache.poi.ss.usermodel.charts.Chart;
+import org.apache.poi.ss.usermodel.charts.AxisPosition;
+import org.apache.poi.ss.usermodel.charts.ChartAxis;
+import org.apache.poi.ss.usermodel.charts.ValueAxis;
+import org.apache.poi.ss.usermodel.charts.AxisCrosses;
+import org.apache.poi.ss.usermodel.charts.LegendPosition;
+import org.apache.poi.ss.usermodel.charts.LineChartSeries;
+import org.apache.poi.ss.usermodel.charts.LineChartData;
+import org.apache.poi.xddf.usermodel.chart.*;
+import org.apache.poi.xssf.usermodel.XSSFChart;
+import org.apache.poi.xssf.usermodel.XSSFDrawing;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.charts.XSSFLineChart;
+import org.apache.poi.xssf.usermodel.charts.XSSFChartLegend;
+import org.apache.poi.ss.usermodel.ClientAnchor;
+import org.apache.poi.ss.usermodel.Drawing;
+import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.util.Units;
+
 
 public class ReportBuilder {
     private static final Logger LOGGER = Logger.getLogger(ReportBuilder.class.getName());
@@ -413,7 +441,7 @@ public class ReportBuilder {
         // Add trend analysis sheet
         Sheet sheetTendances = workbook.createSheet("Analyse des Tendances");
         Row tendancesHeader = sheetTendances.createRow(0);
-        String[] headersTendances = {"Indicateur", "Valeur", "Variation"};
+        String[] headersTendances = {"Indicateur", "Variation", "Statut"};
 
         for (int i = 0; i < headersTendances.length; i++) {
             Cell cell = tendancesHeader.createCell(i);
@@ -431,7 +459,7 @@ public class ReportBuilder {
             row.createCell(1).setCellValue(entry.getValue());
             // Add a formula for variation calculation if needed.
         }
-
+        genererGraphiqueExcel(workbook, tendances, "Analyse des Tendances");
 
         // Ajuster la largeur des colonnes
         for (Sheet sheet : new Sheet[]{sheetStats, sheetVentes, sheetModes, sheetTendances}) {
@@ -662,7 +690,7 @@ public class ReportBuilder {
 
         Row row4 = sheetVueEnsemble.createRow(5);
         row4.createCell(0).setCellValue("Taux de marge brute");
-        Cell margeCell = row4.createCell(1);
+        Cell margeCell = row4.createCell(1;
         // Formule pour calculer le taux de marge
         margeCell.setCellFormula("(B3-B4)/B3");
         margeCell.setCellStyle(percentStyle);
@@ -694,6 +722,7 @@ public class ReportBuilder {
             statutCell.setCellFormula(String.format("IF(B%d>0,\"↗ Hausse\",IF(B%d<0,\"↘ Baisse\",\"→ Stable\"))",
                     rowNum, rowNum));
         }
+        genererGraphiqueExcel(workbook, tendances, "Analyse des Tendances");
 
         // Ajuster la largeur des colonnes
         for (Sheet sheet : new Sheet[]{sheetVueEnsemble, sheetTendances}) {
@@ -710,8 +739,7 @@ public class ReportBuilder {
     }
 
     private void ajouterEnTeteTableau(PdfPTable table, String[] headers) {
-        for(String header : headers) {
-            PdfPCell cell = new PdfPCell(new Phrase(header, SMALL_FONT));
+        for(String header : headers) {            PdfPCell cell = new PdfPCell(new Phrase(header, SMALL_FONT));
             cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
             cell.setHorizontalAlignment(Element.ALIGN_CENTER);
             table.addCell(cell);
@@ -721,137 +749,351 @@ public class ReportBuilder {
     private Map<String, Double> calculerTendances(List<Vente> ventes, LocalDate debut, LocalDate fin) {
         Map<String, Double> tendances = new HashMap<>();
 
-        // Calculer la période précédente
-        long nbJours = ChronoUnit.DAYS.between(debut, fin);
+        // Calculer la durée de la période en jours
+        long nbJours = ChronoUnit.DAYS.between(debut, fin) + 1;
         LocalDate debutPrecedent = debut.minusDays(nbJours);
         LocalDate finPrecedent = debut.minusDays(1);
 
-        // Calculer les variations entre périodes
-        List<Vente> ventesPeriodeActuelle = ventes.stream()
-                .filter(v -> !v.getDate().toLocalDate().isBefore(debut) && !v.getDate().toLocalDate().isAfter(fin))
-                .collect(Collectors.toList());
+        // Ventes de la période actuelle et précédente
+        List<Vente> ventesActuelles = ventes.stream()
+            .filter(v -> !v.getDate().toLocalDate().isBefore(debut) && !v.getDate().toLocalDate().isAfter(fin))
+            .collect(Collectors.toList());
 
-        List<Vente> ventesPeriodePrecedente = ventes.stream()
-                .filter(v -> !v.getDate().toLocalDate().isBefore(debutPrecedent) && !v.getDate().toLocalDate().isAfter(finPrecedent))
-                .collect(Collectors.toList());
+        List<Vente> ventesPrecedentes = ventes.stream()
+            .filter(v -> !v.getDate().toLocalDate().isBefore(debutPrecedent) && !v.getDate().toLocalDate().isAfter(finPrecedent))
+            .collect(Collectors.toList());
 
-        // Calculer les totaux
-        double caActuel = ventesPeriodeActuelle.stream()
-                .mapToDouble(Vente::getMontantTotal)
-                .sum();
+        // Calculer les tendances du CA par catégorie
+        Map<String, Double> caParCategorieActuel = ventesActuelles.stream()
+            .flatMap(v -> v.getLignes().stream())
+            .collect(Collectors.groupingBy(
+                ligne -> ligne.getProduit().getCategorie(),
+                Collectors.summingDouble(ligne -> ligne.getPrixUnitaire() * ligne.getQuantite())
+            ));
 
-        double caPrecedent = ventesPeriodePrecedente.stream()
-                .mapToDouble(Vente::getMontantTotal)
-                .sum();
+        Map<String, Double> caParCategoriePrecedent = ventesPrecedentes.stream()
+            .flatMap(v -> v.getLignes().stream())
+            .collect(Collectors.groupingBy(
+                ligne -> ligne.getProduit().getCategorie(),
+                Collectors.summingDouble(ligne -> ligne.getPrixUnitaire() * ligne.getQuantite())
+            ));
 
-        // Calculer les variations
-        double variationCA = caPrecedent != 0 ? ((caActuel - caPrecedent) / caPrecedent) * 100 : 100;
-        tendances.put("variationCA", variationCA);
+        // Calculer l'évolution par catégorie
+        Set<String> categories = Stream.concat(
+            caParCategorieActuel.keySet().stream(),
+            caParCategoriePrecedent.keySet().stream()
+        ).collect(Collectors.toSet());
 
-        // Nombre moyen de ventes par jour
-        double nbVentesJourActuel = ventesPeriodeActuelle.size() / (double) nbJours;
-        double nbVentesJourPrecedent = ventesPeriodePrecedente.size() / (double) nbJours;
-        double variationNbVentes = nbVentesJourPrecedent != 0 ?
-                ((nbVentesJourActuel - nbVentesJourPrecedent) / nbVentesJourPrecedent) * 100 : 100;
-        tendances.put("variationNbVentes", variationNbVentes);
+        for (String categorie : categories) {
+            double caActuel = caParCategorieActuel.getOrDefault(categorie, 0.0);
+            double caPrecedent = caParCategoriePrecedent.getOrDefault(categorie, 0.0);
+            double evolution = caPrecedent == 0 ? 100 : ((caActuel - caPrecedent) / caPrecedent) * 100;
+            tendances.put("evolution_cat_" + categorie.toLowerCase(), evolution);
+        }
 
-        // Panier moyen
-        double panierMoyenActuel = ventesPeriodeActuelle.stream()
-                .mapToDouble(Vente::getMontantTotal)
-                .average()
-                .orElse(0);
+        // Autres indicateurs existants...
+        double caActuel = ventesActuelles.stream()
+            .mapToDouble(Vente::getMontantTotal)
+            .sum();
 
-        double panierMoyenPrecedent = ventesPeriodePrecedente.stream()
-                .mapToDouble(Vente::getMontantTotal)
-                .average()
-                .orElse(0);
+        double caPrecedent = ventesPrecedentes.stream()
+            .mapToDouble(Vente::getMontantTotal)
+            .sum();
 
-        double variationPanierMoyen = panierMoyenPrecedent != 0 ?
-                ((panierMoyenActuel - panierMoyenPrecedent) / panierMoyenPrecedent) * 100 : 100;
-        tendances.put("variationPanierMoyen", variationPanierMoyen);
+        // Évolution du CA en pourcentage
+        double evolutionCA = caPrecedent == 0 ? 100 : ((caActuel - caPrecedent) / caPrecedent) * 100;
+        tendances.put("evolution_ca", evolutionCA);
+
+        // Ajouter des indicateurs de performance horaire
+        Map<Integer, Long> ventesParHeureActuelles = ventesActuelles.stream()
+            .collect(Collectors.groupingBy(
+                v -> v.getDate().getHour(),
+                Collectors.counting()
+            ));
+
+        Map<Integer, Long> ventesParHeurePrecedentes = ventesPrecedentes.stream()
+            .collect(Collectors.groupingBy(
+                v -> v.getDate().getHour(),
+                Collectors.counting()
+            ));
+
+        // Calculer les heures de pointe
+        OptionalDouble heurePointeActuelle = ventesParHeureActuelles.entrySet().stream()
+            .mapToDouble(Map.Entry::getValue)
+            .max();
+        OptionalDouble heurePointePrecedente = ventesParHeurePrecedentes.entrySet().stream()
+            .mapToDouble(Map.Entry::getValue)
+            .max();
+
+        if (heurePointeActuelle.isPresent() && heurePointePrecedente.isPresent()) {
+            double evolutionHeuresPointe = ((heurePointeActuelle.getAsDouble() - heurePointePrecedente.getAsDouble()) 
+                / heurePointePrecedente.getAsDouble()) * 100;
+            tendances.put("evolution_heure_pointe", evolutionHeuresPointe);
+        }
 
         return tendances;
     }
 
-    private void genererGraphiqueTendances(String cheminFichier, Map<String, Double> tendances) throws Exception {
-        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-
-        dataset.addValue(tendances.get("variationCA"), "Variation", "Chiffre d'affaires");
-        dataset.addValue(tendances.get("variationNbVentes"), "Variation", "Nombre de ventes");
-        dataset.addValue(tendances.get("variationPanierMoyen"), "Variation", "Panier moyen");
-
-        JFreeChart chart = ChartFactory.createBarChart(
-                "Analyse des tendances",
-                "Indicateurs",
-                "Variation (%)",
-                dataset,
-                PlotOrientation.VERTICAL,
-                true,
-                true,
-                false
-        );
-
-        // Personnalisation du graphique
-        CategoryPlot plot = chart.getCategoryPlot();
-        plot.setBackgroundPaint(java.awt.Color.WHITE);
-        plot.setRangeGridlinePaint(java.awt.Color.GRAY);
-
-        // Coloration selon la variation (positif/négatif)
-        BarRenderer renderer = (BarRenderer) plot.getRenderer();
-        renderer.setSeriesPaint(0, new java.awt.Color(30, 144, 255));
-
-        ChartUtils.saveChartAsJPEG(new File(cheminFichier), chart, 600, 400);
-    }
-
-    private void ajouterGraphiqueTendancesPDF(Document document, Map<String, Double> tendances) throws Exception {
-        // Création et sauvegarde temporaire du graphique
-        String tempFile = "temp_tendances_graph.jpg";
-        genererGraphiqueTendances(tempFile, tendances);
-
-        // Ajout au document PDF
-        com.itextpdf.text.Image graph = com.itextpdf.text.Image.getInstance(tempFile);
-        graph.scaleToFit(500, 300);
-        document.add(graph);
-
-        // Nettoyage du fichier temporaire
-        new File(tempFile).delete();
-
-        // Ajout d'un tableau récapitulatif
+    private void ajouterGraphiqueTendancesPDF(Document document, Map<String, Double> tendances) throws DocumentException {
+        Font sectionFont = new Font(Font.FontFamily.HELVETICA, 14, Font.BOLD);
+        document.add(new Paragraph("Analyse des Tendances:", sectionFont));
         document.add(Chunk.NEWLINE);
-        document.add(new Paragraph("Récapitulatif des variations", SUBTITLE_FONT));
 
-        PdfPTable table = new PdfPTable(2);
+        PdfPTable table = new PdfPTable(3);
         table.setWidthPercentage(100);
 
         // En-têtes
-        PdfPCell cell = new PdfPCell(new Phrase("Indicateur", SMALL_FONT));
-        cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
-        table.addCell(cell);
-
-        cell = new PdfPCell(new Phrase("Variation", SMALL_FONT));
-        cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
-        table.addCell(cell);
+        Stream.of("Indicateur", "Variation", "Tendance")
+            .forEach(columnTitle -> {
+                PdfPCell header = new PdfPCell();
+                header.setBackgroundColor(BaseColor.LIGHT_GRAY);
+                header.setBorderWidth(2);
+                header.setPhrase(new Phrase(columnTitle));
+                table.addCell(header);
+            });
 
         // Données
         for (Map.Entry<String, Double> entry : tendances.entrySet()) {
+            // Indicateur
             table.addCell(formatIndicateur(entry.getKey()));
-            table.addCell(String.format("%.1f%%", entry.getValue()));
+
+            // Variation
+            String variation = String.format("%.1f%%", entry.getValue());
+            table.addCell(variation);
+
+            // Tendance (flèche)
+            String tendance = entry.getValue() > 0 ? "↗" : entry.getValue() < 0 ? "↘" : "→";
+            PdfPCell cell = new PdfPCell(new Phrase(tendance));
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(cell);
         }
 
         document.add(table);
     }
 
     private String formatIndicateur(String key) {
+        if (key.startsWith("evolution_cat_")) {
+            return "Catégorie: " + key.substring(13).replace('_', ' ');
+        }
+
         switch (key) {
-            case "variationCA":
+            case "evolution_ca":
                 return "Chiffre d'affaires";
-            case "variationNbVentes":
-                return "Nombre de ventes";
-            case "variationPanierMoyen":
+            case "evolution_moyenne_produits":
+                return "Nombre moyen de produits";
+            case "evolution_panier_moyen":
                 return "Panier moyen";
+            case "evolution_frequence":
+                return "Fréquence des ventes";
+            case "evolution_especes":
+                return "Paiements en espèces";
+            case "evolution_carte":
+                return "Paiements par carte";
+            case "evolution_cheque":
+                return "Paiements par chèque";
+            case "evolution_heure_pointe":
+                return "Performance heure de pointe";
             default:
-                return key;
+                return key.substring(10).replace('_', ' ');
         }
     }
 
+    private void genererGraphiqueExcel(Workbook workbook, Map<String, Double> tendances, String titre) {
+        // Créer une nouvelle feuille pour le graphique
+        Sheet sheet = workbook.createSheet(titre);
+
+        // Préparer les données avec une meilleure organisation
+        Row headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue("Indicateur");
+        headerRow.createCell(1).setCellValue("Variation (%)");
+        headerRow.createCell(2).setCellValue("Statut");
+
+        // Style pour les cellules
+        CellStyle positifStyle = workbook.createCellStyle();
+        positifStyle.setFillForegroundColor(IndexedColors.LIGHT_GREEN.getIndex());
+        positifStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+        CellStyle negatifStyle = workbook.createCellStyle();
+        negatifStyle.setFillForegroundColor(IndexedColors.LIGHT_ORANGE.getIndex());
+        negatifStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+        CellStyle stableStyle = workbook.createCellStyle();
+        stableStyle.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
+        stableStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+
+        // Remplir les données
+        int rowNum = 1;
+        for (Map.Entry<String, Double> entry : tendances.entrySet()) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(formatIndicateur(entry.getKey()));
+
+            Cell variationCell = row.createCell(1);
+            variationCell.setCellValue(entry.getValue());
+
+            Cell statutCell = row.createCell(2);
+            double valeur = entry.getValue();
+            if (valeur > 0) {
+                statutCell.setCellValue("↗ Hausse");
+                statutCell.setCellStyle(positifStyle);
+            } else if (valeur < 0) {
+                statutCell.setCellValue("↘ Baisse");
+                statutCell.setCellStyle(negatifStyle);
+            } else {
+                statutCell.setCellValue("→ Stable");
+                statutCell.setCellStyle(stableStyle);
+            }
+        }
+
+        // Créer le graphique
+        Drawing<?> drawing = sheet.createDrawingPatriarch();
+        ClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 4, 0, 15, 15);
+
+        Chart chart = drawing.createChart(anchor);
+        ChartLegend legend = chart.getOrCreateLegend();
+        legend.setPosition(LegendPosition.RIGHT);
+
+        // Configurer les données du graphique
+        LineChartData data = chart.getChartDataFactory().createLineChartData();
+
+        // Configuration des axes avec labels personnalisés
+        ChartAxis bottomAxis = chart.getChartAxisFactory().createCategoryAxis(AxisPosition.BOTTOM);
+        bottomAxis.setTitle("Indicateurs");
+
+        ValueAxis leftAxis = chart.getChartAxisFactory().createValueAxis(AxisPosition.LEFT);
+        leftAxis.setTitle("Variation (%)");
+        leftAxis.setCrosses(AxisCrosses.AUTO_ZERO);
+
+        // Références des données
+        ChartDataSource<String> xs = DataSources.fromStringCellRange(sheet, 
+            new CellRangeAddress(1, rowNum - 1, 0, 0));
+        ChartDataSource<Number> ys = DataSources.fromNumericCellRange(sheet, 
+            new CellRangeAddress(1, rowNum - 1, 1, 1));
+
+        // Ajouter et configurer la série
+        LineChartSeries series = data.addSeries(xs, ys);
+        series.setTitle("Évolution des indicateurs");
+
+        // Appliquer les données au graphique
+        chart.plot(data, bottomAxis, leftAxis);
+
+        // Ajuster la largeur des colonnes
+        for (int i = 0; i < 3; i++) {
+            sheet.autoSizeColumn(i);
+        }
+    }
+
+    private Map<String, Double> calculerTendances(List<Vente> ventes, LocalDate debut, LocalDate fin) {
+        Map<String, Double> tendances = new HashMap<>();
+
+        // Calculer la durée de la période en jours
+        long nbJours = ChronoUnit.DAYS.between(debut, fin) + 1;
+        LocalDate debutPrecedent = debut.minusDays(nbJours);
+        LocalDate finPrecedent = debut.minusDays(1);
+
+        // Ventes de la période actuelle et précédente
+        List<Vente> ventesActuelles = ventes.stream()
+            .filter(v -> !v.getDate().toLocalDate().isBefore(debut) && !v.getDate().toLocalDate().isAfter(fin))
+            .collect(Collectors.toList());
+
+        List<Vente> ventesPrecedentes = ventes.stream()
+            .filter(v -> !v.getDate().toLocalDate().isBefore(debutPrecedent) && !v.getDate().toLocalDate().isAfter(finPrecedent))
+            .collect(Collectors.toList());
+
+        // Calculer les tendances du CA par catégorie
+        Map<String, Double> caParCategorieActuel = ventesActuelles.stream()
+            .flatMap(v -> v.getLignes().stream())
+            .collect(Collectors.groupingBy(
+                ligne -> ligne.getProduit().getCategorie(),
+                Collectors.summingDouble(ligne -> ligne.getPrixUnitaire() * ligne.getQuantite())
+            ));
+
+        Map<String, Double> caParCategoriePrecedent = ventesPrecedentes.stream()
+            .flatMap(v -> v.getLignes().stream())
+            .collect(Collectors.groupingBy(
+                ligne -> ligne.getProduit().getCategorie(),
+                Collectors.summingDouble(ligne -> ligne.getPrixUnitaire() * ligne.getQuantite())
+            ));
+
+        // Calculer l'évolution par catégorie
+        Set<String> categories = Stream.concat(
+            caParCategorieActuel.keySet().stream(),
+            caParCategoriePrecedent.keySet().stream()
+        ).collect(Collectors.toSet());
+
+        for (String categorie : categories) {
+            double caActuel = caParCategorieActuel.getOrDefault(categorie, 0.0);
+            double caPrecedent = caParCategoriePrecedent.getOrDefault(categorie, 0.0);
+            double evolution = caPrecedent == 0 ? 100 : ((caActuel - caPrecedent) / caPrecedent) * 100;
+            tendances.put("evolution_cat_" + categorie.toLowerCase(), evolution);
+        }
+
+        // Autres indicateurs existants...
+        double caActuel = ventesActuelles.stream()
+            .mapToDouble(Vente::getMontantTotal)
+            .sum();
+
+        double caPrecedent = ventesPrecedentes.stream()
+            .mapToDouble(Vente::getMontantTotal)
+            .sum();
+
+        // Évolution du CA en pourcentage
+        double evolutionCA = caPrecedent == 0 ? 100 : ((caActuel - caPrecedent) / caPrecedent) * 100;
+        tendances.put("evolution_ca", evolutionCA);
+
+        // Ajouter des indicateurs de performance horaire
+        Map<Integer, Long> ventesParHeureActuelles = ventesActuelles.stream()
+            .collect(Collectors.groupingBy(
+                v -> v.getDate().getHour(),
+                Collectors.counting()
+            ));
+
+        Map<Integer, Long> ventesParHeurePrecedentes = ventesPrecedentes.stream()
+            .collect(Collectors.groupingBy(
+                v -> v.getDate().getHour(),
+                Collectors.counting()
+            ));
+
+        // Calculer les heures de pointe
+        OptionalDouble heurePointeActuelle = ventesParHeureActuelles.entrySet().stream()
+            .mapToDouble(Map.Entry::getValue)
+            .max();
+        OptionalDouble heurePointePrecedente = ventesParHeurePrecedentes.entrySet().stream()
+            .mapToDouble(Map.Entry::getValue)
+            .max();
+
+        if (heurePointeActuelle.isPresent() && heurePointePrecedente.isPresent()) {
+            double evolutionHeuresPointe = ((heurePointeActuelle.getAsDouble() - heurePointePrecedente.getAsDouble()) 
+                / heurePointePrecedente.getAsDouble()) * 100;
+            tendances.put("evolution_heure_pointe", evolutionHeuresPointe);
+        }
+
+        return tendances;
+    }
+
+    private String formatIndicateur(String key) {
+        if (key.startsWith("evolution_cat_")) {
+            return "Catégorie: " + key.substring(13).replace('_', ' ');
+        }
+
+        switch (key) {
+            case "evolution_ca":
+                return "Chiffre d'affaires";
+            case "evolution_moyenne_produits":
+                return "Nombre moyen de produits";
+            case "evolution_panier_moyen":
+                return "Panier moyen";
+            case "evolution_frequence":
+                return "Fréquence des ventes";
+            case "evolution_especes":
+                return "Paiements en espèces";
+            case "evolution_carte":
+                return "Paiements par carte";
+            case "evolution_cheque":
+                return "Paiements par chèque";
+            case "evolution_heure_pointe":
+                return "Performance heure de pointe";
+            default:
+                return key.substring(10).replace('_', ' ');
+        }
+    }
 }

@@ -8,6 +8,8 @@
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <ikonli.version>12.3.1</ikonli.version>
+    <apache.poi.version>5.2.3</apache.poi.version>
   </properties>
 
   <dependencies>
@@ -27,12 +29,22 @@
     <dependency>
       <groupId>org.apache.poi</groupId>
       <artifactId>poi</artifactId>
-      <version>5.4.0</version>
+      <version>${apache.poi.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.poi</groupId>
       <artifactId>poi-ooxml</artifactId>
-      <version>5.4.0</version>
+      <version>${apache.poi.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.poi</groupId>
+      <artifactId>poi-ooxml-schemas</artifactId>
+      <version>${apache.poi.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-core</artifactId>
+      <version>2.20.0</version>
     </dependency>
 
     <!-- Graphiques et icônes -->
@@ -41,15 +53,23 @@
       <artifactId>jfreechart</artifactId>
       <version>1.5.4</version>
     </dependency>
+    <!-- Ikonli core -->
+    <dependency>
+      <groupId>org.kordamp.ikonli</groupId>
+      <artifactId>ikonli-core</artifactId>
+      <version>${ikonli.version}</version>
+    </dependency>
+    <!-- Ikonli Swing integration -->
     <dependency>
       <groupId>org.kordamp.ikonli</groupId>
       <artifactId>ikonli-swing</artifactId>
-      <version>12.3.1</version>
+      <version>${ikonli.version}</version>
     </dependency>
+    <!-- Material Design Icons pack -->
     <dependency>
       <groupId>org.kordamp.ikonli</groupId>
       <artifactId>ikonli-materialdesign-pack</artifactId>
-      <version>12.3.1</version>
+      <version>${ikonli.version}</version>
     </dependency>
 
     <!-- Tests -->
