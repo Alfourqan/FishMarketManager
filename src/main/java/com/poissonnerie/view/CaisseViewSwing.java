@@ -4,14 +4,16 @@ import com.poissonnerie.controller.CaisseController;
 import com.poissonnerie.model.MouvementCaisse;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
+import org.kordamp.ikonli.materialdesign.MaterialDesign;
+import org.kordamp.ikonli.swing.FontIcon;
 import java.io.File;
 import java.io.FileWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import org.kordamp.ikonli.materialdesign.MaterialDesign;
-import org.kordamp.ikonli.swing.FontIcon;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -28,7 +30,6 @@ public class CaisseViewSwing {
     private final JTable tableMouvements;
     private final DefaultTableModel tableModel;
     private final JLabel soldeLabel;
-    private JComboBox<MouvementCaisse.TypeMouvement> typeCombo;
     private JButton ouvrirBtn;
     private JButton cloturerBtn;
     private JButton ajouterBtn;
@@ -48,9 +49,66 @@ public class CaisseViewSwing {
             }
         };
         tableMouvements = new JTable(tableModel);
-        tableMouvements.setRowHeight(40);
+
+        // Style moderne pour la table et ses en-têtes
+        tableMouvements.setShowGrid(true);
+        tableMouvements.setGridColor(new Color(226, 232, 240));
+        tableMouvements.setBackground(Color.WHITE);
+        tableMouvements.setSelectionBackground(new Color(219, 234, 254));
+        tableMouvements.setSelectionForeground(new Color(15, 23, 42));
+        tableMouvements.setRowHeight(45);
         tableMouvements.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        tableMouvements.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
+        tableMouvements.setIntercellSpacing(new Dimension(1, 1));
+
+        // Style amélioré des en-têtes avec icônes
+        JTableHeader header = tableMouvements.getTableHeader();
+        header.setDefaultRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                JLabel label = (JLabel) super.getTableCellRendererComponent(table, value,
+                        isSelected, hasFocus, row, column);
+
+                // Configuration du style
+                label.setHorizontalAlignment(JLabel.LEFT);
+                label.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(203, 213, 225)),
+                    BorderFactory.createEmptyBorder(8, 12, 8, 12)
+                ));
+                label.setFont(new Font("Segoe UI", Font.BOLD, 14));
+                label.setBackground(new Color(241, 245, 249));
+                label.setForeground(new Color(15, 23, 42));
+
+                // Ajout des icônes selon la colonne
+                FontIcon icon = null;
+                switch (column) {
+                    case 0: // Date
+                        icon = FontIcon.of(MaterialDesign.MDI_CALENDAR);
+                        break;
+                    case 1: // Type
+                        icon = FontIcon.of(MaterialDesign.MDI_TAG);
+                        break;
+                    case 2: // Montant
+                        icon = FontIcon.of(MaterialDesign.MDI_CURRENCY_EUR);
+                        break;
+                    case 3: // Description
+                        icon = FontIcon.of(MaterialDesign.MDI_TEXT);
+                        break;
+                }
+
+                if (icon != null) {
+                    icon.setIconSize(16);
+                    icon.setIconColor(new Color(15, 23, 42));
+                    label.setIcon(icon);
+                    label.setIconTextGap(8);
+                }
+
+                return label;
+            }
+        });
+
+        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 50));
+
 
         // Style moderne pour le solde
         soldeLabel = new JLabel("Solde: 0.00 €");
@@ -133,15 +191,7 @@ public class CaisseViewSwing {
         topPanel.add(soldePanel, BorderLayout.WEST);
         topPanel.add(actionPanel, BorderLayout.CENTER);
 
-        // Style moderne pour la table
-        tableMouvements.setShowGrid(true);
-        tableMouvements.setGridColor(new Color(226, 232, 240));
-        tableMouvements.setSelectionBackground(new Color(219, 234, 254));
-        tableMouvements.setSelectionForeground(new Color(30, 41, 59));
-        tableMouvements.getTableHeader().setBackground(new Color(248, 250, 252));
-        tableMouvements.getTableHeader().setForeground(new Color(30, 41, 59));
-        tableMouvements.setBackground(Color.WHITE);
-        tableMouvements.setForeground(new Color(30, 41, 59));
+        // Style moderne pour la table (already set in constructor)
 
         JScrollPane scrollPane = new JScrollPane(tableMouvements);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -275,7 +325,7 @@ public class CaisseViewSwing {
         });
 
         if (etatPrecedent != caisseOuverte.get()) {
-            LOGGER.log(Level.INFO, "État de la caisse modifié: {0}", 
+            LOGGER.log(Level.INFO, "État de la caisse modifié: {0}",
                 caisseOuverte.get() ? "ouverte" : "fermée");
         }
     }
@@ -299,7 +349,7 @@ public class CaisseViewSwing {
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         // Champs du formulaire avec validation renforcée
-        typeCombo = new JComboBox<>(new MouvementCaisse.TypeMouvement[]{
+        JComboBox<MouvementCaisse.TypeMouvement> typeCombo = new JComboBox<>(new MouvementCaisse.TypeMouvement[]{
             MouvementCaisse.TypeMouvement.ENTREE,
             MouvementCaisse.TypeMouvement.SORTIE
         });

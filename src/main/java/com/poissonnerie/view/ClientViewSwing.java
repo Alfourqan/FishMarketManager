@@ -5,7 +5,11 @@ import com.poissonnerie.model.Client;
 import com.poissonnerie.util.PDFGenerator;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
+import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
+import org.kordamp.ikonli.materialdesign.MaterialDesign;
+import org.kordamp.ikonli.swing.FontIcon;
 
 public class ClientViewSwing {
     private final JPanel mainPanel;
@@ -68,6 +72,73 @@ public class ClientViewSwing {
         ));
         buttonPanel.setBackground(new Color(236, 239, 241));
 
+        // Style moderne pour la table et ses en-têtes
+        tableClients.setShowGrid(true);
+        tableClients.setGridColor(new Color(226, 232, 240));
+        tableClients.setBackground(new Color(255, 255, 255));
+        tableClients.setSelectionBackground(new Color(219, 234, 254));
+        tableClients.setSelectionForeground(new Color(15, 23, 42));
+        tableClients.setRowHeight(45);
+        tableClients.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        tableClients.setIntercellSpacing(new Dimension(1, 1));
+
+        // Style amélioré des en-têtes avec icônes
+        JTableHeader header = tableClients.getTableHeader();
+        header.setDefaultRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                JLabel label = (JLabel) super.getTableCellRendererComponent(table, value,
+                        isSelected, hasFocus, row, column);
+
+                // Configuration du style
+                label.setHorizontalAlignment(JLabel.LEFT);
+                label.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(203, 213, 225)),
+                    BorderFactory.createEmptyBorder(8, 12, 8, 12)
+                ));
+                label.setFont(new Font("Segoe UI", Font.BOLD, 14));
+                label.setBackground(new Color(241, 245, 249));
+                label.setForeground(new Color(15, 23, 42));
+
+                // Ajout des icônes selon la colonne
+                FontIcon icon = null;
+                switch (column) {
+                    case 0: // Nom
+                        icon = FontIcon.of(MaterialDesign.MDI_ACCOUNT);
+                        break;
+                    case 1: // Téléphone
+                        icon = FontIcon.of(MaterialDesign.MDI_PHONE);
+                        break;
+                    case 2: // Adresse
+                        icon = FontIcon.of(MaterialDesign.MDI_MAP_MARKER);
+                        break;
+                    case 3: // Solde
+                        icon = FontIcon.of(MaterialDesign.MDI_CURRENCY_EUR);
+                        break;
+                }
+
+                if (icon != null) {
+                    icon.setIconSize(16);
+                    icon.setIconColor(new Color(15, 23, 42));
+                    label.setIcon(icon);
+                    label.setIconTextGap(8);
+                }
+
+                return label;
+            }
+        });
+
+        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 50));
+
+
+        // Configuration du scroll pane avec style moderne
+        JScrollPane scrollPane = new JScrollPane(tableClients);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getViewport().setBackground(Color.WHITE);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+
         // Création des boutons avec style moderne
         JButton ajouterBtn = createStyledButton("Ajouter", new Color(76, 175, 80));
         JButton modifierBtn = createStyledButton("Modifier", new Color(33, 150, 243));
@@ -80,20 +151,6 @@ public class ClientViewSwing {
         buttonPanel.add(supprimerBtn);
         buttonPanel.add(reglerCreanceBtn);
         buttonPanel.add(actualiserBtn);
-
-        // Style moderne pour la table
-        JScrollPane scrollPane = new JScrollPane(tableClients);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.setBackground(new Color(236, 239, 241));
-        scrollPane.getViewport().setBackground(new Color(236, 239, 241));
-
-        tableClients.setShowGrid(true);
-        tableClients.setGridColor(new Color(200, 200, 200));
-        tableClients.setBackground(new Color(245, 246, 247));
-        tableClients.setSelectionBackground(new Color(197, 202, 233));
-        tableClients.setSelectionForeground(new Color(33, 33, 33));
-        tableClients.getTableHeader().setBackground(new Color(220, 224, 228));
-        tableClients.getTableHeader().setFont(tableClients.getTableHeader().getFont().deriveFont(Font.BOLD));
 
         mainPanel.add(buttonPanel, BorderLayout.NORTH);
         mainPanel.add(scrollPane, BorderLayout.CENTER);

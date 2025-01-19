@@ -227,6 +227,27 @@ public class Main {
         Color textColor = new Color(30, 41, 59);         // Gris foncé
         Color lightTextColor = new Color(148, 163, 184); // Gris clair
 
+        // Style des tableaux amélioré
+        UIManager.put("Table.background", Color.WHITE);
+        UIManager.put("Table.foreground", textColor);
+        UIManager.put("Table.selectionBackground", new Color(219, 234, 254));
+        UIManager.put("Table.selectionForeground", textColor);
+        UIManager.put("Table.gridColor", new Color(226, 232, 240));
+        UIManager.put("Table.font", new Font("Segoe UI", Font.PLAIN, 14));
+        UIManager.put("Table.rowHeight", 45);
+        UIManager.put("Table.showGrid", true);
+        UIManager.put("Table.intercellSpacing", new Dimension(1, 1));
+
+        // Style amélioré des en-têtes de tableau
+        UIManager.put("TableHeader.background", new Color(241, 245, 249));
+        UIManager.put("TableHeader.foreground", new Color(15, 23, 42));
+        UIManager.put("TableHeader.font", new Font("Segoe UI", Font.BOLD, 14));
+        UIManager.put("TableHeader.height", 50);
+        UIManager.put("TableHeader.border", BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(203, 213, 225)),
+            BorderFactory.createEmptyBorder(8, 12, 8, 12)
+        ));
+
         // Configuration des boutons avec style moderne
         UIManager.put("Button.background", primaryColor);
         UIManager.put("Button.foreground", Color.WHITE);
@@ -264,17 +285,6 @@ public class Main {
             BorderFactory.createEmptyBorder(7, 11, 7, 11)
         ));
 
-        // Style des tableaux
-        UIManager.put("Table.background", Color.WHITE);
-        UIManager.put("Table.foreground", textColor);
-        UIManager.put("Table.selectionBackground", new Color(219, 234, 254));
-        UIManager.put("Table.selectionForeground", textColor);
-        UIManager.put("Table.gridColor", new Color(226, 232, 240));
-        UIManager.put("Table.font", new Font("Segoe UI", Font.PLAIN, 14));
-        UIManager.put("Table.rowHeight", 40);
-        UIManager.put("TableHeader.background", backgroundColor);
-        UIManager.put("TableHeader.foreground", textColor);
-        UIManager.put("TableHeader.font", new Font("Segoe UI", Font.BOLD, 14));
 
         // Style des scrollbars
         UIManager.put("ScrollBar.thumb", new Color(203, 213, 225));
