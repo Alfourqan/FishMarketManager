@@ -234,18 +234,18 @@ public class Main {
         UIManager.put("Table.selectionForeground", textColor);
         UIManager.put("Table.gridColor", new Color(226, 232, 240));
         UIManager.put("Table.font", new Font("Segoe UI", Font.PLAIN, 14));
-        UIManager.put("Table.rowHeight", 45);
-        UIManager.put("Table.showGrid", true);
-        UIManager.put("Table.intercellSpacing", new Dimension(1, 1));
+        UIManager.put("Table.rowHeight", 35); // Réduit de 45 à 35
+        UIManager.put("Table.showGrid", false); // Désactive la grille par défaut
+        UIManager.put("Table.intercellSpacing", new Dimension(0, 0)); // Réduit l'espacement
 
         // Style amélioré des en-têtes de tableau avec fond sombre
-        UIManager.put("TableHeader.background", new Color(31, 41, 55));  // Fond sombre
-        UIManager.put("TableHeader.foreground", Color.WHITE);            // Texte blanc
+        UIManager.put("TableHeader.background", new Color(33, 33, 33));  // Noir plus profond
+        UIManager.put("TableHeader.foreground", Color.WHITE);
         UIManager.put("TableHeader.font", new Font("Segoe UI", Font.BOLD, 14));
-        UIManager.put("TableHeader.height", 50);
+        UIManager.put("TableHeader.height", 40); // Réduit de 50 à 40
         UIManager.put("TableHeader.border", BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(51, 65, 85)),
-            BorderFactory.createEmptyBorder(8, 12, 8, 12)
+            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(51, 51, 51)),
+            BorderFactory.createEmptyBorder(8, 16, 8, 16)
         ));
 
         // Configuration des boutons avec style moderne

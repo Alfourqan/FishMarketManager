@@ -90,15 +90,16 @@ public class ClientViewSwing {
                 Component c = super.getTableCellRendererComponent(table, value,
                         isSelected, hasFocus, row, column);
                 if (!isSelected) {
-                    c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252));
+                    c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(245, 245, 245));
                 }
-                // Ajouter un padding aux cellules
-                ((JLabel) c).setBorder(BorderFactory.createEmptyBorder(0, 12, 0, 12));
+                // Padding des cellules ajusté
+                ((JLabel) c).setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 16));
+                ((JLabel) c).setHorizontalAlignment(JLabel.LEFT);
                 return c;
             }
         });
 
-        // Style amélioré des en-têtes avec icônes
+        // Style amélioré des en-têtes
         JTableHeader header = tableClients.getTableHeader();
         header.setDefaultRenderer(new DefaultTableCellRenderer() {
             @Override
@@ -109,44 +110,18 @@ public class ClientViewSwing {
 
                 // Configuration du style amélioré
                 label.setHorizontalAlignment(JLabel.LEFT);
-                label.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(51, 65, 85)),
-                    BorderFactory.createEmptyBorder(12, 16, 12, 16)
-                ));
+                label.setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 16));
                 label.setFont(new Font("Segoe UI", Font.BOLD, 14));
-                label.setBackground(new Color(31, 41, 55));
+                label.setBackground(new Color(33, 33, 33));
                 label.setForeground(Color.WHITE);
                 label.setOpaque(true);
-
-                // Ajout des icônes avec style amélioré
-                FontIcon icon = null;
-                switch (column) {
-                    case 0: // Nom
-                        icon = FontIcon.of(MaterialDesign.MDI_ACCOUNT_CIRCLE);
-                        break;
-                    case 1: // Téléphone
-                        icon = FontIcon.of(MaterialDesign.MDI_PHONE_CLASSIC);
-                        break;
-                    case 2: // Adresse
-                        icon = FontIcon.of(MaterialDesign.MDI_MAP_MARKER_RADIUS);
-                        break;
-                    case 3: // Solde
-                        icon = FontIcon.of(MaterialDesign.MDI_CURRENCY_EUR);
-                        break;
-                }
-
-                if (icon != null) {
-                    icon.setIconSize(18);
-                    icon.setIconColor(Color.WHITE);
-                    label.setIcon(icon);
-                    label.setIconTextGap(12);
-                }
 
                 return label;
             }
         });
 
-        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 56));
+        // Ajustement de la hauteur de l'en-tête
+        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 40));
 
 
         // Configuration du scroll pane avec style moderne
