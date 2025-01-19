@@ -9,6 +9,11 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 import org.kordamp.ikonli.materialdesign.MaterialDesign;
 import org.kordamp.ikonli.swing.FontIcon;
+import javax.swing.border.EmptyBorder;
+import java.text.NumberFormat;
+import java.util.Locale;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class AccueilViewSwing {
     private static final Logger LOGGER = Logger.getLogger(AccueilViewSwing.class.getName());
@@ -31,6 +36,8 @@ public class AccueilViewSwing {
     private static final Color DANGER_COLOR = new Color(244, 67, 54);
     private static final Font TITLE_FONT = new Font("Arial", Font.BOLD, 16);
     private static final Font VALUE_FONT = new Font("Arial", Font.BOLD, 24);
+    private static final int ANIMATION_DELAY = 50;
+    private static final int ANIMATION_STEPS = 10;
 
     public AccueilViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -50,11 +57,12 @@ public class AccueilViewSwing {
         JPanel kpiPanel = new JPanel(new GridLayout(2, 2, 15, 15));
         kpiPanel.setBackground(BACKGROUND_COLOR);
 
-        // Initialisation des labels
-        ventesJourLabel = new JLabel("0.00 €", SwingConstants.CENTER);
+        // Initialisation des labels avec formatage monétaire
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.FRANCE);
+        ventesJourLabel = new JLabel(currencyFormat.format(0), SwingConstants.CENTER);
         produitsRuptureLabel = new JLabel("0", SwingConstants.CENTER);
-        encaissementsJourLabel = new JLabel("0.00 €", SwingConstants.CENTER);
-        chiffreAffairesLabel = new JLabel("0.00 €", SwingConstants.CENTER);
+        encaissementsJourLabel = new JLabel(currencyFormat.format(0), SwingConstants.CENTER);
+        chiffreAffairesLabel = new JLabel(currencyFormat.format(0), SwingConstants.CENTER);
 
         // Création des cartes KPI avec icônes
         kpiPanel.add(createKPIPanel("Ventes du jour", ventesJourLabel, SUCCESS_COLOR, MaterialDesign.MDI_CART));
@@ -64,7 +72,18 @@ public class AccueilViewSwing {
 
         // Bouton d'actualisation avec icône
         JButton refreshButton = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH, PRIMARY_COLOR);
-        refreshButton.addActionListener(e -> loadData());
+        refreshButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                refreshButton.setEnabled(false);
+                Timer timer = new Timer(1000, event -> {
+                    loadData();
+                    refreshButton.setEnabled(true);
+                });
+                timer.setRepeats(false);
+                timer.start();
+            }
+        });
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.setBackground(BACKGROUND_COLOR);
@@ -78,8 +97,8 @@ public class AccueilViewSwing {
     private JPanel createKPIPanel(String title, JLabel valueLabel, Color color, MaterialDesign icon) {
         JPanel panel = new JPanel(new BorderLayout(5, 10));
         panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(color, 2),
-            BorderFactory.createEmptyBorder(15, 15, 15, 15)
+            BorderFactory.createLineBorder(color, 2, true),
+            new EmptyBorder(15, 15, 15, 15)
         ));
         panel.setBackground(BACKGROUND_COLOR);
 
@@ -105,6 +124,18 @@ public class AccueilViewSwing {
         valueLabel.setFont(VALUE_FONT);
         valueLabel.setForeground(color);
 
+        // Effet de survol
+        panel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                panel.setBackground(new Color(245, 245, 245));
+                titlePanel.setBackground(new Color(245, 245, 245));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                panel.setBackground(BACKGROUND_COLOR);
+                titlePanel.setBackground(BACKGROUND_COLOR);
+            }
+        });
+
         panel.add(titlePanel, BorderLayout.NORTH);
         panel.add(valueLabel, BorderLayout.CENTER);
 
@@ -121,11 +152,8 @@ public class AccueilViewSwing {
                 produitController.chargerProduits();
                 caisseController.chargerMouvements();
 
-                // Mise à jour des KPIs
-                updateVentesJour();
-                updateProduitsRupture();
-                updateEncaissementsJour();
-                updateChiffreAffaires();
+                // Mise à jour des KPIs avec animation
+                animateKPIUpdate();
 
                 LOGGER.info("Données du tableau de bord mises à jour avec succès");
             } catch (Exception e) {
@@ -140,36 +168,67 @@ public class AccueilViewSwing {
         });
     }
 
-    private void updateVentesJour() {
+    private void animateKPIUpdate() {
+        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.FRANCE);
+
+        // Calcul des valeurs finales
+        double finalVentesJour = calculerVentesJour();
+        int finalProduitsRupture = calculerProduitsRupture();
+        double finalEncaissementsJour = calculerEncaissementsJour();
+        double finalCA = calculerChiffreAffaires();
+
+        // Animation des mises à jour
+        Timer timer = new Timer(ANIMATION_DELAY, null);
+        final int[] step = {0};
+
+        timer.addActionListener(e -> {
+            if (step[0] >= ANIMATION_STEPS) {
+                // Valeurs finales
+                ventesJourLabel.setText(currencyFormat.format(finalVentesJour));
+                produitsRuptureLabel.setText(String.valueOf(finalProduitsRupture));
+                encaissementsJourLabel.setText(currencyFormat.format(finalEncaissementsJour));
+                chiffreAffairesLabel.setText(currencyFormat.format(finalCA));
+                timer.stop();
+            } else {
+                // Valeurs intermédiaires
+                double progress = (double) step[0] / ANIMATION_STEPS;
+                ventesJourLabel.setText(currencyFormat.format(finalVentesJour * progress));
+                produitsRuptureLabel.setText(String.valueOf((int)(finalProduitsRupture * progress)));
+                encaissementsJourLabel.setText(currencyFormat.format(finalEncaissementsJour * progress));
+                chiffreAffairesLabel.setText(currencyFormat.format(finalCA * progress));
+                step[0]++;
+            }
+        });
+
+        timer.start();
+    }
+
+    private double calculerVentesJour() {
         LocalDate today = LocalDate.now();
-        double totalVentes = venteController.getVentes().stream()
+        return venteController.getVentes().stream()
             .filter(v -> v.getDate().toLocalDate().equals(today))
             .mapToDouble(Vente::getTotal)
             .sum();
-        ventesJourLabel.setText(String.format("%.2f €", totalVentes));
     }
 
-    private void updateProduitsRupture() {
-        long produitsRupture = produitController.getProduits().stream()
+    private int calculerProduitsRupture() {
+        return (int) produitController.getProduits().stream()
             .filter(p -> p.getStock() <= 0)
             .count();
-        produitsRuptureLabel.setText(String.valueOf(produitsRupture));
     }
 
-    private void updateEncaissementsJour() {
+    private double calculerEncaissementsJour() {
         LocalDate today = LocalDate.now();
-        double totalEncaissements = caisseController.getMouvements().stream()
+        return caisseController.getMouvements().stream()
             .filter(m -> m.getDate().toLocalDate().equals(today))
             .mapToDouble(MouvementCaisse::getMontant)
             .sum();
-        encaissementsJourLabel.setText(String.format("%.2f €", totalEncaissements));
     }
 
-    private void updateChiffreAffaires() {
-        double totalCA = venteController.getVentes().stream()
+    private double calculerChiffreAffaires() {
+        return venteController.getVentes().stream()
             .mapToDouble(Vente::getTotal)
             .sum();
-        chiffreAffairesLabel.setText(String.format("%.2f €", totalCA));
     }
 
     private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
@@ -189,12 +248,17 @@ public class AccueilViewSwing {
         button.setMargin(new Insets(8, 16, 8, 16));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
+        // Effet de survol amélioré
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(color.darker());
+                if (button.isEnabled()) {
+                    button.setBackground(color.darker());
+                }
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(color);
+                if (button.isEnabled()) {
+                    button.setBackground(color);
+                }
             }
         });
 

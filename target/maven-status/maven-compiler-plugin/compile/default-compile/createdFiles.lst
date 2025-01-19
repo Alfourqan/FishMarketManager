@@ -46,7 +46,6 @@ com/poissonnerie/view/ConfigurationViewSwing.class
 com/poissonnerie/view/VenteViewSwing$4.class
 com/poissonnerie/view/FournisseurViewSwing.class
 com/poissonnerie/view/VenteViewSwing$2.class
-com/poissonnerie/model/Fournisseur.class
 com/poissonnerie/view/ProduitViewSwing$1.class
 com/poissonnerie/view/ClientViewSwing$2.class
 com/poissonnerie/view/ProduitViewSwing$3.class
