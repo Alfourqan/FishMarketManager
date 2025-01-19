@@ -16,19 +16,19 @@ import java.awt.event.WindowEvent;
 
 public class Main {
     private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+    private static SplashScreen splash;
     private static final int MAX_RETRIES = 3;
     private static final int RETRY_DELAY_MS = 1000;
     private static final AtomicReference<JFrame> mainFrame = new AtomicReference<>();
-    private static SplashScreen splash;
-    private static CardLayout cardLayout;
-    private static JPanel mainContainer;
 
     public static void main(String[] args) {
+        // Configuration du gestionnaire d'exceptions non gérées
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
             LOGGER.log(Level.SEVERE, "Exception non gérée dans le thread " + thread.getName(), throwable);
             handleError(throwable, "Erreur inattendue");
         });
 
+        // Démarrage sécurisé de l'application
         SwingUtilities.invokeLater(() -> {
             try {
                 LOGGER.info("Démarrage de l'application...");
@@ -41,35 +41,11 @@ public class Main {
 
     private static void initializeApplication() {
         try {
-            // Création de la fenêtre principale
-            JFrame frame = new JFrame("Gestion Poissonnerie");
-            mainFrame.set(frame);
-            frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-            frame.addWindowListener(new WindowAdapter() {
-                @Override
-                public void windowClosing(WindowEvent e) {
-                    cleanupAndExit(frame);
-                }
-            });
-            frame.setSize(1200, 800);
-
-            // Configuration du CardLayout pour la transition
-            cardLayout = new CardLayout();
-            mainContainer = new JPanel(cardLayout);
-            frame.setContentPane(mainContainer);
-
-            // Création et ajout du splash screen
+            // Affichage du splash screen
             splash = new SplashScreen();
-            mainContainer.add(splash, "splash");
+            splash.setVisible(true);
 
-            // Centrer la fenêtre
-            frame.setLocationRelativeTo(null);
-            frame.setVisible(true);
-
-            // Afficher le splash screen
-            cardLayout.show(mainContainer, "splash");
-
-            // Démarrer le processus d'initialisation en arrière-plan
+            // Démarrage du processus d'initialisation
             new Thread(() -> {
                 try {
                     initializeComponents();
@@ -79,7 +55,7 @@ public class Main {
             }, "InitThread").start();
 
         } catch (Exception e) {
-            handleError(e, "Erreur lors de la création de l'interface");
+            handleError(e, "Erreur lors de la création du splash screen");
         }
     }
 
@@ -87,6 +63,7 @@ public class Main {
         updateProgress(10, "Configuration du thème...");
         Thread.sleep(500);
 
+        // Configuration du thème
         SwingUtilities.invokeAndWait(() -> {
             try {
                 FlatMaterialLighterIJTheme.setup();
@@ -97,6 +74,7 @@ public class Main {
             }
         });
 
+        // Initialisation de la base de données avec retry et validation SIRET désactivée
         updateProgress(30, "Initialisation de la base de données...");
         System.setProperty("SKIP_SIRET_VALIDATION", "true");
         try {
@@ -112,43 +90,16 @@ public class Main {
         updateProgress(80, "Chargement de l'interface principale...");
         Thread.sleep(500);
 
+        // Création et affichage de la fenêtre principale
         SwingUtilities.invokeAndWait(() -> {
             try {
-                createMainView();
+                createAndShowMainWindow();
             } catch (Exception e) {
-                throw new RuntimeException("Erreur lors de la création de la vue principale", e);
+                throw new RuntimeException("Erreur lors de la création de la fenêtre principale", e);
             }
         });
 
         finishStartup();
-    }
-
-    private static void createMainView() {
-        MainViewSwing mainView = new MainViewSwing();
-        mainContainer.add(mainView.getMainPanel(), "main");
-        LOGGER.info("Vue principale créée");
-    }
-
-    private static void finishStartup() {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                updateProgress(100, "Démarrage terminé");
-                Thread.sleep(500);
-
-                // Transition vers l'interface principale avec animation
-                Timer transitionTimer = new Timer(20, e -> {
-                    cardLayout.show(mainContainer, "main");
-                    ((Timer)e.getSource()).stop();
-                    splash.stopAnimation();
-                });
-                transitionTimer.setInitialDelay(500);
-                transitionTimer.start();
-
-                LOGGER.info("Application démarrée avec succès");
-            } catch (Exception e) {
-                handleError(e, "Erreur lors de la finalisation du démarrage");
-            }
-        });
     }
 
     private static void initializeDatabaseWithRetry() throws Exception {
@@ -169,6 +120,28 @@ public class Main {
         throw new Exception("Échec de l'initialisation de la base de données après " + MAX_RETRIES + " tentatives", lastException);
     }
 
+    private static void createAndShowMainWindow() {
+        JFrame frame = new JFrame("Gestion Poissonnerie");
+        mainFrame.set(frame);
+
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                cleanupAndExit(frame);
+            }
+        });
+
+        frame.setSize(1200, 800);
+        LOGGER.info("Fenêtre principale créée");
+
+        MainViewSwing mainView = new MainViewSwing();
+        frame.setContentPane(mainView.getMainPanel());
+        LOGGER.info("Vue principale configurée");
+
+        frame.setLocationRelativeTo(null);
+    }
+
     private static void cleanupAndExit(JFrame frame) {
         try {
             LOGGER.info("Fermeture de l'application...");
@@ -182,9 +155,37 @@ public class Main {
     }
 
     private static void updateProgress(int progress, String message) {
-        if (splash != null) {
+        if (splash != null && splash.isVisible()) {
             splash.setProgress(progress, message);
             LOGGER.info(message + " - " + progress + "%");
+        }
+    }
+
+    private static void finishStartup() {
+        SwingUtilities.invokeLater(() -> {
+            try {
+                updateProgress(100, "Démarrage terminé");
+                Thread.sleep(500);
+
+                JFrame frame = mainFrame.get();
+                if (frame != null) {
+                    frame.setVisible(true);
+                    LOGGER.info("Application démarrée avec succès");
+                } else {
+                    throw new IllegalStateException("La fenêtre principale n'a pas été initialisée");
+                }
+            } catch (Exception e) {
+                handleError(e, "Erreur lors de la finalisation du démarrage");
+            } finally {
+                disposeSplashScreen();
+            }
+        });
+    }
+
+    private static void disposeSplashScreen() {
+        if (splash != null) {
+            splash.dispose();
+            splash = null;
         }
     }
 
@@ -197,7 +198,9 @@ public class Main {
         LOGGER.log(Level.SEVERE, fullMessage, e);
 
         SwingUtilities.invokeLater(() -> {
-            JOptionPane.showMessageDialog(mainFrame.get(),
+            disposeSplashScreen();
+
+            JOptionPane.showMessageDialog(null,
                 fullMessage,
                 "Erreur",
                 JOptionPane.ERROR_MESSAGE);
