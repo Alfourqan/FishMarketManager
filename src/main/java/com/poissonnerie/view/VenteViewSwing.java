@@ -107,11 +107,11 @@ public class VenteViewSwing {
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors du chargement des données", e);
-            SwingUtilities.invokeLater(() -> 
-                JOptionPane.showMessageDialog(mainPanel,
-                    "Erreur lors du chargement des données : " + e.getMessage(),
-                    "Erreur",
-                    JOptionPane.ERROR_MESSAGE));
+            SwingUtilities.invokeLater(() ->
+                    JOptionPane.showMessageDialog(mainPanel,
+                            "Erreur lors du chargement des données : " + e.getMessage(),
+                            "Erreur",
+                            JOptionPane.ERROR_MESSAGE));
         }
     }
 
@@ -141,8 +141,8 @@ public class VenteViewSwing {
             return "";
         }
         return input.replaceAll("[<>\"'%;)(&+]", "")
-                   .trim()
-                   .replaceAll("\\s+", " ");
+                .trim()
+                .replaceAll("\\s+", " ");
     }
 
     private boolean validateQuantite(String quantiteText) {
@@ -157,9 +157,9 @@ public class VenteViewSwing {
     private void actualiserDonnees() {
         if (!checkAndSetProcessing()) {
             JOptionPane.showMessageDialog(mainPanel,
-                "Une opération est déjà en cours, veuillez patienter",
-                "Information",
-                JOptionPane.INFORMATION_MESSAGE);
+                    "Une opération est déjà en cours, veuillez patienter",
+                    "Information",
+                    JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
@@ -206,7 +206,7 @@ public class VenteViewSwing {
 
         int quantite = Integer.parseInt(quantiteText);
 
-        synchronized(panier) {
+        synchronized (panier) {
             try {
                 if (quantite > produit.getStock()) {
                     JOptionPane.showMessageDialog(mainPanel,
@@ -242,8 +242,8 @@ public class VenteViewSwing {
                     panier.add(ligne);
                 }
 
-                LOGGER.info(String.format("Produit ajouté au panier: %s, quantité: %d", 
-                    produit.getNom(), quantite));
+                LOGGER.info(String.format("Produit ajouté au panier: %s, quantité: %d",
+                        produit.getNom(), quantite));
                 updatePanierTable();
             } catch (Exception ex) {
                 LOGGER.log(Level.SEVERE, "Erreur lors de l'ajout au panier", ex);
@@ -258,14 +258,14 @@ public class VenteViewSwing {
     private void validerVente() {
         if (!checkAndSetProcessing()) {
             JOptionPane.showMessageDialog(mainPanel,
-                "Une opération est déjà en cours, veuillez patienter",
-                "Information",
-                JOptionPane.INFORMATION_MESSAGE);
+                    "Une opération est déjà en cours, veuillez patienter",
+                    "Information",
+                    JOptionPane.INFORMATION_MESSAGE);
             return;
         }
 
         try {
-            synchronized(panier) {
+            synchronized (panier) {
                 if (panier.isEmpty()) {
                     JOptionPane.showMessageDialog(mainPanel,
                             "Le panier est vide",
@@ -313,10 +313,10 @@ public class VenteViewSwing {
 
                     // Panneau de boutons
                     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-                    JButton confirmerBtn = createStyledButton("Confirmer et imprimer", 
-                        MaterialDesign.MDI_PRINTER, new Color(76, 175, 80));
-                    JButton cancelBtn = createStyledButton("Annuler", 
-                        MaterialDesign.MDI_CLOSE, new Color(244, 67, 54));
+                    JButton confirmerBtn = createStyledButton("Confirmer et imprimer",
+                            MaterialDesign.MDI_PRINTER, new Color(76, 175, 80));
+                    JButton cancelBtn = createStyledButton("Annuler",
+                            MaterialDesign.MDI_CLOSE, new Color(244, 67, 54));
 
                     confirmerBtn.addActionListener(confirmEvent -> {
                         try {
@@ -328,8 +328,8 @@ public class VenteViewSwing {
                             refreshComboBoxes();
                             refreshVentesTable();
 
-                            LOGGER.info(String.format("Vente enregistrée avec succès: ID=%d, Total=%.2f€", 
-                                vente.getId(), vente.getTotal()));
+                            LOGGER.info(String.format("Vente enregistrée avec succès: ID=%d, Total=%.2f€",
+                                    vente.getId(), vente.getTotal()));
 
                             JOptionPane.showMessageDialog(mainPanel,
                                     "<html>Vente enregistrée avec succès<br>Ticket généré: <b>ticket_" +
@@ -374,13 +374,13 @@ public class VenteViewSwing {
             panierModel.setRowCount(0);
             double total = 0;
 
-            synchronized(panier) {
+            synchronized (panier) {
                 for (Vente.LigneVente ligne : panier) {
                     double sousTotal = ligne.getQuantite() * ligne.getPrixUnitaire();
                     panierModel.addRow(new Object[]{
-                            String.format("%s (%s)", 
-                                sanitizeInput(ligne.getProduit().getNom()),
-                                sanitizeInput(ligne.getProduit().getCategorie())),
+                            String.format("%s (%s)",
+                                    sanitizeInput(ligne.getProduit().getNom()),
+                                    sanitizeInput(ligne.getProduit().getCategorie())),
                             ligne.getQuantite(),
                             String.format("%.2f €", ligne.getPrixUnitaire()),
                             String.format("%.2f €", sousTotal)
@@ -416,7 +416,7 @@ public class VenteViewSwing {
     }
 
     private synchronized double calculateTotal() {
-        synchronized(panier) {
+        synchronized (panier) {
             return panier.stream()
                     .mapToDouble(ligne -> ligne.getQuantite() * ligne.getPrixUnitaire())
                     .sum();
@@ -429,7 +429,7 @@ public class VenteViewSwing {
             creditCheck.setSelected(false);
             clientCombo.setEnabled(false);
             produitCombo.setSelectedIndex(-1);
-            synchronized(panier) {
+            synchronized (panier) {
                 panier.clear();
             }
             updatePanierTable();
@@ -563,10 +563,14 @@ public class VenteViewSwing {
         // Effet de survol
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(color.darker());
+                if (button.isEnabled()) {
+                    button.setBackground(color.darker());
+                }
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(color);
+                if (button.isEnabled()) {
+                    button.setBackground(color);
+                }
             }
         });
 
@@ -592,7 +596,6 @@ public class VenteViewSwing {
     }
 
     private JPanel createActionPanel() {
-        // Changement de l'alignement de LEFT à RIGHT
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         actionPanel.setOpaque(false);
 
@@ -618,6 +621,11 @@ public class VenteViewSwing {
         clientCombo = new JComboBox<>();
         creditCheck = new JCheckBox("Vente à crédit");
 
+        // Ajout d'icône au checkbox crédit
+        FontIcon creditIcon = FontIcon.of(MaterialDesign.MDI_CREDIT_CARD);
+        creditIcon.setIconSize(16);
+        creditCheck.setIcon(creditIcon);
+
         clientCombo.setEnabled(false);
         creditCheck.addActionListener(e -> {
             clientCombo.setEnabled(creditCheck.isSelected());
@@ -626,7 +634,13 @@ public class VenteViewSwing {
             }
         });
 
-        headerPanel.add(new JLabel("Client:"));
+        // Ajout d'icône client
+        JLabel clientLabel = new JLabel("Client:");
+        FontIcon clientIcon = FontIcon.of(MaterialDesign.MDI_ACCOUNT);
+        clientIcon.setIconSize(16);
+        clientLabel.setIcon(clientIcon);
+
+        headerPanel.add(clientLabel);
         headerPanel.add(clientCombo);
         headerPanel.add(creditCheck);
 
@@ -636,19 +650,38 @@ public class VenteViewSwing {
         JTextField quantiteField = new JTextField(5);
         JButton ajouterBtn = createStyledButton("Ajouter au panier", MaterialDesign.MDI_CART_PLUS, new Color(33, 150, 243));
 
-        selectionPanel.add(new JLabel("Produit:"));
+        // Ajout d'icône produit
+        JLabel produitLabel = new JLabel("Produit:");
+        FontIcon produitIcon = FontIcon.of(MaterialDesign.MDI_PACKAGE);
+        produitIcon.setIconSize(16);
+        produitLabel.setIcon(produitIcon);
+
+        // Ajout d'icône quantité
+        JLabel quantiteLabel = new JLabel("Quantité:");
+        FontIcon quantiteIcon = FontIcon.of(MaterialDesign.MDI_NUMERIC);
+        quantiteIcon.setIconSize(16);
+        quantiteLabel.setIcon(quantiteIcon);
+
+        selectionPanel.add(produitLabel);
         selectionPanel.add(produitCombo);
-        selectionPanel.add(new JLabel("Quantité:"));
+        selectionPanel.add(quantiteLabel);
         selectionPanel.add(quantiteField);
         selectionPanel.add(ajouterBtn);
 
         // Panier
         JScrollPane panierScroll = new JScrollPane(tablePanier);
 
-        // Footer
+        // Footer avec boutons modernisés
         JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
         totalLabel = new JLabel("Total: 0.00 €");
         totalLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+
+        // Icône pour le total
+        FontIcon totalIcon = FontIcon.of(MaterialDesign.MDI_CASH);
+        totalIcon.setIconSize(18);
+        totalIcon.setIconColor(new Color(76, 175, 80));
+        totalLabel.setIcon(totalIcon);
+
         JButton validerBtn = createStyledButton("Valider la vente", MaterialDesign.MDI_CHECK_CIRCLE, new Color(76, 175, 80));
         JButton annulerBtn = createStyledButton("Annuler", MaterialDesign.MDI_CLOSE_CIRCLE, new Color(244, 67, 54));
 
@@ -709,11 +742,24 @@ public class VenteViewSwing {
 
     private JPanel createHistoriquePanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.setBorder(BorderFactory.createTitledBorder("Historique des Ventes"));
+
+        // Titre avec icône
+        JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        FontIcon historyIcon = FontIcon.of(MaterialDesign.MDI_HISTORY);
+        historyIcon.setIconSize(18);
+        historyIcon.setIconColor(new Color(33, 150, 243));
+
+        JLabel titleLabel = new JLabel("Historique des Ventes");
+        titleLabel.setIcon(historyIcon);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+
+        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        titlePanel.add(titleLabel);
 
         JScrollPane scrollPane = new JScrollPane(tableVentes);
         tableVentes.setFillsViewportHeight(true);
 
+        panel.add(titlePanel, BorderLayout.NORTH);
         panel.add(scrollPane, BorderLayout.CENTER);
 
         return panel;

@@ -34,8 +34,8 @@ public class AccueilViewSwing {
     private static final Color SUCCESS_COLOR = new Color(76, 175, 80);
     private static final Color WARNING_COLOR = new Color(255, 152, 0);
     private static final Color DANGER_COLOR = new Color(244, 67, 54);
-    private static final Font TITLE_FONT = new Font("Arial", Font.BOLD, 16);
-    private static final Font VALUE_FONT = new Font("Arial", Font.BOLD, 24);
+    private static final Font TITLE_FONT = new Font("Segoe UI", Font.BOLD, 16);
+    private static final Font VALUE_FONT = new Font("Segoe UI", Font.BOLD, 24);
     private static final int ANIMATION_DELAY = 50;
     private static final int ANIMATION_STEPS = 10;
 
@@ -50,6 +50,10 @@ public class AccueilViewSwing {
 
         initializeComponents();
         loadData();
+
+        // Mettre en place une actualisation automatique toutes les 5 minutes
+        Timer refreshTimer = new Timer(300000, e -> loadData());
+        refreshTimer.start();
     }
 
     private void initializeComponents() {
@@ -64,24 +68,40 @@ public class AccueilViewSwing {
         encaissementsJourLabel = new JLabel(currencyFormat.format(0), SwingConstants.CENTER);
         chiffreAffairesLabel = new JLabel(currencyFormat.format(0), SwingConstants.CENTER);
 
-        // Création des cartes KPI avec icônes
-        kpiPanel.add(createKPIPanel("Ventes du jour", ventesJourLabel, SUCCESS_COLOR, MaterialDesign.MDI_CART));
-        kpiPanel.add(createKPIPanel("Produits en rupture", produitsRuptureLabel, DANGER_COLOR, MaterialDesign.MDI_ALERT_CIRCLE));
-        kpiPanel.add(createKPIPanel("Encaissements du jour", encaissementsJourLabel, WARNING_COLOR, MaterialDesign.MDI_CASH));
-        kpiPanel.add(createKPIPanel("Chiffre d'affaires", chiffreAffairesLabel, PRIMARY_COLOR, MaterialDesign.MDI_CHART_LINE));
+        // Création des cartes KPI avec icônes Material Design améliorées
+        kpiPanel.add(createKPIPanel("Ventes du jour", ventesJourLabel, SUCCESS_COLOR, 
+            MaterialDesign.MDI_TRENDING_UP, "Chiffre d'affaires réalisé aujourd'hui"));
+        kpiPanel.add(createKPIPanel("Produits en rupture", produitsRuptureLabel, DANGER_COLOR, 
+            MaterialDesign.MDI_ALERT_OCTAGON, "Nombre de produits en rupture de stock"));
+        kpiPanel.add(createKPIPanel("Encaissements du jour", encaissementsJourLabel, WARNING_COLOR, 
+            MaterialDesign.MDI_CASH_MULTIPLE, "Total des encaissements de la journée"));
+        kpiPanel.add(createKPIPanel("Chiffre d'affaires total", chiffreAffairesLabel, PRIMARY_COLOR, 
+            MaterialDesign.MDI_CHART_LINE_VARIANT, "Chiffre d'affaires global"));
 
-        // Bouton d'actualisation avec icône
+        // Bouton d'actualisation avec icône et animation
         JButton refreshButton = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH, PRIMARY_COLOR);
         refreshButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 refreshButton.setEnabled(false);
-                Timer timer = new Timer(1000, event -> {
+                // Animation de rotation de l'icône pendant l'actualisation
+                FontIcon icon = (FontIcon) refreshButton.getIcon();
+                Timer rotationTimer = new Timer(50, event -> {
+                    icon.setRotation(icon.getRotation() + 30);
+                    refreshButton.repaint();
+                });
+                rotationTimer.start();
+
+                // Actualisation des données
+                Timer dataTimer = new Timer(1000, event -> {
                     loadData();
                     refreshButton.setEnabled(true);
+                    rotationTimer.stop();
+                    icon.setRotation(0);
+                    refreshButton.repaint();
                 });
-                timer.setRepeats(false);
-                timer.start();
+                dataTimer.setRepeats(false);
+                dataTimer.start();
             }
         });
 
@@ -94,19 +114,20 @@ public class AccueilViewSwing {
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    private JPanel createKPIPanel(String title, JLabel valueLabel, Color color, MaterialDesign icon) {
+    private JPanel createKPIPanel(String title, JLabel valueLabel, Color color, MaterialDesign icon, String tooltip) {
         JPanel panel = new JPanel(new BorderLayout(5, 10));
         panel.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(color, 2, true),
             new EmptyBorder(15, 15, 15, 15)
         ));
         panel.setBackground(BACKGROUND_COLOR);
+        panel.setToolTipText(tooltip);
 
         // Panel pour le titre avec icône
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
         titlePanel.setBackground(BACKGROUND_COLOR);
 
-        // Icône
+        // Icône avec effet de brillance
         FontIcon fontIcon = FontIcon.of(icon);
         fontIcon.setIconSize(24);
         fontIcon.setIconColor(color);
@@ -124,15 +145,51 @@ public class AccueilViewSwing {
         valueLabel.setFont(VALUE_FONT);
         valueLabel.setForeground(color);
 
-        // Effet de survol
+        // Effet de survol amélioré avec transition douce
         panel.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                panel.setBackground(new Color(245, 245, 245));
-                titlePanel.setBackground(new Color(245, 245, 245));
+            private final Timer timer = new Timer(20, null);
+            private float alpha = 0.0f;
+            private boolean isHovered = false;
+
+            {
+                timer.addActionListener(e -> {
+                    if (isHovered && alpha < 1.0f) {
+                        alpha = Math.min(1.0f, alpha + 0.1f);
+                    } else if (!isHovered && alpha > 0.0f) {
+                        alpha = Math.max(0.0f, alpha - 0.1f);
+                    } else {
+                        timer.stop();
+                    }
+
+                    Color newBackground = new Color(
+                        245,
+                        245,
+                        245,
+                        Math.round(alpha * 255)
+                    );
+
+                    panel.setBackground(newBackground);
+                    titlePanel.setBackground(newBackground);
+                    panel.repaint();
+                });
             }
+
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                isHovered = true;
+                if (!timer.isRunning()) {
+                    timer.start();
+                }
+                fontIcon.setIconSize(28); // Agrandir légèrement l'icône
+                panel.repaint();
+            }
+
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                panel.setBackground(BACKGROUND_COLOR);
-                titlePanel.setBackground(BACKGROUND_COLOR);
+                isHovered = false;
+                if (!timer.isRunning()) {
+                    timer.start();
+                }
+                fontIcon.setIconSize(24); // Retour à la taille normale
+                panel.repaint();
             }
         });
 
