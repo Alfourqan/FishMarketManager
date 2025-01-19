@@ -6,10 +6,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import org.kordamp.ikonli.materialdesign.MaterialDesign;
+import org.kordamp.ikonli.materialdesign2.MaterialDesignA;
+import org.kordamp.ikonli.materialdesign2.MaterialDesignC;
 import org.kordamp.ikonli.swing.FontIcon;
 
 public class AccueilViewSwing {
@@ -45,32 +45,32 @@ public class AccueilViewSwing {
 
         // Création des cartes KPI
         ventesJourLabel = createKPICard("Ventes (Aujourd'hui)", "0.00 €", 
-            MaterialDesign.MDI_CASH_MULTIPLE, new Color(76, 175, 80));
-        
+            MaterialDesignC.CASH_MULTIPLE, new Color(76, 175, 80));
+
         produitsRuptureLabel = createKPICard("Produits en rupture", "0", 
-            MaterialDesign.MDI_ALERT_CIRCLE, new Color(244, 67, 54));
-        
+            MaterialDesignA.ALERT_CIRCLE, new Color(244, 67, 54));
+
         encaissementsJourLabel = createKPICard("Encaissements (Aujourd'hui)", "0.00 €", 
-            MaterialDesign.MDI_CASH_REGISTER, new Color(33, 150, 243));
-        
+            MaterialDesignC.CASH, new Color(33, 150, 243));
+
         chiffreAffairesLabel = createKPICard("Chiffre d'affaires", "0.00 €", 
-            MaterialDesign.MDI_CHART_LINE, new Color(156, 39, 176));
+            MaterialDesignC.CHART_LINE, new Color(156, 39, 176));
 
         // Ajout des cartes au panel
         kpiPanel.add(createKPIPanel(ventesJourLabel, "Ventes (Aujourd'hui)", 
-            MaterialDesign.MDI_CASH_MULTIPLE, new Color(76, 175, 80)));
-        
+            MaterialDesignC.CASH_MULTIPLE, new Color(76, 175, 80)));
+
         kpiPanel.add(createKPIPanel(produitsRuptureLabel, "Produits en rupture", 
-            MaterialDesign.MDI_ALERT_CIRCLE, new Color(244, 67, 54)));
-        
+            MaterialDesignA.ALERT_CIRCLE, new Color(244, 67, 54)));
+
         kpiPanel.add(createKPIPanel(encaissementsJourLabel, "Encaissements (Aujourd'hui)", 
-            MaterialDesign.MDI_CASH_REGISTER, new Color(33, 150, 243)));
-        
+            MaterialDesignC.CASH, new Color(33, 150, 243)));
+
         kpiPanel.add(createKPIPanel(chiffreAffairesLabel, "Chiffre d'affaires", 
-            MaterialDesign.MDI_CHART_LINE, new Color(156, 39, 176)));
+            MaterialDesignC.CHART_LINE, new Color(156, 39, 176)));
 
         // Bouton d'actualisation
-        JButton refreshButton = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH);
+        JButton refreshButton = createStyledButton("Actualiser", MaterialDesignC.REFRESH);
         refreshButton.addActionListener(e -> loadData());
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -82,7 +82,7 @@ public class AccueilViewSwing {
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    private JPanel createKPIPanel(JLabel valueLabel, String title, MaterialDesign icon, Color color) {
+    private JPanel createKPIPanel(JLabel valueLabel, String title, Object icon, Color color) {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createCompoundBorder(
@@ -118,7 +118,7 @@ public class AccueilViewSwing {
         return panel;
     }
 
-    private JLabel createKPICard(String title, String initialValue, MaterialDesign icon, Color color) {
+    private JLabel createKPICard(String title, String initialValue, Object icon, Color color) {
         JLabel label = new JLabel(initialValue);
         label.setHorizontalAlignment(SwingConstants.LEFT);
         return label;
@@ -165,7 +165,7 @@ public class AccueilViewSwing {
 
     private void updateProduitsRupture() {
         long produitsRupture = produitController.getProduits().stream()
-            .filter(p -> p.getStock() == 0)
+            .filter(p -> p.getQuantite() == 0)
             .count();
         produitsRuptureLabel.setText(String.valueOf(produitsRupture));
     }
@@ -186,7 +186,7 @@ public class AccueilViewSwing {
         chiffreAffairesLabel.setText(String.format("%.2f €", totalCA));
     }
 
-    private JButton createStyledButton(String text, MaterialDesign iconCode) {
+    private JButton createStyledButton(String text, Object iconCode) {
         FontIcon icon = FontIcon.of(iconCode);
         icon.setIconSize(18);
         icon.setIconColor(Color.WHITE);

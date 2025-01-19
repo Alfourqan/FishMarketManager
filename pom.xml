@@ -9,52 +9,60 @@
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <junit.version>5.9.2</junit.version>
+    <ikonli.version>12.3.1</ikonli.version>
+    <flatlaf.version>3.5.4</flatlaf.version>
   </properties>
 
   <dependencies>
-    <!-- Production dependencies -->
-    <dependency>
-      <groupId>com.itextpdf</groupId>
-      <artifactId>itextpdf</artifactId>
-      <version>5.5.13.3</version>
-    </dependency>
-    <dependency>
-      <groupId>org.xerial</groupId>
-      <artifactId>sqlite-jdbc</artifactId>
-      <version>3.48.0.0</version>
-    </dependency>
+    <!-- UI Dependencies -->
     <dependency>
       <groupId>com.formdev</groupId>
       <artifactId>flatlaf</artifactId>
-      <version>3.5.4</version>
+      <version>${flatlaf.version}</version>
     </dependency>
     <dependency>
       <groupId>com.formdev</groupId>
       <artifactId>flatlaf-intellij-themes</artifactId>
-      <version>3.5.4</version>
+      <version>${flatlaf.version}</version>
     </dependency>
     <dependency>
       <groupId>com.formdev</groupId>
       <artifactId>flatlaf-extras</artifactId>
       <version>3.2.1</version>
     </dependency>
-    <dependency>
-      <groupId>org.kordamp.ikonli</groupId>
-      <artifactId>ikonli-core</artifactId>
-      <version>12.3.1</version>
-    </dependency>
+
+    <!-- Icons Dependencies -->
     <dependency>
       <groupId>org.kordamp.ikonli</groupId>
       <artifactId>ikonli-swing</artifactId>
-      <version>12.3.1</version>
+      <version>${ikonli.version}</version>
     </dependency>
     <dependency>
       <groupId>org.kordamp.ikonli</groupId>
-      <artifactId>ikonli-materialdesign-pack</artifactId>
-      <version>12.3.1</version>
+      <artifactId>ikonli-core</artifactId>
+      <version>${ikonli.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.kordamp.ikonli</groupId>
+      <artifactId>ikonli-materialdesign2-pack</artifactId>
+      <version>${ikonli.version}</version>
     </dependency>
 
-    <!-- Test dependencies -->
+    <!-- Database Dependencies -->
+    <dependency>
+      <groupId>org.xerial</groupId>
+      <artifactId>sqlite-jdbc</artifactId>
+      <version>3.48.0.0</version>
+    </dependency>
+
+    <!-- PDF Generation -->
+    <dependency>
+      <groupId>com.itextpdf</groupId>
+      <artifactId>itextpdf</artifactId>
+      <version>5.5.13.3</version>
+    </dependency>
+
+    <!-- Test Dependencies -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>

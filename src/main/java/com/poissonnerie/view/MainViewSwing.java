@@ -2,7 +2,7 @@ package com.poissonnerie.view;
 
 import javax.swing.*;
 import java.awt.*;
-import org.kordamp.ikonli.materialdesign.MaterialDesign;
+import org.kordamp.ikonli.materialdesign2.*;
 import org.kordamp.ikonli.swing.FontIcon;
 import com.poissonnerie.controller.*;
 import com.poissonnerie.model.*;
@@ -22,8 +22,8 @@ public class MainViewSwing {
     private final ProduitController produitController;
     private final ClientController clientController;
     private final CaisseController caisseController;
-    private JLabel titleLabel; // Pour stocker la référence au label du titre
-    private String currentTitle = "HOME"; // Pour stocker le titre actuel
+    private JLabel titleLabel;
+    private String currentTitle = "HOME";
 
     public MainViewSwing() {
         mainPanel = new JPanel(new BorderLayout());
@@ -38,24 +38,20 @@ public class MainViewSwing {
     }
 
     private void initializeComponents() {
-        // En-tête vert avec titre dynamique
         JPanel headerPanel = createHeader();
         mainPanel.add(headerPanel, BorderLayout.NORTH);
 
-        // Panel de navigation vertical à gauche (barre latérale sombre)
         JPanel navigationPanel = createNavigationPanel();
         mainPanel.add(navigationPanel, BorderLayout.WEST);
 
-        // Contenu principal
         mainPanel.add(contentPanel, BorderLayout.CENTER);
 
-        // Ajouter les vues
         addViews();
     }
 
     private JPanel createHeader() {
         JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(new Color(76, 175, 80)); // Vert
+        headerPanel.setBackground(new Color(76, 175, 80));
         headerPanel.setPreferredSize(new Dimension(0, 50));
 
         titleLabel = new JLabel(currentTitle, SwingConstants.CENTER);
@@ -75,29 +71,28 @@ public class MainViewSwing {
     private JPanel createNavigationPanel() {
         JPanel navigationPanel = new JPanel();
         navigationPanel.setLayout(new BoxLayout(navigationPanel, BoxLayout.Y_AXIS));
-        navigationPanel.setBackground(new Color(33, 37, 41)); // Couleur sombre
+        navigationPanel.setBackground(new Color(33, 37, 41));
         navigationPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
         navigationPanel.setPreferredSize(new Dimension(200, 0));
 
-        // Définir les éléments de navigation avec Accueil en premier
         String[] viewNames = {
             "Accueil", "Produits", "Ventes", "Clients", "Factures",
             "Fournisseurs", "Inventaire", "Caisse",
             "Rapport", "Réglages", "Déconnexion"
         };
 
-        MaterialDesign[] icons = {
-            MaterialDesign.MDI_HOME,  // Icône pour Accueil
-            MaterialDesign.MDI_PACKAGE_VARIANT,
-            MaterialDesign.MDI_CART,
-            MaterialDesign.MDI_ACCOUNT_MULTIPLE,
-            MaterialDesign.MDI_FILE_DOCUMENT,
-            MaterialDesign.MDI_TRUCK_DELIVERY,
-            MaterialDesign.MDI_TAG_MULTIPLE,
-            MaterialDesign.MDI_CLIPBOARD_TEXT,
-            MaterialDesign.MDI_CASH_MULTIPLE,
-            MaterialDesign.MDI_SETTINGS,
-            MaterialDesign.MDI_LOGOUT
+        Object[] icons = {
+            MaterialDesignH.HOME,
+            MaterialDesignP.PACKAGE_VARIANT,
+            MaterialDesignC.CART,
+            MaterialDesignA.ACCOUNT_MULTIPLE,
+            MaterialDesignF.FILE_DOCUMENT,
+            MaterialDesignT.TRUCK_DELIVERY,
+            MaterialDesignT.TAG_MULTIPLE,
+            MaterialDesignC.CASH,
+            MaterialDesignC.CASH_MULTIPLE,
+            MaterialDesignC.COG,
+            MaterialDesignL.LOGOUT
         };
 
         ButtonGroup buttonGroup = new ButtonGroup();
@@ -107,12 +102,12 @@ public class MainViewSwing {
             JToggleButton navButton = createNavigationButton(viewNames[i], icons[i]);
             final String cardName = viewNames[i];
 
-            if (i < viewNames.length - 1) { // Tous sauf Déconnexion
+            if (i < viewNames.length - 1) {
                 navButton.addActionListener(e -> {
                     cardLayout.show(contentPanel, cardName);
-                    updateTitle(cardName.toUpperCase()); // Met à jour le titre avec le nom de la vue
+                    updateTitle(cardName.toUpperCase());
                 });
-            } else { // Bouton Déconnexion
+            } else {
                 navButton.addActionListener(e -> handleLogout());
             }
 
@@ -120,7 +115,6 @@ public class MainViewSwing {
             navigationPanel.add(navButton);
             navigationPanel.add(Box.createVerticalStrut(5));
 
-            // Sélectionner l'accueil par défaut
             if (i == 0) {
                 navButton.setSelected(true);
                 updateTitle(viewNames[i].toUpperCase());
@@ -130,34 +124,7 @@ public class MainViewSwing {
         return navigationPanel;
     }
 
-    private void addViews() {
-        // Ajouter la vue Accueil en premier
-        contentPanel.add(new AccueilViewSwing().getMainPanel(), "Accueil");
-
-        // Ajouter les autres vues
-        contentPanel.add(new ProduitViewSwing().getMainPanel(), "Produits");
-        contentPanel.add(new VenteViewSwing().getMainPanel(), "Ventes");
-        contentPanel.add(new ClientViewSwing().getMainPanel(), "Clients");
-        contentPanel.add(new CaisseViewSwing().getMainPanel(), "Caisse");
-        contentPanel.add(new InventaireViewSwing().getMainPanel(), "Inventaire");
-        contentPanel.add(new FournisseurViewSwing().getMainPanel(), "Fournisseurs");
-        contentPanel.add(new ReportViewSwing().getMainPanel(), "Rapport");
-        contentPanel.add(new ConfigurationViewSwing().getMainPanel(), "Réglages");
-
-        // Ajouter des panels temporaires pour les autres vues
-        contentPanel.add(createTemporaryPanel("Factures"), "Factures");
-    }
-
-    private JPanel createTemporaryPanel(String name) {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.WHITE);
-        JLabel label = new JLabel("Vue " + name + " en construction", SwingConstants.CENTER);
-        label.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        panel.add(label, BorderLayout.CENTER);
-        return panel;
-    }
-
-    private JToggleButton createNavigationButton(String text, MaterialDesign iconCode) {
+    private JToggleButton createNavigationButton(String text, Object iconCode) {
         JToggleButton button = new JToggleButton(text);
 
         FontIcon icon = FontIcon.of(iconCode);
@@ -178,7 +145,6 @@ public class MainViewSwing {
         button.setBorderPainted(false);
         button.setOpaque(true);
 
-        // Style au survol et à la sélection
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 if (!button.isSelected()) {
@@ -194,6 +160,19 @@ public class MainViewSwing {
         });
 
         return button;
+    }
+
+    private void addViews() {
+        contentPanel.add(new AccueilViewSwing().getMainPanel(), "Accueil");
+        contentPanel.add(new ProduitViewSwing().getMainPanel(), "Produits");
+        contentPanel.add(new VenteViewSwing().getMainPanel(), "Ventes");
+        contentPanel.add(new ClientViewSwing().getMainPanel(), "Clients");
+        contentPanel.add(new CaisseViewSwing().getMainPanel(), "Caisse");
+        contentPanel.add(new InventaireViewSwing().getMainPanel(), "Inventaire");
+        contentPanel.add(new FournisseurViewSwing().getMainPanel(), "Fournisseurs");
+        contentPanel.add(new ReportViewSwing().getMainPanel(), "Rapport");
+        contentPanel.add(new ConfigurationViewSwing().getMainPanel(), "Réglages");
+        contentPanel.add(createTemporaryPanel("Factures"), "Factures");
     }
 
     private void handleLogout() {
@@ -213,14 +192,23 @@ public class MainViewSwing {
             System.exit(0);
         }
     }
+
+    private JPanel createTemporaryPanel(String name) {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        JLabel label = new JLabel("Vue " + name + " en construction", SwingConstants.CENTER);
+        label.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        panel.add(label, BorderLayout.CENTER);
+        return panel;
+    }
     private JMenuBar createMenuBar() {
         JMenuBar menuBar = new JMenuBar();
 
         // Menu Fichier avec icônes
         JMenu fichierMenu = new JMenu("Fichier");
-        JMenuItem parametresMenuItem = new JMenuItem("Paramètres", createLargeIcon(MaterialDesign.MDI_SETTINGS));
-        JMenuItem exporterMenuItem = new JMenuItem("Exporter les données", createLargeIcon(MaterialDesign.MDI_EXPORT));
-        JMenuItem quitterMenuItem = new JMenuItem("Quitter", createLargeIcon(MaterialDesign.MDI_EXIT_TO_APP));
+        JMenuItem parametresMenuItem = new JMenuItem("Paramètres", createLargeIcon(MaterialDesignC.COG));
+        JMenuItem exporterMenuItem = new JMenuItem("Exporter les données", createLargeIcon(MaterialDesignE.EXPORT));
+        JMenuItem quitterMenuItem = new JMenuItem("Quitter", createLargeIcon(MaterialDesignE.EXIT_TO_APP));
 
         parametresMenuItem.addActionListener(e -> showParametres());
         quitterMenuItem.addActionListener(e -> System.exit(0));
@@ -232,10 +220,10 @@ public class MainViewSwing {
 
         // Menu Rapports avec icônes
         JMenu rapportsMenu = new JMenu("Rapports");
-        JMenuItem ventesJourMenuItem = new JMenuItem("Ventes du jour", createLargeIcon(MaterialDesign.MDI_CHART_BAR));
-        JMenuItem stocksMenuItem = new JMenuItem("État des stocks", createLargeIcon(MaterialDesign.MDI_CLIPBOARD_TEXT));
-        JMenuItem creancesMenuItem = new JMenuItem("État des créances", createLargeIcon(MaterialDesign.MDI_WALLET_MEMBERSHIP));
-        JMenuItem caisseMenuItem = new JMenuItem("Journal de caisse", createLargeIcon(MaterialDesign.MDI_CASH));
+        JMenuItem ventesJourMenuItem = new JMenuItem("Ventes du jour", createLargeIcon(MaterialDesignC.CHART_BAR));
+        JMenuItem stocksMenuItem = new JMenuItem("État des stocks", createLargeIcon(MaterialDesignC.CLIPBOARD_TEXT));
+        JMenuItem creancesMenuItem = new JMenuItem("État des créances", createLargeIcon(MaterialDesignW.WALLET_MEMBERSHIP));
+        JMenuItem caisseMenuItem = new JMenuItem("Journal de caisse", createLargeIcon(MaterialDesignC.CASH));
 
         // Ajout des gestionnaires d'événements pour les rapports
         ventesJourMenuItem.addActionListener(e -> genererRapportVentesJour());
@@ -348,7 +336,7 @@ public class MainViewSwing {
         JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.ERROR_MESSAGE);
     }
 
-    private FontIcon createLargeIcon(MaterialDesign iconCode) {
+    private FontIcon createLargeIcon(Object iconCode) {
         FontIcon icon = FontIcon.of(iconCode);
         icon.setIconSize(20);
         return icon;
