@@ -1,4 +1,4 @@
-modules = ["java", "java-17", "java-21", "postgresql-16"]
+modules = ["java", "java-17", "java-21", "postgresql-16", "maven"]
 
 [nix]
 channel = "stable-24_05"
@@ -77,7 +77,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "mvn clean compile exec:java -Dexec.mainClass=\"com.poissonnerie.Main\" -Dexec.systemProperties.SKIP_SIRET_VALIDATION=true -Djava.awt.headless=false"
+args = "mvn clean compile exec:java -Dexec.mainClass=\"com.poissonnerie.Main\" -Dexec.systemProperties.SKIP_SIRET_VALIDATION=true -Djava.awt.headless=false -Dexec.cleanupDaemonThreads=false"
 
 [[workflows.workflow]]
 name = "Test Inventaire"
