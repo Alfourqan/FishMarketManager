@@ -12,7 +12,6 @@ import java.util.logging.Level;
 import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteDataSource;
 
-
 public class DatabaseManager {
     private static final Logger LOGGER = Logger.getLogger(DatabaseManager.class.getName());
     private static final String DB_FILE = "poissonnerie.db";
@@ -38,7 +37,7 @@ public class DatabaseManager {
                     dataSource.setUrl(DB_URL);
 
                     LOGGER.info("DataSource initialisé avec succès");
-                } catch (SQLException e) {
+                } catch (Exception e) {
                     LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation du DataSource", e);
                     throw new RuntimeException("Impossible d'initialiser le DataSource", e);
                 }
@@ -142,6 +141,7 @@ public class DatabaseManager {
             }
         }
     }
+
     public static void resetConnection() {
         LOGGER.info("Réinitialisation de la connexion à la base de données");
         closeConnections();
@@ -150,6 +150,25 @@ public class DatabaseManager {
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la réinitialisation de la connexion", e);
             throw new RuntimeException("Erreur lors de la réinitialisation de la connexion", e);
+        }
+    }
+
+    public static void checkDatabaseHealth() throws SQLException {
+        LOGGER.info("Vérification de la santé de la base de données...");
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement()) {
+
+            // Vérifier si la base de données répond
+            stmt.execute("SELECT 1");
+
+            // Vérifier les paramètres PRAGMA essentiels
+            stmt.execute("PRAGMA integrity_check");
+            stmt.execute("PRAGMA foreign_key_check");
+
+            LOGGER.info("Vérification de la base de données terminée avec succès");
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la vérification de la base de données", e);
+            throw e;
         }
     }
 }
