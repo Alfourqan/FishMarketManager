@@ -360,6 +360,7 @@ public class ReportBuilder {
         ajouterGraphiqueTendancesPDF(document, tendances);
 
 
+
         document.close();
     }
 
@@ -690,7 +691,7 @@ public class ReportBuilder {
 
         Row row4 = sheetVueEnsemble.createRow(5);
         row4.createCell(0).setCellValue("Taux de marge brute");
-        Cell margeCell = row4.createCell(1;
+        Cell margeCell = row4.createCell(1);  // Correction de la syntaxe
         // Formule pour calculer le taux de marge
         margeCell.setCellFormula("(B3-B4)/B3");
         margeCell.setCellStyle(percentStyle);
@@ -834,152 +835,53 @@ public class ReportBuilder {
         return tendances;
     }
 
-    private void ajouterGraphiqueTendancesPDF(Document document, Map<String, Double> tendances) throws DocumentException {
-        Font sectionFont = new Font(Font.FontFamily.HELVETICA, 14, Font.BOLD);
-        document.add(new Paragraph("Analyse des Tendances:", sectionFont));
-        document.add(Chunk.NEWLINE);
-
+    private void ajouterGraphiqueTendancesPDF(Document document, Map<String, Double> tendances) throws Exception {
+        // Créer un tableau pour afficher les tendances
         PdfPTable table = new PdfPTable(3);
         table.setWidthPercentage(100);
+        table.setSpacingBefore(10f);
+        table.setSpacingAfter(10f);
 
-        // En-têtes
-        Stream.of("Indicateur", "Variation", "Tendance")
-            .forEach(columnTitle -> {
-                PdfPCell header = new PdfPCell();
-                header.setBackgroundColor(BaseColor.LIGHT_GRAY);
-                header.setBorderWidth(2);
-                header.setPhrase(new Phrase(columnTitle));
-                table.addCell(header);
-            });
+        // En-tête du tableau
+        PdfPCell header1 = new PdfPCell(new Phrase("Indicateur", NORMAL_FONT));
+        PdfPCell header2 = new PdfPCell(new Phrase("Variation (%)", NORMAL_FONT));
+        PdfPCell header3 = new PdfPCell(new Phrase("Statut", NORMAL_FONT));
 
-        // Données
+        header1.setHorizontalAlignment(Element.ALIGN_CENTER);
+        header2.setHorizontalAlignment(Element.ALIGN_CENTER);
+        header3.setHorizontalAlignment(Element.ALIGN_CENTER);
+
+        table.addCell(header1);
+        table.addCell(header2);
+        table.addCell(header3);
+
+        // Ajouter les données
+        BaseColor positifColor = new BaseColor(200, 255, 200);
+        BaseColor negatifColor = new BaseColor(255, 200, 200);
+        BaseColor stableColor = new BaseColor(255, 255, 200);
+
         for (Map.Entry<String, Double> entry : tendances.entrySet()) {
-            // Indicateur
-            table.addCell(formatIndicateur(entry.getKey()));
+            PdfPCell cellIndicateur = new PdfPCell(new Phrase(formatIndicateur(entry.getKey()), SMALL_FONT));
+            PdfPCell cellVariation = new PdfPCell(new Phrase(String.format("%.2f%%", entry.getValue()), SMALL_FONT));
+            PdfPCell cellStatut = new PdfPCell();
 
-            // Variation
-            String variation = String.format("%.1f%%", entry.getValue());
-            table.addCell(variation);
+            if (entry.getValue() > 0) {
+                cellStatut = new PdfPCell(new Phrase("↗ Hausse", SMALL_FONT));
+                cellStatut.setBackgroundColor(positifColor);
+            } else if (entry.getValue() < 0) {
+                cellStatut = new PdfPCell(new Phrase("↘ Baisse", SMALL_FONT));
+                cellStatut.setBackgroundColor(negatifColor);
+            } else {
+                cellStatut = new PdfPCell(new Phrase("→ Stable", SMALL_FONT));
+                cellStatut.setBackgroundColor(stableColor);
+            }
 
-            // Tendance (flèche)
-            String tendance = entry.getValue() > 0 ? "↗" : entry.getValue() < 0 ? "↘" : "→";
-            PdfPCell cell = new PdfPCell(new Phrase(tendance));
-            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-            table.addCell(cell);
+            table.addCell(cellIndicateur);
+            table.addCell(cellVariation);
+            table.addCell(cellStatut);
         }
 
         document.add(table);
-    }
-
-    private String formatIndicateur(String key) {
-        if (key.startsWith("evolution_cat_")) {
-            return "Catégorie: " + key.substring(13).replace('_', ' ');
-        }
-
-        switch (key) {
-            case "evolution_ca":
-                return "Chiffre d'affaires";
-            case "evolution_moyenne_produits":
-                return "Nombre moyen de produits";
-            case "evolution_panier_moyen":
-                return "Panier moyen";
-            case "evolution_frequence":
-                return "Fréquence des ventes";
-            case "evolution_especes":
-                return "Paiements en espèces";
-            case "evolution_carte":
-                return "Paiements par carte";
-            case "evolution_cheque":
-                return "Paiements par chèque";
-            case "evolution_heure_pointe":
-                return "Performance heure de pointe";
-            default:
-                return key.substring(10).replace('_', ' ');
-        }
-    }
-
-    private void genererGraphiqueExcel(Workbook workbook, Map<String, Double> tendances, String titre) {
-        // Créer une nouvelle feuille pour le graphique
-        Sheet sheet = workbook.createSheet(titre);
-
-        // Préparer les données avec une meilleure organisation
-        Row headerRow = sheet.createRow(0);
-        headerRow.createCell(0).setCellValue("Indicateur");
-        headerRow.createCell(1).setCellValue("Variation (%)");
-        headerRow.createCell(2).setCellValue("Statut");
-
-        // Style pour les cellules
-        CellStyle positifStyle = workbook.createCellStyle();
-        positifStyle.setFillForegroundColor(IndexedColors.LIGHT_GREEN.getIndex());
-        positifStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
-        CellStyle negatifStyle = workbook.createCellStyle();
-        negatifStyle.setFillForegroundColor(IndexedColors.LIGHT_ORANGE.getIndex());
-        negatifStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
-        CellStyle stableStyle = workbook.createCellStyle();
-        stableStyle.setFillForegroundColor(IndexedColors.LIGHT_YELLOW.getIndex());
-        stableStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-
-        // Remplir les données
-        int rowNum = 1;
-        for (Map.Entry<String, Double> entry : tendances.entrySet()) {
-            Row row = sheet.createRow(rowNum++);
-            row.createCell(0).setCellValue(formatIndicateur(entry.getKey()));
-
-            Cell variationCell = row.createCell(1);
-            variationCell.setCellValue(entry.getValue());
-
-            Cell statutCell = row.createCell(2);
-            double valeur = entry.getValue();
-            if (valeur > 0) {
-                statutCell.setCellValue("↗ Hausse");
-                statutCell.setCellStyle(positifStyle);
-            } else if (valeur < 0) {
-                statutCell.setCellValue("↘ Baisse");
-                statutCell.setCellStyle(negatifStyle);
-            } else {
-                statutCell.setCellValue("→ Stable");
-                statutCell.setCellStyle(stableStyle);
-            }
-        }
-
-        // Créer le graphique
-        Drawing<?> drawing = sheet.createDrawingPatriarch();
-        ClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 4, 0, 15, 15);
-
-        Chart chart = drawing.createChart(anchor);
-        ChartLegend legend = chart.getOrCreateLegend();
-        legend.setPosition(LegendPosition.RIGHT);
-
-        // Configurer les données du graphique
-        LineChartData data = chart.getChartDataFactory().createLineChartData();
-
-        // Configuration des axes avec labels personnalisés
-        ChartAxis bottomAxis = chart.getChartAxisFactory().createCategoryAxis(AxisPosition.BOTTOM);
-        bottomAxis.setTitle("Indicateurs");
-
-        ValueAxis leftAxis = chart.getChartAxisFactory().createValueAxis(AxisPosition.LEFT);
-        leftAxis.setTitle("Variation (%)");
-        leftAxis.setCrosses(AxisCrosses.AUTO_ZERO);
-
-        // Références des données
-        ChartDataSource<String> xs = DataSources.fromStringCellRange(sheet, 
-            new CellRangeAddress(1, rowNum - 1, 0, 0));
-        ChartDataSource<Number> ys = DataSources.fromNumericCellRange(sheet, 
-            new CellRangeAddress(1, rowNum - 1, 1, 1));
-
-        // Ajouter et configurer la série
-        LineChartSeries series = data.addSeries(xs, ys);
-        series.setTitle("Évolution des indicateurs");
-
-        // Appliquer les données au graphique
-        chart.plot(data, bottomAxis, leftAxis);
-
-        // Ajuster la largeur des colonnes
-        for (int i = 0; i < 3; i++) {
-            sheet.autoSizeColumn(i);
-        }
     }
 
     private Map<String, Double> calculerTendances(List<Vente> ventes, LocalDate debut, LocalDate fin) {
@@ -1027,7 +929,7 @@ public class ReportBuilder {
             tendances.put("evolution_cat_" + categorie.toLowerCase(), evolution);
         }
 
-        // Autres indicateurs existants...
+        // Évolution globale du CA
         double caActuel = ventesActuelles.stream()
             .mapToDouble(Vente::getMontantTotal)
             .sum();
@@ -1036,11 +938,10 @@ public class ReportBuilder {
             .mapToDouble(Vente::getMontantTotal)
             .sum();
 
-        // Évolution du CA en pourcentage
         double evolutionCA = caPrecedent == 0 ? 100 : ((caActuel - caPrecedent) / caPrecedent) * 100;
         tendances.put("evolution_ca", evolutionCA);
 
-        // Ajouter des indicateurs de performance horaire
+        // Analyse des performances horaires
         Map<Integer, Long> ventesParHeureActuelles = ventesActuelles.stream()
             .collect(Collectors.groupingBy(
                 v -> v.getDate().getHour(),
@@ -1053,7 +954,7 @@ public class ReportBuilder {
                 Collectors.counting()
             ));
 
-        // Calculer les heures de pointe
+        // Calculer l'évolution des heures de pointe
         OptionalDouble heurePointeActuelle = ventesParHeureActuelles.entrySet().stream()
             .mapToDouble(Map.Entry::getValue)
             .max();
@@ -1094,6 +995,57 @@ public class ReportBuilder {
                 return "Performance heure de pointe";
             default:
                 return key.substring(10).replace('_', ' ');
+        }
+    }
+    private void genererGraphiqueExcel(Workbook workbook, Map<String, Double> tendances, String titre) {
+        // Créer une nouvelle feuille pour le graphique
+        Sheet sheet = workbook.createSheet(titre);
+
+        // Préparer les données
+        int rowNum = 0;
+        Row headerRow = sheet.createRow(rowNum++);
+        headerRow.createCell(0).setCellValue("Indicateur");
+        headerRow.createCell(1).setCellValue("Variation (%)");
+
+        // Remplir les données
+        for (Map.Entry<String, Double> entry : tendances.entrySet()) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(formatIndicateur(entry.getKey()));
+            row.createCell(1).setCellValue(entry.getValue());
+        }
+
+        // Créer le graphique
+        Drawing<?> drawing = sheet.createDrawingPatriarch();
+        ClientAnchor anchor = drawing.createAnchor(0, 0, 0, 0, 0, rowNum + 1, 15, rowNum + 20);
+
+        Chart chart = drawing.createChart(anchor);
+        ChartLegend legend = chart.getOrCreateLegend();
+        legend.setPosition(LegendPosition.RIGHT);
+
+        // Configurer les axes
+        LineChartData data = chart.getChartDataFactory().createLineChartData();
+
+        // Configurer l'axe des catégories
+        ChartAxis bottomAxis = chart.getChartAxisFactory().createCategoryAxis(AxisPosition.BOTTOM);
+        ValueAxis leftAxis = chart.getChartAxisFactory().createValueAxis(AxisPosition.LEFT);
+        leftAxis.setCrosses(AxisCrosses.AUTO_ZERO);
+
+        // Créer les références de données
+        ChartDataSource<String> xs = DataSources.fromStringCellRange(sheet, 
+            new CellRangeAddress(1, rowNum - 1, 0, 0));
+        ChartDataSource<Number> ys = DataSources.fromNumericCellRange(sheet, 
+            new CellRangeAddress(1, rowNum - 1, 1, 1));
+
+        // Ajouter et configurer la série
+        LineChartSeries series = data.addSeries(xs, ys);
+        series.setTitle("Évolution des indicateurs");
+
+        // Appliquer les données au graphique
+        chart.plot(data, bottomAxis, leftAxis);
+
+        // Ajuster la largeur des colonnes
+        for (int i = 0; i < 3; i++) {
+            sheet.autoSizeColumn(i);
         }
     }
 }

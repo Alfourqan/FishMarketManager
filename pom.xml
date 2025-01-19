@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project>
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.poissonnerie</groupId>
@@ -26,6 +27,8 @@
       <artifactId>itextpdf</artifactId>
       <version>5.5.13.4</version>
     </dependency>
+
+    <!-- Apache POI dependencies -->
     <dependency>
       <groupId>org.apache.poi</groupId>
       <artifactId>poi</artifactId>
@@ -38,12 +41,34 @@
     </dependency>
     <dependency>
       <groupId>org.apache.poi</groupId>
-      <artifactId>poi-ooxml-schemas</artifactId>
+      <artifactId>poi-ooxml-lite</artifactId>
       <version>${apache.poi.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.apache.xmlbeans</groupId>
+      <artifactId>xmlbeans</artifactId>
+      <version>5.1.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+      <version>1.24.0</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.13.0</version>
+    </dependency>
+
+    <!-- Logging -->
+    <dependency>
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-core</artifactId>
+      <version>2.20.0</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-api</artifactId>
       <version>2.20.0</version>
     </dependency>
 
