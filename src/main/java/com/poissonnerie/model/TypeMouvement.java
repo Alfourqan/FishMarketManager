@@ -1,8 +1,9 @@
 package com.poissonnerie.model;
 
 /**
- * Énumération des types de mouvements de caisse.
+ * @deprecated Utilisez MouvementCaisse.TypeMouvement à la place.
  */
+@Deprecated
 public enum TypeMouvement {
     ENTREE("Entrée", true),
     SORTIE("Sortie", false),
