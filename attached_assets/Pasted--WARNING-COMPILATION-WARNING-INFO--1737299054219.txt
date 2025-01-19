@@ -1,0 +1,42 @@
+[WARNING] COMPILATION WARNING : 
+[INFO] -------------------------------------------------------------
+[WARNING] system modules path not set in conjunction with -source 17
+[INFO] 1 warning
+[INFO] -------------------------------------------------------------
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/AccueilViewSwing.java:[79,27] cannot find symbol
+  symbol:   variable MDI_CHART_LINE_VARIANT
+  location: class org.kordamp.ikonli.materialdesign.MaterialDesign
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/AccueilViewSwing.java:[90,42] cannot find symbol
+  symbol:   method getRotation()
+  location: variable icon of type org.kordamp.ikonli.swing.FontIcon
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/AccueilViewSwing.java:[100,25] cannot find symbol
+  symbol:   method setRotation(int)
+  location: variable icon of type org.kordamp.ikonli.swing.FontIcon
+[INFO] 3 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  8.287 s
+[INFO] Finished at: 2025-01-19T15:00:11Z
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project gestion-poissonnerie: Compilation failure: Compilation failure: 
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/AccueilViewSwing.java:[79,27] cannot find symbol
+[ERROR]   symbol:   variable MDI_CHART_LINE_VARIANT
+[ERROR]   location: class org.kordamp.ikonli.materialdesign.MaterialDesign
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/AccueilViewSwing.java:[90,42] cannot find symbol
+[ERROR]   symbol:   method getRotation()
+[ERROR]   location: variable icon of type org.kordamp.ikonli.swing.FontIcon
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/AccueilViewSwing.java:[100,25] cannot find symbol
+[ERROR]   symbol:   method setRotation(int)
+[ERROR]   location: variable icon of type org.kordamp.ikonli.swing.FontIcon
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

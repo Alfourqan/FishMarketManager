@@ -36,8 +36,6 @@ public class AccueilViewSwing {
     private static final Color DANGER_COLOR = new Color(244, 67, 54);
     private static final Font TITLE_FONT = new Font("Segoe UI", Font.BOLD, 16);
     private static final Font VALUE_FONT = new Font("Segoe UI", Font.BOLD, 24);
-    private static final int ANIMATION_DELAY = 50;
-    private static final int ANIMATION_STEPS = 10;
 
     public AccueilViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -69,39 +67,21 @@ public class AccueilViewSwing {
         chiffreAffairesLabel = new JLabel(currencyFormat.format(0), SwingConstants.CENTER);
 
         // Création des cartes KPI avec icônes Material Design améliorées
-        kpiPanel.add(createKPIPanel("Ventes du jour", ventesJourLabel, SUCCESS_COLOR, 
+        kpiPanel.add(createKPIPanel("Ventes du jour", ventesJourLabel, SUCCESS_COLOR,
             MaterialDesign.MDI_TRENDING_UP, "Chiffre d'affaires réalisé aujourd'hui"));
-        kpiPanel.add(createKPIPanel("Produits en rupture", produitsRuptureLabel, DANGER_COLOR, 
+        kpiPanel.add(createKPIPanel("Produits en rupture", produitsRuptureLabel, DANGER_COLOR,
             MaterialDesign.MDI_ALERT_OCTAGON, "Nombre de produits en rupture de stock"));
-        kpiPanel.add(createKPIPanel("Encaissements du jour", encaissementsJourLabel, WARNING_COLOR, 
+        kpiPanel.add(createKPIPanel("Encaissements du jour", encaissementsJourLabel, WARNING_COLOR,
             MaterialDesign.MDI_CASH_MULTIPLE, "Total des encaissements de la journée"));
-        kpiPanel.add(createKPIPanel("Chiffre d'affaires total", chiffreAffairesLabel, PRIMARY_COLOR, 
-            MaterialDesign.MDI_CHART_LINE_VARIANT, "Chiffre d'affaires global"));
+        kpiPanel.add(createKPIPanel("Chiffre d'affaires total", chiffreAffairesLabel, PRIMARY_COLOR,
+            MaterialDesign.MDI_CHART_BAR, "Chiffre d'affaires global"));
 
-        // Bouton d'actualisation avec icône et animation
+        // Bouton d'actualisation avec animation de chargement
         JButton refreshButton = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH, PRIMARY_COLOR);
         refreshButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                refreshButton.setEnabled(false);
-                // Animation de rotation de l'icône pendant l'actualisation
-                FontIcon icon = (FontIcon) refreshButton.getIcon();
-                Timer rotationTimer = new Timer(50, event -> {
-                    icon.setRotation(icon.getRotation() + 30);
-                    refreshButton.repaint();
-                });
-                rotationTimer.start();
-
-                // Actualisation des données
-                Timer dataTimer = new Timer(1000, event -> {
-                    loadData();
-                    refreshButton.setEnabled(true);
-                    rotationTimer.stop();
-                    icon.setRotation(0);
-                    refreshButton.repaint();
-                });
-                dataTimer.setRepeats(false);
-                dataTimer.start();
+                loadData();
             }
         });
 
@@ -109,12 +89,11 @@ public class AccueilViewSwing {
         buttonPanel.setBackground(BACKGROUND_COLOR);
         buttonPanel.add(refreshButton);
 
-        // Layout final
         mainPanel.add(kpiPanel, BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    private JPanel createKPIPanel(String title, JLabel valueLabel, Color color, MaterialDesign icon, String tooltip) {
+    private JPanel createKPIPanel(String title, JLabel valueLabel, Color color, MaterialDesign iconCode, String tooltip) {
         JPanel panel = new JPanel(new BorderLayout(5, 10));
         panel.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(color, 2, true),
@@ -127,8 +106,8 @@ public class AccueilViewSwing {
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
         titlePanel.setBackground(BACKGROUND_COLOR);
 
-        // Icône avec effet de brillance
-        FontIcon fontIcon = FontIcon.of(icon);
+        // Icône
+        FontIcon fontIcon = FontIcon.of(iconCode);
         fontIcon.setIconSize(24);
         fontIcon.setIconColor(color);
         JLabel iconLabel = new JLabel(fontIcon);
@@ -145,119 +124,66 @@ public class AccueilViewSwing {
         valueLabel.setFont(VALUE_FONT);
         valueLabel.setForeground(color);
 
-        // Effet de survol amélioré avec transition douce
-        panel.addMouseListener(new java.awt.event.MouseAdapter() {
-            private final Timer timer = new Timer(20, null);
-            private float alpha = 0.0f;
-            private boolean isHovered = false;
-
-            {
-                timer.addActionListener(e -> {
-                    if (isHovered && alpha < 1.0f) {
-                        alpha = Math.min(1.0f, alpha + 0.1f);
-                    } else if (!isHovered && alpha > 0.0f) {
-                        alpha = Math.max(0.0f, alpha - 0.1f);
-                    } else {
-                        timer.stop();
-                    }
-
-                    Color newBackground = new Color(
-                        245,
-                        245,
-                        245,
-                        Math.round(alpha * 255)
-                    );
-
-                    panel.setBackground(newBackground);
-                    titlePanel.setBackground(newBackground);
-                    panel.repaint();
-                });
-            }
-
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                isHovered = true;
-                if (!timer.isRunning()) {
-                    timer.start();
-                }
-                fontIcon.setIconSize(28); // Agrandir légèrement l'icône
-                panel.repaint();
-            }
-
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                isHovered = false;
-                if (!timer.isRunning()) {
-                    timer.start();
-                }
-                fontIcon.setIconSize(24); // Retour à la taille normale
-                panel.repaint();
-            }
-        });
-
         panel.add(titlePanel, BorderLayout.NORTH);
         panel.add(valueLabel, BorderLayout.CENTER);
 
         return panel;
     }
 
-    private void loadData() {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                mainPanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
+        JButton button = new JButton(text);
+        FontIcon icon = FontIcon.of(iconCode);
+        icon.setIconSize(18);
+        icon.setIconColor(Color.WHITE);
+        button.setIcon(icon);
 
-                // Chargement des données
-                venteController.chargerVentes();
-                produitController.chargerProduits();
-                caisseController.chargerMouvements();
+        button.setFont(TITLE_FONT);
+        button.setBackground(color);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setMargin(new Insets(8, 16, 8, 16));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-                // Mise à jour des KPIs avec animation
-                animateKPIUpdate();
-
-                LOGGER.info("Données du tableau de bord mises à jour avec succès");
-            } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Erreur lors du chargement des données", e);
-                JOptionPane.showMessageDialog(mainPanel,
-                    "Erreur lors du chargement des données : " + e.getMessage(),
-                    "Erreur",
-                    JOptionPane.ERROR_MESSAGE);
-            } finally {
-                mainPanel.setCursor(Cursor.getDefaultCursor());
+        // Effet de survol
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                if (button.isEnabled()) {
+                    button.setBackground(color.darker());
+                }
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                if (button.isEnabled()) {
+                    button.setBackground(color);
+                }
             }
         });
+
+        return button;
     }
 
-    private void animateKPIUpdate() {
-        NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.FRANCE);
+    private void loadData() {
+        try {
+            // Calcul des KPIs
+            double ventesJour = calculerVentesJour();
+            int produitsRupture = calculerProduitsRupture();
+            double encaissementsJour = calculerEncaissementsJour();
+            double chiffreAffaires = calculerChiffreAffaires();
 
-        // Calcul des valeurs finales
-        double finalVentesJour = calculerVentesJour();
-        int finalProduitsRupture = calculerProduitsRupture();
-        double finalEncaissementsJour = calculerEncaissementsJour();
-        double finalCA = calculerChiffreAffaires();
+            // Mise à jour des labels avec formatage monétaire
+            NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.FRANCE);
+            ventesJourLabel.setText(currencyFormat.format(ventesJour));
+            produitsRuptureLabel.setText(String.valueOf(produitsRupture));
+            encaissementsJourLabel.setText(currencyFormat.format(encaissementsJour));
+            chiffreAffairesLabel.setText(currencyFormat.format(chiffreAffaires));
 
-        // Animation des mises à jour
-        Timer timer = new Timer(ANIMATION_DELAY, null);
-        final int[] step = {0};
-
-        timer.addActionListener(e -> {
-            if (step[0] >= ANIMATION_STEPS) {
-                // Valeurs finales
-                ventesJourLabel.setText(currencyFormat.format(finalVentesJour));
-                produitsRuptureLabel.setText(String.valueOf(finalProduitsRupture));
-                encaissementsJourLabel.setText(currencyFormat.format(finalEncaissementsJour));
-                chiffreAffairesLabel.setText(currencyFormat.format(finalCA));
-                timer.stop();
-            } else {
-                // Valeurs intermédiaires
-                double progress = (double) step[0] / ANIMATION_STEPS;
-                ventesJourLabel.setText(currencyFormat.format(finalVentesJour * progress));
-                produitsRuptureLabel.setText(String.valueOf((int)(finalProduitsRupture * progress)));
-                encaissementsJourLabel.setText(currencyFormat.format(finalEncaissementsJour * progress));
-                chiffreAffairesLabel.setText(currencyFormat.format(finalCA * progress));
-                step[0]++;
-            }
-        });
-
-        timer.start();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors du chargement des données", e);
+            JOptionPane.showMessageDialog(mainPanel,
+                "Erreur lors du chargement des données : " + e.getMessage(),
+                "Erreur",
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private double calculerVentesJour() {
@@ -286,40 +212,6 @@ public class AccueilViewSwing {
         return venteController.getVentes().stream()
             .mapToDouble(Vente::getTotal)
             .sum();
-    }
-
-    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
-        JButton button = new JButton(text);
-
-        // Ajout de l'icône
-        FontIcon icon = FontIcon.of(iconCode);
-        icon.setIconSize(18);
-        icon.setIconColor(Color.WHITE);
-        button.setIcon(icon);
-
-        button.setFont(TITLE_FONT);
-        button.setBackground(color);
-        button.setForeground(Color.WHITE);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setMargin(new Insets(8, 16, 8, 16));
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        // Effet de survol amélioré
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                if (button.isEnabled()) {
-                    button.setBackground(color.darker());
-                }
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                if (button.isEnabled()) {
-                    button.setBackground(color);
-                }
-            }
-        });
-
-        return button;
     }
 
     public JPanel getMainPanel() {
