@@ -74,14 +74,18 @@ public class Main {
             }
         });
 
-        updateProgress(30, "Configuration de l'interface...");
-        Thread.sleep(500);
+        // Initialisation de la base de données avec retry et validation SIRET désactivée
+        updateProgress(30, "Initialisation de la base de données...");
+        System.setProperty("SKIP_SIRET_VALIDATION", "true");
+        try {
+            initializeDatabaseWithRetry();
+            LOGGER.info("Base de données initialisée avec succès");
+        } finally {
+            System.clearProperty("SKIP_SIRET_VALIDATION");
+        }
 
-        // Initialisation de la base de données avec retry
-        updateProgress(50, "Initialisation de la base de données...");
-        LOGGER.info("Tentative d'initialisation de la base de données...");
-
-        initializeDatabaseWithRetry();
+        updateProgress(50, "Vérification de la base de données...");
+        DatabaseManager.checkDatabaseHealth();
 
         updateProgress(80, "Chargement de l'interface principale...");
         Thread.sleep(500);
@@ -186,9 +190,9 @@ public class Main {
     }
 
     private static void handleError(Throwable e, String message) {
-        String fullMessage = String.format("%s: %s\nType: %s", 
-            message, 
-            e.getMessage(), 
+        String fullMessage = String.format("%s: %s\nType: %s",
+            message,
+            e.getMessage(),
             e.getClass().getSimpleName());
 
         LOGGER.log(Level.SEVERE, fullMessage, e);

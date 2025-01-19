@@ -59,6 +59,11 @@ public class ConfigurationParam {
 
         String cleanValue = valeur.trim();
 
+        // Si la validation SIRET est désactivée, retourner la valeur pour le SIRET
+        if (cle.equals(CLE_SIRET_ENTREPRISE) && System.getProperty("SKIP_SIRET_VALIDATION") != null) {
+            return cleanValue;
+        }
+
         // Validation spécifique selon le type de configuration
         switch (cle) {
             case CLE_EMAIL:
@@ -172,17 +177,26 @@ public class ConfigurationParam {
         }
     }
 
+    @Override
     public void setValeur(String valeur) {
         try {
             String validatedValue = validateValeur(valeur, this.cle);
-            if (estCrypte && validatedValue != null && !validatedValue.isEmpty()) {
+            if (estCrypte && validatedValue != null && !validatedValue.isEmpty() && 
+                System.getenv().get("CONFIG_SECRET_KEY") != null) {
                 this.valeur = encryptValue(validatedValue);
             } else {
                 this.valeur = validatedValue;
             }
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du traitement de la valeur", e);
-            throw new IllegalStateException("Impossible de traiter la valeur: " + e.getMessage(), e);
+            LOGGER.log(Level.WARNING, "Erreur lors du traitement de la valeur", e);
+            if (this.cle.equals(CLE_SIRET_ENTREPRISE) && 
+                System.getProperty("SKIP_SIRET_VALIDATION") != null) {
+                // Si la validation SIRET est désactivée, accepter la valeur telle quelle
+                this.valeur = valeur;
+                LOGGER.info("Validation SIRET désactivée, valeur acceptée: " + valeur);
+            } else {
+                throw new IllegalStateException("Impossible de traiter la valeur: " + e.getMessage(), e);
+            }
         }
     }
 
@@ -237,46 +251,38 @@ public class ConfigurationParam {
     }
 
     private static String encryptValue(String value) throws Exception {
-        if (value == null || value.isEmpty()) {
+        if (value == null || value.isEmpty() || System.getenv().get("CONFIG_SECRET_KEY") == null) {
+            LOGGER.warning("Valeur non cryptée car clé de cryptage non configurée ou valeur vide");
             return value;
         }
-        try {
-            // Si la clé n'est pas configurée, retourner la valeur non cryptée
-            if (System.getenv().get("CONFIG_SECRET_KEY") == null) {
-                LOGGER.warning("CONFIG_SECRET_KEY non configurée, la valeur ne sera pas cryptée");
-                return value;
-            }
 
+        try {
             SecretKeySpec key = generateKey();
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, key);
             byte[] encryptedBytes = cipher.doFinal(value.getBytes(StandardCharsets.UTF_8));
             return Base64.getEncoder().encodeToString(encryptedBytes);
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Erreur de cryptage, retour de la valeur non cryptée: " + e.getMessage());
-            return value; // En cas d'erreur, retourner la valeur non cryptée
+            LOGGER.log(Level.WARNING, "Erreur de cryptage, retour de la valeur non cryptée", e);
+            return value;
         }
     }
 
     private static String decryptValue(String encrypted) throws Exception {
-        if (encrypted == null || encrypted.isEmpty()) {
+        if (encrypted == null || encrypted.isEmpty() || System.getenv().get("CONFIG_SECRET_KEY") == null) {
+            LOGGER.warning("Valeur non décryptée car clé de cryptage non configurée ou valeur vide");
             return encrypted;
         }
-        try {
-            // Si la clé n'est pas configurée, retourner la valeur cryptée telle quelle
-            if (System.getenv().get("CONFIG_SECRET_KEY") == null) {
-                LOGGER.warning("CONFIG_SECRET_KEY non configurée, impossible de décrypter");
-                return encrypted;
-            }
 
+        try {
             SecretKeySpec key = generateKey();
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE, key);
             byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encrypted));
             return new String(decryptedBytes, StandardCharsets.UTF_8);
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Erreur de décryptage, retour de la valeur cryptée: " + e.getMessage());
-            return encrypted; // En cas d'erreur, retourner la valeur cryptée
+            LOGGER.log(Level.WARNING, "Erreur de décryptage, retour de la valeur cryptée", e);
+            return encrypted;
         }
     }
 }

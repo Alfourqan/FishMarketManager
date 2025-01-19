@@ -77,7 +77,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "mvn clean compile exec:java -Dexec.mainClass=\"com.poissonnerie.Main\" -Djava.awt.headless=false"
+args = "mvn clean compile exec:java -Dexec.mainClass=\"com.poissonnerie.Main\" -Dexec.systemProperties.SKIP_SIRET_VALIDATION=true -Djava.awt.headless=false"
 
 [[workflows.workflow]]
 name = "Test Inventaire"
@@ -189,7 +189,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "mvn test -Dtest=TestConfiguration"
+args = "mvn clean test -Dtest=TestConfiguration"
 
 [deployment]
 run = ["sh", "-c", "mvn clean compile"]

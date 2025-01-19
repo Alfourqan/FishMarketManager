@@ -139,7 +139,10 @@ public class DatabaseManager {
                     throw new SecurityException("Le schéma SQL contient des éléments non autorisés");
                 }
 
+                // Désactiver temporairement les contraintes pendant l'initialisation
                 try (Statement stmt = conn.createStatement()) {
+                    stmt.execute("PRAGMA foreign_keys = OFF");
+
                     for (String sql : schema.split(";")) {
                         sql = sql.trim();
                         if (!sql.isEmpty()) {
@@ -147,16 +150,22 @@ public class DatabaseManager {
                                 stmt.execute(sql);
                                 LOGGER.info("Exécution réussie: " + sql.substring(0, Math.min(50, sql.length())) + "...");
                             } catch (SQLException e) {
-                                LOGGER.log(Level.SEVERE, "Erreur lors de l'exécution de la requête: " + sql, e);
-                                throw e;
+                                if (!e.getMessage().contains("table already exists")) {
+                                    LOGGER.log(Level.SEVERE, "Erreur lors de l'exécution de la requête: " + sql, e);
+                                    throw e;
+                                }
+                                LOGGER.info("Table déjà existante, continue...");
                             }
                         }
                     }
 
-                    conn.commit();
-                    isInitialized = true;
-                    LOGGER.info("Base de données initialisée avec succès");
+                    // Réactiver les contraintes
+                    stmt.execute("PRAGMA foreign_keys = ON");
                 }
+
+                conn.commit();
+                isInitialized = true;
+                LOGGER.info("Base de données initialisée avec succès");
             } catch (Exception e) {
                 conn.rollback();
                 LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation, rollback effectué", e);
