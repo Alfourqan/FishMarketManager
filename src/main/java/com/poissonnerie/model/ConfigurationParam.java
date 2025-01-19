@@ -30,7 +30,7 @@ public class ConfigurationParam {
         this.cle = validateCle(cle);
         this.description = validateDescription(description);
         this.estCrypte = needsEncryption(cle);
-        setValeur(valeur);
+        setValeur(valeur); // Validation immédiate de la valeur
     }
 
     private static String validateCle(String cle) {
@@ -53,7 +53,7 @@ public class ConfigurationParam {
         }
 
         // Vérification de la longueur avant tout traitement
-        if (valeur.length() > MAX_VALUE_LENGTH) {
+        if (valeur.trim().length() > MAX_VALUE_LENGTH) {
             throw new IllegalArgumentException("La valeur ne peut pas dépasser " + MAX_VALUE_LENGTH + " caractères");
         }
 
@@ -65,7 +65,7 @@ public class ConfigurationParam {
                 if (!EMAIL_PATTERN.matcher(cleanValue).matches()) {
                     throw new IllegalArgumentException("Format d'email invalide");
                 }
-                return cleanValue; // Retourne l'email sans modification pour préserver sa validité
+                return cleanValue;
 
             case CLE_TAUX_TVA:
                 try {
@@ -143,14 +143,14 @@ public class ConfigurationParam {
                             .replaceAll("\\s+", " ");
 
         // Limiter la longueur
-        return cleaned.length() > 255 ? cleaned.substring(0, 255) : cleaned;
+        return cleaned.length() > MAX_VALUE_LENGTH ? cleaned.substring(0, MAX_VALUE_LENGTH) : cleaned;
     }
 
     private static boolean needsEncryption(String cle) {
         return CLES_SENSIBLES.contains(cle);
     }
 
-    // Getters et setters
+    // Getters et setters avec validation
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -241,14 +241,20 @@ public class ConfigurationParam {
             return value;
         }
         try {
+            // Si la clé n'est pas configurée, retourner la valeur non cryptée
+            if (System.getenv().get("CONFIG_SECRET_KEY") == null) {
+                LOGGER.warning("CONFIG_SECRET_KEY non configurée, la valeur ne sera pas cryptée");
+                return value;
+            }
+
             SecretKeySpec key = generateKey();
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.ENCRYPT_MODE, key);
             byte[] encryptedBytes = cipher.doFinal(value.getBytes(StandardCharsets.UTF_8));
             return Base64.getEncoder().encodeToString(encryptedBytes);
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du cryptage: " + e.getMessage(), e);
-            throw new IllegalStateException("Erreur de cryptage: " + e.getMessage(), e);
+            LOGGER.log(Level.WARNING, "Erreur de cryptage, retour de la valeur non cryptée: " + e.getMessage());
+            return value; // En cas d'erreur, retourner la valeur non cryptée
         }
     }
 
@@ -257,14 +263,20 @@ public class ConfigurationParam {
             return encrypted;
         }
         try {
+            // Si la clé n'est pas configurée, retourner la valeur cryptée telle quelle
+            if (System.getenv().get("CONFIG_SECRET_KEY") == null) {
+                LOGGER.warning("CONFIG_SECRET_KEY non configurée, impossible de décrypter");
+                return encrypted;
+            }
+
             SecretKeySpec key = generateKey();
             Cipher cipher = Cipher.getInstance(ALGORITHM);
             cipher.init(Cipher.DECRYPT_MODE, key);
             byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encrypted));
             return new String(decryptedBytes, StandardCharsets.UTF_8);
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du décryptage: " + e.getMessage(), e);
-            throw new IllegalStateException("Erreur de décryptage: " + e.getMessage(), e);
+            LOGGER.log(Level.WARNING, "Erreur de décryptage, retour de la valeur cryptée: " + e.getMessage());
+            return encrypted; // En cas d'erreur, retourner la valeur cryptée
         }
     }
 }

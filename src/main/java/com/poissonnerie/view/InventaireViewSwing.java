@@ -14,19 +14,23 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import org.kordamp.ikonli.materialdesign.MaterialDesign;
 import org.kordamp.ikonli.swing.FontIcon;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class InventaireViewSwing {
+    private static final Logger LOGGER = Logger.getLogger(InventaireViewSwing.class.getName());
     private final JPanel mainPanel;
     private final ProduitController produitController;
     private final InventaireManager inventaireManager;
     private final JTable tableInventaire;
     private final DefaultTableModel tableModel;
-    private JLabel statusLabel; 
+    private JLabel statusLabel;
 
     public InventaireViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
         produitController = new ProduitController();
         inventaireManager = new InventaireManager();
+        LOGGER.info("Initialisation de InventaireViewSwing");
 
         // Configuration de la table
         String[] columnNames = {"", "Nom", "Catégorie", "Stock actuel", "Seuil d'alerte", "Actions"};
@@ -49,22 +53,28 @@ public class InventaireViewSwing {
         inventaireManager.ajouterObserver(new InventaireObserver() {
             @Override
             public void onStockBas(Produit produit) {
-                updateStatus("⚠️ Stock bas pour " + produit.getNom());
-                refreshTable();
+                SwingUtilities.invokeLater(() -> {
+                    updateStatus("⚠️ Stock bas pour " + produit.getNom());
+                    refreshTable();
+                });
             }
 
             @Override
             public void onRuptureStock(Produit produit) {
-                updateStatus("⛔ Rupture de stock pour " + produit.getNom());
-                refreshTable();
+                SwingUtilities.invokeLater(() -> {
+                    updateStatus("⛔ Rupture de stock pour " + produit.getNom());
+                    refreshTable();
+                });
             }
 
             @Override
             public void onStockAjuste(Produit produit, int ancienStock, int nouveauStock) {
-                String message = String.format("Stock ajusté pour %s : %d → %d", 
-                    produit.getNom(), ancienStock, nouveauStock);
-                updateStatus(message);
-                refreshTable();
+                SwingUtilities.invokeLater(() -> {
+                    String message = String.format("Stock ajusté pour %s : %d → %d", 
+                        produit.getNom(), ancienStock, nouveauStock);
+                    updateStatus(message);
+                    refreshTable();
+                });
             }
         });
 
@@ -106,68 +116,91 @@ public class InventaireViewSwing {
     }
 
     private void showAjustementDialog(Produit produit) {
-        JDialog dialog = new JDialog((Frame)SwingUtilities.getWindowAncestor(mainPanel),
-            "Ajuster le stock", true);
-        dialog.setLayout(new BorderLayout(10, 10));
+        try {
+            LOGGER.info("Ouverture du dialogue d'ajustement pour " + produit.getNom());
+            JDialog dialog = new JDialog((Frame)SwingUtilities.getWindowAncestor(mainPanel),
+                "Ajuster le stock", true);
+            dialog.setLayout(new BorderLayout(10, 10));
 
-        JPanel formPanel = new JPanel(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+            JPanel formPanel = new JPanel(new GridBagLayout());
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.insets = new Insets(5, 5, 5, 5);
+            gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Informations actuelles
-        JLabel stockActuelLabel = new JLabel("Stock actuel: " + produit.getStock());
-        JLabel seuilLabel = new JLabel("Seuil d'alerte: " + produit.getSeuilAlerte());
+            // Informations actuelles
+            JLabel stockActuelLabel = new JLabel("Stock actuel: " + produit.getStock());
+            JLabel seuilLabel = new JLabel("Seuil d'alerte: " + produit.getSeuilAlerte());
 
-        // Champ de saisie
-        JTextField quantiteField = new JTextField(10);
-        JLabel quantiteLabel = new JLabel("Quantité à ajouter/retirer:");
+            // Champ de saisie
+            JTextField quantiteField = new JTextField(10);
+            JLabel quantiteLabel = new JLabel("Quantité à ajouter/retirer:");
 
-        // Layout
-        gbc.gridx = 0; gbc.gridy = 0;
-        formPanel.add(stockActuelLabel, gbc);
-        gbc.gridy = 1;
-        formPanel.add(seuilLabel, gbc);
-        gbc.gridy = 2;
-        formPanel.add(quantiteLabel, gbc);
-        gbc.gridy = 3;
-        formPanel.add(quantiteField, gbc);
+            // Layout
+            gbc.gridx = 0; gbc.gridy = 0;
+            formPanel.add(stockActuelLabel, gbc);
+            gbc.gridy = 1;
+            formPanel.add(seuilLabel, gbc);
+            gbc.gridy = 2;
+            formPanel.add(quantiteLabel, gbc);
+            gbc.gridy = 3;
+            formPanel.add(quantiteField, gbc);
 
-        // Boutons avec style moderne
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton okButton = createStyledButton("Valider", MaterialDesign.MDI_CHECK_CIRCLE, new Color(76, 175, 80));
-        JButton cancelButton = createStyledButton("Annuler", MaterialDesign.MDI_CLOSE_CIRCLE, new Color(244, 67, 54));
+            // Boutons avec style moderne
+            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+            JButton okButton = createStyledButton("Valider", MaterialDesign.MDI_CHECK_CIRCLE, new Color(76, 175, 80));
+            JButton cancelButton = createStyledButton("Annuler", MaterialDesign.MDI_CLOSE_CIRCLE, new Color(244, 67, 54));
 
-        okButton.addActionListener(e -> {
-            try {
-                int quantite = Integer.parseInt(quantiteField.getText());
-                inventaireManager.ajusterStock(produit, quantite);
-                produitController.mettreAJourProduit(produit);
+            okButton.addActionListener(e -> {
+                try {
+                    String input = quantiteField.getText().trim();
+                    if (input.isEmpty()) {
+                        throw new IllegalArgumentException("Veuillez entrer une quantité");
+                    }
+                    int quantite = Integer.parseInt(input);
+                    LOGGER.info("Tentative d'ajustement du stock de " + produit.getNom() + " de " + quantite);
+
+                    inventaireManager.ajusterStock(produit, quantite);
+                    produitController.mettreAJourProduit(produit);
+                    LOGGER.info("Ajustement réussi pour " + produit.getNom());
+
+                    dialog.dispose();
+                    refreshTable();
+                } catch (NumberFormatException ex) {
+                    LOGGER.warning("Erreur de format de nombre: " + ex.getMessage());
+                    JOptionPane.showMessageDialog(dialog,
+                        "Veuillez entrer un nombre valide",
+                        "Erreur",
+                        JOptionPane.ERROR_MESSAGE);
+                } catch (Exception ex) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors de l'ajustement", ex);
+                    JOptionPane.showMessageDialog(dialog,
+                        "Erreur lors de l'ajustement : " + ex.getMessage(),
+                        "Erreur",
+                        JOptionPane.ERROR_MESSAGE);
+                }
+            });
+
+            cancelButton.addActionListener(e -> {
+                LOGGER.info("Annulation de l'ajustement");
                 dialog.dispose();
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(dialog,
-                    "Veuillez entrer un nombre valide",
-                    "Erreur",
-                    JOptionPane.ERROR_MESSAGE);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(dialog,
-                    "Erreur lors de l'ajustement : " + ex.getMessage(),
-                    "Erreur",
-                    JOptionPane.ERROR_MESSAGE);
-            }
-        });
+            });
 
-        cancelButton.addActionListener(e -> dialog.dispose());
+            buttonPanel.add(okButton);
+            buttonPanel.add(cancelButton);
 
-        buttonPanel.add(okButton);
-        buttonPanel.add(cancelButton);
+            dialog.add(formPanel, BorderLayout.CENTER);
+            dialog.add(buttonPanel, BorderLayout.SOUTH);
 
-        dialog.add(formPanel, BorderLayout.CENTER);
-        dialog.add(buttonPanel, BorderLayout.SOUTH);
-
-        dialog.pack();
-        dialog.setLocationRelativeTo(mainPanel);
-        dialog.setVisible(true);
+            dialog.pack();
+            dialog.setLocationRelativeTo(mainPanel);
+            dialog.setVisible(true);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'affichage du dialogue d'ajustement", e);
+            JOptionPane.showMessageDialog(mainPanel,
+                "Erreur lors de l'ouverture du dialogue d'ajustement : " + e.getMessage(),
+                "Erreur",
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
@@ -199,8 +232,11 @@ public class InventaireViewSwing {
     }
 
     private void updateStatus(String message) {
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-        statusLabel.setText(timestamp + " - " + message);
+        SwingUtilities.invokeLater(() -> {
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+            statusLabel.setText(timestamp + " - " + message);
+            LOGGER.info("Status mis à jour: " + message);
+        });
     }
 
     private class ButtonRenderer extends JButton implements javax.swing.table.TableCellRenderer {
@@ -287,43 +323,56 @@ public class InventaireViewSwing {
     }
 
     private void refreshTable() {
-        tableModel.setRowCount(0);
+        LOGGER.info("Rafraîchissement de la table d'inventaire");
+        SwingUtilities.invokeLater(() -> {
+            try {
+                tableModel.setRowCount(0);
+                for (Produit produit : produitController.getProduits()) {
+                    // Icône d'état
+                    FontIcon icon;
+                    if (produit.getStock() == 0) {
+                        icon = FontIcon.of(MaterialDesign.MDI_ALERT);
+                        icon.setIconColor(new Color(220, 53, 69));
+                    } else if (produit.estStockBas()) {
+                        icon = FontIcon.of(MaterialDesign.MDI_ALERT_CIRCLE);
+                        icon.setIconColor(new Color(255, 193, 7));
+                    } else {
+                        icon = FontIcon.of(MaterialDesign.MDI_CHECKBOX_MARKED_CIRCLE);
+                        icon.setIconColor(new Color(40, 167, 69));
+                    }
 
-        for (Produit produit : produitController.getProduits()) {
-            // Icône d'état
-            FontIcon icon;
-            if (produit.getStock() == 0) {
-                icon = FontIcon.of(MaterialDesign.MDI_ALERT);
-                icon.setIconColor(new Color(220, 53, 69));
-            } else if (produit.estStockBas()) {
-                icon = FontIcon.of(MaterialDesign.MDI_ALERT_CIRCLE);
-                icon.setIconColor(new Color(255, 193, 7));
-            } else {
-                icon = FontIcon.of(MaterialDesign.MDI_CHECKBOX_MARKED_CIRCLE);
-                icon.setIconColor(new Color(40, 167, 69));
+                    // Créer un nouveau bouton pour chaque ligne
+                    JButton ajusterBtn = createStyledButton("Ajuster", MaterialDesign.MDI_PENCIL, new Color(255, 165, 0));
+                    final Produit produitFinal = produit;
+                    ajusterBtn.addActionListener(e -> showAjustementDialog(produitFinal));
+
+                    tableModel.addRow(new Object[]{
+                        icon,
+                        produit.getNom(),
+                        produit.getCategorie(),
+                        produit.getStock(),
+                        produit.getSeuilAlerte(),
+                        ajusterBtn
+                    });
+                }
+
+                // Configurer les renderers et editors
+                tableInventaire.getColumn("Actions").setCellRenderer(new ButtonRenderer());
+                tableInventaire.getColumn("Actions").setCellEditor(new ButtonEditor());
+
+                // Forcer la mise à jour de l'affichage
+                tableInventaire.repaint();
+                LOGGER.info("Table rafraîchie avec succès");
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Erreur lors du rafraîchissement de la table", e);
+                SwingUtilities.invokeLater(() -> {
+                    JOptionPane.showMessageDialog(mainPanel,
+                        "Erreur lors du rafraîchissement de la table : " + e.getMessage(),
+                        "Erreur",
+                        JOptionPane.ERROR_MESSAGE);
+                });
             }
-
-            // Créer un nouveau bouton pour chaque ligne
-            JButton ajusterBtn = createStyledButton("Ajuster", MaterialDesign.MDI_PENCIL, new Color(255, 165, 0));
-            final Produit produitFinal = produit; // Pour utilisation dans le lambda
-            ajusterBtn.addActionListener(e -> showAjustementDialog(produitFinal));
-
-            tableModel.addRow(new Object[]{
-                icon,
-                produit.getNom(),
-                produit.getCategorie(),
-                produit.getStock(),
-                produit.getSeuilAlerte(),
-                ajusterBtn
-            });
-        }
-
-        // Configurer les renderers et editors
-        tableInventaire.getColumn("Actions").setCellRenderer(new ButtonRenderer());
-        tableInventaire.getColumn("Actions").setCellEditor(new ButtonEditor());
-
-        // Forcer la mise à jour de l'affichage
-        tableInventaire.repaint();
+        });
     }
 
     private void loadData() {

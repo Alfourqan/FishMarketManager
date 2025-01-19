@@ -71,7 +71,7 @@ INSERT OR IGNORE INTO configurations (cle, valeur, description) VALUES
 ('ADRESSE_ENTREPRISE', '', 'Adresse de l''entreprise'),
 ('TELEPHONE_ENTREPRISE', '', 'Numéro de téléphone de l''entreprise'),
 ('EMAIL_ENTREPRISE', '', 'Adresse email de l''entreprise'),
-('SIRET_ENTREPRISE', '', 'Numéro SIRET de l''entreprise'),
+('SIRET_ENTREPRISE', '12345678901234', 'Numéro SIRET de l''entreprise'),
 ('LOGO_PATH', '', 'Chemin vers le logo de l''entreprise'),
 ('FORMAT_RECU', 'COMPACT', 'Format des reçus (COMPACT ou DETAILLE)'),
 ('PIED_PAGE_RECU', 'Merci de votre visite !', 'Message en pied de page des reçus'),

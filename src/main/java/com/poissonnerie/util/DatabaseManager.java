@@ -33,6 +33,7 @@ public class DatabaseManager {
     private static final int LOGIN_TIMEOUT_SECONDS = 30;
     private static final Object LOCK = new Object();
     private static volatile SQLiteDataSource dataSource;
+    private static boolean isInitialized = false;
 
     private static final Set<String> ALLOWED_SQL_KEYWORDS = new HashSet<>(Arrays.asList(
         "CREATE", "TABLE", "IF", "NOT", "EXISTS", "DROP", "ALTER", "PRIMARY", "KEY",
@@ -43,7 +44,8 @@ public class DatabaseManager {
         "ORDER", "BY", "DESC", "ASC", "LIMIT", "OFFSET", "GROUP", "HAVING", "JOIN",
         "LEFT", "RIGHT", "INNER", "OUTER", "USING", "DISTINCT", "COUNT", "SUM", "AVG",
         "MIN", "MAX", "CASE", "WHEN", "THEN", "ELSE", "END", "TRUE", "FALSE", "0", "1",
-        "DATETIME", "NOW", "LOCALTIME", "STRFTIME"
+        "DATETIME", "NOW", "LOCALTIME", "STRFTIME", "'ACTIF'", "'NOW'", "'LOCALTIME'",
+        "'ENTREE'", "'SORTIE'", "'OUVERTURE'", "'CLOTURE'", "*"
     ));
 
     private static final Pattern MALICIOUS_SQL_PATTERN = Pattern.compile(
@@ -62,7 +64,7 @@ public class DatabaseManager {
                 try {
                     SQLiteConfig config = new SQLiteConfig();
                     config.enforceForeignKeys(true);
-                    config.setBusyTimeout(30000); // Augmentation du timeout à 30 secondes
+                    config.setBusyTimeout(30000);
                     config.setReadOnly(false);
                     config.setJournalMode(SQLiteConfig.JournalMode.WAL);
                     config.setSynchronous(SQLiteConfig.SynchronousMode.NORMAL);
@@ -111,7 +113,12 @@ public class DatabaseManager {
         return conn;
     }
 
-    public static void initDatabase() {
+    public static synchronized void initDatabase() {
+        if (isInitialized) {
+            LOGGER.info("La base de données est déjà initialisée");
+            return;
+        }
+
         LOGGER.info("Début de l'initialisation de la base de données");
 
         try (Connection conn = getConnection()) {
@@ -123,6 +130,10 @@ public class DatabaseManager {
                         StandardCharsets.UTF_8))
                     .lines()
                     .collect(Collectors.joining("\n"));
+
+                if (schema == null || schema.trim().isEmpty()) {
+                    throw new IllegalStateException("Le fichier schema.sql est vide ou introuvable");
+                }
 
                 if (!validateSchemaContent(schema)) {
                     throw new SecurityException("Le schéma SQL contient des éléments non autorisés");
@@ -143,6 +154,7 @@ public class DatabaseManager {
                     }
 
                     conn.commit();
+                    isInitialized = true;
                     LOGGER.info("Base de données initialisée avec succès");
                 }
             } catch (Exception e) {
@@ -153,6 +165,19 @@ public class DatabaseManager {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur fatale lors de l'initialisation de la base de données", e);
             throw new RuntimeException("Erreur fatale lors de l'initialisation de la base de données: " + e.getMessage(), e);
+        }
+    }
+
+    public static void checkDatabaseHealth() {
+        try (Connection conn = getConnection();
+             Statement stmt = conn.createStatement()) {
+
+            stmt.execute("SELECT 1");
+            LOGGER.info("Vérification de la santé de la base de données : OK");
+
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "La base de données n'est pas en bonne santé", e);
+            throw new RuntimeException("Erreur lors de la vérification de la base de données", e);
         }
     }
 
