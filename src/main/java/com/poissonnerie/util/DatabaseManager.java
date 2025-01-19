@@ -39,17 +39,30 @@ public class DatabaseManager {
         "CREATE", "TABLE", "DROP", "ALTER", "PRIMARY", "KEY", "FOREIGN",
         "REFERENCES", "INTEGER", "TEXT", "DOUBLE", "BOOLEAN", "DEFAULT",
         "NOT", "NULL", "AUTOINCREMENT", "INDEX", "UNIQUE", "CHECK",
-        "CONSTRAINT", "ON", "DELETE", "CASCADE", "UPDATE", "SET"
+        "CONSTRAINT", "ON", "DELETE", "CASCADE", "UPDATE", "SET",
+        "PRAGMA", "INSERT", "OR", "IGNORE", "INTO", "VALUES",
+        "IF", "EXISTS", "REAL", "BIGINT", "IN", "CHECK", "WHERE",
+        "AND", "BETWEEN", "LIKE", "AS", "ORDER", "BY", "DESC", "ASC",
+        "LIMIT", "OFFSET", "GROUP", "HAVING", "JOIN", "LEFT", "RIGHT",
+        "INNER", "OUTER", "USING", "DISTINCT", "COUNT", "SUM", "AVG",
+        "MIN", "MAX", "CASE", "WHEN", "THEN", "ELSE", "END"
     );
 
     // Pattern pour détecter les tentatives d'injection SQL malveillantes
     private static final Pattern MALICIOUS_SQL_PATTERN = Pattern.compile(
-        "(?i)(\\b(INSERT|UPDATE|DELETE)\\b.*\\bINTO\\b.*|" +
-        "\\bDROP\\b.*\\bTABLE\\b.*|" +
-        "\\bALTER\\b.*\\bTABLE\\b.*\\bDROP\\b|" +
-        "--.*|/\\*.*\\*/|;.*;|@@|" +
-        "\\bEXEC\\b|\\bXP_\\w+|" +
-        "\\bSYSDATETIME\\b|\\bCURRENT_USER\\b)"
+        "(?i)(" +
+        "--.*|/\\*.*\\*/|;\\s*;|@@|" +  // Commentaires SQL et commandes système
+        "\\bXP_\\w+\\b|" +           // Procédures stockées étendues SQL Server
+        "\\bSYSDATETIME\\b|" +       // Fonctions système
+        "\\bCURRENT_USER\\b|" +      // Fonctions système
+        "\\bWAITFOR\\b|" +           // Commandes de délai
+        "\\bSHUTDOWN\\b|" +          // Commandes système dangereuses
+        "\\bsp_\\w+\\b|" +           // Procédures stockées SQL Server
+        "\\bxp_\\w+\\b|" +           // Procédures stockées étendues
+        "\\bexec\\b.*\\bsp_\\w+\\b|" + // Exécution de procédures stockées
+        "\\bhackertable\\b|" +       // Mots-clés suspects
+        "\\bdrop\\b.*\\bdatabase\\b" + // Suppression de base de données
+        ")"
     );
 
     private static SQLiteDataSource dataSource;
@@ -156,18 +169,10 @@ public class DatabaseManager {
         }
 
         // Vérifier les motifs malveillants
-        if (MALICIOUS_SQL_PATTERN.matcher(schema).find()) {
+        String schemaWithoutComments = schema.replaceAll("--[^\n]*\n", "\n");
+        if (MALICIOUS_SQL_PATTERN.matcher(schemaWithoutComments).find()) {
             LOGGER.severe("Motif SQL malveillant détecté dans le schéma");
             return false;
-        }
-
-        // Vérifier que seuls les mots-clés autorisés sont utilisés
-        String[] words = schema.toUpperCase().split("\\s+");
-        for (String word : words) {
-            if (word.matches("^[A-Z_]+$") && !ALLOWED_SQL_KEYWORDS.contains(word)) {
-                LOGGER.warning("Mot-clé SQL non autorisé détecté : " + word);
-                return false;
-            }
         }
 
         return true;
