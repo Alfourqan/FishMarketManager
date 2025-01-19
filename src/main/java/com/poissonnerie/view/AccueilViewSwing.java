@@ -5,12 +5,8 @@ import com.poissonnerie.model.*;
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import org.kordamp.ikonli.materialdesign2.MaterialDesignA;
-import org.kordamp.ikonli.materialdesign2.MaterialDesignC;
-import org.kordamp.ikonli.swing.FontIcon;
 
 public class AccueilViewSwing {
     private static final Logger LOGGER = Logger.getLogger(AccueilViewSwing.class.getName());
@@ -44,33 +40,20 @@ public class AccueilViewSwing {
         kpiPanel.setBackground(Color.WHITE);
 
         // Création des cartes KPI
-        ventesJourLabel = createKPICard("Ventes (Aujourd'hui)", "0.00 €", 
-            MaterialDesignC.CASH_MULTIPLE, new Color(76, 175, 80));
+        kpiPanel.add(createKPIPanel("Ventes (Aujourd'hui)", ventesJourLabel = new JLabel("0.00 €"), 
+            new Color(76, 175, 80)));
 
-        produitsRuptureLabel = createKPICard("Produits en rupture", "0", 
-            MaterialDesignA.ALERT_CIRCLE, new Color(244, 67, 54));
+        kpiPanel.add(createKPIPanel("Produits en rupture", produitsRuptureLabel = new JLabel("0"), 
+            new Color(244, 67, 54)));
 
-        encaissementsJourLabel = createKPICard("Encaissements (Aujourd'hui)", "0.00 €", 
-            MaterialDesignC.CASH, new Color(33, 150, 243));
+        kpiPanel.add(createKPIPanel("Encaissements (Aujourd'hui)", encaissementsJourLabel = new JLabel("0.00 €"), 
+            new Color(33, 150, 243)));
 
-        chiffreAffairesLabel = createKPICard("Chiffre d'affaires", "0.00 €", 
-            MaterialDesignC.CHART_LINE, new Color(156, 39, 176));
-
-        // Ajout des cartes au panel
-        kpiPanel.add(createKPIPanel(ventesJourLabel, "Ventes (Aujourd'hui)", 
-            MaterialDesignC.CASH_MULTIPLE, new Color(76, 175, 80)));
-
-        kpiPanel.add(createKPIPanel(produitsRuptureLabel, "Produits en rupture", 
-            MaterialDesignA.ALERT_CIRCLE, new Color(244, 67, 54)));
-
-        kpiPanel.add(createKPIPanel(encaissementsJourLabel, "Encaissements (Aujourd'hui)", 
-            MaterialDesignC.CASH, new Color(33, 150, 243)));
-
-        kpiPanel.add(createKPIPanel(chiffreAffairesLabel, "Chiffre d'affaires", 
-            MaterialDesignC.CHART_LINE, new Color(156, 39, 176)));
+        kpiPanel.add(createKPIPanel("Chiffre d'affaires", chiffreAffairesLabel = new JLabel("0.00 €"), 
+            new Color(156, 39, 176)));
 
         // Bouton d'actualisation
-        JButton refreshButton = createStyledButton("Actualiser", MaterialDesignC.REFRESH);
+        JButton refreshButton = createStyledButton("Actualiser");
         refreshButton.addActionListener(e -> loadData());
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -82,7 +65,7 @@ public class AccueilViewSwing {
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    private JPanel createKPIPanel(JLabel valueLabel, String title, Object icon, Color color) {
+    private JPanel createKPIPanel(String title, JLabel valueLabel, Color color) {
         JPanel panel = new JPanel();
         panel.setLayout(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createCompoundBorder(
@@ -91,37 +74,19 @@ public class AccueilViewSwing {
         ));
         panel.setBackground(Color.WHITE);
 
-        // Icône
-        FontIcon fontIcon = FontIcon.of(icon);
-        fontIcon.setIconSize(32);
-        fontIcon.setIconColor(color);
-        JLabel iconLabel = new JLabel(fontIcon);
-
         // Titre
         JLabel titleLabel = new JLabel(title);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         titleLabel.setForeground(new Color(33, 33, 33));
 
-        // Panel pour l'icône et le titre
-        JPanel headerPanel = new JPanel(new BorderLayout(10, 0));
-        headerPanel.setBackground(Color.WHITE);
-        headerPanel.add(iconLabel, BorderLayout.WEST);
-        headerPanel.add(titleLabel, BorderLayout.CENTER);
-
         // Valeur
         valueLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
         valueLabel.setForeground(color);
 
-        panel.add(headerPanel, BorderLayout.NORTH);
+        panel.add(titleLabel, BorderLayout.NORTH);
         panel.add(valueLabel, BorderLayout.CENTER);
 
         return panel;
-    }
-
-    private JLabel createKPICard(String title, String initialValue, Object icon, Color color) {
-        JLabel label = new JLabel(initialValue);
-        label.setHorizontalAlignment(SwingConstants.LEFT);
-        return label;
     }
 
     private void loadData() {
@@ -186,13 +151,8 @@ public class AccueilViewSwing {
         chiffreAffairesLabel.setText(String.format("%.2f €", totalCA));
     }
 
-    private JButton createStyledButton(String text, Object iconCode) {
-        FontIcon icon = FontIcon.of(iconCode);
-        icon.setIconSize(18);
-        icon.setIconColor(Color.WHITE);
-
+    private JButton createStyledButton(String text) {
         JButton button = new JButton(text);
-        button.setIcon(icon);
         button.setFont(new Font("Segoe UI", Font.BOLD, 13));
         button.setBackground(new Color(33, 150, 243));
         button.setForeground(Color.WHITE);

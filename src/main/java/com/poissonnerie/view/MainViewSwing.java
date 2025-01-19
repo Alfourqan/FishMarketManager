@@ -2,17 +2,9 @@ package com.poissonnerie.view;
 
 import javax.swing.*;
 import java.awt.*;
-import org.kordamp.ikonli.materialdesign2.*;
-import org.kordamp.ikonli.swing.FontIcon;
 import com.poissonnerie.controller.*;
 import com.poissonnerie.model.*;
-import com.poissonnerie.util.PDFGenerator;
-import java.time.LocalDateTime;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
 import java.io.File;
-import com.poissonnerie.view.*;
 
 public class MainViewSwing {
     private final JPanel mainPanel;
@@ -23,7 +15,7 @@ public class MainViewSwing {
     private final ClientController clientController;
     private final CaisseController caisseController;
     private JLabel titleLabel;
-    private String currentTitle = "HOME";
+    private String currentTitle = "ACCUEIL";
 
     public MainViewSwing() {
         mainPanel = new JPanel(new BorderLayout());
@@ -81,25 +73,11 @@ public class MainViewSwing {
             "Rapport", "Réglages", "Déconnexion"
         };
 
-        Object[] icons = {
-            MaterialDesignH.HOME,
-            MaterialDesignP.PACKAGE_VARIANT,
-            MaterialDesignC.CART,
-            MaterialDesignA.ACCOUNT_MULTIPLE,
-            MaterialDesignF.FILE_DOCUMENT,
-            MaterialDesignT.TRUCK_DELIVERY,
-            MaterialDesignT.TAG_MULTIPLE,
-            MaterialDesignC.CASH,
-            MaterialDesignC.CASH_MULTIPLE,
-            MaterialDesignC.COG,
-            MaterialDesignL.LOGOUT
-        };
-
         ButtonGroup buttonGroup = new ButtonGroup();
         navigationPanel.add(Box.createVerticalStrut(10));
 
         for (int i = 0; i < viewNames.length; i++) {
-            JToggleButton navButton = createNavigationButton(viewNames[i], icons[i]);
+            JToggleButton navButton = createNavigationButton(viewNames[i]);
             final String cardName = viewNames[i];
 
             if (i < viewNames.length - 1) {
@@ -124,16 +102,9 @@ public class MainViewSwing {
         return navigationPanel;
     }
 
-    private JToggleButton createNavigationButton(String text, Object iconCode) {
+    private JToggleButton createNavigationButton(String text) {
         JToggleButton button = new JToggleButton(text);
-
-        FontIcon icon = FontIcon.of(iconCode);
-        icon.setIconSize(18);
-        icon.setIconColor(Color.WHITE);
-        button.setIcon(icon);
-
         button.setHorizontalAlignment(SwingConstants.LEFT);
-        button.setIconTextGap(15);
         button.setMargin(new Insets(8, 15, 8, 15));
         button.setFocusPainted(false);
         button.setPreferredSize(new Dimension(170, 40));
@@ -151,7 +122,6 @@ public class MainViewSwing {
                     button.setBackground(new Color(44, 49, 54));
                 }
             }
-
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 if (!button.isSelected()) {
                     button.setBackground(new Color(33, 37, 41));
@@ -200,165 +170,6 @@ public class MainViewSwing {
         label.setFont(new Font("Segoe UI", Font.BOLD, 18));
         panel.add(label, BorderLayout.CENTER);
         return panel;
-    }
-    private JMenuBar createMenuBar() {
-        JMenuBar menuBar = new JMenuBar();
-
-        // Menu Fichier avec icônes
-        JMenu fichierMenu = new JMenu("Fichier");
-        JMenuItem parametresMenuItem = new JMenuItem("Paramètres", createLargeIcon(MaterialDesignC.COG));
-        JMenuItem exporterMenuItem = new JMenuItem("Exporter les données", createLargeIcon(MaterialDesignE.EXPORT));
-        JMenuItem quitterMenuItem = new JMenuItem("Quitter", createLargeIcon(MaterialDesignE.EXIT_TO_APP));
-
-        parametresMenuItem.addActionListener(e -> showParametres());
-        quitterMenuItem.addActionListener(e -> System.exit(0));
-
-        fichierMenu.add(parametresMenuItem);
-        fichierMenu.add(exporterMenuItem);
-        fichierMenu.addSeparator();
-        fichierMenu.add(quitterMenuItem);
-
-        // Menu Rapports avec icônes
-        JMenu rapportsMenu = new JMenu("Rapports");
-        JMenuItem ventesJourMenuItem = new JMenuItem("Ventes du jour", createLargeIcon(MaterialDesignC.CHART_BAR));
-        JMenuItem stocksMenuItem = new JMenuItem("État des stocks", createLargeIcon(MaterialDesignC.CLIPBOARD_TEXT));
-        JMenuItem creancesMenuItem = new JMenuItem("État des créances", createLargeIcon(MaterialDesignW.WALLET_MEMBERSHIP));
-        JMenuItem caisseMenuItem = new JMenuItem("Journal de caisse", createLargeIcon(MaterialDesignC.CASH));
-
-        // Ajout des gestionnaires d'événements pour les rapports
-        ventesJourMenuItem.addActionListener(e -> genererRapportVentesJour());
-        stocksMenuItem.addActionListener(e -> genererRapportStocks());
-        creancesMenuItem.addActionListener(e -> genererRapportCreances());
-        caisseMenuItem.addActionListener(e -> genererRapportCaisse());
-
-        rapportsMenu.add(ventesJourMenuItem);
-        rapportsMenu.add(stocksMenuItem);
-        rapportsMenu.add(creancesMenuItem);
-        rapportsMenu.add(caisseMenuItem);
-
-        menuBar.add(fichierMenu);
-        menuBar.add(rapportsMenu);
-
-        fichierMenu.setFont(new Font(fichierMenu.getFont().getName(), Font.BOLD, 13));
-        rapportsMenu.setFont(new Font(rapportsMenu.getFont().getName(), Font.BOLD, 13));
-
-        return menuBar;
-    }
-
-    private void genererRapportVentesJour() {
-        try {
-            venteController.chargerVentes();
-            LocalDate aujourdhui = LocalDate.now();
-
-            List<Vente> ventesJour = venteController.getVentes().stream()
-                .filter(v -> v.getDate().toLocalDate().equals(aujourdhui))
-                .collect(Collectors.toList());
-
-            String nomFichier = "rapport_ventes_" + aujourdhui + ".pdf";
-            PDFGenerator.genererRapportVentes(ventesJour, nomFichier);
-
-            afficherMessageSuccess("Rapport genere avec succes",
-                "Le rapport des ventes a ete genere dans le fichier : " + nomFichier);
-
-            ouvrirFichierPDF(nomFichier);
-
-        } catch (Exception e) {
-            afficherMessageErreur("Erreur lors de la generation du rapport", e.getMessage());
-        }
-    }
-
-    private void genererRapportStocks() {
-        try {
-            produitController.chargerProduits();
-            String nomFichier = "rapport_stocks_" + LocalDate.now() + ".pdf";
-            PDFGenerator.genererRapportStocks(produitController.getProduits(), nomFichier);
-
-            afficherMessageSuccess("Rapport genere avec succes",
-                "Le rapport des stocks a ete genere dans le fichier : " + nomFichier);
-
-            ouvrirFichierPDF(nomFichier);
-
-        } catch (Exception e) {
-            afficherMessageErreur("Erreur lors de la generation du rapport", e.getMessage());
-        }
-    }
-
-    private void genererRapportCreances() {
-        try {
-            clientController.chargerClients();
-            String nomFichier = "rapport_creances_" + LocalDate.now() + ".pdf";
-            PDFGenerator.genererRapportCreances(clientController.getClients(), nomFichier);
-
-            afficherMessageSuccess("Rapport genere avec succes",
-                "Le rapport des creances a ete genere dans le fichier : " + nomFichier);
-
-            ouvrirFichierPDF(nomFichier);
-
-        } catch (Exception e) {
-            afficherMessageErreur("Erreur lors de la generation du rapport", e.getMessage());
-        }
-    }
-
-    private void genererRapportCaisse() {
-        try {
-            caisseController.chargerMouvements();
-            String nomFichier = "rapport_caisse_" + LocalDate.now() + ".pdf";
-            PDFGenerator.genererRapportCaisse(caisseController.getMouvements(), nomFichier);
-
-            afficherMessageSuccess("Rapport genere avec succes",
-                "Le rapport de caisse a ete genere dans le fichier : " + nomFichier);
-
-            ouvrirFichierPDF(nomFichier);
-
-        } catch (Exception e) {
-            afficherMessageErreur("Erreur lors de la generation du rapport", e.getMessage());
-        }
-    }
-
-    private void ouvrirFichierPDF(String nomFichier) {
-        try {
-            File file = new File(nomFichier);
-            if (file.exists()) {
-                if (Desktop.isDesktopSupported()) {
-                    Desktop.getDesktop().open(file);
-                }
-            }
-        } catch (Exception e) {
-            System.err.println("Impossible d'ouvrir le fichier : " + e.getMessage());
-        }
-    }
-
-    private void afficherMessageSuccess(String titre, String message) {
-        JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private void afficherMessageErreur(String titre, String message) {
-        JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.ERROR_MESSAGE);
-    }
-
-    private FontIcon createLargeIcon(Object iconCode) {
-        FontIcon icon = FontIcon.of(iconCode);
-        icon.setIconSize(20);
-        return icon;
-    }
-
-    private void showParametres() {
-        Window window = SwingUtilities.getWindowAncestor(mainPanel);
-        JDialog dialog;
-        if (window instanceof Frame) {
-            dialog = new JDialog((Frame) window, "Paramètres", true);
-        } else if (window instanceof Dialog) {
-            dialog = new JDialog((Dialog) window, "Paramètres", true);
-        } else {
-            dialog = new JDialog();
-            dialog.setTitle("Paramètres");
-            dialog.setModal(true);
-        }
-
-        dialog.setContentPane(new ConfigurationViewSwing().getMainPanel());
-        dialog.setSize(600, 400);
-        dialog.setLocationRelativeTo(mainPanel);
-        dialog.setVisible(true);
     }
 
     public JPanel getMainPanel() {

@@ -1,0 +1,483 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------< com.poissonnerie:gestion-poissonnerie >----------------
+[INFO] Building gestion-poissonnerie 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+Downloading from central: https://repo.maven.apache.org/maven2/org/kordamp/ikonli/ikonli-materialdesign2-pack/12.3.1/ikonli-materialdesign2-pack-12.3.1.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/kordamp/ikonli/ikonli-materialdesign2-pack/12.3.1/ikonli-materialdesign2-pack-12.3.1.pom (1.5 kB at 640 B/s)
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ gestion-poissonnerie ---
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ gestion-poissonnerie ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ gestion-poissonnerie ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 27 source files with javac [debug target 17] to target/classes
+[INFO] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java: /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java uses unchecked or unsafe operations.
+[INFO] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java: Recompile with -Xlint:unchecked for details.
+[INFO] Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+[INFO] -------------------------------------------------------------
+[WARNING] COMPILATION WARNING : 
+[INFO] -------------------------------------------------------------
+[WARNING] system modules path not set in conjunction with -source 17
+[INFO] 1 warning
+[INFO] -------------------------------------------------------------
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ClientViewSwing.java:[9,41] package org.kordamp.ikonli.materialdesign does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ClientViewSwing.java:[45,53] cannot find symbol
+  symbol:   class MaterialDesign
+  location: class com.poissonnerie.view.ClientViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ProduitViewSwing.java:[8,41] package org.kordamp.ikonli.materialdesign does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ProduitViewSwing.java:[196,53] cannot find symbol
+  symbol:   class MaterialDesign
+  location: class com.poissonnerie.view.ProduitViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/FournisseurViewSwing.java:[13,41] package org.kordamp.ikonli.materialdesign does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/FournisseurViewSwing.java:[171,53] cannot find symbol
+  symbol:   class MaterialDesign
+  location: class com.poissonnerie.view.FournisseurViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/InventaireViewSwing.java:[15,41] package org.kordamp.ikonli.materialdesign does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/InventaireViewSwing.java:[206,53] cannot find symbol
+  symbol:   class MaterialDesign
+  location: class com.poissonnerie.view.InventaireViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/VenteViewSwing.java:[19,41] package org.kordamp.ikonli.materialdesign does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/VenteViewSwing.java:[548,53] cannot find symbol
+  symbol:   class MaterialDesign
+  location: class com.poissonnerie.view.VenteViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[12,41] package org.kordamp.ikonli.materialdesign does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[424,53] cannot find symbol
+  symbol:   class MaterialDesign
+  location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[787,53] cannot find symbol
+  symbol:   class MaterialDesign
+  location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/CaisseViewSwing.java:[13,41] package org.kordamp.ikonli.materialdesign does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/CaisseViewSwing.java:[58,53] cannot find symbol
+  symbol:   class MaterialDesign
+  location: class com.poissonnerie.view.CaisseViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[5,41] package org.kordamp.ikonli.materialdesign does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[71,53] cannot find symbol
+  symbol:   class MaterialDesign
+  location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[98,53] cannot find symbol
+  symbol:   class MaterialDesign
+  location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ClientViewSwing.java:[86,60] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ClientViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ClientViewSwing.java:[87,62] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ClientViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ClientViewSwing.java:[88,64] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ClientViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ClientViewSwing.java:[89,73] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ClientViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ClientViewSwing.java:[90,66] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ClientViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ClientViewSwing.java:[207,36] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ClientViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ClientViewSwing.java:[210,36] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ClientViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ProduitViewSwing.java:[150,60] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ProduitViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ProduitViewSwing.java:[151,62] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ProduitViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ProduitViewSwing.java:[152,64] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ProduitViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ProduitViewSwing.java:[153,66] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ProduitViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ProduitViewSwing.java:[275,62] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ProduitViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ProduitViewSwing.java:[276,62] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ProduitViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ProduitViewSwing.java:[405,36] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ProduitViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ProduitViewSwing.java:[408,36] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ProduitViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/FournisseurViewSwing.java:[116,42] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.FournisseurViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/FournisseurViewSwing.java:[205,60] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.FournisseurViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/FournisseurViewSwing.java:[206,62] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.FournisseurViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/FournisseurViewSwing.java:[207,64] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.FournisseurViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/FournisseurViewSwing.java:[208,66] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.FournisseurViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/FournisseurViewSwing.java:[209,60] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.FournisseurViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/InventaireViewSwing.java:[96,63] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.InventaireViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/InventaireViewSwing.java:[150,62] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.InventaireViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/InventaireViewSwing.java:[151,66] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.InventaireViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/InventaireViewSwing.java:[334,44] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.InventaireViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/InventaireViewSwing.java:[337,44] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.InventaireViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/InventaireViewSwing.java:[340,44] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.InventaireViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/InventaireViewSwing.java:[345,72] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.InventaireViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/MainViewSwing.java:[130,37] incompatible types: java.lang.Object cannot be converted to org.kordamp.ikonli.Ikon
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/MainViewSwing.java:[340,37] incompatible types: java.lang.Object cannot be converted to org.kordamp.ikonli.Ikon
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/AccueilViewSwing.java:[73,81] cannot find symbol
+  symbol:   variable REFRESH
+  location: class org.kordamp.ikonli.materialdesign2.MaterialDesignC
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/AccueilViewSwing.java:[95,41] incompatible types: java.lang.Object cannot be converted to org.kordamp.ikonli.Ikon
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/AccueilViewSwing.java:[190,37] incompatible types: java.lang.Object cannot be converted to org.kordamp.ikonli.Ikon
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/VenteViewSwing.java:[317,25] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.VenteViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/VenteViewSwing.java:[319,25] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.VenteViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/VenteViewSwing.java:[600,66] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.VenteViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/VenteViewSwing.java:[637,70] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.VenteViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/VenteViewSwing.java:[652,69] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.VenteViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/VenteViewSwing.java:[653,60] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.VenteViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[116,13] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[199,45] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[214,64] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[290,75] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[325,73] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[358,69] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[361,58] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[466,66] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[467,72] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[468,68] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/CaisseViewSwing.java:[94,60] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.CaisseViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/CaisseViewSwing.java:[95,64] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.CaisseViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/CaisseViewSwing.java:[96,62] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.CaisseViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/CaisseViewSwing.java:[97,60] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.CaisseViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[170,70] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[171,70] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[172,78] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[173,70] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[174,71] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[585,13] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[722,13] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[724,13] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[798,60] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[799,60] cannot find symbol
+  symbol:   variable MaterialDesign
+  location: class com.poissonnerie.view.ReportViewSwing
+[INFO] 81 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  20.046 s
+[INFO] Finished at: 2025-01-19T14:10:36Z
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project gestion-poissonnerie: Compilation failure: Compilation failure: 
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ClientViewSwing.java:[9,41] package org.kordamp.ikonli.materialdesign does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ClientViewSwing.java:[45,53] cannot find symbol
+[ERROR]   symbol:   class MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ClientViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ProduitViewSwing.java:[8,41] package org.kordamp.ikonli.materialdesign does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ProduitViewSwing.java:[196,53] cannot find symbol
+[ERROR]   symbol:   class MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ProduitViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/FournisseurViewSwing.java:[13,41] package org.kordamp.ikonli.materialdesign does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/FournisseurViewSwing.java:[171,53] cannot find symbol
+[ERROR]   symbol:   class MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.FournisseurViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/InventaireViewSwing.java:[15,41] package org.kordamp.ikonli.materialdesign does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/InventaireViewSwing.java:[206,53] cannot find symbol
+[ERROR]   symbol:   class MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.InventaireViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/VenteViewSwing.java:[19,41] package org.kordamp.ikonli.materialdesign does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/VenteViewSwing.java:[548,53] cannot find symbol
+[ERROR]   symbol:   class MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.VenteViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[12,41] package org.kordamp.ikonli.materialdesign does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[424,53] cannot find symbol
+[ERROR]   symbol:   class MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[787,53] cannot find symbol
+[ERROR]   symbol:   class MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/CaisseViewSwing.java:[13,41] package org.kordamp.ikonli.materialdesign does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/CaisseViewSwing.java:[58,53] cannot find symbol
+[ERROR]   symbol:   class MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.CaisseViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[5,41] package org.kordamp.ikonli.materialdesign does not exist
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[71,53] cannot find symbol
+[ERROR]   symbol:   class MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[98,53] cannot find symbol
+[ERROR]   symbol:   class MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ClientViewSwing.java:[86,60] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ClientViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ClientViewSwing.java:[87,62] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ClientViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ClientViewSwing.java:[88,64] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ClientViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ClientViewSwing.java:[89,73] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ClientViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ClientViewSwing.java:[90,66] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ClientViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ClientViewSwing.java:[207,36] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ClientViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ClientViewSwing.java:[210,36] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ClientViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ProduitViewSwing.java:[150,60] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ProduitViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ProduitViewSwing.java:[151,62] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ProduitViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ProduitViewSwing.java:[152,64] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ProduitViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ProduitViewSwing.java:[153,66] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ProduitViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ProduitViewSwing.java:[275,62] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ProduitViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ProduitViewSwing.java:[276,62] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ProduitViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ProduitViewSwing.java:[405,36] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ProduitViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ProduitViewSwing.java:[408,36] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ProduitViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/FournisseurViewSwing.java:[116,42] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.FournisseurViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/FournisseurViewSwing.java:[205,60] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.FournisseurViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/FournisseurViewSwing.java:[206,62] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.FournisseurViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/FournisseurViewSwing.java:[207,64] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.FournisseurViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/FournisseurViewSwing.java:[208,66] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.FournisseurViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/FournisseurViewSwing.java:[209,60] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.FournisseurViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/InventaireViewSwing.java:[96,63] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.InventaireViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/InventaireViewSwing.java:[150,62] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.InventaireViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/InventaireViewSwing.java:[151,66] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.InventaireViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/InventaireViewSwing.java:[334,44] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.InventaireViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/InventaireViewSwing.java:[337,44] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.InventaireViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/InventaireViewSwing.java:[340,44] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.InventaireViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/InventaireViewSwing.java:[345,72] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.InventaireViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/MainViewSwing.java:[130,37] incompatible types: java.lang.Object cannot be converted to org.kordamp.ikonli.Ikon
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/MainViewSwing.java:[340,37] incompatible types: java.lang.Object cannot be converted to org.kordamp.ikonli.Ikon
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/AccueilViewSwing.java:[73,81] cannot find symbol
+[ERROR]   symbol:   variable REFRESH
+[ERROR]   location: class org.kordamp.ikonli.materialdesign2.MaterialDesignC
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/AccueilViewSwing.java:[95,41] incompatible types: java.lang.Object cannot be converted to org.kordamp.ikonli.Ikon
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/AccueilViewSwing.java:[190,37] incompatible types: java.lang.Object cannot be converted to org.kordamp.ikonli.Ikon
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/VenteViewSwing.java:[317,25] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.VenteViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/VenteViewSwing.java:[319,25] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.VenteViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/VenteViewSwing.java:[600,66] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.VenteViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/VenteViewSwing.java:[637,70] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.VenteViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/VenteViewSwing.java:[652,69] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.VenteViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/VenteViewSwing.java:[653,60] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.VenteViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[116,13] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[199,45] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[214,64] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[290,75] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[325,73] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[358,69] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[361,58] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[466,66] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[467,72] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[468,68] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/CaisseViewSwing.java:[94,60] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.CaisseViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/CaisseViewSwing.java:[95,64] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.CaisseViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/CaisseViewSwing.java:[96,62] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.CaisseViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/CaisseViewSwing.java:[97,60] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.CaisseViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[170,70] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[171,70] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[172,78] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[173,70] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[174,71] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[585,13] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[722,13] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[724,13] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[798,60] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[799,60] cannot find symbol
+[ERROR]   symbol:   variable MaterialDesign
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
