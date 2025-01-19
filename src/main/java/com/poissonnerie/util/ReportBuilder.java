@@ -324,11 +324,87 @@ public class ReportBuilder {
 
     private void genererRapportVentesExcel(String cheminFichier, Map<String, Object> stats,
                                             LocalDate debut, LocalDate fin) throws Exception {
-        // TODO: Implement Excel report generation for sales data
         Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("Rapport Ventes");
-        // Add implementation here
 
+        // Feuille des statistiques globales
+        Sheet sheetStats = workbook.createSheet("Statistiques Globales");
+        CellStyle headerStyle = creerStyleEnTete(workbook);
+        CellStyle dataStyle = creerStyleDonnees(workbook);
+
+        // En-tête
+        Row headerRow = sheetStats.createRow(0);
+        headerRow.createCell(0).setCellValue("Période du rapport");
+        headerRow.createCell(1).setCellValue(debut.format(DATE_FORMATTER) + " au " + fin.format(DATE_FORMATTER));
+
+        // Statistiques principales
+        Row row1 = sheetStats.createRow(2);
+        row1.createCell(0).setCellValue("Chiffre d'affaires");
+        row1.createCell(1).setCellValue(((Number)stats.get("chiffreAffaires")).doubleValue());
+
+        Row row2 = sheetStats.createRow(3);
+        row2.createCell(0).setCellValue("Nombre de ventes");
+        row2.createCell(1).setCellValue(((Number)stats.get("nombreVentes")).intValue());
+
+        Row row3 = sheetStats.createRow(4);
+        row3.createCell(0).setCellValue("Panier moyen");
+        row3.createCell(1).setCellValue(((Number)stats.get("panierMoyen")).doubleValue());
+
+        // Feuille des ventes détaillées
+        Sheet sheetVentes = workbook.createSheet("Détail des Ventes");
+        Row ventesHeader = sheetVentes.createRow(0);
+        String[] headers = {"Date", "Client", "Nombre Produits", "Total", "Mode Paiement"};
+
+        for (int i = 0; i < headers.length; i++) {
+            Cell cell = ventesHeader.createCell(i);
+            cell.setCellValue(headers[i]);
+            cell.setCellStyle(headerStyle);
+        }
+
+        // Données des ventes
+        @SuppressWarnings("unchecked")
+        List<Vente> ventesTriees = (List<Vente>) stats.get("ventesTriees");
+        int rowNum = 1;
+        for (Vente vente : ventesTriees) {
+            Row row = sheetVentes.createRow(rowNum++);
+            row.createCell(0).setCellValue(vente.getDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            row.createCell(1).setCellValue(vente.getClient() != null ? vente.getClient().getNom() : "Vente comptant");
+            row.createCell(2).setCellValue(vente.getLignes().size());
+            row.createCell(3).setCellValue(vente.getMontantTotal());
+            row.createCell(4).setCellValue(vente.getModePaiement().toString());
+        }
+
+        // Feuille d'analyse par mode de paiement
+        Sheet sheetModes = workbook.createSheet("Analyse par Mode");
+        Row modesHeader = sheetModes.createRow(0);
+        String[] headersModes = {"Mode de Paiement", "Nombre", "Total", "Moyenne"};
+
+        for (int i = 0; i < headersModes.length; i++) {
+            Cell cell = modesHeader.createCell(i);
+            cell.setCellValue(headersModes[i]);
+            cell.setCellStyle(headerStyle);
+        }
+
+        @SuppressWarnings("unchecked")
+        Map<ModePaiement, DoubleSummaryStatistics> statsParMode =
+            (Map<ModePaiement, DoubleSummaryStatistics>) stats.get("statsParMode");
+
+        rowNum = 1;
+        for (Map.Entry<ModePaiement, DoubleSummaryStatistics> entry : statsParMode.entrySet()) {
+            Row row = sheetModes.createRow(rowNum++);
+            row.createCell(0).setCellValue(entry.getKey().toString());
+            row.createCell(1).setCellValue(entry.getValue().getCount());
+            row.createCell(2).setCellValue(entry.getValue().getSum());
+            row.createCell(3).setCellValue(entry.getValue().getAverage());
+        }
+
+        // Ajuster la largeur des colonnes
+        for (Sheet sheet : new Sheet[]{sheetStats, sheetVentes, sheetModes}) {
+            for (int i = 0; i < 5; i++) {
+                sheet.autoSizeColumn(i);
+            }
+        }
+
+        // Sauvegarder le fichier
         try (FileOutputStream fileOut = new FileOutputStream(cheminFichier)) {
             workbook.write(fileOut);
         }
@@ -393,11 +469,73 @@ public class ReportBuilder {
     }
 
     private void genererRapportCreancesExcel(String cheminFichier, Map<String, Object> stats) throws Exception {
-        // TODO: Implement Excel report generation for receivables
         Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("Rapport Créances");
-        // Add implementation here
 
+        // Feuille principale
+        Sheet sheet = workbook.createSheet("Rapport Créances");
+        CellStyle headerStyle = creerStyleEnTete(workbook);
+        CellStyle dataStyle = creerStyleDonnees(workbook);
+
+        // En-tête avec statistiques globales
+        Row headerRow = sheet.createRow(0);
+        headerRow.createCell(0).setCellValue("Total des créances");
+        headerRow.createCell(1).setCellValue(((Number)stats.get("totalCreances")).doubleValue());
+
+        // Analyse par statut
+        Row statutHeader = sheet.createRow(2);
+        statutHeader.createCell(0).setCellValue("Analyse par Statut");
+
+        Row statutLabels = sheet.createRow(3);
+        String[] labels = {"Statut", "Nombre", "Montant Moyen", "Total"};
+        for (int i = 0; i < labels.length; i++) {
+            Cell cell = statutLabels.createCell(i);
+            cell.setCellValue(labels[i]);
+            cell.setCellStyle(headerStyle);
+        }
+
+        @SuppressWarnings("unchecked")
+        Map<String, DoubleSummaryStatistics> statsParStatut = 
+            (Map<String, DoubleSummaryStatistics>) stats.get("statsParStatut");
+
+        int rowNum = 4;
+        for (Map.Entry<String, DoubleSummaryStatistics> entry : statsParStatut.entrySet()) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(entry.getKey());
+            row.createCell(1).setCellValue(entry.getValue().getCount());
+            row.createCell(2).setCellValue(entry.getValue().getAverage());
+            row.createCell(3).setCellValue(entry.getValue().getSum());
+        }
+
+        // Liste des clients en retard
+        Row retardHeader = sheet.createRow(rowNum + 1);
+        retardHeader.createCell(0).setCellValue("Clients en Retard de Paiement");
+
+        Row retardLabels = sheet.createRow(rowNum + 2);
+        String[] retardHeaders = {"Client", "Solde", "Dernière Vente", "Statut"};
+        for (int i = 0; i < retardHeaders.length; i++) {
+            Cell cell = retardLabels.createCell(i);
+            cell.setCellValue(retardHeaders[i]);
+            cell.setCellStyle(headerStyle);
+        }
+
+        @SuppressWarnings("unchecked")
+        List<Client> clientsRetard = (List<Client>) stats.get("clientsRetard");
+        rowNum += 3;
+        for (Client client : clientsRetard) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(client.getNom());
+            row.createCell(1).setCellValue(client.getSolde());
+            row.createCell(2).setCellValue(client.getDerniereVente() != null ? 
+                client.getDerniereVente().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "N/A");
+            row.createCell(3).setCellValue(client.getStatutCreances().toString());
+        }
+
+        // Ajuster la largeur des colonnes
+        for (int i = 0; i < 4; i++) {
+            sheet.autoSizeColumn(i);
+        }
+
+        // Sauvegarder le fichier
         try (FileOutputStream fileOut = new FileOutputStream(cheminFichier)) {
             workbook.write(fileOut);
         }
@@ -469,11 +607,99 @@ public class ReportBuilder {
 
     private void genererRapportFinancierExcel(String cheminFichier, Map<String, Object> stats,
                                              LocalDate debut, LocalDate fin) throws Exception {
-        // TODO: Implement Excel report generation for finances
         Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("Rapport Financier");
-        // Add implementation here
+        CellStyle headerStyle = creerStyleEnTete(workbook);
+        CellStyle dataStyle = creerStyleDonnees(workbook);
 
+        // Feuille principale - Vue d'ensemble
+        Sheet sheetVueEnsemble = workbook.createSheet("Vue d'ensemble");
+
+        // En-tête
+        Row headerRow = sheetVueEnsemble.createRow(0);
+        headerRow.createCell(0).setCellValue("Rapport Financier");
+        headerRow.createCell(1).setCellValue(debut.format(DATE_FORMATTER) + " au " + fin.format(DATE_FORMATTER));
+
+        // Résultats globaux
+        Row row1 = sheetVueEnsemble.createRow(2);
+        row1.createCell(0).setCellValue("Chiffre d'affaires total");
+        row1.createCell(1).setCellValue(((Number)stats.get("chiffreAffairesTotal")).doubleValue());
+
+        Row row2 = sheetVueEnsemble.createRow(3);
+        row2.createCell(0).setCellValue("Total des dépenses");
+        row2.createCell(1).setCellValue(((Number)stats.get("depensesTotal")).doubleValue());
+
+        Row row3 = sheetVueEnsemble.createRow(4);
+        row3.createCell(0).setCellValue("Bénéfice net");
+        row3.createCell(1).setCellValue(((Number)stats.get("beneficeNet")).doubleValue());
+
+        if (stats.containsKey("tauxMargeBrute")) {
+            Row row4 = sheetVueEnsemble.createRow(5);
+            row4.createCell(0).setCellValue("Taux de marge brute");
+            row4.createCell(1).setCellValue(((Number)stats.get("tauxMargeBrute")).doubleValue() + "%");
+        }
+
+        // Feuille - Évolution quotidienne
+        Sheet sheetEvolution = workbook.createSheet("Évolution Quotidienne");
+        Row evolutionHeader = sheetEvolution.createRow(0);
+        String[] headers = {"Date", "Chiffre d'affaires", "Dépenses", "Bénéfice"};
+
+        for (int i = 0; i < headers.length; i++) {
+            Cell cell = evolutionHeader.createCell(i);
+            cell.setCellValue(headers[i]);
+            cell.setCellStyle(headerStyle);
+        }
+
+        @SuppressWarnings("unchecked")
+        Map<LocalDate, Double> caParJour = (Map<LocalDate, Double>) stats.get("chiffreAffairesParJour");
+        @SuppressWarnings("unchecked")
+        Map<LocalDate, Double> depensesParJour = (Map<LocalDate, Double>) stats.get("depensesParJour");
+
+        Set<LocalDate> dates = new TreeSet<>();
+        dates.addAll(caParJour.keySet());
+        dates.addAll(depensesParJour.keySet());
+
+        int rowNum = 1;
+        for (LocalDate date : dates) {
+            Row row = sheetEvolution.createRow(rowNum++);
+            double ca = caParJour.getOrDefault(date, 0.0);
+            double depenses = depensesParJour.getOrDefault(date, 0.0);
+
+            row.createCell(0).setCellValue(date.format(DATE_FORMATTER));
+            row.createCell(1).setCellValue(ca);
+            row.createCell(2).setCellValue(depenses);
+            row.createCell(3).setCellValue(ca - depenses);
+        }
+
+        // Feuille - Analyse des tendances
+        Sheet sheetTendances = workbook.createSheet("Analyse des Tendances");
+        Row tendancesHeader = sheetTendances.createRow(0);
+        String[] headersTendances = {"Indicateur", "Valeur", "Variation"};
+
+        for (int i = 0; i < headersTendances.length; i++) {
+            Cell cell = tendancesHeader.createCell(i);
+            cell.setCellValue(headersTendances[i]);
+            cell.setCellStyle(headerStyle);
+        }
+
+        @SuppressWarnings("unchecked")
+        Map<String, Double> tendances = (Map<String, Double>) stats.get("tendances");
+        if (tendances != null) {
+            rowNum = 1;
+            for (Map.Entry<String, Double> entry : tendances.entrySet()) {
+                Row row = sheetTendances.createRow(rowNum++);
+                row.createCell(0).setCellValue(entry.getKey());
+                row.createCell(1).setCellValue(entry.getValue());
+            }
+        }
+
+        // Ajuster la largeur des colonnes
+        for (Sheet sheet : new Sheet[]{sheetVueEnsemble, sheetEvolution, sheetTendances}) {
+            for (int i = 0; i < 4; i++) {
+                sheet.autoSizeColumn(i);
+            }
+        }
+
+        // Sauvegarder le fichier
         try (FileOutputStream fileOut = new FileOutputStream(cheminFichier)) {
             workbook.write(fileOut);
         }

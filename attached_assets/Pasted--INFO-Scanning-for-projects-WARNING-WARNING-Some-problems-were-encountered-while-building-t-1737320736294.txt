@@ -1,0 +1,45 @@
+[INFO] Scanning for projects...
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for com.poissonnerie:gestion-poissonnerie:jar:1.0-SNAPSHOT
+[WARNING] 'dependencies.dependency.(groupId:artifactId:type:classifier)' must be unique: org.apache.poi:poi-ooxml:jar -> duplicate declaration of version 5.4.0 @ line 91, column 17
+[WARNING] 'dependencies.dependency.(groupId:artifactId:type:classifier)' must be unique: com.itextpdf:itextpdf:jar -> version 5.5.13.3 vs 5.5.13.4 @ line 97, column 17
+[WARNING] 'dependencies.dependency.(groupId:artifactId:type:classifier)' must be unique: org.apache.poi:poi:jar -> duplicate declaration of version 5.4.0 @ line 109, column 17
+[WARNING] 'dependencies.dependency.(groupId:artifactId:type:classifier)' must be unique: org.apache.poi:poi:jar -> duplicate declaration of version 5.4.0 @ line 115, column 17
+[WARNING] 'dependencies.dependency.(groupId:artifactId:type:classifier)' must be unique: org.apache.poi:poi-ooxml:jar -> duplicate declaration of version 5.4.0 @ line 121, column 17
+[WARNING] 'dependencies.dependency.(groupId:artifactId:type:classifier)' must be unique: com.itextpdf:itextpdf:jar -> version 5.5.13.3 vs 5.5.13.4 @ line 127, column 17
+[WARNING] 'dependencies.dependency.(groupId:artifactId:type:classifier)' must be unique: org.jfree:jfreechart:jar -> duplicate declaration of version 1.5.5 @ line 133, column 17
+[WARNING] 
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING] 
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING] 
+[INFO] 
+[INFO] ---------------< com.poissonnerie:gestion-poissonnerie >----------------
+[INFO] Building gestion-poissonnerie 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[WARNING] Parameter 'dynamicDependencies' is unknown for plugin 'maven-compiler-plugin:3.11.0:compile (default-compile)'
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ gestion-poissonnerie ---
+[INFO] Deleting /home/runner/workspace/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ gestion-poissonnerie ---
+[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ gestion-poissonnerie ---
+[INFO] Changes detected - recompiling the module! :source
+[WARNING] File encoding has not been set, using platform encoding UTF-8, i.e. build is platform dependent!
+[INFO] Compiling 33 source files with javac [debug target 1.8] to target/classes
+[WARNING] bootstrap class path not set in conjunction with -source 8
+[WARNING] source value 8 is obsolete and will be removed in a future release
+[WARNING] target value 8 is obsolete and will be removed in a future release
+[WARNING] To suppress warnings about obsolete options, use -Xlint:-options.
+[INFO] /home/runner/workspace/src/main/java/com/poissonnerie/util/ExcelGenerator.java: Some input files use unchecked or unsafe operations.
+[INFO] /home/runner/workspace/src/main/java/com/poissonnerie/util/ExcelGenerator.java: Recompile with -Xlint:unchecked for details.
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  3.661 s
+[INFO] Finished at: 2025-01-19T21:03:52Z
+[INFO] ------------------------------------------------------------------------

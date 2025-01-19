@@ -113,7 +113,7 @@ public class PDFGenerator {
             String originalName = new File(cheminFichier).getName();
             String sanitizedName = sanitizeFilename(UUID.randomUUID().toString() + "_" + originalName);
             Path path = Paths.get(OUTPUT_DIR, sanitizedName).normalize();
-            
+
             // Vérification que le chemin est dans le répertoire de sortie autorisé
             Path baseDir = Paths.get(OUTPUT_DIR).normalize();
             if (!path.startsWith(baseDir)) {
@@ -333,7 +333,7 @@ public class PDFGenerator {
     }
 
     private static void ajouterStatistiquesVentes(Document document, Map<String, Object> stats) 
-            throws DocumentException {
+            throws DocumentException, IOException {
         Font sectionFont = new Font(BaseFont.createFont(), 14, Font.BOLD);
 
         // Chiffres clés
@@ -358,7 +358,7 @@ public class PDFGenerator {
     }
 
     private static void ajouterAnalyseTendances(Document document, List<Vente> ventes, 
-            LocalDate dateDebut, LocalDate dateFin) throws DocumentException {
+            LocalDate dateDebut, LocalDate dateFin) throws DocumentException, IOException {
         Font sectionFont = new Font(BaseFont.createFont(), 14, Font.BOLD);
         document.add(new Paragraph("Analyse des Tendances:", sectionFont));
 
@@ -409,7 +409,7 @@ public class PDFGenerator {
     }
 
     private static void ajouterVisualisationsVentes(Document document, Map<String, Object> stats) 
-            throws DocumentException {
+            throws DocumentException, IOException {
         Font sectionFont = new Font(BaseFont.createFont(), 14, Font.BOLD);
         document.add(new Paragraph("Analyses Supplémentaires:", sectionFont));
 

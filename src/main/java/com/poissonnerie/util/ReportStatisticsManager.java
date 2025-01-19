@@ -10,6 +10,8 @@ import java.util.logging.Level;
 
 public class ReportStatisticsManager {
     private static final Logger LOGGER = Logger.getLogger(ReportStatisticsManager.class.getName());
+    private static final double SEUIL_ALERTE_STOCK = 10.0;
+    private static final double SEUIL_ALERTE_CA = 1000.0;
 
     public static Map<String, Object> analyserStocks(List<Produit> produits, String categorie) {
         Map<String, Object> stats = new HashMap<>();
@@ -51,11 +53,16 @@ public class ReportStatisticsManager {
                 .filter(v -> modePaiement == null || v.getModePaiement() == modePaiement)
                 .collect(Collectors.toList());
 
+            // Statistiques de base
             double chiffreAffaires = ventesFiltrees.stream()
                 .mapToDouble(Vente::getMontantTotal)
                 .sum();
             stats.put("chiffreAffaires", chiffreAffaires);
+            stats.put("nombreVentes", ventesFiltrees.size());
+            stats.put("panierMoyen", ventesFiltrees.isEmpty() ? 0.0 : 
+                chiffreAffaires / ventesFiltrees.size());
 
+            // Statistiques par mode de paiement
             Map<ModePaiement, DoubleSummaryStatistics> statsParMode = ventesFiltrees.stream()
                 .collect(Collectors.groupingBy(
                     Vente::getModePaiement,
@@ -63,6 +70,11 @@ public class ReportStatisticsManager {
                 ));
             stats.put("statsParMode", statsParMode);
 
+            // Répartition des ventes
+            Map<String, Double> repartition = calculerRepartitionVentes(ventesFiltrees);
+            stats.put("repartitionVentes", repartition);
+
+            // Analyse des tendances
             Map<LocalDate, Double> ventesParJour = ventesFiltrees.stream()
                 .collect(Collectors.groupingBy(
                     v -> v.getDate().toLocalDate(),
@@ -70,12 +82,65 @@ public class ReportStatisticsManager {
                 ));
             stats.put("ventesParJour", ventesParJour);
 
+            // Génération des alertes
+            List<String> alertes = genererAlertes(ventesFiltrees, chiffreAffaires);
+            stats.put("alertes", alertes);
+
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de l'analyse des ventes", e);
             stats.put("erreur", e.getMessage());
         }
 
         return stats;
+    }
+
+    private static Map<String, Double> calculerRepartitionVentes(List<Vente> ventes) {
+        if (ventes.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        double totalVentes = ventes.stream()
+            .mapToDouble(Vente::getMontantTotal)
+            .sum();
+
+        Map<String, Double> repartition = new HashMap<>();
+
+        // Par mode de paiement
+        Map<ModePaiement, Double> parMode = ventes.stream()
+            .collect(Collectors.groupingBy(
+                Vente::getModePaiement,
+                Collectors.summingDouble(Vente::getMontantTotal)
+            ));
+
+        parMode.forEach((mode, montant) -> {
+            repartition.put(mode.toString(), (montant / totalVentes) * 100);
+        });
+
+        return repartition;
+    }
+
+    private static List<String> genererAlertes(List<Vente> ventes, double chiffreAffaires) {
+        List<String> alertes = new ArrayList<>();
+
+        // Alerte sur le chiffre d'affaires
+        if (chiffreAffaires < SEUIL_ALERTE_CA) {
+            alertes.add(String.format("Attention: Chiffre d'affaires bas (%.2f €)", chiffreAffaires));
+        }
+
+        // Analyse des produits en alerte de stock
+        Set<Produit> produitsVendus = ventes.stream()
+            .flatMap(v -> v.getLignes().stream())
+            .map(Vente.LigneVente::getProduit)
+            .collect(Collectors.toSet());
+
+        produitsVendus.stream()
+            .filter(p -> p.getQuantite() <= p.getSeuilAlerte())
+            .forEach(p -> alertes.add(String.format(
+                "Stock faible pour %s: %d unités restantes (seuil: %d)",
+                p.getNom(), p.getQuantite(), p.getSeuilAlerte()
+            )));
+
+        return alertes;
     }
 
     public static Map<String, Object> analyserCreances(List<Client> clients) {
