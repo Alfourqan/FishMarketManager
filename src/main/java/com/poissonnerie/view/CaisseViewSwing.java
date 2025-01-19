@@ -38,15 +38,17 @@ public class CaisseViewSwing {
 
     public CaisseViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBackground(new Color(248, 250, 252));
+        mainPanel.setBackground(new Color(245, 245, 245));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         controller = new CaisseController();
 
-        // Initialisation du label de solde
+        // Initialisation du label de solde avec style moderne
         soldeLabel = new JLabel("Solde: 0.00 €");
         soldeLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
-        soldeLabel.setForeground(new Color(30, 41, 59));
-        soldeLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+        soldeLabel.setForeground(new Color(33, 33, 33));
+        soldeLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
 
+        // Création du modèle de table
         String[] columnNames = {"Date", "Type", "Montant", "Description"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
@@ -61,83 +63,6 @@ public class CaisseViewSwing {
         updateCaisseState();
     }
 
-    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
-        FontIcon icon = FontIcon.of(iconCode);
-        icon.setIconSize(18);
-        icon.setIconColor(Color.WHITE);
-
-        JButton button = new JButton(text);
-        button.setIcon(icon);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        button.setBackground(color);
-        button.setForeground(Color.WHITE);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setMargin(new Insets(8, 15, 8, 15));
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.putClientProperty("JButton.buttonType", "roundRect");
-
-        // Effet de survol avec animation
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(color.darker());
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(color);
-            }
-        });
-
-        return button;
-    }
-
-    private void initializeComponents() {
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        mainPanel.setBackground(new Color(248, 250, 252));
-
-        // Panel du haut avec style moderne
-        JPanel topPanel = new JPanel(new BorderLayout(20, 0));
-        topPanel.setBackground(new Color(248, 250, 252));
-        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-        actionPanel.setBackground(new Color(248, 250, 252));
-
-        // Création des boutons avec nouveaux styles et animations
-        ouvrirBtn = createStyledButton("Ouvrir la caisse", MaterialDesign.MDI_CASH, new Color(34, 197, 94));
-        cloturerBtn = createStyledButton("Clôturer la caisse", MaterialDesign.MDI_CLOSE_CIRCLE, new Color(239, 68, 68));
-        ajouterBtn = createStyledButton("Nouveau mouvement", MaterialDesign.MDI_PLUS_CIRCLE, new Color(59, 130, 246));
-        exporterBtn = createStyledButton("Exporter (CSV)", MaterialDesign.MDI_EXPORT, new Color(99, 102, 241));
-
-        // Panel pour le solde avec style moderne
-        JPanel soldePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        soldePanel.setBackground(new Color(248, 250, 252));
-        soldePanel.add(soldeLabel);
-
-        // Ajout des boutons avec un espacement approprié
-        actionPanel.add(Box.createHorizontalStrut(5));
-        actionPanel.add(ouvrirBtn);
-        actionPanel.add(Box.createHorizontalStrut(10));
-        actionPanel.add(cloturerBtn);
-        actionPanel.add(Box.createHorizontalStrut(10));
-        actionPanel.add(ajouterBtn);
-        actionPanel.add(Box.createHorizontalStrut(10));
-        actionPanel.add(exporterBtn);
-
-        topPanel.add(soldePanel, BorderLayout.WEST);
-        topPanel.add(actionPanel, BorderLayout.CENTER);
-
-        JScrollPane scrollPane = new JScrollPane(tableMouvements);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.getViewport().setBackground(Color.WHITE);
-
-        // Event handlers
-        ouvrirBtn.addActionListener(e -> ouvrirCaisse());
-        cloturerBtn.addActionListener(e -> cloturerCaisse());
-        ajouterBtn.addActionListener(e -> showMouvementDialog());
-        exporterBtn.addActionListener(e -> exporterMouvements());
-
-        mainPanel.add(topPanel, BorderLayout.NORTH);
-        mainPanel.add(scrollPane, BorderLayout.CENTER);
-    }
-
     private void setupTableStyle() {
         // Configuration de base du tableau
         tableMouvements.setShowGrid(false);
@@ -145,15 +70,9 @@ public class CaisseViewSwing {
         tableMouvements.setBackground(Color.WHITE);
         tableMouvements.setSelectionBackground(new Color(232, 240, 254));
         tableMouvements.setSelectionForeground(new Color(33, 33, 33));
-        tableMouvements.setRowHeight(42); // Hauteur confortable pour la lecture
-        tableMouvements.setFont(new Font("Segoe UI", Font.PLAIN, 15)); // Police intermédiaire
+        tableMouvements.setRowHeight(35); // Hauteur ajustée pour correspondre au style produits
+        tableMouvements.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         tableMouvements.setIntercellSpacing(new Dimension(0, 0));
-
-        // Configuration des colonnes pour une meilleure lisibilité
-        tableMouvements.getColumnModel().getColumn(0).setPreferredWidth(160); // Date
-        tableMouvements.getColumnModel().getColumn(1).setPreferredWidth(120); // Type
-        tableMouvements.getColumnModel().getColumn(2).setPreferredWidth(140); // Montant
-        tableMouvements.getColumnModel().getColumn(3).setPreferredWidth(280); // Description
 
         // Configuration des cellules avec alternance de couleurs
         DefaultTableCellRenderer cellRenderer = new DefaultTableCellRenderer() {
@@ -165,8 +84,7 @@ public class CaisseViewSwing {
                 if (!isSelected) {
                     c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(245, 245, 245));
                 }
-                // Padding des cellules ajusté
-                ((JLabel) c).setBorder(BorderFactory.createEmptyBorder(0, 18, 0, 18));
+                ((JLabel) c).setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 16));
                 ((JLabel) c).setHorizontalAlignment(column == 2 ? JLabel.RIGHT : JLabel.LEFT);
                 return c;
             }
@@ -181,8 +99,14 @@ public class CaisseViewSwing {
         JTableHeader header = tableMouvements.getTableHeader();
         header.setBackground(new Color(33, 33, 33));
         header.setForeground(Color.WHITE);
-        header.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 45));
+        header.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 40));
+
+        // Configuration des colonnes
+        tableMouvements.getColumnModel().getColumn(0).setPreferredWidth(160); // Date
+        tableMouvements.getColumnModel().getColumn(1).setPreferredWidth(120); // Type
+        tableMouvements.getColumnModel().getColumn(2).setPreferredWidth(140); // Montant
+        tableMouvements.getColumnModel().getColumn(3).setPreferredWidth(280); // Description
 
         // Configuration du rendu de l'en-tête
         DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer() {
@@ -193,13 +117,108 @@ public class CaisseViewSwing {
                         isSelected, hasFocus, row, column);
                 label.setBackground(new Color(33, 33, 33));
                 label.setForeground(Color.WHITE);
-                label.setBorder(BorderFactory.createEmptyBorder(0, 18, 0, 18));
+                label.setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 16));
                 label.setHorizontalAlignment(column == 2 ? JLabel.RIGHT : JLabel.LEFT);
                 return label;
             }
         };
 
         header.setDefaultRenderer(headerRenderer);
+    }
+
+    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
+        FontIcon icon = FontIcon.of(iconCode);
+        icon.setIconSize(16);  // Réduction de la taille de l'icône
+        icon.setIconColor(Color.WHITE);
+
+        JButton button = new JButton(text);
+        button.setIcon(icon);
+        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        button.setBackground(color);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setMargin(new Insets(8, 12, 8, 12));  // Marges réduites
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(color.darker());
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(color);
+            }
+        });
+
+        return button;
+    }
+
+    private void initializeComponents() {
+        // Panel d'en-tête avec titre et recherche
+        JPanel headerPanel = createHeaderPanel();
+
+        // Panel des boutons d'action
+        JPanel actionPanel = createActionPanel();
+
+        // Conteneur principal
+        JPanel contentPanel = new JPanel(new BorderLayout(0, 20));
+        contentPanel.setOpaque(false);
+        contentPanel.add(headerPanel, BorderLayout.NORTH);
+        contentPanel.add(actionPanel, BorderLayout.CENTER);
+
+        // ScrollPane pour la table
+        JScrollPane scrollPane = new JScrollPane(tableMouvements);
+        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(225, 225, 225)));
+        scrollPane.getViewport().setBackground(Color.WHITE);
+
+        mainPanel.add(contentPanel, BorderLayout.NORTH);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+    }
+
+    private JPanel createHeaderPanel() {
+        JPanel headerPanel = new JPanel(new BorderLayout(15, 0));
+        headerPanel.setOpaque(false);
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
+
+        JLabel titleLabel = new JLabel("Gestion de la Caisse");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        titleLabel.setForeground(new Color(33, 33, 33));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
+
+        headerPanel.add(titleLabel, BorderLayout.WEST);
+        headerPanel.add(soldeLabel, BorderLayout.EAST);
+
+        return headerPanel;
+    }
+
+    private JPanel createActionPanel() {
+        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));  // Espacement réduit
+        actionPanel.setOpaque(false);
+        actionPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
+
+        // Création des boutons avec styles harmonisés
+        ouvrirBtn = createStyledButton("Ouvrir la caisse", MaterialDesign.MDI_CASH, new Color(76, 175, 80));
+        cloturerBtn = createStyledButton("Clôturer la caisse", MaterialDesign.MDI_CLOSE_CIRCLE, new Color(244, 67, 54));
+        ajouterBtn = createStyledButton("Nouveau mouvement", MaterialDesign.MDI_PLUS_CIRCLE, new Color(33, 150, 243));
+        exporterBtn = createStyledButton("Exporter (CSV)", MaterialDesign.MDI_EXPORT, new Color(156, 39, 176));
+
+        // Configuration des event handlers
+        ouvrirBtn.addActionListener(e -> ouvrirCaisse());
+        cloturerBtn.addActionListener(e -> cloturerCaisse());
+        ajouterBtn.addActionListener(e -> showMouvementDialog());
+        exporterBtn.addActionListener(e -> exporterMouvements());
+
+        // Ajout des boutons avec espacement approprié
+        actionPanel.add(Box.createHorizontalStrut(4));  // Espacement initial réduit
+        actionPanel.add(ouvrirBtn);
+        actionPanel.add(Box.createHorizontalStrut(8));  // Espacement entre boutons réduit
+        actionPanel.add(cloturerBtn);
+        actionPanel.add(Box.createHorizontalStrut(8));
+        actionPanel.add(ajouterBtn);
+        actionPanel.add(Box.createHorizontalStrut(8));
+        actionPanel.add(exporterBtn);
+
+        return actionPanel;
     }
 
     private void ouvrirCaisse() {

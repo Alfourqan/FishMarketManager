@@ -27,7 +27,6 @@ com/poissonnerie/view/AccueilViewSwing$2.class
 com/poissonnerie/view/AccueilViewSwing.class
 com/poissonnerie/view/MainViewSwing.class
 com/poissonnerie/view/ConfigurationViewSwing$2.class
-schema.sql
 com/poissonnerie/controller/VenteController.class
 com/poissonnerie/view/ProduitViewSwing$5.class
 com/poissonnerie/view/ReportViewSwing$3.class
