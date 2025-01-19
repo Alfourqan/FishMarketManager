@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.io.File;
+import com.poissonnerie.view.*;
 
 public class MainViewSwing {
     private final JPanel mainPanel;
@@ -78,14 +79,15 @@ public class MainViewSwing {
         navigationPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
         navigationPanel.setPreferredSize(new Dimension(200, 0));
 
-        // Définir les éléments de navigation
+        // Définir les éléments de navigation avec Accueil en premier
         String[] viewNames = {
-            "Produits", "Ventes", "Clients", "Factures",
+            "Accueil", "Produits", "Ventes", "Clients", "Factures",
             "Fournisseurs", "Inventaire", "Caisse",
             "Rapport", "Réglages", "Déconnexion"
         };
 
         MaterialDesign[] icons = {
+            MaterialDesign.MDI_HOME,  // Icône pour Accueil
             MaterialDesign.MDI_PACKAGE_VARIANT,
             MaterialDesign.MDI_CART,
             MaterialDesign.MDI_ACCOUNT_MULTIPLE,
@@ -94,7 +96,6 @@ public class MainViewSwing {
             MaterialDesign.MDI_TAG_MULTIPLE,
             MaterialDesign.MDI_CLIPBOARD_TEXT,
             MaterialDesign.MDI_CASH_MULTIPLE,
-            MaterialDesign.MDI_CHART_BAR,
             MaterialDesign.MDI_SETTINGS,
             MaterialDesign.MDI_LOGOUT
         };
@@ -119,9 +120,10 @@ public class MainViewSwing {
             navigationPanel.add(navButton);
             navigationPanel.add(Box.createVerticalStrut(5));
 
+            // Sélectionner l'accueil par défaut
             if (i == 0) {
                 navButton.setSelected(true);
-                updateTitle(viewNames[i].toUpperCase()); // Définit le titre initial
+                updateTitle(viewNames[i].toUpperCase());
             }
         }
 
@@ -129,21 +131,21 @@ public class MainViewSwing {
     }
 
     private void addViews() {
-        // Ajouter les vues existantes
+        // Ajouter la vue Accueil en premier
+        contentPanel.add(new AccueilViewSwing().getMainPanel(), "Accueil");
+
+        // Ajouter les autres vues
         contentPanel.add(new ProduitViewSwing().getMainPanel(), "Produits");
         contentPanel.add(new VenteViewSwing().getMainPanel(), "Ventes");
         contentPanel.add(new ClientViewSwing().getMainPanel(), "Clients");
         contentPanel.add(new CaisseViewSwing().getMainPanel(), "Caisse");
         contentPanel.add(new InventaireViewSwing().getMainPanel(), "Inventaire");
-
-        // Ajouter les nouvelles vues
         contentPanel.add(new FournisseurViewSwing().getMainPanel(), "Fournisseurs");
         contentPanel.add(new ReportViewSwing().getMainPanel(), "Rapport");
         contentPanel.add(new ConfigurationViewSwing().getMainPanel(), "Réglages");
 
         // Ajouter des panels temporaires pour les autres vues
         contentPanel.add(createTemporaryPanel("Factures"), "Factures");
-        contentPanel.add(createTemporaryPanel("Catégories"), "Catégories");
     }
 
     private JPanel createTemporaryPanel(String name) {
