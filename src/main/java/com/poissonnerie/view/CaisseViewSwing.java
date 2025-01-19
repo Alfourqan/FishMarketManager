@@ -60,62 +60,6 @@ public class CaisseViewSwing {
         tableMouvements.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         tableMouvements.setIntercellSpacing(new Dimension(1, 1));
 
-        // Style amélioré des en-têtes avec icônes
-        JTableHeader header = tableMouvements.getTableHeader();
-        header.setDefaultRenderer(new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable table, Object value,
-                    boolean isSelected, boolean hasFocus, int row, int column) {
-                JLabel label = (JLabel) super.getTableCellRendererComponent(table, value,
-                        isSelected, hasFocus, row, column);
-
-                // Configuration du style
-                label.setHorizontalAlignment(JLabel.LEFT);
-                label.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(203, 213, 225)),
-                    BorderFactory.createEmptyBorder(8, 12, 8, 12)
-                ));
-                label.setFont(new Font("Segoe UI", Font.BOLD, 14));
-                label.setBackground(new Color(241, 245, 249));
-                label.setForeground(new Color(15, 23, 42));
-
-                // Ajout des icônes selon la colonne
-                FontIcon icon = null;
-                switch (column) {
-                    case 0: // Date
-                        icon = FontIcon.of(MaterialDesign.MDI_CALENDAR);
-                        break;
-                    case 1: // Type
-                        icon = FontIcon.of(MaterialDesign.MDI_TAG);
-                        break;
-                    case 2: // Montant
-                        icon = FontIcon.of(MaterialDesign.MDI_CURRENCY_EUR);
-                        break;
-                    case 3: // Description
-                        icon = FontIcon.of(MaterialDesign.MDI_TEXT);
-                        break;
-                }
-
-                if (icon != null) {
-                    icon.setIconSize(16);
-                    icon.setIconColor(new Color(15, 23, 42));
-                    label.setIcon(icon);
-                    label.setIconTextGap(8);
-                }
-
-                return label;
-            }
-        });
-
-        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 50));
-
-
-        // Style moderne pour le solde
-        soldeLabel = new JLabel("Solde: 0.00 €");
-        soldeLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
-        soldeLabel.setForeground(new Color(30, 41, 59));
-        soldeLabel.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
-
         initializeComponents();
         loadData();
         updateCaisseState();
@@ -196,6 +140,58 @@ public class CaisseViewSwing {
         JScrollPane scrollPane = new JScrollPane(tableMouvements);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getViewport().setBackground(Color.WHITE);
+
+        // Style amélioré des en-têtes avec icônes
+        JTableHeader header = tableMouvements.getTableHeader();
+        header.setDefaultRenderer(new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                JLabel label = (JLabel) super.getTableCellRendererComponent(table, value,
+                        isSelected, hasFocus, row, column);
+
+                // Configuration du style amélioré
+                label.setHorizontalAlignment(JLabel.LEFT);
+                label.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createMatteBorder(0, 0, 3, 0, new Color(203, 213, 225)),
+                    BorderFactory.createEmptyBorder(12, 16, 12, 16)
+                ));
+                label.setFont(new Font("Segoe UI Semibold", Font.BOLD, 14));
+                label.setBackground(new Color(243, 244, 246));
+                label.setForeground(new Color(31, 41, 55));
+                label.setOpaque(true);
+
+                // Ajout des icônes avec style amélioré
+                FontIcon icon = null;
+                switch (column) {
+                    case 0: // Date
+                        icon = FontIcon.of(MaterialDesign.MDI_CALENDAR_CLOCK);
+                        break;
+                    case 1: // Type
+                        icon = FontIcon.of(MaterialDesign.MDI_TAG_MULTIPLE);
+                        break;
+                    case 2: // Montant
+                        icon = FontIcon.of(MaterialDesign.MDI_CURRENCY_EUR);
+                        break;
+                    case 3: // Description
+                        icon = FontIcon.of(MaterialDesign.MDI_INFORMATION);
+                        break;
+                }
+
+                if (icon != null) {
+                    icon.setIconSize(18);
+                    icon.setIconColor(new Color(31, 41, 55));
+                    label.setIcon(icon);
+                    label.setIconTextGap(12);
+                }
+
+                return label;
+            }
+        });
+
+        // Définir une hauteur plus importante pour les en-têtes
+        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 56));
+
 
         // Event handlers
         ouvrirBtn.addActionListener(e -> ouvrirCaisse());

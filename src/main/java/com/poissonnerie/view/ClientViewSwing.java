@@ -91,27 +91,28 @@ public class ClientViewSwing {
                 JLabel label = (JLabel) super.getTableCellRendererComponent(table, value,
                         isSelected, hasFocus, row, column);
 
-                // Configuration du style
+                // Configuration du style amélioré
                 label.setHorizontalAlignment(JLabel.LEFT);
                 label.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(203, 213, 225)),
-                    BorderFactory.createEmptyBorder(8, 12, 8, 12)
+                    BorderFactory.createMatteBorder(0, 0, 3, 0, new Color(203, 213, 225)),
+                    BorderFactory.createEmptyBorder(12, 16, 12, 16)
                 ));
-                label.setFont(new Font("Segoe UI", Font.BOLD, 14));
-                label.setBackground(new Color(241, 245, 249));
-                label.setForeground(new Color(15, 23, 42));
+                label.setFont(new Font("Segoe UI Semibold", Font.BOLD, 14));
+                label.setBackground(new Color(243, 244, 246));
+                label.setForeground(new Color(31, 41, 55));
+                label.setOpaque(true);
 
-                // Ajout des icônes selon la colonne
+                // Ajout des icônes avec style amélioré
                 FontIcon icon = null;
                 switch (column) {
                     case 0: // Nom
-                        icon = FontIcon.of(MaterialDesign.MDI_ACCOUNT);
+                        icon = FontIcon.of(MaterialDesign.MDI_ACCOUNT_CIRCLE);
                         break;
                     case 1: // Téléphone
-                        icon = FontIcon.of(MaterialDesign.MDI_PHONE);
+                        icon = FontIcon.of(MaterialDesign.MDI_PHONE_CLASSIC);
                         break;
                     case 2: // Adresse
-                        icon = FontIcon.of(MaterialDesign.MDI_MAP_MARKER);
+                        icon = FontIcon.of(MaterialDesign.MDI_MAP_MARKER_RADIUS);
                         break;
                     case 3: // Solde
                         icon = FontIcon.of(MaterialDesign.MDI_CURRENCY_EUR);
@@ -119,17 +120,17 @@ public class ClientViewSwing {
                 }
 
                 if (icon != null) {
-                    icon.setIconSize(16);
-                    icon.setIconColor(new Color(15, 23, 42));
+                    icon.setIconSize(18);
+                    icon.setIconColor(new Color(31, 41, 55));
                     label.setIcon(icon);
-                    label.setIconTextGap(8);
+                    label.setIconTextGap(12);
                 }
 
                 return label;
             }
         });
 
-        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 50));
+        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 56));
 
 
         // Configuration du scroll pane avec style moderne
@@ -137,7 +138,6 @@ public class ClientViewSwing {
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getViewport().setBackground(Color.WHITE);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-
 
         // Création des boutons avec style moderne
         JButton ajouterBtn = createStyledButton("Ajouter", new Color(76, 175, 80));
