@@ -21,6 +21,7 @@ com/poissonnerie/model/MouvementCaisse$TypeMouvement.class
 com/poissonnerie/view/FournisseurViewSwing$2.class
 com/poissonnerie/view/CaisseViewSwing$2.class
 com/poissonnerie/Main.class
+com/poissonnerie/view/AccueilViewSwing$2.class
 com/poissonnerie/view/AccueilViewSwing.class
 com/poissonnerie/view/MainViewSwing.class
 com/poissonnerie/view/ConfigurationViewSwing$2.class
@@ -46,6 +47,7 @@ com/poissonnerie/view/ConfigurationViewSwing.class
 com/poissonnerie/view/VenteViewSwing$4.class
 com/poissonnerie/view/FournisseurViewSwing.class
 com/poissonnerie/view/VenteViewSwing$2.class
+com/poissonnerie/model/Fournisseur.class
 com/poissonnerie/view/ProduitViewSwing$1.class
 com/poissonnerie/view/ClientViewSwing$2.class
 com/poissonnerie/view/ProduitViewSwing$3.class
@@ -58,6 +60,7 @@ com/poissonnerie/model/Vente$LigneVente.class
 com/poissonnerie/view/InventaireViewSwing$1.class
 com/poissonnerie/view/SplashScreen$1.class
 com/poissonnerie/Main$1.class
+com/poissonnerie/view/AccueilViewSwing$3.class
 com/poissonnerie/model/Client$StatutCreances.class
 com/poissonnerie/view/VenteViewSwing.class
 com/poissonnerie/view/CaisseViewSwing$1.class

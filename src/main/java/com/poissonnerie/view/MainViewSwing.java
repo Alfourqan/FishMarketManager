@@ -5,6 +5,8 @@ import java.awt.*;
 import com.poissonnerie.controller.*;
 import com.poissonnerie.model.*;
 import java.io.File;
+import org.kordamp.ikonli.materialdesign.MaterialDesign;
+import org.kordamp.ikonli.swing.FontIcon;
 
 public class MainViewSwing {
     private final JPanel mainPanel;
@@ -67,20 +69,32 @@ public class MainViewSwing {
         navigationPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
         navigationPanel.setPreferredSize(new Dimension(200, 0));
 
-        String[] viewNames = {
-            "Accueil", "Produits", "Ventes", "Clients", "Factures",
-            "Fournisseurs", "Inventaire", "Caisse",
-            "Rapport", "Réglages", "Déconnexion"
+        // Configuration des éléments de menu avec leurs icônes
+        Object[][] menuItems = {
+            {"Accueil", MaterialDesign.MDI_HOME},
+            {"Produits", MaterialDesign.MDI_PACKAGE_VARIANT},
+            {"Ventes", MaterialDesign.MDI_CART},
+            {"Clients", MaterialDesign.MDI_ACCOUNT_GROUP},
+            {"Factures", MaterialDesign.MDI_FILE_DOCUMENT},
+            {"Fournisseurs", MaterialDesign.MDI_TRUCK_DELIVERY},
+            {"Inventaire", MaterialDesign.MDI_CLIPBOARD_TEXT},
+            {"Caisse", MaterialDesign.MDI_CASH_REGISTER},
+            {"Rapport", MaterialDesign.MDI_CHART_BAR},
+            {"Réglages", MaterialDesign.MDI_COG},
+            {"Déconnexion", MaterialDesign.MDI_LOGOUT}
         };
 
         ButtonGroup buttonGroup = new ButtonGroup();
         navigationPanel.add(Box.createVerticalStrut(10));
 
-        for (int i = 0; i < viewNames.length; i++) {
-            JToggleButton navButton = createNavigationButton(viewNames[i]);
-            final String cardName = viewNames[i];
+        for (int i = 0; i < menuItems.length; i++) {
+            String text = (String) menuItems[i][0];
+            MaterialDesign icon = (MaterialDesign) menuItems[i][1];
 
-            if (i < viewNames.length - 1) {
+            JToggleButton navButton = createNavigationButton(text, icon);
+            final String cardName = text;
+
+            if (i < menuItems.length - 1) {
                 navButton.addActionListener(e -> {
                     cardLayout.show(contentPanel, cardName);
                     updateTitle(cardName.toUpperCase());
@@ -95,15 +109,23 @@ public class MainViewSwing {
 
             if (i == 0) {
                 navButton.setSelected(true);
-                updateTitle(viewNames[i].toUpperCase());
+                updateTitle(text.toUpperCase());
             }
         }
 
         return navigationPanel;
     }
 
-    private JToggleButton createNavigationButton(String text) {
+    private JToggleButton createNavigationButton(String text, MaterialDesign iconCode) {
         JToggleButton button = new JToggleButton(text);
+
+        // Configuration de l'icône
+        FontIcon icon = FontIcon.of(iconCode);
+        icon.setIconSize(18);
+        icon.setIconColor(Color.WHITE);
+        button.setIcon(icon);
+
+        // Style du bouton
         button.setHorizontalAlignment(SwingConstants.LEFT);
         button.setMargin(new Insets(8, 15, 8, 15));
         button.setFocusPainted(false);
@@ -116,6 +138,7 @@ public class MainViewSwing {
         button.setBorderPainted(false);
         button.setOpaque(true);
 
+        // Effet de survol
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 if (!button.isSelected()) {
