@@ -6,7 +6,7 @@ import java.awt.geom.RoundRectangle2D;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
-public class SplashScreen extends JWindow {
+public class SplashScreen extends JPanel {
     private static final int WIDTH = 600;
     private static final int HEIGHT = 350;
     private JProgressBar progressBar;
@@ -15,10 +15,9 @@ public class SplashScreen extends JWindow {
     private Timer animationTimer;
 
     public SplashScreen() {
-        setSize(WIDTH, HEIGHT);
-        setLocationRelativeTo(null);
+        setPreferredSize(new Dimension(WIDTH, HEIGHT));
         setLayout(new BorderLayout());
-        setBackground(new Color(0, 0, 0, 0));
+        setOpaque(false);
 
         // Démarrer l'animation
         animationTimer = new Timer(50, new ActionListener() {
@@ -67,13 +66,13 @@ public class SplashScreen extends JWindow {
 
                 // Titre principal avec effet de lueur
                 drawGlowingText(g2d, "Gestion Poissonnerie", 
-                              new Font("Segoe UI", Font.BOLD, 36),
-                              getWidth()/2, 80);
+                             new Font("Segoe UI", Font.BOLD, 36),
+                             getWidth()/2, 80);
 
                 // Sous-titre
                 drawGlowingText(g2d, "Application de gestion commerciale",
-                              new Font("Segoe UI", Font.PLAIN, 18),
-                              getWidth()/2, 120);
+                             new Font("Segoe UI", Font.PLAIN, 18),
+                             getWidth()/2, 120);
 
                 // Logo du poisson animé
                 drawAnimatedFishLogo(g2d, getWidth()/2, 180);
@@ -204,9 +203,6 @@ public class SplashScreen extends JWindow {
 
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
         add(mainPanel);
-
-        // Rendre la fenêtre arrondie
-        setShape(new RoundRectangle2D.Double(0, 0, WIDTH, HEIGHT, 20, 20));
     }
 
     public void setProgress(int progress, String status) {
@@ -214,11 +210,9 @@ public class SplashScreen extends JWindow {
         statusLabel.setText(status);
     }
 
-    @Override
-    public void dispose() {
+    public void stopAnimation() {
         if (animationTimer != null) {
             animationTimer.stop();
         }
-        super.dispose();
     }
 }
