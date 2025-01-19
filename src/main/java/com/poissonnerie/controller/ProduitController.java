@@ -13,6 +13,11 @@ public class ProduitController {
         return produits;
     }
 
+    // Alias de getProduits() pour maintenir la compatibilité avec ReportController
+    public List<Produit> getTousProduits() {
+        return getProduits();
+    }
+
     public void chargerProduits() {
         produits.clear();
         String sql = "SELECT * FROM produits";
@@ -103,7 +108,6 @@ public class ProduitController {
         }
     }
 
-    // Méthodes existantes inchangées
     public boolean produitUtiliseDansVentes(int produitId) {
         String sql = "SELECT COUNT(*) as count FROM lignes_vente WHERE produit_id = ?";
 

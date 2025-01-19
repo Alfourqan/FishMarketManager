@@ -547,9 +547,6 @@ public class ReportViewSwing {
         JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.INFORMATION_MESSAGE);
     }
 
-    public JPanel getMainPanel() {
-        return mainPanel;
-    }
     private JButton createReportButton(String text, MaterialDesign iconCode) {
         return createStyledButton(text, iconCode, PRIMARY_COLOR);
     }
@@ -761,9 +758,6 @@ public class ReportViewSwing {
         return 15.3; // Exemple
     }
 
-    private void updateCharts() {
-        afficherStatistiques();
-    }
 
     private void ouvrirFichierPDF(String nomFichier) {
         try {
@@ -864,7 +858,7 @@ public class ReportViewSwing {
         table.setShowHorizontalLines(true);
         table.setGridColor(new Color(230, 230, 230));
 
-        table.getTableHeader().setBackground(new Color(240, 240, 240));
+        table.getTableHeader().setBackground(new Color(240,240, 240));
         table.getTableHeader().setForeground(new Color(33, 33, 33));
         table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
         table.getTableHeader().setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(200, 200, 200)));
@@ -950,224 +944,12 @@ public class ReportViewSwing {
         }
     }
 
-    private void showSuccessMessage(String titre, String message) {
-        JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private void showErrorMessage(String titre, String message) {
-        JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.ERROR_MESSAGE);
-    }
-
-    private void showInfoMessage(String titre, String message) {
-        JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    /* Amélioration de la gestion des erreurs dans createDetailDialog */
-    private JDialog createDetailDialog(Client client) {
-        if (client == null) {
-            LOGGER.severe("Client null passé à createDetailDialog");
-            throw new IllegalArgumentException("Le client ne peut pas être null");
-        }
-
-        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel),
-            "Détail des créances - " + client.getNom(), true);
-        dialog.setLayout(new BorderLayout(10, 10));
-        dialog.setSize(600, 400);
-        dialog.setLocationRelativeTo(null);
-
-        try {
-            JPanel mainPanel = createDetailMainPanel(client);
-            dialog.add(mainPanel);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la création du panel de détails", e);
-            throw new RuntimeException("Impossible de créer le dialogue de détails", e);
-        }
-
-        return dialog;
-    }
-
-    private JPanel createDetailMainPanel(Client client) {
-        JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-
-        panel.add(createInfoPanel(client), BorderLayout.NORTH);
-        panel.add(createHistoriquePanel(), BorderLayout.CENTER);
-        panel.add(createButtonPanel(client), BorderLayout.SOUTH);
-
-        return panel;
-    }
-
-    private JPanel createInfoPanel(Client client) {
-        JPanel infoPanel = new JPanel(new GridLayout(3, 2, 5, 5));
-        infoPanel.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(SUCCESS_COLOR),
-            "Informations client",
-            TitledBorder.DEFAULT_JUSTIFICATION,
-            TitledBorder.DEFAULT_POSITION,
-            new Font("Segoe UI", Font.BOLD, 12),
-            SUCCESS_COLOR
-        ));
-
-        infoPanel.add(new JLabel("Nom:"));
-        infoPanel.add(new JLabel(client.getNom()));
-        infoPanel.add(new JLabel("Téléphone:"));
-        infoPanel.add(new JLabel(client.getTelephone()));
-        infoPanel.add(new JLabel("Solde actuel:"));
-        infoPanel.add(new JLabel(String.format("%.2f €", client.getSolde())));
-        return infoPanel;
-    }
-
-    private JPanel createHistoriquePanel() {
-        JPanel historiquePanel = new JPanel(new BorderLayout());
-        historiquePanel.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(INFO_COLOR),
-            "Historique des transactions",
-            TitledBorder.DEFAULT_JUSTIFICATION,
-            TitledBorder.DEFAULT_POSITION,
-            new Font("Segoe UI", Font.BOLD, 12),
-            INFO_COLOR
-        ));
-
-        String[] columns = {"Date", "Type", "Montant", "Solde après"};
-        Object[][] data = new Object[0][4];
-
-        JTable table = new JTable(data, columns);
-        table.setFillsViewportHeight(true);
-        table.setRowHeight(25);
-        table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-
-        historiquePanel.add(new JScrollPane(table), BorderLayout.CENTER);
-        return historiquePanel;
-    }
-
-    private JPanel createButtonPanel(Client client) {
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton genererRapportBtn = createStyledButton("Générer rapport détaillé",
-            MaterialDesign.MDI_FILE_DOCUMENT, INFO_COLOR);
-        JButton reglerCreanceBtn = createStyledButton("Régler créance",
-            MaterialDesign.MDI_CASH, SUCCESS_COLOR);
-
-        genererRapportBtn.addActionListener(e -> {
-            genererRapportCreanceClient(client);
-            ((JDialog)((JButton)e.getSource()).getTopLevelAncestor()).dispose();
-        });
-
-        reglerCreanceBtn.addActionListener(e -> {
-            afficherDialogueReglement(client);
-            ((JDialog)((JButton)e.getSource()).getTopLevelAncestor()).dispose();
-        });
-
-        buttonPanel.add(genererRapportBtn);
-        buttonPanel.add(reglerCreanceBtn);
-        return buttonPanel;
-    }
-
-    /* Amélioration de la méthode afficherDialogueReglement */
-    private void afficherDialogueReglement(Client client) {
-        if (client == null || client.getSolde() <= 0) {
-            LOGGER.warning("Tentative d'afficher le dialogue de règlement pour un client invalide");
-            showErrorMessage("Erreur", "Client invalide ou sans créance");
-            return;
-        }
-
-        try {
-            JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel),
-                "Règlement de créance - " + client.getNom(), true);
-            dialog.setLayout(new BorderLayout(10, 10));
-            dialog.setSize(400, 250);
-            dialog.setLocationRelativeTo(null);
-
-            JPanel panel = new JPanel(new GridBagLayout());
-            panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.gridwidth = 1;
-            gbc.fill = GridBagConstraints.HORIZONTAL;
-            gbc.insets = new Insets(5, 5, 5, 5);
-
-            configureReglementDialogComponents(dialog, panel, gbc, client);
-            dialog.setVisible(true);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de l'affichage du dialogue de règlement", e);
-            showErrorMessage("Erreur", "Impossible d'afficher le dialogue de règlement: " + e.getMessage());
-        }
-    }
-
-    /* Nouvelle méthode pour la configuration des composants du dialogue de règlement */
-    private void configureReglementDialogComponents(JDialog dialog, JPanel panel, GridBagConstraints gbc, Client client) {
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        panel.add(new JLabel("Solde actuel:"), gbc);
-
-        gbc.gridx = 1;
-        panel.add(new JLabel(String.format("%.2f €", client.getSolde())), gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        panel.add(new JLabel("Montant à régler:"), gbc);
-
-        gbc.gridx = 1;
-        SpinnerNumberModel spinnerModel = new SpinnerNumberModel(0.0, 0.0, client.getSolde(), 0.01);
-        JSpinner montantSpinner = new JSpinner(spinnerModel);
-        panel.add(montantSpinner, gbc);
-
-        JPanel buttonPanel = createReglementButtonPanel(dialog, montantSpinner, client);
-
-        dialog.add(panel, BorderLayout.CENTER);
-        dialog.add(buttonPanel, BorderLayout.SOUTH);
-    }
-
-    /* Nouvelle méthode pour créer le panel des boutons de règlement */
-    private JPanel createReglementButtonPanel(JDialog dialog, JSpinner montantSpinner, Client client) {
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton validerBtn = createStyledButton("Valider", MaterialDesign.MDI_CHECK, SUCCESS_COLOR);
-        JButton annulerBtn = createStyledButton("Annuler", MaterialDesign.MDI_CLOSE, ERROR_COLOR);
-
-        validerBtn.addActionListener(e -> handleReglementValidation(dialog, montantSpinner, client));
-        annulerBtn.addActionListener(e -> dialog.dispose());
-
-        buttonPanel.add(validerBtn);
-        buttonPanel.add(annulerBtn);
-        return buttonPanel;
-    }
-
-    /* Nouvelle méthode pour gérer la validation du règlement */
-    private void handleReglementValidation(JDialog dialog, JSpinner montantSpinner, Client client) {
-        try {
-            double montant = (double) montantSpinner.getValue();
-            validateReglementAmount(montant, client.getSolde());
-
-            ClientController clientController = new ClientController();
-            clientController.reglerCreance(client, montant);
-
-            showSuccessMessage("Succès", String.format("Règlement de %.2f € effectué avec succès", montant));
-            dialog.dispose();
-            afficherEtatCreances();
-        } catch (IllegalArgumentException ex) {
-            showErrorMessage("Erreur", ex.getMessage());
-        } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du règlement de la créance", ex);
-            showErrorMessage("Erreur", "Une erreur est survenue lors du règlement: " + ex.getMessage());
-        }
-    }
-
-    /* Nouvelle méthode pour valider le montant du règlement */
-    private void validateReglementAmount(double montant, double solde) {
-        if (montant <= 0) {
-            throw new IllegalArgumentException("Le montant doit être supérieur à 0");
-        }
-        if (montant > solde) {
-            throw new IllegalArgumentException("Le montant ne peut pas être supérieur au solde");
-        }
-    }
 
     private void handleError(String operation, Exception e) {
         LOGGER.log(Level.SEVERE, "Erreur lors de " + operation, e);
         showErrorMessage("Erreur", MSG_ERREUR_GENERATION + e.getMessage());
     }
 
-    public JPanel getMainPanel() {
-        return mainPanel;
-    }
     private void afficherDetailCreancesClient(Client client) {
         try {
             JDialog dialog = createDetailDialog(client);
@@ -1176,5 +958,38 @@ public class ReportViewSwing {
             LOGGER.log(Level.SEVERE, "Erreur lors de l'affichage des détails", e);
             showErrorMessage("Erreur", "Impossible d'afficher les détails : " + e.getMessage());
         }
+    }
+    private JDialog createDetailDialog(Client client) {
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel),
+            "Détails créances - " + client.getNom(), true);
+        dialog.setLayout(new BorderLayout(10, 10));
+        dialog.setSize(600, 400);
+        dialog.setLocationRelativeTo(null);
+
+        // Panel principal
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+
+        // Informations client
+        JPanel infoPanel = new JPanel(new GridLayout(3, 2, 5, 5));
+        infoPanel.add(new JLabel("Nom:"));
+        infoPanel.add(new JLabel(client.getNom()));
+        infoPanel.add(new JLabel("Téléphone:"));
+        infoPanel.add(new JLabel(client.getTelephone()));
+        infoPanel.add(new JLabel("Solde actuel:"));
+        infoPanel.add(new JLabel(String.format("%.2f €", client.getSolde())));
+
+        panel.add(infoPanel, BorderLayout.NORTH);
+
+        // Boutons
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton closeButton = createStyledButton("Fermer", MaterialDesign.MDI_CLOSE, Color.GRAY);
+        closeButton.addActionListener(e -> dialog.dispose());
+        buttonPanel.add(closeButton);
+
+        panel.add(buttonPanel, BorderLayout.SOUTH);
+        dialog.add(panel);
+
+        return dialog;
     }
 }

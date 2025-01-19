@@ -10,15 +10,34 @@ import java.util.logging.Logger;
 
 public class Vente {
     private static final Logger LOGGER = Logger.getLogger(Vente.class.getName());
+
+    public enum ModePaiement {
+        ESPECES("Espèces"),
+        CARTE("Carte bancaire"), 
+        CREDIT("Crédit");
+
+        private final String libelle;
+
+        ModePaiement(String libelle) {
+            this.libelle = libelle;
+        }
+
+        @Override
+        public String toString() {
+            return libelle;
+        }
+    }
+
     private int id;
     private final LocalDateTime date;
     private final Client client;
     private final boolean credit;
     private double total;
     private List<LigneVente> lignes;
+    private final ModePaiement modePaiement;
     private static final double TAUX_TVA_DEFAULT = 20.0; // 20% par défaut
 
-    public Vente(int id, LocalDateTime date, Client client, boolean credit, double total) {
+    public Vente(int id, LocalDateTime date, Client client, boolean credit, double total, ModePaiement modePaiement) {
         if (date == null) {
             throw new IllegalArgumentException("La date de vente ne peut pas être null");
         }
@@ -31,12 +50,19 @@ public class Vente {
         if (total < 0) {
             throw new IllegalArgumentException("Le total de la vente ne peut pas être négatif");
         }
+        if (modePaiement == null) {
+            throw new IllegalArgumentException("Le mode de paiement ne peut pas être null");
+        }
+        if (credit && modePaiement != ModePaiement.CREDIT) {
+            throw new IllegalArgumentException("Une vente à crédit doit avoir le mode de paiement CREDIT");
+        }
 
         this.id = id;
         this.date = date;
         this.client = client;
         this.credit = credit;
         this.total = total;
+        this.modePaiement = modePaiement;
         this.lignes = new ArrayList<>();
     }
 
@@ -52,6 +78,7 @@ public class Vente {
     public LocalDateTime getDate() { return date; }
     public Client getClient() { return client; }
     public boolean isCredit() { return credit; }
+    public ModePaiement getModePaiement() { return modePaiement; }
 
     public double getTotal() { return total; }
     public void setTotal(double total) {
@@ -247,11 +274,12 @@ public class Vente {
                Double.compare(vente.total, total) == 0 &&
                Objects.equals(date, vente.date) &&
                Objects.equals(client, vente.client) &&
-               Objects.equals(lignes, vente.lignes);
+               Objects.equals(lignes, vente.lignes) &&
+               modePaiement == vente.modePaiement;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, date, client, credit, total, lignes);
+        return Objects.hash(id, date, client, credit, total, lignes, modePaiement);
     }
 }

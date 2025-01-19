@@ -23,6 +23,7 @@ public class ReportController {
         this.caisseController = new CaisseController();
     }
 
+    // Méthodes de génération de rapports Excel
     public void genererRapportStocksExcel(String cheminFichier) {
         try {
             List<Produit> produits = produitController.getTousProduits();
@@ -37,7 +38,7 @@ public class ReportController {
 
     private Map<String, Double> calculerStatistiquesStocks(List<Produit> produits) {
         Map<String, Double> stats = new HashMap<>();
-        
+
         // Valeur totale du stock
         double valeurTotale = produits.stream()
             .mapToDouble(p -> p.getPrix() * p.getQuantite())
@@ -67,16 +68,16 @@ public class ReportController {
                 .collect(Collectors.toList());
             Map<String, Double> analyses = analyserVentes(ventes);
             ExcelGenerator.genererRapportVentes(ventes, analyses, cheminFichier);
-            LOGGER.info("Rapport des ventes généré avec succès");
+            LOGGER.info("Rapport des ventes Excel généré avec succès");
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport des ventes", e);
-            throw new RuntimeException("Erreur lors de la génération du rapport des ventes", e);
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport Excel des ventes", e);
+            throw new RuntimeException("Erreur lors de la génération du rapport Excel des ventes", e);
         }
     }
 
     private Map<String, Double> analyserVentes(List<Vente> ventes) {
         Map<String, Double> analyses = new HashMap<>();
-        
+
         // Chiffre d'affaires total
         double caTotal = ventes.stream().mapToDouble(Vente::getTotal).sum();
         analyses.put("Chiffre d'affaires total", caTotal);
@@ -88,16 +89,6 @@ public class ReportController {
             .orElse(0.0);
         analyses.put("Moyenne des ventes", moyenneVentes);
 
-        // Répartition par mode de paiement
-        Map<Vente.ModePaiement, Double> parModePaiement = ventes.stream()
-            .collect(Collectors.groupingBy(
-                Vente::getModePaiement,
-                Collectors.summingDouble(Vente::getTotal)
-            ));
-        
-        parModePaiement.forEach((mode, total) -> 
-            analyses.put("Total " + mode.toString(), total));
-
         return analyses;
     }
 
@@ -107,9 +98,8 @@ public class ReportController {
             Map<String, Double> couts = calculerCouts(debut, fin);
             Map<String, Double> benefices = calculerBenefices(chiffreAffaires, couts);
             Map<String, Double> marges = calculerMarges(chiffreAffaires, couts);
-            
-            ExcelGenerator.genererRapportFinancier(
-                chiffreAffaires, couts, benefices, marges, cheminFichier);
+
+            ExcelGenerator.genererRapportFinancier(chiffreAffaires, couts, benefices, marges, cheminFichier);
             LOGGER.info("Rapport financier généré avec succès");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport financier", e);
@@ -141,7 +131,7 @@ public class ReportController {
 
     private Map<String, Double> calculerCouts(LocalDateTime debut, LocalDateTime fin) {
         Map<String, Double> couts = new HashMap<>();
-        
+
         // Achats (mouvements de caisse sortants)
         double totalAchats = caisseController.getMouvements().stream()
             .filter(m -> m.getType() == MouvementCaisse.TypeMouvement.SORTIE)
@@ -149,9 +139,7 @@ public class ReportController {
             .mapToDouble(MouvementCaisse::getMontant)
             .sum();
         couts.put("Total achats", totalAchats);
-        
-        // Autres coûts peuvent être ajoutés ici
-        
+
         return couts;
     }
 
@@ -159,15 +147,15 @@ public class ReportController {
             Map<String, Double> chiffreAffaires,
             Map<String, Double> couts) {
         Map<String, Double> benefices = new HashMap<>();
-        
+
         double totalCA = chiffreAffaires.get("Total période");
         double totalCouts = couts.get("Total achats");
         double beneficeNet = totalCA - totalCouts;
-        
+
         benefices.put("Chiffre d'affaires", totalCA);
         benefices.put("Coûts totaux", totalCouts);
         benefices.put("Bénéfice net", beneficeNet);
-        
+
         return benefices;
     }
 
@@ -175,15 +163,15 @@ public class ReportController {
             Map<String, Double> chiffreAffaires,
             Map<String, Double> couts) {
         Map<String, Double> marges = new HashMap<>();
-        
+
         double totalCA = chiffreAffaires.get("Total période");
         double totalCouts = couts.get("Total achats");
-        
+
         if (totalCA > 0) {
             double margeBrute = ((totalCA - totalCouts) / totalCA) * 100;
             marges.put("Marge brute (%)", margeBrute);
         }
-        
+
         return marges;
     }
 
@@ -193,8 +181,7 @@ public class ReportController {
             List<Vente> ventes = venteController.getVentes().stream()
                 .filter(v -> !v.getDate().isBefore(debut) && !v.getDate().isAfter(fin))
                 .collect(Collectors.toList());
-            Map<String, Double> analyses = analyserVentes(ventes);
-            PDFGenerator.genererRapportVentes(ventes, analyses, cheminFichier);
+            PDFGenerator.genererRapportVentes(ventes, cheminFichier);
             LOGGER.info("Rapport des ventes PDF généré avec succès");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF des ventes", e);
@@ -205,8 +192,7 @@ public class ReportController {
     public void genererRapportStocksPDF(String cheminFichier) {
         try {
             List<Produit> produits = produitController.getProduits();
-            Map<String, Double> statistiques = calculerStatistiquesStocks(produits);
-            PDFGenerator.genererRapportStocks(produits, statistiques, cheminFichier);
+            PDFGenerator.genererRapportStocks(produits, cheminFichier);
             LOGGER.info("Rapport des stocks PDF généré avec succès");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF des stocks", e);
@@ -227,7 +213,9 @@ public class ReportController {
 
     public void genererRapportCreancesPDF(String cheminFichier) {
         try {
-            List<Client> clients = clientController.getClientsAvecCreances();
+            List<Client> clients = clientController.getClients().stream()
+                .filter(c -> c.getSolde() > 0)
+                .collect(Collectors.toList());
             PDFGenerator.genererRapportCreances(clients, cheminFichier);
             LOGGER.info("Rapport des créances PDF généré avec succès");
         } catch (Exception e) {
@@ -248,33 +236,6 @@ public class ReportController {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport financier PDF", e);
             throw new RuntimeException("Erreur lors de la génération du rapport financier PDF", e);
-        }
-    }
-
-    // Méthodes de génération de rapports Excel
-    public void genererRapportVentesExcel(LocalDateTime debut, LocalDateTime fin, String cheminFichier) {
-        try {
-            List<Vente> ventes = venteController.getVentes().stream()
-                .filter(v -> !v.getDate().isBefore(debut) && !v.getDate().isAfter(fin))
-                .collect(Collectors.toList());
-            Map<String, Double> analyses = analyserVentes(ventes);
-            ExcelGenerator.genererRapportVentes(ventes, analyses, cheminFichier);
-            LOGGER.info("Rapport des ventes Excel généré avec succès");
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport Excel des ventes", e);
-            throw new RuntimeException("Erreur lors de la génération du rapport Excel des ventes", e);
-        }
-    }
-
-    public void genererRapportStocksExcel(String cheminFichier) {
-        try {
-            List<Produit> produits = produitController.getProduits();
-            Map<String, Double> statistiques = calculerStatistiquesStocks(produits);
-            ExcelGenerator.genererRapportStocks(produits, statistiques, cheminFichier);
-            LOGGER.info("Rapport des stocks Excel généré avec succès");
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport Excel des stocks", e);
-            throw new RuntimeException("Erreur lors de la génération du rapport Excel des stocks", e);
         }
     }
 
@@ -329,8 +290,7 @@ public class ReportController {
 
     public Map<String, Double> analyserAchatsFournisseurs(LocalDateTime debut, LocalDateTime fin) {
         try {
-            // TODO: Implémenter la logique pour récupérer les achats par fournisseur
-            // Pour l'instant, on retourne des données fictives
+            // Pour l'instant, retourne des données fictives
             Map<String, Double> donnees = new HashMap<>();
             donnees.put("Fournisseur 1", 1500.0);
             donnees.put("Fournisseur 2", 2300.0);
@@ -344,8 +304,7 @@ public class ReportController {
 
     // Méthodes utilitaires
     private List<Fournisseur> getFournisseursAvecStats() {
-        // TODO: Implémenter la récupération des statistiques des fournisseurs
+        // Pour l'instant, retourne une liste vide
         return new ArrayList<>();
     }
-
 }
