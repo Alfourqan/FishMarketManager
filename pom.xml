@@ -11,45 +11,6 @@
   </properties>
 
   <dependencies>
-    <!-- FlatLaf et thèmes -->
-    <dependency>
-      <groupId>com.formdev</groupId>
-      <artifactId>flatlaf</artifactId>
-      <version>3.2.1</version>
-    </dependency>
-    <dependency>
-      <groupId>com.formdev</groupId>
-      <artifactId>flatlaf-intellij-themes</artifactId>
-      <version>3.2.1</version>
-    </dependency>
-    <dependency>
-      <groupId>com.formdev</groupId>
-      <artifactId>flatlaf-extras</artifactId>
-      <version>3.2.1</version>
-    </dependency>
-
-    <!-- Icônes et packs -->
-    <dependency>
-      <groupId>org.kordamp.ikonli</groupId>
-      <artifactId>ikonli-swing</artifactId>
-      <version>12.3.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.kordamp.ikonli</groupId>
-      <artifactId>ikonli-core</artifactId>
-      <version>12.3.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.kordamp.ikonli</groupId>
-      <artifactId>ikonli-materialdesign2-pack</artifactId>
-      <version>12.3.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.kordamp.ikonli</groupId>
-      <artifactId>ikonli-materialdesign-pack</artifactId>
-      <version>12.3.1</version>
-    </dependency>
-
     <!-- Base de données -->
     <dependency>
       <groupId>org.xerial</groupId>
@@ -74,29 +35,10 @@
       <version>5.4.0</version>
     </dependency>
 
-    <!-- Graphiques -->
-    <dependency>
-      <groupId>org.jfree</groupId>
-      <artifactId>jfreechart</artifactId>
-      <version>1.5.5</version>
-    </dependency>
-
     <!-- Tests -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
-      <version>5.9.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <version>5.9.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
       <version>5.9.2</version>
       <scope>test</scope>
     </dependency>
@@ -123,6 +65,9 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.1.0</version>
+        <configuration>
+          <mainClass>com.poissonnerie.Main</mainClass>
+        </configuration>
       </plugin>
     </plugins>
   </build>

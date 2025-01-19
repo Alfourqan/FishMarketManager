@@ -71,7 +71,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "mvn clean compile exec:java -Dexec.mainClass='com.poissonnerie.Main' -Dexec.systemProperties.SKIP_SIRET_VALIDATION=true -Djava.awt.headless=false -Dexec.cleanupDaemonThreads=false"
+args = "mvn clean compile exec:java -Dexec.mainClass='com.poissonnerie.Main'"
 
 [[workflows.workflow]]
 name = "Database Init"
@@ -102,4 +102,4 @@ task = "shell.exec"
 args = "mvn clean compile"
 
 [deployment]
-run = ["sh", "-c", "mvn clean compile exec:java -Dexec.mainClass='com.poissonnerie.Main' -Dexec.systemProperties.SKIP_SIRET_VALIDATION=true -Djava.awt.headless=false -Dexec.cleanupDaemonThreads=false"]
+run = ["sh", "-c", "mvn clean compile exec:java -Dexec.mainClass='com.poissonnerie.Main'"]
