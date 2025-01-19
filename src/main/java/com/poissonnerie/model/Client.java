@@ -12,6 +12,23 @@ public class Client {
     private double totalCreances;
     private StatutCreances statutCreances;
 
+    public enum StatutCreances {
+        A_JOUR("À jour"),
+        EN_RETARD("En retard"),
+        CRITIQUE("Critique");
+
+        private final String libelle;
+
+        StatutCreances(String libelle) {
+            this.libelle = libelle;
+        }
+
+        @Override
+        public String toString() {
+            return libelle;
+        }
+    }
+
     public Client(int id, String nom, String telephone, String adresse, double solde) {
         this.id = id;
         this.nom = nom;
@@ -61,7 +78,7 @@ public class Client {
 
     private void updateStatutCreances() {
         if (solde <= 0) {
-            statutCreances = StatutCreances.NORMAL;
+            statutCreances = StatutCreances.A_JOUR;
         } else if (solde <= 500) {
             statutCreances = StatutCreances.EN_RETARD;
         } else {

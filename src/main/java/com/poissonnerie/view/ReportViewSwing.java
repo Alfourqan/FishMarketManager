@@ -256,7 +256,7 @@ public class ReportViewSwing {
         return button;
     }
 
-    /* Mise à jour de la méthode genererRapport pour les ventes */
+    /* Ajout des vérifications de type */
     private void genererRapport(String type, List<?> donnees, String nomFichier) {
         if (donnees == null) {
             LOGGER.severe("Les données ne peuvent pas être null");
@@ -270,7 +270,7 @@ public class ReportViewSwing {
                     if (!(donnees.stream().allMatch(d -> d instanceof Vente))) {
                         throw new IllegalArgumentException("Type de données incorrect pour le rapport des ventes");
                     }
-                    PDFGenerator.genererRapportVentes((List<Vente>) donnees, nomFichier, dateDebut, dateFin);
+                    PDFGenerator.genererRapportVentes((List<Vente>) donnees, nomFichier);
                     break;
                 case "stocks":
                     if (!(donnees.stream().allMatch(d -> d instanceof Produit))) {
@@ -777,7 +777,7 @@ public class ReportViewSwing {
         gbc.gridx = 1;
         panel.add(new JLabel(String.format("%.2f €", client.getSolde())), gbc);
 
-        gbc.gridx= 0;
+        gbc.gridx = 0;
         gbc.gridy = 1;
         panel.add(new JLabel("Montant à régler:"), gbc);
 

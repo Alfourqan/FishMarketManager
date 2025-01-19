@@ -48,7 +48,7 @@ public class ProduitViewSwing {
         DefaultTableCellRenderer cellRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value,
-                                                           boolean isSelected, boolean hasFocus, int row, int column) {
+                    boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value,
                         isSelected, hasFocus, row, column);
                 if (!isSelected) {
@@ -80,7 +80,7 @@ public class ProduitViewSwing {
         DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value,
-                                                           boolean isSelected, boolean hasFocus, int row, int column) {
+                    boolean isSelected, boolean hasFocus, int row, int column) {
                 JLabel label = (JLabel) super.getTableCellRendererComponent(table, value,
                         isSelected, hasFocus, row, column);
                 label.setBackground(new Color(33, 33, 33));
@@ -139,8 +139,8 @@ public class ProduitViewSwing {
         JTextField field = new JTextField(20);
         field.setPreferredSize(new Dimension(250, 35));
         field.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200)),
-                BorderFactory.createEmptyBorder(5, 10, 5, 10)
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)
         ));
         field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 
@@ -237,8 +237,8 @@ public class ProduitViewSwing {
 
     private void showProduitDialog(Produit produit) {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel),
-                                      produit == null ? "Nouveau produit" : "Modifier produit",
-                                      true);
+                                  produit == null ? "Nouveau produit" : "Modifier produit",
+                                  true);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
         JPanel panel = new JPanel(new GridBagLayout());
@@ -277,7 +277,7 @@ public class ProduitViewSwing {
         okButton.addActionListener(evt -> {
             try {
                 validateAndSaveProduit(produit, nomField, categorieCombo, prixAchatField,
-                                        prixVenteField, stockField, seuilField);
+                                    prixVenteField, stockField, seuilField);
                 dialog.dispose();
             } catch (Exception e) {
                 showErrorMessage(e.getMessage());
@@ -305,15 +305,15 @@ public class ProduitViewSwing {
         JTextField field = new JTextField(20);
         field.setPreferredSize(new Dimension(250, 30));
         field.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200)),
-                BorderFactory.createEmptyBorder(5, 8, 5, 8)
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(5, 8, 5, 8)
         ));
         field.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         return field;
     }
 
     private void addFormField(JPanel panel, GridBagConstraints gbc, String labelText,
-                              JComponent field, int row) {
+                            JComponent field, int row) {
         gbc.gridx = 0;
         gbc.gridy = row;
         gbc.weightx = 0;
@@ -328,9 +328,9 @@ public class ProduitViewSwing {
     }
 
     private void validateAndSaveProduit(Produit produit, JTextField nomField,
-                                        JComboBox<String> categorieCombo, JTextField prixAchatField,
-                                        JTextField prixVenteField, JTextField stockField,
-                                        JTextField seuilField) {
+                                      JComboBox<String> categorieCombo, JTextField prixAchatField,
+                                      JTextField prixVenteField, JTextField stockField,
+                                      JTextField seuilField) {
         String nom = nomField.getText().trim();
         String categorie = (String) categorieCombo.getSelectedItem();
         String prixAchatText = prixAchatField.getText().trim().replace(",", ".");
@@ -354,7 +354,7 @@ public class ProduitViewSwing {
         if (seuil < 0) throw new IllegalArgumentException("Le seuil d'alerte ne peut pas être négatif");
 
         if (produit == null) {
-            controller.ajouterProduit(new Produit(0L, nom, categorie, prixAchat, prixVente, stock, seuil));
+            controller.ajouterProduit(new Produit(0, nom, categorie, prixAchat, prixVente, stock, seuil));
         } else {
             produit.setNom(nom);
             produit.setCategorie(categorie);
@@ -385,38 +385,38 @@ public class ProduitViewSwing {
 
     private void showWarningMessage(String message) {
         JOptionPane.showMessageDialog(mainPanel, message, "Attention",
-                JOptionPane.WARNING_MESSAGE);
+            JOptionPane.WARNING_MESSAGE);
     }
 
     private void showErrorMessage(String message) {
         JOptionPane.showMessageDialog(mainPanel, message, "Erreur",
-                JOptionPane.ERROR_MESSAGE);
+            JOptionPane.ERROR_MESSAGE);
     }
 
     private void showSuccessMessage(String message) {
         JOptionPane.showMessageDialog(mainPanel, message, "Succès",
-                JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.INFORMATION_MESSAGE);
     }
 
     private boolean showConfirmDialog(String message) {
         return JOptionPane.showConfirmDialog(mainPanel, message, "Confirmation",
-                JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+            JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
     }
 
     private void refreshTable() {
         tableModel.setRowCount(0);
         for (Produit produit : controller.getProduits()) {
             Color textColor = produit.getStock() <= produit.getSeuilAlerte() ?
-                    new Color(220, 53, 69) : new Color(40, 167, 69);
+                new Color(220, 53, 69) : new Color(40, 167, 69);
 
             tableModel.addRow(new Object[]{
-                    produit.getNom(),
-                    produit.getCategorie(),
-                    String.format("%.2f €", produit.getPrixAchat()),
-                    String.format("%.2f €", produit.getPrixVente()),
-                    String.format("%.1f%%", produit.getTauxMarge()),
-                    produit.getStock(),
-                    produit.getSeuilAlerte()
+                produit.getNom(),
+                produit.getCategorie(),
+                String.format("%.2f €", produit.getPrixAchat()),
+                String.format("%.2f €", produit.getPrixVente()),
+                String.format("%.1f%%", produit.getTauxMarge()),
+                produit.getStock(),
+                produit.getSeuilAlerte()
             });
         }
     }

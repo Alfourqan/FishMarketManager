@@ -43,18 +43,8 @@ public class VenteController {
                         "client_id INTEGER, " +
                         "credit BOOLEAN NOT NULL, " +
                         "total DOUBLE NOT NULL CHECK (total >= 0), " +
-                        "mode_paiement VARCHAR(50) NOT NULL DEFAULT 'ESPECES', " +
                         "supprime BOOLEAN DEFAULT false, " +
                         "FOREIGN KEY (client_id) REFERENCES clients(id))");
-
-            // Ajouter la colonne mode_paiement si elle n'existe pas déjà
-            try {
-                stmt.execute("ALTER TABLE ventes ADD COLUMN mode_paiement VARCHAR(50) NOT NULL DEFAULT 'ESPECES'");
-                LOGGER.info("Colonne mode_paiement ajoutée à la table ventes");
-            } catch (SQLException e) {
-                // La colonne existe déjà, on ignore l'erreur
-                LOGGER.fine("La colonne mode_paiement existe déjà dans la table ventes");
-            }
 
             // Mettre à jour la table lignes_vente si nécessaire
             stmt.execute("CREATE TABLE IF NOT EXISTS lignes_vente (" +
@@ -212,7 +202,7 @@ public class VenteController {
 
     private Produit creerProduitDepuisResultSet(ResultSet rs) throws SQLException {
         try {
-            Long produitId = rs.getLong("produit_id");
+            int produitId = rs.getInt("produit_id");
             String nom = sanitizeInput(rs.getString("nom"));
             String categorie = sanitizeInput(rs.getString("categorie"));
             double prixAchat = rs.getDouble("prix_achat");
@@ -261,7 +251,7 @@ public class VenteController {
     private void validateStock(Connection conn, Vente.LigneVente ligne) throws SQLException {
         String sql = "SELECT stock FROM produits WHERE id = ? AND supprime = false AND stock >= ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setLong(1, ligne.getProduit().getId());
+            pstmt.setInt(1, ligne.getProduit().getId());
             pstmt.setInt(2, ligne.getQuantite());
 
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -330,7 +320,7 @@ public class VenteController {
     }
 
     private int insererVente(Connection conn, Vente vente) throws SQLException {
-        String sql = "INSERT INTO ventes (date, client_id, credit, total, mode_paiement) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO ventes (date, client_id, credit, total) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             long timestamp = vente.getDate().atZone(java.time.ZoneId.systemDefault())
@@ -344,7 +334,6 @@ public class VenteController {
             }
             pstmt.setBoolean(3, vente.isCredit());
             pstmt.setDouble(4, vente.getTotal());
-            pstmt.setString(5, vente.getModePaiement().name());
 
             pstmt.executeUpdate();
 
@@ -364,7 +353,7 @@ public class VenteController {
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, venteId);
-            pstmt.setLong(2, ligne.getProduit().getId()); // Utilisation de setLong au lieu de setInt
+            pstmt.setInt(2, ligne.getProduit().getId());
             pstmt.setInt(3, ligne.getQuantite());
             pstmt.setDouble(4, ligne.getPrixUnitaire());
 
@@ -378,7 +367,7 @@ public class VenteController {
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, ligne.getQuantite());
-            pstmt.setLong(2, ligne.getProduit().getId()); // Modifié de setInt à setLong
+            pstmt.setInt(2, ligne.getProduit().getId());
             pstmt.setInt(3, ligne.getQuantite());
 
             int rowsAffected = pstmt.executeUpdate();

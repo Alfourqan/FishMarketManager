@@ -72,16 +72,16 @@ public class MainViewSwing {
         // Configuration des éléments de menu avec leurs icônes
         Object[][] menuItems = {
             {"Accueil", MaterialDesign.MDI_HOME},
-            {"Produits", MaterialDesign.MDI_PACKAGE_VARIANT},
+            {"Produits", MaterialDesign.MDI_PACKAGE},
             {"Ventes", MaterialDesign.MDI_CART},
-            {"Clients", MaterialDesign.MDI_ACCOUNT_MULTIPLE},
-            {"Factures", MaterialDesign.MDI_FILE_DOCUMENT},
-            {"Fournisseurs", MaterialDesign.MDI_TRUCK_DELIVERY},
-            {"Inventaire", MaterialDesign.MDI_CLIPBOARD_TEXT},
+            {"Clients", MaterialDesign.MDI_ACCOUNT},
+            {"Factures", MaterialDesign.MDI_FILE},
+            {"Fournisseurs", MaterialDesign.MDI_TRUCK},
+            {"Inventaire", MaterialDesign.MDI_CLIPBOARD},
             {"Caisse", MaterialDesign.MDI_CASH},
             {"Rapport", MaterialDesign.MDI_CHART_BAR},
             {"Réglages", MaterialDesign.MDI_SETTINGS},
-            {"Déconnexion", MaterialDesign.MDI_LOGOUT_VARIANT}
+            {"Déconnexion", MaterialDesign.MDI_LOGOUT}
         };
 
         ButtonGroup buttonGroup = new ButtonGroup();

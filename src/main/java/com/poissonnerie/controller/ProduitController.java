@@ -15,7 +15,7 @@ public class ProduitController {
 
     public void chargerProduits() {
         produits.clear();
-        String sql = "SELECT * FROM produits WHERE supprime = false";
+        String sql = "SELECT * FROM produits";
 
         try (Connection conn = DatabaseManager.getConnection();
              Statement stmt = conn.createStatement();
@@ -23,7 +23,7 @@ public class ProduitController {
 
             while (rs.next()) {
                 Produit produit = new Produit(
-                    rs.getLong("id"),
+                    rs.getInt("id"),
                     rs.getString("nom"),
                     rs.getString("categorie"),
                     rs.getDouble("prix_achat"),
@@ -35,7 +35,6 @@ public class ProduitController {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException("Erreur lors du chargement des produits", e);
         }
     }
 
@@ -58,7 +57,7 @@ public class ProduitController {
                 try (Statement stmt = conn.createStatement();
                      ResultSet rs = stmt.executeQuery(getIdSql)) {
                     if (rs.next()) {
-                        produit.setId(rs.getLong("id"));
+                        produit.setId(rs.getInt("id"));
                         produits.add(produit);
                     }
                 }
@@ -85,7 +84,7 @@ public class ProduitController {
                 pstmt.setDouble(4, produit.getPrixVente());
                 pstmt.setInt(5, produit.getStock());
                 pstmt.setInt(6, produit.getSeuilAlerte());
-                pstmt.setLong(7, produit.getId());
+                pstmt.setInt(7, produit.getId());
 
                 int rowsUpdated = pstmt.executeUpdate();
                 if (rowsUpdated > 0) {
@@ -104,13 +103,14 @@ public class ProduitController {
         }
     }
 
-    public boolean produitUtiliseDansVentes(Long produitId) {
-        String sql = "SELECT COUNT(*) as count FROM lignes_vente WHERE produit_id = ? AND supprime = false";
+    // Méthodes existantes inchangées
+    public boolean produitUtiliseDansVentes(int produitId) {
+        String sql = "SELECT COUNT(*) as count FROM lignes_vente WHERE produit_id = ?";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setLong(1, produitId);
+            pstmt.setInt(1, produitId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt("count") > 0;
@@ -118,7 +118,6 @@ public class ProduitController {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            throw new RuntimeException("Erreur lors de la vérification d'utilisation du produit", e);
         }
         return false;
     }
@@ -128,12 +127,12 @@ public class ProduitController {
             throw new SQLException("Impossible de supprimer ce produit car il est utilisé dans des ventes existantes.");
         }
 
-        String sql = "UPDATE produits SET supprime = true WHERE id = ?";
+        String sql = "DELETE FROM produits WHERE id = ?";
 
         try (Connection conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(false);
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setLong(1, produit.getId());
+                pstmt.setInt(1, produit.getId());
                 int rowsDeleted = pstmt.executeUpdate();
 
                 if (rowsDeleted > 0) {
