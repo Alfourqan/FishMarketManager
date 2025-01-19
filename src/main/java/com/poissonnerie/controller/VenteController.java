@@ -43,8 +43,18 @@ public class VenteController {
                         "client_id INTEGER, " +
                         "credit BOOLEAN NOT NULL, " +
                         "total DOUBLE NOT NULL CHECK (total >= 0), " +
+                        "mode_paiement VARCHAR(50) NOT NULL DEFAULT 'ESPECES', " +
                         "supprime BOOLEAN DEFAULT false, " +
                         "FOREIGN KEY (client_id) REFERENCES clients(id))");
+
+            // Ajouter la colonne mode_paiement si elle n'existe pas déjà
+            try {
+                stmt.execute("ALTER TABLE ventes ADD COLUMN mode_paiement VARCHAR(50) NOT NULL DEFAULT 'ESPECES'");
+                LOGGER.info("Colonne mode_paiement ajoutée à la table ventes");
+            } catch (SQLException e) {
+                // La colonne existe déjà, on ignore l'erreur
+                LOGGER.fine("La colonne mode_paiement existe déjà dans la table ventes");
+            }
 
             // Mettre à jour la table lignes_vente si nécessaire
             stmt.execute("CREATE TABLE IF NOT EXISTS lignes_vente (" +
@@ -320,7 +330,7 @@ public class VenteController {
     }
 
     private int insererVente(Connection conn, Vente vente) throws SQLException {
-        String sql = "INSERT INTO ventes (date, client_id, credit, total) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO ventes (date, client_id, credit, total, mode_paiement) VALUES (?, ?, ?, ?, ?)";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             long timestamp = vente.getDate().atZone(java.time.ZoneId.systemDefault())
@@ -334,6 +344,7 @@ public class VenteController {
             }
             pstmt.setBoolean(3, vente.isCredit());
             pstmt.setDouble(4, vente.getTotal());
+            pstmt.setString(5, vente.getModePaiement().name());
 
             pstmt.executeUpdate();
 

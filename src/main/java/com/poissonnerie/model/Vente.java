@@ -16,6 +16,7 @@ public class Vente {
     private final boolean credit;
     private double total;
     private List<LigneVente> lignes;
+    private ModePaiement modePaiement;
     private static final double TAUX_TVA_DEFAULT = 20.0; // 20% par défaut
 
     public Vente(int id, LocalDateTime date, Client client, boolean credit, double total) {
@@ -38,6 +39,8 @@ public class Vente {
         this.credit = credit;
         this.total = total;
         this.lignes = new ArrayList<>();
+        // Par défaut, si c'est une vente à crédit, mode crédit, sinon comptant
+        this.modePaiement = credit ? ModePaiement.CREDIT : ModePaiement.ESPECES;
     }
 
     // Getters et setters avec validations
@@ -71,6 +74,17 @@ public class Vente {
             String.format("Modification du total de la vente %d: %.2f → %.2f", 
                 id, this.total, total));
         this.total = total;
+    }
+
+    public ModePaiement getModePaiement() { return modePaiement; }
+    public void setModePaiement(ModePaiement modePaiement) {
+        if (modePaiement == null) {
+            throw new IllegalArgumentException("Le mode de paiement ne peut pas être null");
+        }
+        if (credit && modePaiement != ModePaiement.CREDIT) {
+            throw new IllegalArgumentException("Une vente à crédit doit avoir le mode de paiement CREDIT");
+        }
+        this.modePaiement = modePaiement;
     }
 
     public List<LigneVente> getLignes() {
@@ -247,11 +261,12 @@ public class Vente {
                Double.compare(vente.total, total) == 0 &&
                Objects.equals(date, vente.date) &&
                Objects.equals(client, vente.client) &&
-               Objects.equals(lignes, vente.lignes);
+               Objects.equals(lignes, vente.lignes) &&
+               modePaiement == vente.modePaiement;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, date, client, credit, total, lignes);
+        return Objects.hash(id, date, client, credit, total, lignes, modePaiement);
     }
 }
