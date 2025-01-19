@@ -699,10 +699,11 @@ public class ReportBuilder {
             // Formule conditionnelle pour le statut
             Cell statutCell = row.createCell(2);
             statutCell.setCellFormula(String.format("IF(B%d>0,\"↗ Hausse\",IF(B%d<0,\"↘ Baisse\",\"→ Stable\"))",
-                    rowNum,rowNum));        }
+                    rowNum,rowNum));
+        }
         genererGraphiqueExcel(workbook, tendances, "Analyse des Tendances");
 
-        // Ajuster la largeur des colonnes
+        // Ajuster la largeur descolonnes
         for (Sheet sheet : new Sheet[]{sheetVueEnsemble, sheetTendances}) {
             for (int i = 0; i < 3; i++) {
                 sheet.autoSizeColumn(i);
@@ -726,20 +727,21 @@ public class ReportBuilder {
 
     private Map<String, Double> calculerTendances(List<Vente> ventes, LocalDate debut, LocalDate fin) {
         Map<String, Double> tendances = new HashMap<>();
-
-        // Calculer la durée de la période en jours
         long nbJours = ChronoUnit.DAYS.between(debut, fin);
         LocalDate milieuPeriode = debut.plusDays(nbJours / 2);
 
+        // Filtrer les ventes pour chaque période
         List<Vente> ventesP1 = ventes.stream()
-            .filter(v -> !v.getDate().toLocalDate().isAfter(milieuPeriode))
-            .collect(Collectors.toList());
+                .filter(v -> !v.getDate().isBefore(debut.atStartOfDay().toLocalDate()) && 
+                           !v.getDate().isAfter(milieuPeriode.atStartOfDay().toLocalDate()))
+                .collect(Collectors.toList());
 
         List<Vente> ventesP2 = ventes.stream()
-            .filter(v -> v.getDate().toLocalDate().isAfter(milieuPeriode))
-            .collect(Collectors.toList());
+                .filter(v -> !v.getDate().isBefore(milieuPeriode.plusDays(1).atStartOfDay().toLocalDate()) && 
+                           !v.getDate().isAfter(fin.atStartOfDay().toLocalDate()))
+                .collect(Collectors.toList());
 
-        // Calcul des variations
+        // Calculer les indicateurs pour chaque période
         double caP1 = ventesP1.stream().mapToDouble(Vente::getMontantTotal).sum();
         double caP2 = ventesP2.stream().mapToDouble(Vente::getMontantTotal).sum();
         tendances.put("ca", calculerVariation(caP1, caP2));
@@ -872,32 +874,5 @@ public class ReportBuilder {
         }
     }
 
-    private Map<String, Double> calculerTendances(List<Vente> ventes, LocalDate debut, LocalDate fin) {
-        Map<String, Double> tendances = new HashMap<>();
-        long nbJours = ChronoUnit.DAYS.between(debut, fin);
-        LocalDate milieuPeriode = debut.plusDays(nbJours / 2);
-
-        List<Vente> ventesP1 = ventes.stream()
-            .filter(v -> !v.getDate().toLocalDate().isAfter(milieuPeriode))
-            .collect(Collectors.toList());
-
-        List<Vente> ventesP2 = ventes.stream()
-            .filter(v -> v.getDate().toLocalDate().isAfter(milieuPeriode))
-            .collect(Collectors.toList());
-
-        // Calcul des variations
-        double caP1 = ventesP1.stream().mapToDouble(Vente::getMontantTotal).sum();
-        double caP2 = ventesP2.stream().mapToDouble(Vente::getMontantTotal).sum();
-        tendances.put("ca", calculerVariation(caP1, caP2));
-
-        double nbVentesP1 = ventesP1.size();
-        double nbVentesP2 = ventesP2.size();
-        tendances.put("nbVentes", calculerVariation(nbVentesP1, nbVentesP2));
-
-        double panierMoyenP1 = nbVentesP1 > 0 ? caP1 / nbVentesP1 : 0;
-        double panierMoyenP2 = nbVentesP2 > 0 ? caP2 / nbVentesP2 : 0;
-        tendances.put("panierMoyen", calculerVariation(panierMoyenP1, panierMoyenP2));
-
-        return tendances;
-    }
+    
 }

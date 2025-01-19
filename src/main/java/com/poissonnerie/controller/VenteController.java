@@ -364,7 +364,7 @@ public class VenteController {
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, venteId);
-            pstmt.setLong(2, ligne.getProduit().getId()); // Modifié de setInt à setLong pour correspondre au type Long
+            pstmt.setLong(2, ligne.getProduit().getId()); // Utilisation de setLong au lieu de setInt
             pstmt.setInt(3, ligne.getQuantite());
             pstmt.setDouble(4, ligne.getPrixUnitaire());
 
