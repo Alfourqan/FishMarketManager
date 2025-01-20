@@ -81,6 +81,18 @@ public class ConfigurationViewSwing {
     public static final String CLE_DEVISE = "DEVISE";
     public static final String CLE_SEPARATEUR_MILLIERS = "SEPARATEUR_MILLIERS";
     public static final String CLE_DECIMALES = "DECIMALES";
+    public static final String CLE_AFFICHER_CODE_BARRES = "AFFICHER_CODE_BARRES";
+    public static final String CLE_POSITION_CODE_BARRES = "POSITION_CODE_BARRES";
+    public static final String CLE_AFFICHER_QR_CODE = "AFFICHER_QR_CODE";
+    public static final String CLE_CONTENU_QR_CODE = "CONTENU_QR_CODE";
+    public static final String CLE_FORMAT_IMPRESSION = "FORMAT_IMPRESSION";
+    public static final String CLE_ORIENTATION_IMPRESSION = "ORIENTATION_IMPRESSION";
+    public static final String CLE_LANGUE_TICKET = "LANGUE_TICKET";
+    public static final String CLE_STYLE_TABLEAU_PRODUITS = "STYLE_TABLEAU_PRODUITS";
+    public static final String CLE_AFFICHER_SIGNATURE = "AFFICHER_SIGNATURE";
+    public static final String CLE_POSITION_SIGNATURE = "POSITION_SIGNATURE";
+    public static final String CLE_AFFICHER_CONDITIONS = "AFFICHER_CONDITIONS";
+    public static final String CLE_TEXTE_CONDITIONS = "TEXTE_CONDITIONS";
 
 
     public ConfigurationViewSwing() {
@@ -717,7 +729,7 @@ public class ConfigurationViewSwing {
         gbc.gridy++;
         panel.add(messagesPanel, gbc);
 
-        // Options supplémentaires
+                // Options supplémentaires
         gbc.gridy++;
         JPanel optionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         optionsPanel.setBorder(BorderFactory.createTitledBorder("Options supplémentaires"));
@@ -1134,135 +1146,123 @@ public class ConfigurationViewSwing {
     }
 
     private JPanel createRecusAdvancedSection() {
-        JPanel panel = createSectionPanel("Style avancé des reçus", MaterialDesign.MDI_RECEIPT);
+        JPanel panel = createSectionPanel("Options avancées des reçus", MaterialDesign.MDI_RECEIPT_TEXT_PLUS);
         panel.setLayout(new GridBagLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 5, 5, 5);
 
-        // Format de date
-        JLabel dateFormatLabel = new JLabel("Format de date:");
-        JComboBox<String> dateFormatCombo = new JComboBox<>(new String[]{
-            "dd/MM/yyyy HH:mm",
-            "dd-MM-yyyy HH:mm",
-            "yyyy-MM-dd HH:mm",
-            "dd/MM/yyyy",
-            "dd-MM-yyyy",
-            "yyyy-MM-dd"
-        });
-        dateFormatCombo.setFont(texteNormalFont);
-        champsSaisie.put(ConfigurationParam.CLE_FORMAT_DATE_RECU, dateFormatCombo);
-        panel.add(dateFormatLabel, gbc);
-        gbc.gridx = 1;
-        panel.add(dateFormatCombo, gbc);
+        // Codes-barres et QR codes
+        JPanel codesPanel = new JPanel(new GridLayout(0, 2, 10, 5));
+        codesPanel.setBorder(BorderFactory.createTitledBorder("Codes-barres et QR codes"));
 
-        // Marges
+        JCheckBox afficherCodeBarresCheck = new JCheckBox("Afficher le code-barres");
+        JComboBox<String> positionCodeBarresCombo = new JComboBox<>(new String[]{"HAUT", "BAS"});
+        JCheckBox afficherQRCodeCheck = new JCheckBox("Afficher le QR code");
+        JComboBox<String> contenuQRCodeCombo = new JComboBox<>(new String[]{"NUMERO_TICKET", "URL", "CONTACT"});
+
+        champsSaisie.put(ConfigurationParam.CLE_AFFICHER_CODE_BARRES, afficherCodeBarresCheck);
+        champsSaisie.put(ConfigurationParam.CLE_POSITION_CODE_BARRES, positionCodeBarresCombo);
+        champsSaisie.put(ConfigurationParam.CLE_AFFICHER_QR_CODE, afficherQRCodeCheck);
+        champsSaisie.put(ConfigurationParam.CLE_CONTENU_QR_CODE, contenuQRCodeCombo);
+
+        codesPanel.add(afficherCodeBarresCheck);
+        codesPanel.add(positionCodeBarresCombo);
+        codesPanel.add(afficherQRCodeCheck);
+        codesPanel.add(contenuQRCodeCombo);
+
+        // Options d'impression
+        JPanel impressionPanel = new JPanel(new GridLayout(0, 2, 10, 5));
+        impressionPanel.setBorder(BorderFactory.createTitledBorder("Options d'impression"));
+
+        JComboBox<String> formatImpressionCombo = new JComboBox<>(new String[]{"A4", "A5", "TICKET_80MM"});
+        JComboBox<String> orientationImpressionCombo = new JComboBox<>(new String[]{"PORTRAIT", "PAYSAGE"});
+        JComboBox<String> langueTicketCombo = new JComboBox<>(new String[]{"FR", "EN", "ES"});
+
+        champsSaisie.put(ConfigurationParam.CLE_FORMAT_IMPRESSION, formatImpressionCombo);
+        champsSaisie.put(ConfigurationParam.CLE_ORIENTATION_IMPRESSION, orientationImpressionCombo);
+        champsSaisie.put(ConfigurationParam.CLE_LANGUE_TICKET, langueTicketCombo);
+
+        impressionPanel.add(new JLabel("Format:"));
+        impressionPanel.add(formatImpressionCombo);
+        impressionPanel.add(new JLabel("Orientation:"));
+        impressionPanel.add(orientationImpressionCombo);
+        impressionPanel.add(new JLabel("Langue:"));
+        impressionPanel.add(langueTicketCombo);
+
+        // Style du tableau
+        JPanel tableauPanel = new JPanel(new GridLayout(0, 2, 10, 5));
+        tableauPanel.setBorder(BorderFactory.createTitledBorder("Style du tableau"));
+
+        JComboBox<String> styleTableauCombo = new JComboBox<>(new String[]{"SIMPLE", "GRILLE", "MINIMAL"});
+        champsSaisie.put(ConfigurationParam.CLE_STYLE_TABLEAU_PRODUITS, styleTableauCombo);
+
+        tableauPanel.add(new JLabel("Style:"));
+        tableauPanel.add(styleTableauCombo);
+
+        // Signature et conditions
+        JPanel signaturePanel = new JPanel(new GridLayout(0, 2, 10, 5));
+        signaturePanel.setBorder(BorderFactory.createTitledBorder("Signature et conditions"));
+
+        JCheckBox afficherSignatureCheck = new JCheckBox("Afficher la signature");
+        JComboBox<String> positionSignatureCombo = new JComboBox<>(new String[]{"BAS", "DROITE"});
+        JCheckBox afficherConditionsCheck = new JCheckBox("Afficher les conditions");
+        JTextField texteConditionsField = new JTextField();
+
+        champsSaisie.put(ConfigurationParam.CLE_AFFICHER_SIGNATURE, afficherSignatureCheck);
+        champsSaisie.put(ConfigurationParam.CLE_POSITION_SIGNATURE, positionSignatureCombo);
+        champsSaisie.put(ConfigurationParam.CLE_AFFICHER_CONDITIONS, afficherConditionsCheck);
+        champsSaisie.put(ConfigurationParam.CLE_TEXTE_CONDITIONS, texteConditionsField);
+
+        signaturePanel.add(afficherSignatureCheck);
+        signaturePanel.add(positionSignatureCombo);
+        signaturePanel.add(afficherConditionsCheck);
+        signaturePanel.add(texteConditionsField);
+
+        // Ajout des panneaux à la grille principale
         gbc.gridx = 0;
-        gbc.gridy++;
-        JPanel margesPanel = new JPanel(new GridLayout(2, 4, 5, 5));
-        margesPanel.setBorder(BorderFactory.createTitledBorder("Marges (mm)"));
+        gbc.gridy = 0;
+        gbc.gridwidth = 2;
+        panel.add(codesPanel, gbc);
 
-        String[] margeLabels = {"Haut", "Bas", "Gauche", "Droite"};
-        String[] margeCles = {
-            ConfigurationParam.CLE_MARGE_HAUT_RECU,
-            ConfigurationParam.CLE_MARGE_BAS_RECU,
-            ConfigurationParam.CLE_MARGE_GAUCHE_RECU,
-            ConfigurationParam.CLE_MARGE_DROITE_RECU
+        gbc.gridy++;
+        panel.add(impressionPanel, gbc);
+
+        gbc.gridy++;
+        panel.add(tableauPanel, gbc);
+
+        gbc.gridy++;
+        panel.add(signaturePanel, gbc);
+
+        // Ajout des listeners pour la mise à jour de la prévisualisation
+        JComponent[] composantsAvecUpdate = {
+            afficherCodeBarresCheck, positionCodeBarresCombo,
+            afficherQRCodeCheck, contenuQRCodeCombo,
+            formatImpressionCombo, orientationImpressionCombo,
+            langueTicketCombo, styleTableauCombo,
+            afficherSignatureCheck, positionSignatureCombo,
+            afficherConditionsCheck
         };
 
-        for (int i = 0; i < margeLabels.length; i++) {
-            margesPanel.add(new JLabel(margeLabels[i]));
-            JSpinner margeSpinner = new JSpinner(new SpinnerNumberModel(10, 0, 50, 1));
-            margeSpinner.setFont(texteNormalFont);
-            champsSaisie.put(margeCles[i], margeSpinner);
-            margesPanel.add(margeSpinner);
-        }
-
-        gbc.gridwidth = 2;
-        panel.add(margesPanel, gbc);
-
-        // Position du logo
-        gbc.gridy++;
-        gbc.gridwidth = 1;
-        JLabel logoPositionLabel = new JLabel("Position du logo:");
-        JComboBox<String> logoPositionCombo = new JComboBox<>(new String[]{
-            "HAUT_GAUCHE", "HAUT_CENTRE", "HAUT_DROITE"
-        });
-        logoPositionCombo.setFont(texteNormalFont);
-        champsSaisie.put(ConfigurationParam.CLE_POSITION_LOGO_RECU, logoPositionCombo);
-        panel.add(logoPositionLabel, gbc);
-        gbc.gridx = 1;
-        panel.add(logoPositionCombo, gbc);
-
-        // Taille du logo
-        gbc.gridx = 0;
-        gbc.gridy++;
-        JLabel logoSizeLabel = new JLabel("Taille du logo (mm):");
-        JSpinner logoSizeSpinner = new JSpinner(new SpinnerNumberModel(30, 10, 100, 5));
-        logoSizeSpinner.setFont(texteNormalFont);
-        champsSaisie.put(ConfigurationParam.CLE_TAILLE_LOGO_RECU, logoSizeSpinner);
-        panel.add(logoSizeLabel, gbc);
-        gbc.gridx = 1;
-        panel.add(logoSizeSpinner, gbc);
-
-        // Style de numérotation
-        gbc.gridx = 0;
-        gbc.gridy++;
-        JLabel numerotationLabel = new JLabel("Style de numérotation:");
-        JComboBox<String> numerotationCombo = new JComboBox<>(new String[]{
-            "STANDARD (#0001)",
-            "ANNEE_NUMERO (2025-0001)",
-            "PREFIXE_NUMERO (TICKET-0001)"
-        });
-        numerotationCombo.setFont(texteNormalFont);
-        champsSaisie.put(ConfigurationParam.CLE_STYLE_NUMEROTATION, numerotationCombo);
-        panel.add(numerotationLabel, gbc);
-        gbc.gridx = 1;
-        panel.add(numerotationCombo, gbc);
-
-        // Format monétaire
-        gbc.gridx = 0;
-        gbc.gridy++;
-        JPanel monnaiePanel = new JPanel(new GridLayout(3, 2, 5, 5));
-        monnaiePanel.setBorder(BorderFactory.createTitledBorder("Format monétaire"));
-
-        // Devise
-        monnaiePanel.add(new JLabel("Devise:"));
-        JComboBox<String> deviseCombo = new JComboBox<>(new String[]{"€", "$", "£", "CHF"});
-        deviseCombo.setFont(texteNormalFont);
-        champsSaisie.put(ConfigurationParam.CLE_DEVISE, deviseCombo);
-        monnaiePanel.add(deviseCombo);
-
-        // Séparateur de milliers
-        monnaiePanel.add(new JLabel("Séparateur milliers:"));
-        JComboBox<String> sepCombo = new JComboBox<>(new String[]{" ", ".", ","});
-        sepCombo.setFont(texteNormalFont);
-        champsSaisie.put(ConfigurationParam.CLE_SEPARATEUR_MILLIERS, sepCombo);
-        monnaiePanel.add(sepCombo);
-
-        // Nombre de décimales
-        monnaiePanel.add(new JLabel("Décimales:"));
-        JSpinner decimalesSpinner = new JSpinner(new SpinnerNumberModel(2, 0, 4, 1));
-        decimalesSpinner.setFont(texteNormalFont);
-        champsSaisie.put(ConfigurationParam.CLE_DECIMALES, decimalesSpinner);
-        monnaiePanel.add(decimalesSpinner);
-
-        gbc.gridwidth = 2;
-        panel.add(monnaiePanel, gbc);
-
-        // Ajouter les listeners pour la mise à jour de la prévisualisation
-        for (JComponent composant : champsSaisie.values()) {
-            if (composant instanceof JSpinner) {
-                ((JSpinner) composant).addChangeListener(e -> updatePreview());
-            } else if (composant instanceof JComboBox) {
+        for (JComponent composant : composantsAvecUpdate) {
+            if (composant instanceof JComboBox) {
                 ((JComboBox<?>) composant).addActionListener(e -> updatePreview());
+            } else if (composant instanceof JCheckBox) {
+                ((JCheckBox) composant).addActionListener(e -> updatePreview());
             }
         }
 
+        texteConditionsField.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) { updatePreview(); }
+            public void removeUpdate(DocumentEvent e) { updatePreview(); }
+            public void insertUpdate(DocumentEvent e) { updatePreview(); }
+        });
+
         return panel;
     }
+
 }

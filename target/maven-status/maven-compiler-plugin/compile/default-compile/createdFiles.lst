@@ -1,5 +1,6 @@
 com/poissonnerie/controller/CaisseController$1.class
 com/poissonnerie/view/InventaireViewSwing$5.class
+com/poissonnerie/view/VenteViewSwing$3.class
 com/poissonnerie/controller/ClientController.class
 com/poissonnerie/controller/FournisseurController.class
 com/poissonnerie/view/ClientViewSwing$1.class
@@ -7,6 +8,7 @@ com/poissonnerie/model/MouvementCaisse.class
 com/poissonnerie/model/Client.class
 com/poissonnerie/view/FournisseurViewSwing$3.class
 com/poissonnerie/view/InventaireViewSwing$2.class
+com/poissonnerie/util/TextBillPrinter.class
 com/poissonnerie/view/InventaireViewSwing$ButtonEditor.class
 com/poissonnerie/view/InventaireViewSwing$ButtonRenderer.class
 com/poissonnerie/controller/CaisseController.class
@@ -27,6 +29,7 @@ com/poissonnerie/view/ClientViewSwing$3.class
 com/poissonnerie/view/FournisseurViewSwing$1.class
 com/poissonnerie/view/InventaireViewSwing$3.class
 com/poissonnerie/view/MainViewSwing$1.class
+com/poissonnerie/view/VenteViewSwing$1.class
 com/poissonnerie/model/Vente.class
 com/poissonnerie/view/ClientViewSwing.class
 com/poissonnerie/view/AccueilViewSwing$1.class
@@ -35,14 +38,18 @@ com/poissonnerie/controller/ProduitController.class
 com/poissonnerie/view/ProduitViewSwing$4.class
 com/poissonnerie/view/ProduitViewSwing.class
 com/poissonnerie/view/FournisseurViewSwing$5.class
+com/poissonnerie/view/VenteViewSwing$4.class
 com/poissonnerie/view/FournisseurViewSwing.class
+com/poissonnerie/view/VenteViewSwing$2.class
 com/poissonnerie/view/ProduitViewSwing$1.class
 com/poissonnerie/model/Fournisseur.class
 com/poissonnerie/view/ClientViewSwing$2.class
 com/poissonnerie/view/ProduitViewSwing$3.class
 com/poissonnerie/view/InventaireViewSwing$4.class
 com/poissonnerie/model/Vente$ModePaiement.class
+com/poissonnerie/view/VenteViewSwing$5.class
 com/poissonnerie/view/InventaireViewSwing$1.class
 com/poissonnerie/model/Vente$LigneVente.class
 com/poissonnerie/model/Client$StatutCreances.class
+com/poissonnerie/view/VenteViewSwing.class
 com/poissonnerie/view/FournisseurViewSwing$4.class
