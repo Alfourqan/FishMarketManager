@@ -191,18 +191,14 @@ public class ConfigurationViewSwing {
         int espaces = largeur - texte.length();
         String resultat;
 
-        switch (alignement) {
-            case "DROITE":
-                resultat = repeat(" ", espaces) + texte;
-                break;
-            case "CENTRE":
-                int espacesAvant = espaces / 2;
-                int espacesApres = espaces - espacesAvant;
-                resultat = repeat(" ", espacesAvant) + texte + repeat(" ", espacesApres);
-                break;
-            default: // GAUCHE
-                resultat = texte + repeat(" ", espaces);
-                break;
+        if (alignement.equals("DROITE")) {
+            resultat = repeat(" ", espaces) + texte;
+        } else if (alignement.equals("CENTRE")) {
+            int espacesAvant = espaces / 2;
+            int espacesApres = espaces - espacesAvant;
+            resultat = repeat(" ", espacesAvant) + texte + repeat(" ", espacesApres);
+        } else { // GAUCHE
+            resultat = texte + repeat(" ", espaces);
         }
         return resultat;
     }
@@ -269,17 +265,16 @@ public class ConfigurationViewSwing {
     }
 
     private String getSeparateurLigne(String style) {
-        switch (style) {
-            case "DOUBLE":
-                return "================================";
-            case "POINTILLES":
-                return "--------------------------------";
-            case "ETOILES":
-                return "********************************";
-            case "VAGUE":
-                return "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
-            default: // SIMPLE
-                return "--------------------------------";
+        if (style.equals("DOUBLE")) {
+            return "================================";
+        } else if (style.equals("POINTILLES")) {
+            return "--------------------------------";
+        } else if (style.equals("ETOILES")) {
+            return "********************************";
+        } else if (style.equals("VAGUE")) {
+            return "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+        } else { // SIMPLE
+            return "--------------------------------";
         }
     }
 
@@ -310,11 +305,14 @@ public class ConfigurationViewSwing {
 
             // Affichage du logo selon la taille choisie
             if (!tailleLogo.equals("MASQUER")) {
-                int tailleLogoChars = switch (tailleLogo) {
-                    case "PETIT" -> 20;
-                    case "GRAND" -> 40;
-                    default -> 30; // MOYEN
-                };
+                int tailleLogoChars;
+                if (tailleLogo.equals("PETIT")) {
+                    tailleLogoChars = 20;
+                } else if (tailleLogo.equals("GRAND")) {
+                    tailleLogoChars = 40;
+                } else {
+                    tailleLogoChars = 30; // MOYEN par défaut
+                }
                 preview.append("[LOGO - ").append(tailleLogoChars).append(" chars]\n");
             }
 
@@ -340,7 +338,7 @@ public class ConfigurationViewSwing {
             }
 
             // En-tête
-            
+
             String nomEntreprise = Optional.ofNullable(champsSaisie.get(ConfigurationParam.CLE_NOM_ENTREPRISE))
                     .map(comp -> ((JTextField) comp).getText().trim())
                     .orElse("");
