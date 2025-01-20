@@ -35,6 +35,7 @@ import org.jfree.data.general.DefaultPieDataset;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Map;
+import java.util.HashMap;
 
 public class ReportViewSwing {
     private static final Logger LOGGER = Logger.getLogger(ReportViewSwing.class.getName());
@@ -274,7 +275,20 @@ public class ReportViewSwing {
                     );
                     break;
                 case "Stocks":
-                    reportController.genererRapportStocksPDF(nomFichier);
+                    List<Produit> produits = produitController.getProduits();
+                    Map<String, Double> statistiques = new HashMap<>();
+                    double valeurTotale = produits.stream()
+                        .mapToDouble(p -> p.getPrixAchat() * p.getQuantite())
+                        .sum();
+                    statistiques.put("Valeur totale du stock", valeurTotale);
+
+                    double moyenneQuantites = produits.stream()
+                        .mapToDouble(Produit::getQuantite)
+                        .average()
+                        .orElse(0.0);
+                    statistiques.put("Moyenne des quantités", moyenneQuantites);
+
+                    reportController.genererRapportStocksPDF(produits, statistiques, nomFichier);
                     break;
                 case "Fournisseurs":
                     reportController.genererRapportFournisseursPDF(nomFichier);
@@ -384,8 +398,11 @@ public class ReportViewSwing {
         // Graphique des modes de paiement
         addPaiementsChart();
 
-        // Graphique des fournisseurs
-        addFournisseursChart();
+        // Graphique de rentabilité par produit
+        addRentabiliteChart();
+
+        // Graphique d'évolution des ventes
+        addEvolutionVentesChart();
 
         statistiquesPanel.revalidate();
         statistiquesPanel.repaint();
@@ -510,6 +527,69 @@ public class ReportViewSwing {
         }
     }
 
+    private void addRentabiliteChart() {
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+        try {
+            Map<String, Double> rentabilites = reportController.analyserRentabiliteParProduit(
+                dateDebut.atStartOfDay(),
+                dateFin.atTime(23, 59, 59)
+            );
+
+            for (Map.Entry<String, Double> entry : rentabilites.entrySet()) {
+                dataset.addValue(entry.getValue(), "Rentabilité (%)", entry.getKey());
+            }
+
+            JFreeChart chart = ChartFactory.createBarChart(
+                "Rentabilité par produit",
+                "Produit",
+                "Rentabilité (%)",
+                dataset
+            );
+
+            ChartPanel chartPanel = new ChartPanel(chart);
+            chartPanel.setPreferredSize(new Dimension(300, 200));
+            addStyledChartPanel(chartPanel, "Rentabilité par produit");
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la création du graphique de rentabilité", e);
+            showErrorMessage("Erreur", "Impossible de générer le graphique de rentabilité");
+        }
+    }
+
+    private void addEvolutionVentesChart() {
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+        try {
+            Map<String, List<Double>> evolution = reportController.analyserEvolutionVentes(
+                dateDebut.atStartOfDay(),
+                dateFin.atTime(23, 59, 59)
+            );
+
+            List<Double> caJournalier = evolution.get("Chiffre d'affaires journalier");
+            if (caJournalier != null) {
+                for (int i = 0; i < caJournalier.size(); i++) {
+                    dataset.addValue(caJournalier.get(i), "CA", "Jour " + (i + 1));
+                }
+            }
+
+            JFreeChart chart = ChartFactory.createLineChart(
+                "Évolution du chiffre d'affaires",
+                "Période",
+                "Montant (€)",
+                dataset
+            );
+
+            ChartPanel chartPanel = new ChartPanel(chart);
+            chartPanel.setPreferredSize(new Dimension(300, 200));
+            addStyledChartPanel(chartPanel, "Évolution du CA");
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la création du graphique d'évolution", e);
+            showErrorMessage("Erreur", "Impossible de générer le graphique d'évolution");
+        }
+    }
+
     private void addStyledChartPanel(ChartPanel chartPanel, String title) {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(Color.WHITE);
@@ -602,7 +682,21 @@ public class ReportViewSwing {
                     if (!(donnees.stream().allMatch(d -> d instanceof Produit))) {
                         throw new IllegalArgumentException("Type de données incorrect pour le rapport des stocks");
                     }
-                    PDFGenerator.genererRapportStocks((List<Produit>) donnees, nomFichier);
+                    List<Produit> produits = (List<Produit>) donnees;
+                    // Calcul des statistiques pour les stocks
+                    Map<String, Double> statistiques = new HashMap<>();
+                    double valeurTotale = produits.stream()
+                        .mapToDouble(p -> p.getPrixAchat() * p.getQuantite())
+                        .sum();
+                    statistiques.put("Valeur totale du stock", valeurTotale);
+
+                    double moyenneQuantites = produits.stream()
+                        .mapToDouble(Produit::getQuantite)
+                        .average()
+                        .orElse(0.0);
+                    statistiques.put("Moyenne des quantités", moyenneQuantites);
+
+                    PDFGenerator.genererRapportStocks(produits, statistiques, nomFichier);
                     break;
                 case "fournisseurs":
                     if (!(donnees.stream().allMatch(d -> d instanceof Fournisseur))) {

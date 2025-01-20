@@ -37,6 +37,16 @@ public class ReportController {
         }
     }
 
+    public void genererRapportStocksPDF(List<Produit> produits, Map<String, Double> statistiques, String cheminFichier) {
+        try {
+            PDFGenerator.genererRapportStocks(produits, statistiques, cheminFichier);
+            LOGGER.info("Rapport des stocks PDF généré avec succès");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF des stocks", e);
+            throw new RuntimeException("Erreur lors de la génération du rapport PDF des stocks", e);
+        }
+    }
+
     public void genererRapportCreancesExcel(String cheminFichier) {
         try {
             List<Client> clients = clientController.getClients().stream()
@@ -119,7 +129,6 @@ public class ReportController {
         return analyses;
     }
 
-    // Méthodes de génération de rapports Excel
 
     private Map<String, Double> calculerStatistiquesStocks(List<Produit> produits) {
         Map<String, Double> stats = new HashMap<>();
@@ -162,7 +171,6 @@ public class ReportController {
         }
     }
 
-    // Méthodes d'analyse pour les graphiques
     public Map<String, Double> analyserVentesParPeriode(LocalDateTime debut, LocalDateTime fin) {
         try {
             List<Vente> ventes = venteController.getVentes().stream()
@@ -225,7 +233,6 @@ public class ReportController {
         }
     }
 
-    // Méthodes utilitaires
     private List<Fournisseur> getFournisseursAvecStats() {
         // Pour l'instant, retourne une liste vide
         return new ArrayList<>();
@@ -298,7 +305,6 @@ public class ReportController {
         return marges;
     }
 
-    // Méthodes de génération de rapports PDF
     public void genererRapportVentesPDF(LocalDateTime debut, LocalDateTime fin, String cheminFichier) {
         try {
             List<Vente> ventes = venteController.getVentes().stream()
@@ -309,17 +315,6 @@ public class ReportController {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF des ventes", e);
             throw new RuntimeException("Erreur lors de la génération du rapport PDF des ventes", e);
-        }
-    }
-
-    public void genererRapportStocksPDF(String cheminFichier) {
-        try {
-            List<Produit> produits = produitController.getProduits();
-            PDFGenerator.genererRapportStocks(produits, cheminFichier);
-            LOGGER.info("Rapport des stocks PDF généré avec succès");
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF des stocks", e);
-            throw new RuntimeException("Erreur lors de la génération du rapport PDF des stocks", e);
         }
     }
 
@@ -347,5 +342,120 @@ public class ReportController {
         }
     }
 
+    public Map<String, Double> analyserPerformanceStock() {
+        try {
+            List<Produit> produits = produitController.getProduits();
+            Map<String, Double> analyses = new HashMap<>();
 
+            // Taux de rotation du stock
+            double tauxRotation = calculerTauxRotationStock(produits);
+            analyses.put("Taux de rotation du stock", tauxRotation);
+
+            // Produits en alerte
+            long nbProduitsAlerte = produits.stream()
+                .filter(p -> p.getQuantite() <= p.getSeuilAlerte())
+                .count();
+            analyses.put("Nombre de produits en alerte", (double) nbProduitsAlerte);
+
+            // Valeur moyenne du stock
+            double valeurMoyenne = produits.stream()
+                .mapToDouble(p -> p.getPrixAchat() * p.getQuantite())
+                .average()
+                .orElse(0.0);
+            analyses.put("Valeur moyenne du stock", valeurMoyenne);
+
+            return analyses;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'analyse de la performance du stock", e);
+            return new HashMap<>();
+        }
+    }
+
+    private double calculerTauxRotationStock(List<Produit> produits) {
+        if (produits.isEmpty()) return 0.0;
+
+        double valeurStockMoyen = produits.stream()
+            .mapToDouble(p -> p.getPrixAchat() * p.getQuantite())
+            .average()
+            .orElse(0.0);
+
+        double coutVentesPeriode = venteController.getVentes().stream()
+            .flatMap(v -> v.getLignes().stream())
+            .mapToDouble(ligne -> ligne.getProduit().getPrixAchat() * ligne.getQuantite())
+            .sum();
+
+        return valeurStockMoyen > 0 ? (coutVentesPeriode / valeurStockMoyen) * 365 : 0.0;
+    }
+
+    public Map<String, Double> analyserRentabiliteParProduit(LocalDateTime debut, LocalDateTime fin) {
+        try {
+            List<Vente> ventes = venteController.getVentes().stream()
+                .filter(v -> !v.getDate().isBefore(debut) && !v.getDate().isAfter(fin))
+                .collect(Collectors.toList());
+
+            Map<String, Double> rentabilites = new HashMap<>();
+
+            // Calcul de la rentabilité par produit
+            ventes.stream()
+                .flatMap(v -> v.getLignes().stream())
+                .collect(Collectors.groupingBy(
+                    ligne -> ligne.getProduit().getNom(),
+                    Collectors.collectingAndThen(
+                        Collectors.toList(),
+                        lignes -> {
+                            double chiffreAffaires = lignes.stream()
+                                .mapToDouble(l -> l.getPrixUnitaire() * l.getQuantite())
+                                .sum();
+                            double coutAchat = lignes.stream()
+                                .mapToDouble(l -> l.getProduit().getPrixAchat() * l.getQuantite())
+                                .sum();
+                            return (chiffreAffaires - coutAchat) / chiffreAffaires * 100;
+                        }
+                    )
+                ))
+                .forEach(rentabilites::put);
+
+            return rentabilites;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'analyse de la rentabilité par produit", e);
+            return new HashMap<>();
+        }
+    }
+
+    public Map<String, List<Double>> analyserEvolutionVentes(LocalDateTime debut, LocalDateTime fin) {
+        try {
+            List<Vente> ventes = venteController.getVentes().stream()
+                .filter(v -> !v.getDate().isBefore(debut) && !v.getDate().isAfter(fin))
+                .collect(Collectors.toList());
+
+            Map<String, List<Double>> evolution = new HashMap<>();
+
+            // Évolution du chiffre d'affaires
+            List<Double> caJournalier = ventes.stream()
+                .collect(Collectors.groupingBy(
+                    v -> v.getDate().toLocalDate(),
+                    Collectors.summingDouble(Vente::getTotal)
+                ))
+                .values()
+                .stream()
+                .collect(Collectors.toList());
+            evolution.put("Chiffre d'affaires journalier", caJournalier);
+
+            // Évolution du panier moyen
+            List<Double> panierMoyen = ventes.stream()
+                .collect(Collectors.groupingBy(
+                    v -> v.getDate().toLocalDate(),
+                    Collectors.averagingDouble(Vente::getTotal)
+                ))
+                .values()
+                .stream()
+                .collect(Collectors.toList());
+            evolution.put("Panier moyen journalier", panierMoyen);
+
+            return evolution;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'analyse de l'évolution des ventes", e);
+            return new HashMap<>();
+        }
+    }
 }

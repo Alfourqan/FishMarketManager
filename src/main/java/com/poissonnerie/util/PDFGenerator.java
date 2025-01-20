@@ -3,6 +3,7 @@ package com.poissonnerie.util;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import com.poissonnerie.model.*;
+import com.poissonnerie.model.Vente.ModePaiement;
 import java.io.FileOutputStream;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -20,6 +21,19 @@ public class PDFGenerator {
     private static final Font HIGHLIGHT_FONT = new Font(Font.FontFamily.HELVETICA, 12, Font.BOLD, BaseColor.RED);
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
+    private static class SimpleFooter extends PdfPageEventHelper {
+        Font ffont = new Font(Font.FontFamily.HELVETICA, 8);
+
+        public void onEndPage(PdfWriter writer, Document document) {
+            PdfContentByte cb = writer.getDirectContent();
+            Phrase footer = new Phrase("Page " + writer.getPageNumber(), ffont);
+            ColumnText.showTextAligned(cb, Element.ALIGN_CENTER,
+                    footer,
+                    (document.right() - document.left()) / 2 + document.leftMargin(),
+                    document.bottom() - 10, 0);
+        }
+    }
+
     public static void genererRapportFinancier(
             Map<String, Double> chiffreAffaires,
             Map<String, Double> couts,
@@ -30,12 +44,14 @@ public class PDFGenerator {
         try {
             document = new Document(PageSize.A4.rotate());
             PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
+            SimpleFooter footer = new SimpleFooter();
+            writer.setPageEvent(footer);
             document.open();
 
             // En-tête avec date et titre
             Paragraph header = new Paragraph();
-            header.add(new Chunk("Rapport Financier - Généré le " + 
-                DATE_FORMATTER.format(LocalDateTime.now()) + "\n\n", SUBTITLE_FONT));
+            header.add(new Chunk("Rapport Financier - Généré le " +
+                    DATE_FORMATTER.format(LocalDateTime.now()) + "\n\n", SUBTITLE_FONT));
             document.add(header);
 
             // Résumé financier
@@ -68,9 +84,6 @@ public class PDFGenerator {
             document.add(Chunk.NEWLINE);
             ajouterSectionFinanciere(document, "Analyse des Marges", marges);
 
-            // Pied de page avec numérotation
-            HeaderFooter footer = new HeaderFooter(new Phrase("Page ", SMALL_FONT), true);
-            document.setFooter(footer);
 
             LOGGER.info("Rapport financier PDF généré avec succès: " + cheminFichier);
         } catch (Exception e) {
@@ -99,7 +112,7 @@ public class PDFGenerator {
         table.addCell(valueCell);
     }
 
-    private static void ajouterSectionFinanciere(Document document, String titre, Map<String, Double> donnees) 
+    private static void ajouterSectionFinanciere(Document document, String titre, Map<String, Double> donnees)
             throws DocumentException {
         Paragraph titreParagraph = new Paragraph(titre, SUBTITLE_FONT);
         titreParagraph.setSpacingBefore(10f);
@@ -128,7 +141,7 @@ public class PDFGenerator {
         for (Map.Entry<String, Double> entry : donneesTriees.entrySet()) {
             PdfPCell periodeCell = new PdfPCell(new Phrase(entry.getKey(), NORMAL_FONT));
             PdfPCell montantCell = new PdfPCell(new Phrase(
-                String.format("%.2f €", entry.getValue()), NORMAL_FONT));
+                    String.format("%.2f €", entry.getValue()), NORMAL_FONT));
 
             periodeCell.setHorizontalAlignment(Element.ALIGN_LEFT);
             montantCell.setHorizontalAlignment(Element.ALIGN_RIGHT);
@@ -145,6 +158,8 @@ public class PDFGenerator {
         try {
             document = new Document(PageSize.A4.rotate());
             PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
+            SimpleFooter footer = new SimpleFooter();
+            writer.setPageEvent(footer);
             document.open();
 
             // En-tête
@@ -161,8 +176,8 @@ public class PDFGenerator {
 
             // En-têtes
             String[] headers = {
-                "Référence", "Nom", "Catégorie", "Prix Achat", "Prix Vente",
-                "Stock", "Seuil", "Valeur Stock"
+                    "Référence", "Nom", "Catégorie", "Prix Achat", "Prix Vente",
+                    "Stock", "Seuil", "Valeur Stock"
             };
             for (String header : headers) {
                 PdfPCell cell = new PdfPCell(new Phrase(header, SUBTITLE_FONT));
@@ -218,23 +233,23 @@ public class PDFGenerator {
             analyseTable.setSpacingBefore(10f);
 
             // Valeur totale
-            addTableCell(analyseTable, "Valeur totale du stock", 
-                String.format("%.2f €", valeurTotaleStock), true);
+            addTableCell(analyseTable, "Valeur totale du stock",
+                    String.format("%.2f €", valeurTotaleStock), true);
 
             // Distribution par catégorie
             for (Map.Entry<String, Integer> entry : produitsParCategorie.entrySet()) {
                 String categorie = entry.getKey();
                 addTableCell(analyseTable,
-                    String.format("Catégorie %s (%d produits)", categorie, entry.getValue()),
-                    String.format("%.2f €", valeurParCategorie.get(categorie)),
-                    false);
+                        String.format("Catégorie %s (%d produits)", categorie, entry.getValue()),
+                        String.format("%.2f €", valeurParCategorie.get(categorie)),
+                        false);
             }
 
             // Statistiques supplémentaires
             if (statistiques != null && !statistiques.isEmpty()) {
                 for (Map.Entry<String, Double> stat : statistiques.entrySet()) {
-                    addTableCell(analyseTable, stat.getKey(), 
-                        String.format("%.2f €", stat.getValue()), false);
+                    addTableCell(analyseTable, stat.getKey(),
+                            String.format("%.2f €", stat.getValue()), false);
                 }
             }
 
@@ -256,6 +271,8 @@ public class PDFGenerator {
         try {
             document = new Document(PageSize.A4.rotate());
             PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
+            SimpleFooter footer = new SimpleFooter();
+            writer.setPageEvent(footer);
             document.open();
 
             // En-tête
@@ -273,8 +290,8 @@ public class PDFGenerator {
 
             // En-têtes
             String[] headers = {
-                "Date", "Client", "Produits", "Total HT", "TVA",
-                "Total TTC", "Mode", "Marge"
+                    "Date", "Client", "Produits", "Total HT", "TVA",
+                    "Total TTC", "Mode", "Marge"
             };
             for (String header : headers) {
                 PdfPCell cell = new PdfPCell(new Phrase(header, SUBTITLE_FONT));
@@ -310,8 +327,8 @@ public class PDFGenerator {
                     margeVente += marge;
 
                     // Agrégation par catégorie
-                    ventesParCategorie.merge(produit.getCategorie(), 
-                        ligne.getPrixUnitaire() * ligne.getQuantite(), Double::sum);
+                    ventesParCategorie.merge(produit.getCategorie(),
+                            ligne.getPrixUnitaire() * ligne.getQuantite(), Double::sum);
                 }
                 table.addCell(new Phrase(String.format("%.2f €", margeVente), NORMAL_FONT));
 
@@ -345,8 +362,8 @@ public class PDFGenerator {
             addTableCell(analyseTable, "Total TVA", String.format("%.2f €", totalTVA), true);
             addTableCell(analyseTable, "Total TTC", String.format("%.2f €", totalTTC), true);
             addTableCell(analyseTable, "Marge totale", String.format("%.2f €", totalMarge), true);
-            addTableCell(analyseTable, "Taux de marge", 
-                String.format("%.2f %%", totalHT > 0 ? (totalMarge / totalHT) * 100 : 0), true);
+            addTableCell(analyseTable, "Taux de marge",
+                    String.format("%.2f %%", totalHT > 0 ? (totalMarge / totalHT) * 100 : 0), true);
 
             document.add(analyseTable);
             document.add(Chunk.NEWLINE);
@@ -360,8 +377,8 @@ public class PDFGenerator {
             modeTable.setSpacingBefore(10f);
 
             for (Map.Entry<ModePaiement, Double> entry : ventesParMode.entrySet()) {
-                addTableCell(modeTable, entry.getKey().getLibelle(), 
-                    String.format("%.2f €", entry.getValue()), false);
+                addTableCell(modeTable, entry.getKey().getLibelle(),
+                        String.format("%.2f €", entry.getValue()), false);
             }
 
             document.add(modeTable);
@@ -377,8 +394,8 @@ public class PDFGenerator {
                 catTable.setSpacingBefore(10f);
 
                 for (Map.Entry<String, Double> entry : ventesParCategorie.entrySet()) {
-                    addTableCell(catTable, entry.getKey(), 
-                        String.format("%.2f €", entry.getValue()), false);
+                    addTableCell(catTable, entry.getKey(),
+                            String.format("%.2f €", entry.getValue()), false);
                 }
 
                 document.add(catTable);
@@ -399,7 +416,9 @@ public class PDFGenerator {
         Document document = null;
         try {
             document = new Document();
-            PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
+            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
+            SimpleFooter footer = new SimpleFooter();
+            writer.setPageEvent(footer);
             document.open();
 
             // En-tête
@@ -435,7 +454,9 @@ public class PDFGenerator {
         String tempFile = "preview_ticket_" + System.currentTimeMillis() + ".pdf";
         try {
             document = new Document(PageSize.A4);
-            PdfWriter.getInstance(document, new FileOutputStream(tempFile));
+            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(tempFile));
+            SimpleFooter footer = new SimpleFooter();
+            writer.setPageEvent(footer);
             document.open();
             genererContenuTicket(document, vente);
             return tempFile;
@@ -453,7 +474,9 @@ public class PDFGenerator {
         Document document = null;
         try {
             document = new Document(PageSize.A4);
-            PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
+            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
+            SimpleFooter footer = new SimpleFooter();
+            writer.setPageEvent(footer);
             document.open();
             genererContenuTicket(document, vente);
             LOGGER.info("Ticket de vente généré avec succès: " + cheminFichier);
@@ -518,7 +541,9 @@ public class PDFGenerator {
         Document document = null;
         try {
             document = new Document();
-            PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
+            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
+            SimpleFooter footer = new SimpleFooter();
+            writer.setPageEvent(footer);
             document.open();
 
             Paragraph titre = new Paragraph("État des Créances", TITLE_FONT);
@@ -566,7 +591,9 @@ public class PDFGenerator {
         Document document = null;
         try {
             document = new Document();
-            PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
+            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
+            SimpleFooter footer = new SimpleFooter();
+            writer.setPageEvent(footer);
             document.open();
 
             Paragraph titre = new Paragraph("Liste des Fournisseurs", TITLE_FONT);

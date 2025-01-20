@@ -4,6 +4,7 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import com.poissonnerie.model.*;
+import com.poissonnerie.model.Vente.ModePaiement; // Added import
 import java.io.FileOutputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -106,7 +107,7 @@ public class ExcelGenerator {
 
             // Titre
             Row titleRow = analyseSheet.createRow(rowNum++);
-            Cell titleCell = titleCell = titleRow.createCell(0);
+            Cell titleCell = titleRow.createCell(0);
             titleCell.setCellValue("Analyses des Stocks");
             applyHeaderStyle(workbook, (XSSFCell)titleCell);
 
@@ -188,14 +189,14 @@ public class ExcelGenerator {
                     applyCurrencyStyle(workbook, (XSSFCell)soldeCell);
 
                     LocalDateTime derniereVente = c.getDerniereVente();
-                    row.createCell(3).setCellValue(derniereVente != null ? 
+                    row.createCell(3).setCellValue(derniereVente != null ?
                         DATE_TIME_FORMATTER.format(derniereVente) : "-");
                     row.createCell(4).setCellValue(c.getStatutCreances().toString());
 
                     // Calcul des jours depuis la dernière vente
                     if (derniereVente != null) {
                         long joursDernierVente = java.time.temporal.ChronoUnit.DAYS.between(
-                            derniereVente.toLocalDate(), 
+                            derniereVente.toLocalDate(),
                             LocalDateTime.now().toLocalDate()
                         );
                         row.createCell(5).setCellValue(joursDernierVente);
@@ -263,7 +264,7 @@ public class ExcelGenerator {
             // En-tête amélioré
             Row headerRow = venteSheet.createRow(0);
             String[] headers = {
-                "Date", "Client", "Nb Produits", "Total HT", "TVA", "Total TTC", 
+                "Date", "Client", "Nb Produits", "Total HT", "TVA", "Total TTC",
                 "Mode Paiement", "Marge"
             };
 
@@ -309,8 +310,8 @@ public class ExcelGenerator {
                     margeVente += marge;
 
                     // Agrégation par catégorie
-                    ventesParCategorie.merge(produit.getCategorie(), 
-                        ligne.getPrixUnitaire() * ligne.getQuantite(), 
+                    ventesParCategorie.merge(produit.getCategorie(),
+                        ligne.getPrixUnitaire() * ligne.getQuantite(),
                         Double::sum);
                 }
 
@@ -430,7 +431,7 @@ public class ExcelGenerator {
                 row.createCell(3).setCellValue(f.getEmail());
 
                 LocalDateTime derniereCommande = f.getDerniereCommande();
-                row.createCell(4).setCellValue(derniereCommande != null ? 
+                row.createCell(4).setCellValue(derniereCommande != null ?
                     DATE_TIME_FORMATTER.format(derniereCommande) : "-");
                 row.createCell(5).setCellValue(f.getStatut());
             }
@@ -494,7 +495,9 @@ public class ExcelGenerator {
         for (Map.Entry<String, Double> entry : donnees.entrySet()) {
             Row row = sheet.createRow(rowNum++);
             row.createCell(0).setCellValue(entry.getKey());
-            row.createCell(1).setCellValue(entry.getValue());
+            Cell valueCell = row.createCell(1);
+            valueCell.setCellValue(entry.getValue());
+            applyCurrencyStyle(workbook, (XSSFCell)valueCell);
         }
 
         for (int i = 0; i < headers.length; i++) {
