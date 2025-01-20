@@ -23,8 +23,6 @@ public class BillPrint {
     private static final byte[] CUT_PAPER = {0x1D, 0x56, 0x41};  // Full cut
 
     private final Vente vente;
-    private static final int X_MARGIN = 40;     // Marge horizontale comme dans le code Python
-    private static final int Y_MARGIN = 60;     // Marge verticale comme dans le code Python
 
     public BillPrint(Vente vente) {
         this.vente = vente;
@@ -54,19 +52,19 @@ public class BillPrint {
             // Création du document à imprimer
             ByteArrayOutputStream ticketData = new ByteArrayOutputStream();
 
-            // En-tête du ticket (comme dans le code Python)
+            // En-tête du ticket (format standardisé)
             writeBytes(ticketData, ESC_INIT);
             writeBytes(ticketData, ESC_ALIGN_CENTER);
             writeBytes(ticketData, ESC_BOLD_ON);
-            writeLine(ticketData, "MA POISSONNERIE");
+            writeLine(ticketData, "BUSINESS NAME");
             writeBytes(ticketData, ESC_BOLD_OFF);
 
-            // Adresse (comme dans le code Python)
+            // Adresse
             String[] adresse = {
-                "123 Rue de la Mer",
-                "75001 PARIS",
-                "Tel: 01 23 45 67 89",
-                "SIRET: 123 568 941 00056"
+                "1234 Main Street",
+                "Suite 567",
+                "City Name, State 54321",
+                "123-456-7890"
             };
 
             for (String ligne : adresse) {
@@ -74,15 +72,33 @@ public class BillPrint {
             }
             writeBytes(ticketData, LF);
 
-            // Ligne de séparation (comme dans le code Python)
-            writeBytes(ticketData, ESC_ALIGN_LEFT);
-            writeLine(ticketData, "-".repeat(40));
+            // Ligne de séparation
+            writeLine(ticketData, "...................................................");
 
-            // Articles (comme dans le code Python)
-            writeBytes(ticketData, ESC_BOLD_ON);
-            writeLine(ticketData, String.format("%-28s%14s", "ARTICLES", "PRIX"));
-            writeBytes(ticketData, ESC_BOLD_OFF);
-            writeLine(ticketData, "-".repeat(40));
+            // Informations de transaction
+            writeBytes(ticketData, ESC_ALIGN_LEFT);
+            writeLine(ticketData, String.format("Merchant ID:      %s", "987-654321"));
+            writeLine(ticketData, String.format("Terminal ID:      %s", "0123456789"));
+            writeBytes(ticketData, LF);
+
+            writeLine(ticketData, String.format("Transaction ID:   #%d", vente.getId()));
+            writeLine(ticketData, String.format("Type:            %s", vente.getModePaiement().getLibelle()));
+
+            // Date d'achat
+            writeBytes(ticketData, ESC_ALIGN_CENTER);
+            writeLine(ticketData, "PURCHASE");
+            writeLine(ticketData, DATE_FORMATTER.format(vente.getDate()));
+
+            // Informations de carte
+            writeBytes(ticketData, ESC_ALIGN_LEFT);
+            writeLine(ticketData, "Number:          ************1234");
+            writeLine(ticketData, "Entry Mode:      Swiped");
+            writeLine(ticketData, "Card:            Card Name");
+            writeLine(ticketData, "Response:        APPROVED");
+            writeLine(ticketData, "Approval Code:   789-1234");
+
+            // Ligne de séparation
+            writeLine(ticketData, "...................................................");
 
             // Détails des articles
             for (Vente.LigneVente ligne : vente.getLignes()) {
@@ -93,45 +109,39 @@ public class BillPrint {
 
                 if (ligne.getQuantite() > 1) {
                     writeLine(ticketData, nomProduit);
-                    String detail = String.format("  %d x %.2f", 
+                    String detail = String.format("  %d x $%.2f", 
                         ligne.getQuantite(), 
                         ligne.getPrixUnitaire());
-                    writeLine(ticketData, String.format("%-28s%14.2f", 
+                    writeLine(ticketData, String.format("%-28s$%8.2f", 
                         detail, 
                         ligne.getQuantite() * ligne.getPrixUnitaire()));
                 } else {
-                    writeLine(ticketData, String.format("%-28s%14.2f", 
+                    writeLine(ticketData, String.format("%-28s$%8.2f", 
                         nomProduit, 
                         ligne.getPrixUnitaire()));
                 }
             }
 
-            writeLine(ticketData, "-".repeat(40));
+            writeLine(ticketData, "...................................................");
 
-            // Totaux (comme dans le code Python)
+            // Totaux
             double totalHT = vente.getTotal() / 1.20;
             double tva = vente.getTotal() - totalHT;
 
             writeBytes(ticketData, ESC_ALIGN_RIGHT);
-            writeLine(ticketData, String.format("Sub Total:%14.2f", totalHT));
-            writeLine(ticketData, String.format("TVA (20%%):%14.2f", tva));
+            writeLine(ticketData, String.format("Sub Total        $%8.2f", totalHT));
+            writeLine(ticketData, String.format("Sales Tax        $%8.2f", tva));
+            writeLine(ticketData, "...................................................");
             writeBytes(ticketData, ESC_BOLD_ON);
-            writeLine(ticketData, String.format("TOTAL:%14.2f", vente.getTotal()));
+            writeLine(ticketData, String.format("TOTAL (USD)      $%8.2f", vente.getTotal()));
             writeBytes(ticketData, ESC_BOLD_OFF);
             writeBytes(ticketData, LF);
 
-            // Mode de paiement
-            writeBytes(ticketData, ESC_ALIGN_LEFT);
-            writeLine(ticketData, String.format("Paid By: %s", vente.getModePaiement().getLibelle()));
-            if (vente.isCredit() && vente.getClient() != null) {
-                writeLine(ticketData, String.format("Client: %s", vente.getClient().getNom()));
-            }
-            writeBytes(ticketData, LF);
-
-            // Message de remerciement (comme dans le code Python)
+            // Message de remerciement
             writeBytes(ticketData, ESC_ALIGN_CENTER);
             writeBytes(ticketData, ESC_BOLD_ON);
-            writeLine(ticketData, "Thank You For Supporting Local Business!");
+            writeLine(ticketData, "THANK YOU FOR");
+            writeLine(ticketData, "YOUR PURCHASE");
             writeBytes(ticketData, ESC_BOLD_OFF);
             writeBytes(ticketData, LF);
 
@@ -156,9 +166,7 @@ public class BillPrint {
     }
 
     private void writeLine(ByteArrayOutputStream out, String text) throws IOException {
-        // Ajouter les marges comme dans le code Python
-        String paddedText = " ".repeat(X_MARGIN) + text;
-        out.write(paddedText.getBytes());
+        out.write(text.getBytes());
         writeBytes(out, CR);
         writeBytes(out, LF);
     }
