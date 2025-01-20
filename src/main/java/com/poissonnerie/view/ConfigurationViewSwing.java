@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Optional;
 
 
+
 public class ConfigurationViewSwing {
     private static final Logger LOGGER = Logger.getLogger(ConfigurationViewSwing.class.getName());
     private final JPanel mainPanel;
@@ -69,6 +70,32 @@ public class ConfigurationViewSwing {
         controller = new ConfigurationController();
         champsSaisie = new HashMap<>();
 
+        // Initialisation des champs de base
+        champsSaisie.put(ConfigurationParam.CLE_NOM_ENTREPRISE, new JTextField());
+        champsSaisie.put(ConfigurationParam.CLE_ADRESSE_ENTREPRISE, new JTextField());
+        champsSaisie.put(ConfigurationParam.CLE_TELEPHONE_ENTREPRISE, new JTextField());
+        champsSaisie.put(ConfigurationParam.CLE_SIRET_ENTREPRISE, new JTextField());
+        champsSaisie.put(ConfigurationParam.CLE_LOGO_PATH, new JTextField());
+        champsSaisie.put(ConfigurationParam.CLE_MESSAGE_COMMERCIAL_RECU, new JTextArea());
+        champsSaisie.put(ConfigurationParam.CLE_EN_TETE_RECU, new JTextArea());
+        champsSaisie.put(ConfigurationParam.CLE_PIED_PAGE_RECU, new JTextArea());
+        champsSaisie.put(ConfigurationParam.CLE_INFO_SUPPLEMENTAIRE_RECU, new JTextArea());
+
+        // Configuration TVA
+        JCheckBox tvaEnabledCheck = new JCheckBox("Activer la TVA");
+        champsSaisie.put(ConfigurationParam.CLE_TVA_ENABLED, tvaEnabledCheck);
+        JSpinner tauxTvaSpinner = new JSpinner(new SpinnerNumberModel(20.0, 0.0, 100.0, 0.1));
+        champsSaisie.put(ConfigurationParam.CLE_TAUX_TVA, tauxTvaSpinner);
+
+        // Options de mise en page
+        champsSaisie.put(ConfigurationParam.CLE_FORMAT_RECU, new JComboBox<>(new String[]{"COMPACT", "DETAILLE"}));
+        champsSaisie.put(ConfigurationParam.CLE_STYLE_BORDURE_RECU, new JComboBox<>(new String[]{"SIMPLE", "DOUBLE", "POINTILLES"}));
+        champsSaisie.put(ConfigurationParam.CLE_ALIGNEMENT_TITRE_RECU, new JComboBox<>(new String[]{"GAUCHE", "CENTRE", "DROITE"}));
+        champsSaisie.put(ConfigurationParam.CLE_ALIGNEMENT_TEXTE_RECU, new JComboBox<>(new String[]{"GAUCHE", "CENTRE", "DROITE"}));
+        champsSaisie.put(ConfigurationParam.CLE_POLICE_TITRE_RECU, new JSpinner(new SpinnerNumberModel(14, 8, 24, 1)));
+        champsSaisie.put(ConfigurationParam.CLE_POLICE_TEXTE_RECU, new JSpinner(new SpinnerNumberModel(12, 8, 20, 1)));
+        champsSaisie.put(ConfigurationParam.CLE_AFFICHER_TVA_DETAILS, new JCheckBox("Afficher les détails de TVA"));
+
         initializeComponents();
         loadData();
     }
@@ -76,6 +103,10 @@ public class ConfigurationViewSwing {
     private void initializeComponents() {
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         mainPanel.setBackground(couleurFond);
+
+        // Initialisation des champs manquants
+        JTextField logoPathField = new JTextField();
+        champsSaisie.put(ConfigurationParam.CLE_LOGO_PATH, logoPathField);
 
         JPanel configPanel = new JPanel();
         configPanel.setLayout(new BoxLayout(configPanel, BoxLayout.Y_AXIS));
@@ -345,13 +376,12 @@ public class ConfigurationViewSwing {
     private JPanel createTVASection() {
         JPanel panel = createSectionPanel("Configuration TVA", MaterialDesign.MDI_PERCENT);
 
-        JCheckBox tvaEnabledCheck = new JCheckBox("Activer la TVA");
+        JCheckBox tvaEnabledCheck = (JCheckBox) champsSaisie.get(ConfigurationParam.CLE_TVA_ENABLED);
         tvaEnabledCheck.setFont(texteNormalFont);
         tvaEnabledCheck.setToolTipText("Active ou désactive le calcul de la TVA sur les ventes");
-        champsSaisie.put(ConfigurationParam.CLE_TVA_ENABLED, tvaEnabledCheck);
 
         JPanel tauxPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JSpinner tauxTvaSpinner = new JSpinner(new SpinnerNumberModel(20.0, 0.0, 100.0, 0.1));
+        JSpinner tauxTvaSpinner = (JSpinner) champsSaisie.get(ConfigurationParam.CLE_TAUX_TVA);
         JSlider tauxSlider = new JSlider(0, 100, 20);
 
         tauxTvaSpinner.addChangeListener(e -> {
@@ -366,7 +396,6 @@ public class ConfigurationViewSwing {
         });
 
         tauxTvaSpinner.setFont(texteNormalFont);
-        champsSaisie.put(ConfigurationParam.CLE_TAUX_TVA, tauxTvaSpinner);
 
         tvaEnabledCheck.addActionListener(e -> {
             boolean enabled = tvaEnabledCheck.isSelected();
@@ -438,10 +467,9 @@ public class ConfigurationViewSwing {
             JLabel label = new JLabel(champ[1] + ":");
             label.setFont(texteNormalFont);
 
-            JTextField textField = new JTextField(30);
+            JTextField textField = (JTextField) champsSaisie.get(champ[0]);
             textField.setFont(texteNormalFont);
             styleTextField(textField);
-            champsSaisie.put(champ[0], textField);
 
             panel.add(label, gbc);
             gbc.gridx = 1;
@@ -467,10 +495,9 @@ public class ConfigurationViewSwing {
         // Format des reçus
         JLabel formatLabel = new JLabel("Format des reçus:");
         formatLabel.setFont(texteNormalFont);
-        JComboBox<String> formatCombo = new JComboBox<>(new String[]{"COMPACT", "DETAILLE"});
+        JComboBox<String> formatCombo = (JComboBox<String>) champsSaisie.get(ConfigurationParam.CLE_FORMAT_RECU);
         formatCombo.setFont(texteNormalFont);
         formatCombo.setToolTipText("COMPACT: Version simplifiée du reçu\nDETAILLE: Version complète avec informations additionnelles");
-        champsSaisie.put(ConfigurationParam.CLE_FORMAT_RECU, formatCombo);
 
         panel.add(formatLabel, gbc);
         gbc.gridx = 1;
@@ -481,9 +508,8 @@ public class ConfigurationViewSwing {
         gbc.gridy++;
         JLabel bordureLabel = new JLabel("Style de bordure:");
         bordureLabel.setFont(texteNormalFont);
-        JComboBox<String> bordureCombo = new JComboBox<>(new String[]{"SIMPLE", "DOUBLE", "POINTILLES"});
+        JComboBox<String> bordureCombo = (JComboBox<String>) champsSaisie.get(ConfigurationParam.CLE_STYLE_BORDURE_RECU);
         bordureCombo.setFont(texteNormalFont);
-        champsSaisie.put(ConfigurationParam.CLE_STYLE_BORDURE_RECU, bordureCombo);
 
         panel.add(bordureLabel, gbc);
         gbc.gridx = 1;
@@ -495,9 +521,8 @@ public class ConfigurationViewSwing {
         JPanel policeTitrePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel policeTitreLabel = new JLabel("Taille police titre:");
         policeTitreLabel.setFont(texteNormalFont);
-        JSpinner policeTitreSpinner = new JSpinner(new SpinnerNumberModel(14, 8, 24, 1));
+        JSpinner policeTitreSpinner = (JSpinner) champsSaisie.get(ConfigurationParam.CLE_POLICE_TITRE_RECU);
         policeTitreSpinner.setFont(texteNormalFont);
-        champsSaisie.put(ConfigurationParam.CLE_POLICE_TITRE_RECU, policeTitreSpinner);
         policeTitrePanel.add(policeTitreLabel);
         policeTitrePanel.add(policeTitreSpinner);
 
@@ -510,9 +535,8 @@ public class ConfigurationViewSwing {
         JPanel policeTextePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel policeTexteLabel = new JLabel("Taille police texte:");
         policeTexteLabel.setFont(texteNormalFont);
-        JSpinner policeTexteSpinner = new JSpinner(new SpinnerNumberModel(12, 8, 20, 1));
+        JSpinner policeTexteSpinner = (JSpinner) champsSaisie.get(ConfigurationParam.CLE_POLICE_TEXTE_RECU);
         policeTexteSpinner.setFont(texteNormalFont);
-        champsSaisie.put(ConfigurationParam.CLE_POLICE_TEXTE_RECU, policeTexteSpinner);
         policeTextePanel.add(policeTexteLabel);
         policeTextePanel.add(policeTexteSpinner);
 
@@ -526,12 +550,10 @@ public class ConfigurationViewSwing {
         String[] alignements = {"GAUCHE", "CENTRE", "DROITE"};
 
         JLabel alignementTitreLabel = new JLabel("Alignement titre:");
-        JComboBox<String> alignementTitreCombo = new JComboBox<>(alignements);
-        champsSaisie.put(ConfigurationParam.CLE_ALIGNEMENT_TITRE_RECU, alignementTitreCombo);
+        JComboBox<String> alignementTitreCombo = (JComboBox<String>) champsSaisie.get(ConfigurationParam.CLE_ALIGNEMENT_TITRE_RECU);
 
         JLabel alignementTexteLabel = new JLabel("Alignement texte:");
-        JComboBox<String> alignementTexteCombo = new JComboBox<>(alignements);
-        champsSaisie.put(ConfigurationParam.CLE_ALIGNEMENT_TEXTE_RECU, alignementTexteCombo);
+        JComboBox<String> alignementTexteCombo = (JComboBox<String>) champsSaisie.get(ConfigurationParam.CLE_ALIGNEMENT_TEXTE_RECU);
 
         alignementPanel.add(alignementTitreLabel);
         alignementPanel.add(alignementTitreCombo);
@@ -553,9 +575,8 @@ public class ConfigurationViewSwing {
 
         // En-tête
         JLabel enTeteLabel = new JLabel("Message d'en-tête:");
-        JTextArea enTeteArea = new JTextArea(2, 30);
+        JTextArea enTeteArea = (JTextArea) champsSaisie.get(ConfigurationParam.CLE_EN_TETE_RECU);
         styleTextArea(enTeteArea);
-        champsSaisie.put(ConfigurationParam.CLE_EN_TETE_RECU, enTeteArea);
         messagesPanel.add(enTeteLabel, gbcMessages);
         gbcMessages.gridy++;
         messagesPanel.add(new JScrollPane(enTeteArea), gbcMessages);
@@ -563,9 +584,8 @@ public class ConfigurationViewSwing {
         // Message commercial
         gbcMessages.gridy++;
         JLabel msgCommercialLabel = new JLabel("Message commercial:");
-        JTextArea msgCommercialArea = new JTextArea(2, 30);
+        JTextArea msgCommercialArea = (JTextArea) champsSaisie.get(ConfigurationParam.CLE_MESSAGE_COMMERCIAL_RECU);
         styleTextArea(msgCommercialArea);
-        champsSaisie.put(ConfigurationParam.CLE_MESSAGE_COMMERCIAL_RECU, msgCommercialArea);
         messagesPanel.add(msgCommercialLabel, gbcMessages);
         gbcMessages.gridy++;
         messagesPanel.add(new JScrollPane(msgCommercialArea), gbcMessages);
@@ -573,9 +593,8 @@ public class ConfigurationViewSwing {
         // Pied de page
         gbcMessages.gridy++;
         JLabel piedPageLabel = new JLabel("Message de pied de page:");
-        JTextArea piedPageArea = new JTextArea(2, 30);
+        JTextArea piedPageArea = (JTextArea) champsSaisie.get(ConfigurationParam.CLE_PIED_PAGE_RECU);
         styleTextArea(piedPageArea);
-        champsSaisie.put(ConfigurationParam.CLE_PIED_PAGE_RECU, piedPageArea);
         messagesPanel.add(piedPageLabel, gbcMessages);
         gbcMessages.gridy++;
         messagesPanel.add(new JScrollPane(piedPageArea), gbcMessages);
@@ -583,9 +602,8 @@ public class ConfigurationViewSwing {
         // Infos supplémentaires
         gbcMessages.gridy++;
         JLabel infoSupLabel = new JLabel("Informations supplémentaires:");
-        JTextArea infoSupArea = new JTextArea(2, 30);
+        JTextArea infoSupArea = (JTextArea) champsSaisie.get(ConfigurationParam.CLE_INFO_SUPPLEMENTAIRE_RECU);
         styleTextArea(infoSupArea);
-        champsSaisie.put(ConfigurationParam.CLE_INFO_SUPPLEMENTAIRE_RECU, infoSupArea);
         messagesPanel.add(infoSupLabel, gbcMessages);
         gbcMessages.gridy++;
         messagesPanel.add(new JScrollPane(infoSupArea), gbcMessages);
@@ -598,9 +616,8 @@ public class ConfigurationViewSwing {
         JPanel optionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         optionsPanel.setBorder(BorderFactory.createTitledBorder("Options supplémentaires"));
 
-        JCheckBox afficherTVACheck = new JCheckBox("Afficher les détails de TVA");
+        JCheckBox afficherTVACheck = (JCheckBox) champsSaisie.get(ConfigurationParam.CLE_AFFICHER_TVA_DETAILS);
         afficherTVACheck.setFont(texteNormalFont);
-        champsSaisie.put(ConfigurationParam.CLE_AFFICHER_TVA_DETAILS, afficherTVACheck);
         optionsPanel.add(afficherTVACheck);
 
         panel.add(optionsPanel, gbc);
@@ -760,37 +777,85 @@ public class ConfigurationViewSwing {
         }
     }
 
-    private void loadData() {
+    public void loadData() {
         try {
             LOGGER.info("Chargement des configurations...");
             controller.chargerConfigurations();
 
-            for (Map.Entry<String, JComponent> entry : champsSaisie.entrySet()) {
-                String valeur = controller.getValeur(entry.getKey());
-                JComponent composant = entry.getValue();
+            // Initialiser les valeurs par défaut au besoin
+            String[] clesPrincipales = {
+                ConfigurationParam.CLE_NOM_ENTREPRISE,
+                ConfigurationParam.CLE_ADRESSE_ENTREPRISE,
+                ConfigurationParam.CLE_TELEPHONE_ENTREPRISE,
+                ConfigurationParam.CLE_SIRET_ENTREPRISE,
+                ConfigurationParam.CLE_LOGO_PATH,
+                ConfigurationParam.CLE_FORMAT_RECU,
+                ConfigurationParam.CLE_STYLE_BORDURE_RECU,
+                ConfigurationParam.CLE_POLICE_TITRE_RECU,
+                ConfigurationParam.CLE_POLICE_TEXTE_RECU,
+                ConfigurationParam.CLE_ALIGNEMENT_TITRE_RECU,
+                ConfigurationParam.CLE_ALIGNEMENT_TEXTE_RECU,
+                ConfigurationParam.CLE_MESSAGE_COMMERCIAL_RECU,
+                ConfigurationParam.CLE_EN_TETE_RECU,
+                ConfigurationParam.CLE_PIED_PAGE_RECU,
+                ConfigurationParam.CLE_INFO_SUPPLEMENTAIRE_RECU,
+                ConfigurationParam.CLE_TVA_ENABLED,
+                ConfigurationParam.CLE_TAUX_TVA,
+                ConfigurationParam.CLE_AFFICHER_TVA_DETAILS
+            };
 
-                if (composant instanceof JTextField) {
-                    ((JTextField) composant).setText(valeur);
-                } else if (composant instanceof JTextArea) {
-                    ((JTextArea) composant).setText(valeur);
-                } else if (composant instanceof JCheckBox) {
-                    ((JCheckBox) composant).setSelected(Boolean.parseBoolean(valeur));
-                } else if (composant instanceof JSpinner) {
-                    try {
-                        ((JSpinner) composant).setValue(Double.parseDouble(valeur));
-                    } catch(NumberFormatException e) {
-                        ((JSpinner) composant).setValue(20.0);
+            // Vérifier que tous les champs sont initialisés
+            for (String cle : clesPrincipales) {
+                if (!champsSaisie.containsKey(cle)) {
+                    LOGGER.warning("Champ manquant dans champsSaisie: " + cle);
+                    // Créer un composant par défaut selon le type
+                    if (cle.equals(ConfigurationParam.CLE_TVA_ENABLED) || 
+                        cle.equals(ConfigurationParam.CLE_AFFICHER_TVA_DETAILS)) {
+                        champsSaisie.put(cle, new JCheckBox());
+                    } else if (cle.equals(ConfigurationParam.CLE_TAUX_TVA)) {
+                        champsSaisie.put(cle, new JSpinner(new SpinnerNumberModel(20.0, 0.0, 100.0, 0.1)));
+                    } else if (cle.equals(ConfigurationParam.CLE_FORMAT_RECU) ||
+                             cle.equals(ConfigurationParam.CLE_STYLE_BORDURE_RECU) ||
+                             cle.equals(ConfigurationParam.CLE_ALIGNEMENT_TITRE_RECU) ||
+                             cle.equals(ConfigurationParam.CLE_ALIGNEMENT_TEXTE_RECU)) {
+                        champsSaisie.put(cle, new JComboBox<>(new String[]{"COMPACT", "DETAILLE"}));
+                    } else if (cle.contains("MESSAGE") || cle.contains("EN_TETE") || 
+                              cle.contains("PIED_PAGE") || cle.contains("INFO")) {
+                        champsSaisie.put(cle, new JTextArea());
+                    } else {
+                        champsSaisie.put(cle, new JTextField());
                     }
-                } else if (composant instanceof JComboBox) {
-                    ((JComboBox<?>) composant).setSelectedItem(valeur);
                 }
             }
 
-            LOGGER.info("Configurations chargées avec succès");
+            // Mise à jour des valeurs depuis la configuration
+            for (String cle : clesPrincipales) {
+                JComponent composant = champsSaisie.get(cle);
+                String valeur = controller.getValeur(cle);
+
+                if (composant instanceof JTextField) {
+                    ((JTextField) composant).setText(valeur != null ? valeur : "");
+                } else if (composant instanceof JTextArea) {
+                    ((JTextArea) composant).setText(valeur != null ? valeur : "");
+                } else if (composant instanceof JCheckBox) {
+                    ((JCheckBox) composant).setSelected("true".equalsIgnoreCase(valeur));
+                } else if (composant instanceof JSpinner) {
+                    try {
+                        double val = Double.parseDouble(valeur != null ? valeur : "20.0");
+                        ((JSpinner) composant).setValue(val);
+                    } catch (NumberFormatException e) {
+                        LOGGER.warning("Erreur de conversion pour " + cle + ": " + e.getMessage());
+                        ((JSpinner) composant).setValue(20.0);
+                    }
+                } else if (composant instanceof JComboBox) {
+                    ((JComboBox<?>) composant).setSelectedItem(valeur != null ? valeur : "COMPACT");
+                }
+            }
+
             updatePreview();
+            LOGGER.info("Configurations chargées avec succès");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors du chargement des configurations", e);
-            System.err.println("Erreur lors du chargement des configurations: " + e.getMessage());
             showErrorMessage("Erreur lors du chargement des configurations : " + e.getMessage());
         }
     }

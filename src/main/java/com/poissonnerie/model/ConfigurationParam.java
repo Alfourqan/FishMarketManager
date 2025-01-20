@@ -16,7 +16,10 @@ public class ConfigurationParam {
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
         "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
     );
-    private static final Pattern PHONE_PATTERN = Pattern.compile("^\\+?[0-9. ()-]{10,}$");
+    // Mise à jour du pattern téléphone pour accepter plus de formats
+    private static final Pattern PHONE_PATTERN = Pattern.compile(
+        "^[+]?[(]?[0-9]{1,4}[)]?[-\\s.]?[0-9]{1,4}[-\\s.]?[0-9]{1,4}[-\\s.]?[0-9]{1,4}$"
+    );
     private static final Pattern SIRET_PATTERN = Pattern.compile("^[0-9]{14}$");
 
     private int id;
