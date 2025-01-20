@@ -140,6 +140,8 @@ public class Main {
         LOGGER.info("Vue principale configurée");
 
         frame.setLocationRelativeTo(null);
+        frame.setVisible(true);  // Rendre la fenêtre visible immédiatement
+        LOGGER.info("Fenêtre principale rendue visible");
     }
 
     private static void cleanupAndExit(JFrame frame) {
@@ -164,20 +166,20 @@ public class Main {
     private static void finishStartup() {
         SwingUtilities.invokeLater(() -> {
             try {
-                updateProgress(100, "Démarrage terminé");
-                Thread.sleep(500);
-
                 JFrame frame = mainFrame.get();
-                if (frame != null) {
-                    frame.setVisible(true);
+                if (frame != null && frame.isVisible()) {
                     LOGGER.info("Application démarrée avec succès");
+                    updateProgress(100, "Démarrage terminé");
+                    Thread.sleep(500);
                 } else {
-                    throw new IllegalStateException("La fenêtre principale n'a pas été initialisée");
+                    LOGGER.severe("La fenêtre principale n'est pas visible");
+                    throw new IllegalStateException("La fenêtre principale n'est pas visible");
                 }
             } catch (Exception e) {
                 handleError(e, "Erreur lors de la finalisation du démarrage");
             } finally {
                 disposeSplashScreen();
+                LOGGER.info("SplashScreen fermé");
             }
         });
     }
