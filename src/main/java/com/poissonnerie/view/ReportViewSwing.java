@@ -70,6 +70,7 @@ import java.awt.print.Book;
 import java.awt.Graphics2D;
 
 
+
 public class ReportViewSwing {
     private static final Logger LOGGER = Logger.getLogger(ReportViewSwing.class.getName());
 
@@ -334,40 +335,43 @@ public class ReportViewSwing {
                         List<Vente> ventes = new ArrayList<>();
 
                         // Créer un client factice
-                        Client clientDemo = new Client(1, "Client Démo", "0123456789", "demo@email.com", "123 rue Demo");
+                        Client clientDemo = new Client(
+                            1,                      // id
+                            "Client Démo",         // nom
+                            "0123456789",          // téléphone
+                            "demo@email.com",      // email
+                            "123 rue Demo"         // adresse
+                        );
 
-                        // Définir les valeurs monétaires explicitement comme doubles
+                        // Valeurs pour la vente démo
                         double prixUnitaire = 20.0;
                         int quantite = 2;
                         double montantTotal = prixUnitaire * quantite;
 
                         // Créer la vente démo
                         Vente venteDemo = new Vente(
-                            1,                          // id
-                            LocalDateTime.now(),        // date
-                            clientDemo,                 // client
-                            false,                      // credit
-                            montantTotal,              // total
-                            Vente.ModePaiement.ESPECES // mode de paiement
+                            1,                           // id
+                            LocalDateTime.now(),         // date
+                            clientDemo,                  // client
+                            false,                       // credit
+                            montantTotal,                // total
+                            Vente.ModePaiement.ESPECES  // mode de paiement
                         );
                         ventes.add(venteDemo);
 
-                        // Créer et ajouter le produit démo
-                        double prixAchat = 10.0;
-                        double prixVente = 20.0;
-                        int stock = 50;
+                        // Créer le produit démo avec des valeurs numériques explicites
                         Produit produitDemo = new Produit(
-                            1,                  // id
-                            "Poisson Démo",     // nom
-                            "Description démo", // description
-                            prixAchat,         // prix d'achat
-                            prixVente,         // prix de vente
-                            stock,             // stock
-                            "Poissons frais"   // catégorie
+                            1,                     // id
+                            "Poisson Démo",        // nom
+                            "Description démo",    // description
+                            10.0,                  // prix d'achat
+                            20.0,                  // prix de vente
+                            20,                    // stock initial
+                            "Poissons frais"      // catégorie
                         );
 
                         // Créer et ajouter la ligne de vente
-                        Vente.LigneVente ligneVente = new Vente.LigneVente(produitDemo, quantite, prixUnitaire);
+                        Vente.LigneVente ligneVente = venteDemo.new LigneVente(produitDemo, quantite, prixUnitaire);
                         List<Vente.LigneVente> lignes = new ArrayList<>();
                         lignes.add(ligneVente);
                         venteDemo.setLignes(lignes);
@@ -375,7 +379,7 @@ public class ReportViewSwing {
                         // Générer le PDF
                         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                         reportController.genererTicketPDF(ventes.get(0), outputStream);
-                        byte[] pdfData = PDFGenerator.getBytes(outputStream);
+                        byte[] pdfData = outputStream.toByteArray();
                         afficherPreviewTicket(pdfData);
                     } catch (Exception e) {
                         LOGGER.log(Level.SEVERE, "Erreur lors de la génération du ticket", e);
@@ -868,8 +872,7 @@ public class ReportViewSwing {
         JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.INFORMATION_MESSAGE);
     }
 
-    private void afficherMessageErreur(String titre, String message) {
-        JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.ERROR_MESSAGE);
+    private void afficherMessageErreur(String titre, String message) {        JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.ERROR_MESSAGE);
     }
 
     private void afficherEtatCreances() {
