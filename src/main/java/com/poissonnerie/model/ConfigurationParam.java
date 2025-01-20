@@ -217,6 +217,16 @@ public class ConfigurationParam {
     public static final String CLE_PIED_PAGE_RECU = "PIED_PAGE_RECU";
     public static final String CLE_EN_TETE_RECU = "EN_TETE_RECU";
 
+    // Nouvelles constantes pour la personnalisation des reçus
+    public static final String CLE_POLICE_TITRE_RECU = "POLICE_TITRE_RECU";
+    public static final String CLE_POLICE_TEXTE_RECU = "POLICE_TEXTE_RECU";
+    public static final String CLE_ALIGNEMENT_TITRE_RECU = "ALIGNEMENT_TITRE_RECU";
+    public static final String CLE_ALIGNEMENT_TEXTE_RECU = "ALIGNEMENT_TEXTE_RECU";
+    public static final String CLE_STYLE_BORDURE_RECU = "STYLE_BORDURE_RECU";
+    public static final String CLE_MESSAGE_COMMERCIAL_RECU = "MESSAGE_COMMERCIAL_RECU";
+    public static final String CLE_AFFICHER_TVA_DETAILS = "AFFICHER_TVA_DETAILS";
+    public static final String CLE_INFO_SUPPLEMENTAIRE_RECU = "INFO_SUPPLEMENTAIRE_RECU";
+
     private static final java.util.Set<String> CLES_SENSIBLES = new java.util.HashSet<>(java.util.Arrays.asList(
         CLE_EMAIL,
         CLE_TELEPHONE_ENTREPRISE,

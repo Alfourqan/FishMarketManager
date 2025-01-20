@@ -52,6 +52,17 @@ public class ConfigurationViewSwing {
     public static final String CLE_TVA_ENABLED = "TVA_ENABLED";
     public static final String CLE_TVA_CODE = "TVA_CODE";
     public static final String CLE_TVA_TYPE = "TVA_TYPE";
+    public static final String CLE_STYLE_BORDURE_RECU = "STYLE_BORDURE_RECU";
+    public static final String CLE_POLICE_TITRE_RECU = "POLICE_TITRE_RECU";
+    public static final String CLE_POLICE_TEXTE_RECU = "POLICE_TEXTE_RECU";
+    public static final String CLE_ALIGNEMENT_TITRE_RECU = "ALIGNEMENT_TITRE_RECU";
+    public static final String CLE_ALIGNEMENT_TEXTE_RECU = "ALIGNEMENT_TEXTE_RECU";
+    public static final String CLE_MESSAGE_COMMERCIAL_RECU = "MESSAGE_COMMERCIAL_RECU";
+    public static final String CLE_AFFICHER_TVA_DETAILS = "AFFICHER_TVA_DETAILS";
+    public static final String CLE_INFO_SUPPLEMENTAIRE_RECU = "INFO_SUPPLEMENTAIRE_RECU";
+    public static final String CLE_EN_TETE_RECU = "CLE_EN_TETE_RECU";
+    public static final String CLE_PIED_PAGE_RECU = "CLE_PIED_PAGE_RECU";
+
 
     public ConfigurationViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -120,75 +131,164 @@ public class ConfigurationViewSwing {
         return panel;
     }
 
+    private String repeat(String str, int count) {
+        if (str == null) {
+            return null;
+        }
+        if (count <= 0) {
+            return "";
+        }
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < count; i++) {
+            result.append(str);
+        }
+        return result.toString();
+    }
+
+    private String alignerTexte(String texte, String alignement, int largeur) {
+        if (texte.length() > largeur) {
+            return texte.substring(0, largeur);
+        }
+
+        int espaces = largeur - texte.length();
+        String resultat;
+
+        switch (alignement) {
+            case "DROITE":
+                resultat = repeat(" ", espaces) + texte;
+                break;
+            case "CENTRE":
+                int espacesAvant = espaces / 2;
+                int espacesApres = espaces - espacesAvant;
+                resultat = repeat(" ", espacesAvant) + texte + repeat(" ", espacesApres);
+                break;
+            default: // GAUCHE
+                resultat = texte + repeat(" ", espaces);
+                break;
+        }
+        return resultat;
+    }
+
     private void updatePreview() {
         try {
             JTextArea previewArea = (JTextArea) ((JScrollPane) previewPanel.getComponent(0)).getViewport().getView();
             StringBuilder preview = new StringBuilder();
 
+            // Récupération des paramètres de style
+            String styleBordure = ((JComboBox<?>) champsSaisie.get(ConfigurationParam.CLE_STYLE_BORDURE_RECU)).getSelectedItem().toString();
+            String alignementTitre = ((JComboBox<?>) champsSaisie.get(ConfigurationParam.CLE_ALIGNEMENT_TITRE_RECU)).getSelectedItem().toString();
+            boolean afficherTVADetails = ((JCheckBox) champsSaisie.get(ConfigurationParam.CLE_AFFICHER_TVA_DETAILS)).isSelected();
+
+            // Définition des caractères de bordure selon le style
+            String ligneBordure;
+            switch (styleBordure) {
+                case "DOUBLE":
+                    ligneBordure = "================================";
+                    break;
+                case "POINTILLES":
+                    ligneBordure = "--------------------------------";
+                    break;
+                default:
+                    ligneBordure = "--------------------------------";
+                    break;
+            }
+
+            // Logo
             String logoPath = ((JTextField) champsSaisie.get(ConfigurationParam.CLE_LOGO_PATH)).getText();
             if (!logoPath.isEmpty()) {
                 preview.append("[LOGO]\n");
             }
 
-            preview.append("================================\n");
+            // En-tête
+            preview.append(ligneBordure).append("\n");
             String nomEntreprise = ((JTextField) champsSaisie.get(ConfigurationParam.CLE_NOM_ENTREPRISE)).getText();
-            if (!nomEntreprise.isEmpty()) {
-                preview.append(String.format("%s%s%s\n",
-                    " ".repeat(3),
-                    nomEntreprise,
-                    " ".repeat(3)));
-            } else {
-                preview.append("       VOTRE ENTREPRISE         \n");
-            }
-            preview.append("================================\n");
+            String enTete = ((JTextArea) champsSaisie.get(ConfigurationParam.CLE_EN_TETE_RECU)).getText();
 
+            // Alignement du titre
+            if (!nomEntreprise.isEmpty()) {
+                String titreAligne = alignerTexte(nomEntreprise, alignementTitre, 32);
+                preview.append(titreAligne).append("\n");
+            }
+
+            if (!enTete.isEmpty()) {
+                preview.append(enTete).append("\n");
+            }
+
+            preview.append(ligneBordure).append("\n");
+
+            // Informations de l'entreprise
             String adresse = ((JTextField) champsSaisie.get(ConfigurationParam.CLE_ADRESSE_ENTREPRISE)).getText();
             String telephone = ((JTextField) champsSaisie.get(ConfigurationParam.CLE_TELEPHONE_ENTREPRISE)).getText();
             String siret = ((JTextField) champsSaisie.get(ConfigurationParam.CLE_SIRET_ENTREPRISE)).getText();
 
-            if (!adresse.isEmpty()) preview.append(adresse + "\n");
-            if (!telephone.isEmpty()) preview.append("Tel: " + telephone + "\n");
-            if (!siret.isEmpty()) preview.append("SIRET: " + siret + "\n");
+            if (!adresse.isEmpty()) preview.append(adresse).append("\n");
+            if (!telephone.isEmpty()) preview.append("Tel: ").append(telephone).append("\n");
+            if (!siret.isEmpty()) preview.append("SIRET: ").append(siret).append("\n");
 
-            preview.append("--------------------------------\n");
+            preview.append(ligneBordure).append("\n");
 
+            // Message commercial
+            String msgCommercial = ((JTextArea) champsSaisie.get(ConfigurationParam.CLE_MESSAGE_COMMERCIAL_RECU)).getText();
+            if (!msgCommercial.isEmpty()) {
+                preview.append(msgCommercial).append("\n");
+                preview.append(ligneBordure).append("\n");
+            }
+
+            // Articles exemple
             double sousTotal = 25.00;
             preview.append(String.format("Article 1%14.2f EUR\n", 10.00));
             preview.append(String.format("Article 2%14.2f EUR\n", 15.00));
-            preview.append("--------------------------------\n");
+            preview.append(ligneBordure).append("\n");
             preview.append(String.format("Sous-total:%14.2f EUR\n", sousTotal));
 
+            // TVA
             boolean tvaEnabled = ((JCheckBox) champsSaisie.get(ConfigurationParam.CLE_TVA_ENABLED)).isSelected();
             if (tvaEnabled) {
                 double tauxTva = (double) ((JSpinner) champsSaisie.get(ConfigurationParam.CLE_TAUX_TVA)).getValue();
                 double montantTva = sousTotal * (tauxTva / 100);
-                preview.append(String.format("TVA (%.1f%%):%13.2f EUR\n", tauxTva, montantTva));
+
+                if (afficherTVADetails) {
+                    preview.append(String.format("Base HT:%16.2f EUR\n", sousTotal));
+                    preview.append(String.format("TVA (%.1f%%):%13.2f EUR\n", tauxTva, montantTva));
+                } else {
+                    preview.append(String.format("TVA (%.1f%%):%13.2f EUR\n", tauxTva, montantTva));
+                }
                 preview.append(String.format("TOTAL:%18.2f EUR\n", sousTotal + montantTva));
             } else {
                 preview.append(String.format("TOTAL:%18.2f EUR\n", sousTotal));
             }
 
-            preview.append("================================\n");
+            preview.append(ligneBordure).append("\n");
 
+            // Pied de page
             String piedPage = ((JTextArea) champsSaisie.get(ConfigurationParam.CLE_PIED_PAGE_RECU)).getText();
             if (!piedPage.isEmpty()) {
-                preview.append(piedPage + "\n");
+                preview.append(piedPage).append("\n");
             } else {
                 preview.append("Merci de votre visite !\n");
             }
-            preview.append("================================\n");
 
+            // Informations supplémentaires
+            String infosSup = ((JTextArea) champsSaisie.get(ConfigurationParam.CLE_INFO_SUPPLEMENTAIRE_RECU)).getText();
+            if (!infosSup.isEmpty()) {
+                preview.append(ligneBordure).append("\n");
+                preview.append(infosSup).append("\n");
+            }
+
+            preview.append(ligneBordure).append("\n");
+
+            // Format détaillé
             String format = ((JComboBox<?>) champsSaisie.get(ConfigurationParam.CLE_FORMAT_RECU)).getSelectedItem().toString();
             if (format.equals("DETAILLE")) {
                 preview.append("\nMode de paiement: ESPECES\n");
-                preview.append("Date: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) + "\n");
-                preview.append("N° Ticket: #12345\n");
+                preview.append("Date: ").append(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))).append("\n");
+                preview.append("N° Ticket: #").append(String.format("%05d", 12345)).append("\n");
             }
 
             previewArea.setText(preview.toString());
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la mise à jour de l'aperçu", e);
-            e.printStackTrace();
+            showErrorMessage("Erreur lors de la mise à jour de l'aperçu : " + e.getMessage());
         }
     }
 
@@ -323,13 +423,16 @@ public class ConfigurationViewSwing {
 
     private JPanel createRecusSection() {
         JPanel panel = createSectionPanel("Personnalisation des reçus", MaterialDesign.MDI_RECEIPT);
+        panel.setLayout(new GridBagLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.gridy = 1;
+        gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.WEST;
         gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
+        // Format des reçus
         JLabel formatLabel = new JLabel("Format des reçus:");
         formatLabel.setFont(texteNormalFont);
         JComboBox<String> formatCombo = new JComboBox<>(new String[]{"COMPACT", "DETAILLE"});
@@ -337,126 +440,182 @@ public class ConfigurationViewSwing {
         formatCombo.setToolTipText("COMPACT: Version simplifiée du reçu\nDETAILLE: Version complète avec informations additionnelles");
         champsSaisie.put(ConfigurationParam.CLE_FORMAT_RECU, formatCombo);
 
-        formatCombo.addActionListener(e -> updatePreview());
-
         panel.add(formatLabel, gbc);
         gbc.gridx = 1;
         panel.add(formatCombo, gbc);
 
+        // Style de bordure
         gbc.gridx = 0;
         gbc.gridy++;
-        JLabel logoLabel = new JLabel("Logo de l'entreprise:");
-        logoLabel.setFont(texteNormalFont);
+        JLabel bordureLabel = new JLabel("Style de bordure:");
+        bordureLabel.setFont(texteNormalFont);
+        JComboBox<String> bordureCombo = new JComboBox<>(new String[]{"SIMPLE", "DOUBLE", "POINTILLES"});
+        bordureCombo.setFont(texteNormalFont);
+        champsSaisie.put(ConfigurationParam.CLE_STYLE_BORDURE_RECU, bordureCombo);
 
-        JPanel logoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JTextField logoPathField = new JTextField(20);
-        logoPathField.setFont(texteNormalFont);
-        logoPathField.setToolTipText("Chemin vers le fichier image du logo (formats supportés: JPG, PNG, GIF)");
-        styleTextField(logoPathField);
-        champsSaisie.put(ConfigurationParam.CLE_LOGO_PATH, logoPathField);
-
-        JButton chooseLogoButton = createStyledButton("Choisir...", MaterialDesign.MDI_FILE_IMAGE, new Color(33, 150, 243));
-        chooseLogoButton.addActionListener(e -> choisirLogo(logoPathField));
-
-        JButton clearLogoButton = createStyledButton("", MaterialDesign.MDI_CLOSE_CIRCLE, new Color(244, 67, 54));
-        clearLogoButton.setToolTipText("Effacer le logo");
-        clearLogoButton.addActionListener(e -> {
-            logoPathField.setText("");
-            updatePreview();
-        });
-
-        logoPanel.add(logoPathField);
-        logoPanel.add(chooseLogoButton);
-        logoPanel.add(clearLogoButton);
-
-        panel.add(logoLabel, gbc);
+        panel.add(bordureLabel, gbc);
         gbc.gridx = 1;
-        panel.add(logoPanel, gbc);
+        panel.add(bordureCombo, gbc);
 
-        String[][] champsTextAreas = {
-            {ConfigurationParam.CLE_EN_TETE_RECU, "Message d'en-tête", "Message affiché en haut du reçu"},
-            {ConfigurationParam.CLE_PIED_PAGE_RECU, "Message de pied de page", "Message affiché en bas du reçu"}
+        // Polices
+        gbc.gridx = 0;
+        gbc.gridy++;
+        JPanel policeTitrePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JLabel policeTitreLabel = new JLabel("Taille police titre:");
+        policeTitreLabel.setFont(texteNormalFont);
+        JSpinner policeTitreSpinner = new JSpinner(new SpinnerNumberModel(14, 8, 24, 1));
+        policeTitreSpinner.setFont(texteNormalFont);
+        champsSaisie.put(ConfigurationParam.CLE_POLICE_TITRE_RECU, policeTitreSpinner);
+        policeTitrePanel.add(policeTitreLabel);
+        policeTitrePanel.add(policeTitreSpinner);
+
+        gbc.gridx = 0;
+        gbc.gridwidth = 2;
+        panel.add(policeTitrePanel, gbc);
+
+        // Police texte
+        gbc.gridy++;
+        JPanel policeTextePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JLabel policeTexteLabel = new JLabel("Taille police texte:");
+        policeTexteLabel.setFont(texteNormalFont);
+        JSpinner policeTexteSpinner = new JSpinner(new SpinnerNumberModel(12, 8, 20, 1));
+        policeTexteSpinner.setFont(texteNormalFont);
+        champsSaisie.put(ConfigurationParam.CLE_POLICE_TEXTE_RECU, policeTexteSpinner);
+        policeTextePanel.add(policeTexteLabel);
+        policeTextePanel.add(policeTexteSpinner);
+
+        panel.add(policeTextePanel, gbc);
+
+        // Alignements
+        gbc.gridy++;
+        JPanel alignementPanel = new JPanel(new GridLayout(2, 2, 5, 5));
+        alignementPanel.setBorder(BorderFactory.createTitledBorder("Alignements"));
+
+        String[] alignements = {"GAUCHE", "CENTRE", "DROITE"};
+
+        JLabel alignementTitreLabel = new JLabel("Alignement titre:");
+        JComboBox<String> alignementTitreCombo = new JComboBox<>(alignements);
+        champsSaisie.put(ConfigurationParam.CLE_ALIGNEMENT_TITRE_RECU, alignementTitreCombo);
+
+        JLabel alignementTexteLabel = new JLabel("Alignement texte:");
+        JComboBox<String> alignementTexteCombo = new JComboBox<>(alignements);
+        champsSaisie.put(ConfigurationParam.CLE_ALIGNEMENT_TEXTE_RECU, alignementTexteCombo);
+
+        alignementPanel.add(alignementTitreLabel);
+        alignementPanel.add(alignementTitreCombo);
+        alignementPanel.add(alignementTexteLabel);
+        alignementPanel.add(alignementTexteCombo);
+
+        gbc.gridwidth = 2;
+        panel.add(alignementPanel, gbc);
+
+        // Messages personnalisés
+        gbc.gridy++;
+        JPanel messagesPanel = new JPanel(new GridBagLayout());
+        messagesPanel.setBorder(BorderFactory.createTitledBorder("Messages personnalisés"));
+        GridBagConstraints gbcMessages = new GridBagConstraints();
+        gbcMessages.gridx = 0;
+        gbcMessages.gridy = 0;
+        gbcMessages.fill = GridBagConstraints.HORIZONTAL;
+        gbcMessages.insets = new Insets(5, 5, 5, 5);
+
+        // En-tête
+        JLabel enTeteLabel = new JLabel("Message d'en-tête:");
+        JTextArea enTeteArea = new JTextArea(2, 30);
+        styleTextArea(enTeteArea);
+        champsSaisie.put(ConfigurationParam.CLE_EN_TETE_RECU, enTeteArea);
+        messagesPanel.add(enTeteLabel, gbcMessages);
+        gbcMessages.gridy++;
+        messagesPanel.add(new JScrollPane(enTeteArea), gbcMessages);
+
+        // Message commercial
+        gbcMessages.gridy++;
+        JLabel msgCommercialLabel = new JLabel("Message commercial:");
+        JTextArea msgCommercialArea = new JTextArea(2, 30);
+        styleTextArea(msgCommercialArea);
+        champsSaisie.put(ConfigurationParam.CLE_MESSAGE_COMMERCIAL_RECU, msgCommercialArea);
+        messagesPanel.add(msgCommercialLabel, gbcMessages);
+        gbcMessages.gridy++;
+        messagesPanel.add(new JScrollPane(msgCommercialArea), gbcMessages);
+
+        // Pied de page
+        gbcMessages.gridy++;
+        JLabel piedPageLabel = new JLabel("Message de pied de page:");
+        JTextArea piedPageArea = new JTextArea(2, 30);
+        styleTextArea(piedPageArea);
+        champsSaisie.put(ConfigurationParam.CLE_PIED_PAGE_RECU, piedPageArea);
+        messagesPanel.add(piedPageLabel, gbcMessages);
+        gbcMessages.gridy++;
+        messagesPanel.add(new JScrollPane(piedPageArea), gbcMessages);
+
+        // Infos supplémentaires
+        gbcMessages.gridy++;
+        JLabel infoSupLabel = new JLabel("Informations supplémentaires:");
+        JTextArea infoSupArea = new JTextArea(2, 30);
+        styleTextArea(infoSupArea);
+        champsSaisie.put(ConfigurationParam.CLE_INFO_SUPPLEMENTAIRE_RECU, infoSupArea);
+        messagesPanel.add(infoSupLabel, gbcMessages);
+        gbcMessages.gridy++;
+        messagesPanel.add(new JScrollPane(infoSupArea), gbcMessages);
+
+        gbc.gridy++;
+        panel.add(messagesPanel, gbc);
+
+        // Options supplémentaires
+        gbc.gridy++;
+        JPanel optionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        optionsPanel.setBorder(BorderFactory.createTitledBorder("Options supplémentaires"));
+
+        JCheckBox afficherTVACheck = new JCheckBox("Afficher les détails de TVA");
+        afficherTVACheck.setFont(texteNormalFont);
+        champsSaisie.put(ConfigurationParam.CLE_AFFICHER_TVA_DETAILS, afficherTVACheck);
+        optionsPanel.add(afficherTVACheck);
+
+        panel.add(optionsPanel, gbc);
+
+        // Prévisualisation
+        gbc.gridy++;
+        JLabel previewLabel = new JLabel("Les modifications sont visibles dans l'aperçu à droite");
+        previewLabel.setFont(new Font(texteNormalFont.getName(), Font.ITALIC, texteNormalFont.getSize()));
+        previewLabel.setForeground(new Color(128, 128, 128));
+        panel.add(previewLabel, gbc);
+
+        // Ajout des listeners pour la mise à jour de la prévisualisation
+        JComponent[] composantsAvecUpdate = {
+            formatCombo, bordureCombo, policeTitreSpinner, policeTexteSpinner,
+            alignementTitreCombo, alignementTexteCombo, afficherTVACheck
         };
 
-        for (String[] champ : champsTextAreas) {
-            gbc.gridx = 0;
-            gbc.gridy++;
-            JLabel label = new JLabel(champ[1] + ":");
-            label.setFont(texteNormalFont);
+        for (JComponent composant : composantsAvecUpdate) {
+            if (composant instanceof JSpinner) {
+                ((JSpinner) composant).addChangeListener(e -> updatePreview());
+            } else if (composant instanceof JComboBox) {
+                ((JComboBox<?>) composant).addActionListener(e -> updatePreview());
+            } else if (composant instanceof JCheckBox) {
+                ((JCheckBox) composant).addActionListener(e -> updatePreview());
+            }
+        }
 
-            JTextArea textArea = new JTextArea(2, 30);
-            textArea.setFont(texteNormalFont);
-            textArea.setLineWrap(true);
-            textArea.setWrapStyleWord(true);
-            textArea.setToolTipText(champ[2]);
-
+        JTextArea[] textAreas = {enTeteArea, msgCommercialArea, piedPageArea, infoSupArea};
+        for (JTextArea textArea : textAreas) {
             textArea.getDocument().addDocumentListener(new DocumentListener() {
                 public void changedUpdate(DocumentEvent e) { updatePreview(); }
                 public void removeUpdate(DocumentEvent e) { updatePreview(); }
                 public void insertUpdate(DocumentEvent e) { updatePreview(); }
             });
-
-            JScrollPane scrollPane = new JScrollPane(textArea);
-            scrollPane.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200)),
-                BorderFactory.createEmptyBorder(5, 5, 5, 5)
-            ));
-
-            champsSaisie.put(champ[0], textArea);
-
-            panel.add(label, gbc);
-            gbc.gridx = 1;
-            panel.add(scrollPane, gbc);
         }
-
-        JLabel previewLabel = new JLabel("Les modifications sont visibles dans l'aperçu à droite");
-        previewLabel.setFont(new Font(texteNormalFont.getName(), Font.ITALIC, texteNormalFont.getSize()));
-        previewLabel.setForeground(new Color(128, 128, 128));
-        gbc.gridx = 0;
-        gbc.gridy++;
-        gbc.gridwidth = 2;
-        gbc.insets = new Insets(15, 5, 5, 5);
-        panel.add(previewLabel, gbc);
 
         return panel;
     }
 
-    private JPanel createSectionPanel(String titre, MaterialDesign icon) {
-        JPanel panel = new JPanel(new GridBagLayout());
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createEmptyBorder(5, 5, 5, 5),
-            BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
-                BorderFactory.createEmptyBorder(15, 15, 15, 15)
-            )
+    private void styleTextArea(JTextArea textArea) {
+        textArea.setFont(texteNormalFont);
+        textArea.setLineWrap(true);
+        textArea.setWrapStyleWord(true);
+        textArea.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
-
-        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-        headerPanel.setBackground(Color.WHITE);
-
-        FontIcon fontIcon = FontIcon.of(icon);
-        fontIcon.setIconSize(20);
-        fontIcon.setIconColor(couleurPrincipale);
-        JLabel iconLabel = new JLabel(fontIcon);
-
-        JLabel titleLabel = new JLabel(titre);
-        titleLabel.setFont(sousTitreFont);
-
-        headerPanel.add(iconLabel);
-        headerPanel.add(titleLabel);
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 2;
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(0, 0, 15, 0);
-
-        panel.add(headerPanel, gbc);
-
-        return panel;
     }
 
     private JPanel createButtonPanel() {
@@ -587,7 +746,7 @@ public class ConfigurationViewSwing {
                 } else if (composant instanceof JSpinner) {
                     try {
                         ((JSpinner) composant).setValue(Double.parseDouble(valeur));
-                    } catch (NumberFormatException e) {
+                    } catch(NumberFormatException e) {
                         ((JSpinner) composant).setValue(20.0);
                     }
                 } else if (composant instanceof JComboBox) {
