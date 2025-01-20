@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter;
 
 public class BillPrint {
     private static final Logger LOGGER = Logger.getLogger(BillPrint.class.getName());
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm");
 
     // Commandes ESC/POS standard
     private static final byte[] ESC_INIT = {0x1B, 0x40};          // Initialize printer
@@ -18,15 +18,13 @@ public class BillPrint {
     private static final byte[] ESC_ALIGN_RIGHT = {0x1B, 0x61, 0x02};  // Right alignment
     private static final byte[] ESC_BOLD_ON = {0x1B, 0x45, 0x01};      // Bold ON
     private static final byte[] ESC_BOLD_OFF = {0x1B, 0x45, 0x00};     // Bold OFF
-    private static final byte[] ESC_DOUBLE_ON = {0x1B, 0x21, 0x30};    // Double height/width ON
-    private static final byte[] ESC_DOUBLE_OFF = {0x1B, 0x21, 0x00};   // Double height/width OFF
-    private static final byte[] ESC_UNDERLINE_ON = {0x1B, 0x2D, 0x01}; // Underline ON
-    private static final byte[] ESC_UNDERLINE_OFF = {0x1B, 0x2D, 0x00};// Underline OFF
     private static final byte[] LF = {0x0A};                      // Line Feed
     private static final byte[] CR = {0x0D};                      // Carriage Return
     private static final byte[] CUT_PAPER = {0x1D, 0x56, 0x41};  // Full cut
 
     private final Vente vente;
+    private static final int X_MARGIN = 40;     // Marge horizontale comme dans le code Python
+    private static final int Y_MARGIN = 60;     // Marge verticale comme dans le code Python
 
     public BillPrint(Vente vente) {
         this.vente = vente;
@@ -56,80 +54,85 @@ public class BillPrint {
             // Création du document à imprimer
             ByteArrayOutputStream ticketData = new ByteArrayOutputStream();
 
-            // En-tête - Logo et nom du magasin
+            // En-tête du ticket (comme dans le code Python)
             writeBytes(ticketData, ESC_INIT);
             writeBytes(ticketData, ESC_ALIGN_CENTER);
-            writeBytes(ticketData, ESC_DOUBLE_ON);
-            writeLine(ticketData, "MA POISSONNERIE");
-            writeBytes(ticketData, ESC_DOUBLE_OFF);
-            writeBytes(ticketData, ESC_BOLD_OFF);
-            writeLine(ticketData, "123 Rue de la Mer");
-            writeLine(ticketData, "75001 PARIS");
-            writeLine(ticketData, "Tel: 01 23 45 67 89");
-            writeLine(ticketData, "SIRET: 123 568 941 00056");
-            writeBytes(ticketData, LF);
-
-            // Date et numéro de ticket
-            writeBytes(ticketData, ESC_ALIGN_LEFT);
-            writeLine(ticketData, String.format("DATE: %s", DATE_FORMATTER.format(vente.getDate())));
-            writeLine(ticketData, String.format("TICKET N°: %06d", vente.getId()));
-            writeBytes(ticketData, LF);
-
-            // Ligne de séparation
-            writeLine(ticketData, "----------------------------------------");
             writeBytes(ticketData, ESC_BOLD_ON);
-            writeLine(ticketData, "ARTICLES                          PRIX");
+            writeLine(ticketData, "MA POISSONNERIE");
             writeBytes(ticketData, ESC_BOLD_OFF);
-            writeLine(ticketData, "----------------------------------------");
 
-            // Articles
+            // Adresse (comme dans le code Python)
+            String[] adresse = {
+                "123 Rue de la Mer",
+                "75001 PARIS",
+                "Tel: 01 23 45 67 89",
+                "SIRET: 123 568 941 00056"
+            };
+
+            for (String ligne : adresse) {
+                writeLine(ticketData, ligne);
+            }
+            writeBytes(ticketData, LF);
+
+            // Ligne de séparation (comme dans le code Python)
+            writeBytes(ticketData, ESC_ALIGN_LEFT);
+            writeLine(ticketData, "-".repeat(40));
+
+            // Articles (comme dans le code Python)
+            writeBytes(ticketData, ESC_BOLD_ON);
+            writeLine(ticketData, String.format("%-28s%14s", "ARTICLES", "PRIX"));
+            writeBytes(ticketData, ESC_BOLD_OFF);
+            writeLine(ticketData, "-".repeat(40));
+
+            // Détails des articles
             for (Vente.LigneVente ligne : vente.getLignes()) {
                 String nomProduit = ligne.getProduit().getNom();
-                if (nomProduit.length() > 25) {
-                    nomProduit = nomProduit.substring(0, 22) + "...";
+                if (nomProduit.length() > 28) {
+                    nomProduit = nomProduit.substring(0, 25) + "...";
                 }
 
-                // Afficher la quantité si > 1
                 if (ligne.getQuantite() > 1) {
-                    writeLine(ticketData, String.format("%s", nomProduit));
-                    writeLine(ticketData, String.format("  %d x %.2f                    %.2f",
-                        ligne.getQuantite(),
-                        ligne.getPrixUnitaire(),
+                    writeLine(ticketData, nomProduit);
+                    String detail = String.format("  %d x %.2f", 
+                        ligne.getQuantite(), 
+                        ligne.getPrixUnitaire());
+                    writeLine(ticketData, String.format("%-28s%14.2f", 
+                        detail, 
                         ligne.getQuantite() * ligne.getPrixUnitaire()));
                 } else {
-                    writeLine(ticketData, String.format("%-28s%9.2f",
-                        nomProduit,
+                    writeLine(ticketData, String.format("%-28s%14.2f", 
+                        nomProduit, 
                         ligne.getPrixUnitaire()));
                 }
             }
 
-            writeLine(ticketData, "----------------------------------------");
+            writeLine(ticketData, "-".repeat(40));
 
-            // Total
+            // Totaux (comme dans le code Python)
+            double totalHT = vente.getTotal() / 1.20;
+            double tva = vente.getTotal() - totalHT;
+
             writeBytes(ticketData, ESC_ALIGN_RIGHT);
-            writeLine(ticketData, String.format("TOTAL HT:           %.2f€", vente.getTotal() / 1.20));
-            writeLine(ticketData, String.format("TVA (20%%):          %.2f€", vente.getTotal() * 0.20));
+            writeLine(ticketData, String.format("Sub Total:%14.2f", totalHT));
+            writeLine(ticketData, String.format("TVA (20%%):%14.2f", tva));
             writeBytes(ticketData, ESC_BOLD_ON);
-            writeLine(ticketData, String.format("TOTAL TTC:          %.2f€", vente.getTotal()));
+            writeLine(ticketData, String.format("TOTAL:%14.2f", vente.getTotal()));
             writeBytes(ticketData, ESC_BOLD_OFF);
             writeBytes(ticketData, LF);
 
             // Mode de paiement
             writeBytes(ticketData, ESC_ALIGN_LEFT);
-            writeLine(ticketData, String.format("Mode de paiement: %s", vente.getModePaiement().getLibelle()));
+            writeLine(ticketData, String.format("Paid By: %s", vente.getModePaiement().getLibelle()));
             if (vente.isCredit() && vente.getClient() != null) {
                 writeLine(ticketData, String.format("Client: %s", vente.getClient().getNom()));
             }
             writeBytes(ticketData, LF);
 
-            // Message de remerciement
+            // Message de remerciement (comme dans le code Python)
             writeBytes(ticketData, ESC_ALIGN_CENTER);
-            writeLine(ticketData, "Merci de votre visite");
-            writeLine(ticketData, "et à bientôt !");
-            writeBytes(ticketData, LF);
-
-            // TVA et informations légales
-            writeLine(ticketData, "TVA intracommunautaire: FR 82 123568941");
+            writeBytes(ticketData, ESC_BOLD_ON);
+            writeLine(ticketData, "Thank You For Supporting Local Business!");
+            writeBytes(ticketData, ESC_BOLD_OFF);
             writeBytes(ticketData, LF);
 
             // Couper le papier
@@ -153,7 +156,9 @@ public class BillPrint {
     }
 
     private void writeLine(ByteArrayOutputStream out, String text) throws IOException {
-        out.write(text.getBytes());
+        // Ajouter les marges comme dans le code Python
+        String paddedText = " ".repeat(X_MARGIN) + text;
+        out.write(paddedText.getBytes());
         writeBytes(out, CR);
         writeBytes(out, LF);
     }

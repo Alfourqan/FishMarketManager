@@ -1,0 +1,90 @@
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+
+def generate_receipt(filename, business_name, address, items, subtotal, tax, total, payment_type, date, transaction_id, vendor_id):
+    c = canvas.Canvas(filename, pagesize=letter)
+    width, height = letter
+
+    # Ajuster les marges
+    x_margin = 40
+    y_margin = height - 60
+
+    # Titre de l'entreprise
+    c.setFont("Helvetica-Bold", 12)
+    c.drawCentredString(width / 2, y_margin, business_name)
+    y_margin -= 20
+
+    # Adresse
+    c.setFont("Helvetica", 10)
+    for line in address:
+        c.drawCentredString(width / 2, y_margin, line)
+        y_margin -= 15
+
+    # Ligne de séparation
+    c.line(x_margin, y_margin, width - x_margin, y_margin)
+    y_margin -= 10
+
+    # Détails des articles
+    c.setFont("Helvetica", 10)
+    for item, price in items:
+        c.drawString(x_margin, y_margin, f"{item}")
+        c.drawRightString(width - x_margin, y_margin, f"${price:.2f}")
+        y_margin -= 15
+
+    # Sous-total, taxe, total
+    y_margin -= 10
+    c.line(x_margin, y_margin, width - x_margin, y_margin)
+    y_margin -= 15
+    c.drawString(x_margin, y_margin, "Sub Total:")
+    c.drawRightString(width - x_margin, y_margin, f"${subtotal:.2f}")
+    y_margin -= 15
+    c.drawString(x_margin, y_margin, "Sales Tax:")
+    c.drawRightString(width - x_margin, y_margin, f"${tax:.2f}")
+    y_margin -= 15
+    c.setFont("Helvetica-Bold", 12)
+    c.drawString(x_margin, y_margin, "TOTAL:")
+    c.drawRightString(width - x_margin, y_margin, f"${total:.2f}")
+    y_margin -= 20
+
+    # Type de paiement
+    c.setFont("Helvetica", 10)
+    c.drawString(x_margin, y_margin, f"Paid By: {payment_type}")
+    y_margin -= 15
+
+    # Informations additionnelles
+    c.drawString(x_margin, y_margin, f"Date: {date}")
+    y_margin -= 15
+    c.drawString(x_margin, y_margin, f"Transaction ID: {transaction_id}")
+    y_margin -= 15
+    c.drawString(x_margin, y_margin, f"Vendor ID: {vendor_id}")
+    y_margin -= 20
+
+    # Message de remerciement
+    c.setFont("Helvetica-Bold", 10)
+    c.drawCentredString(width / 2, y_margin, "Thank You For Supporting Local Business!")
+
+    # Sauvegarder le fichier PDF
+    c.save()
+
+# Exemple d'utilisation
+business_name = "Business Name"
+address = ["1234 Main Street", "Suite 567", "City Name, State, 54321", "123-456-7890"]
+items = [
+    ("Lorem ipsum", 1.25),
+    ("Dolor sit amet", 7.99),
+    ("Consectetur", 26.70),
+    ("Adipiscing elit", 15.49),
+    ("Sed semper", 18.79),
+    ("Accumsan ante", 42.99),
+    ("Non laoreet", 9.99),
+    ("Dui dapibus eu", 27.50),
+]
+subtotal = 150.70
+tax = 5.29
+total = 155.99
+payment_type = "Credit"
+date = "02/08/2022 09:36"
+transaction_id = "234-567890"
+vendor_id = "987654-321"
+
+generate_receipt("receipt.pdf", business_name, address, items, subtotal, tax, total, payment_type, date, transaction_id, vendor_id)

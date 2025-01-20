@@ -324,7 +324,16 @@ public class VenteViewSwing {
                         try {
                             venteController.enregistrerVente(vente);
 
-                            // Utiliser la nouvelle classe BillPrint pour l'impression
+                            // Préparer les données comme dans le format Python
+                            String businessName = "MA POISSONNERIE";
+                            String[] address = {
+                                    "123 Rue de la Mer",
+                                    "75001 PARIS",
+                                    "Tel: 01 23 45 67 89",
+                                    "SIRET: 123 568 941 00056"
+                            };
+
+                            // Utiliser directement BillPrint pour l'impression
                             BillPrint printer = new BillPrint(vente);
                             printer.imprimer();
 
