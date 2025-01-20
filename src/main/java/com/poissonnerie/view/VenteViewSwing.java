@@ -315,7 +315,8 @@ public class VenteViewSwing {
                                     "SIRET: 123 568 941 00056"
                             };
 
-                            TextBillPrinter printer = new TextBillPrinter(vente);
+                            // Utilisation du nouveau constructeur pour ticket de vente
+                            TextBillPrinter printer = new TextBillPrinter(vente, businessName, address);
                             printer.imprimer();
 
                             previewDialog.dispose();
