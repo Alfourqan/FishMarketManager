@@ -28,44 +28,34 @@ public class DatabaseManager {
 
         LOGGER.info("Initialisation de la base de données...");
 
-        try (Connection conn = DatabaseConnectionPool.getConnection()) {
+        try (Connection conn = DatabaseConnectionPool.getConnection();
+             Statement stmt = conn.createStatement()) {
+
+            // Configuration minimale SQLite
+            stmt.execute("PRAGMA foreign_keys = OFF");
+            stmt.execute("PRAGMA journal_mode = WAL");
+            stmt.execute("PRAGMA synchronous = NORMAL");
+
             String schema = loadSchemaFromResource();
             if (schema == null || schema.trim().isEmpty()) {
                 throw new IllegalStateException("Schema SQL vide ou introuvable");
             }
 
-            try (Statement stmt = conn.createStatement()) {
-                // Optimisations SQLite
-                stmt.execute("PRAGMA journal_mode = WAL");
-                stmt.execute("PRAGMA synchronous = NORMAL");
-                stmt.execute("PRAGMA cache_size = 20000");
-                stmt.execute("PRAGMA page_size = 4096");
-                stmt.execute("PRAGMA temp_store = MEMORY");
-                stmt.execute("PRAGMA mmap_size = 30000000000");
-                stmt.execute("PRAGMA foreign_keys = OFF");
-
-                // Exécution du schéma en une seule transaction
-                conn.setAutoCommit(false);
-                for (String sql : schema.split(";")) {
-                    sql = sql.trim();
-                    if (!sql.isEmpty()) {
-                        try {
-                            stmt.execute(sql);
-                        } catch (SQLException e) {
-                            if (!e.getMessage().contains("table already exists")) {
-                                throw e;
-                            }
+            // Exécution du schéma
+            for (String sql : schema.split(";")) {
+                sql = sql.trim();
+                if (!sql.isEmpty()) {
+                    try {
+                        stmt.execute(sql);
+                    } catch (SQLException e) {
+                        if (!e.getMessage().contains("table already exists")) {
+                            throw e;
                         }
                     }
                 }
-                stmt.execute("PRAGMA foreign_keys = ON");
-                conn.commit();
-
-                // Optimisation des index
-                stmt.execute("ANALYZE");
-                stmt.execute("VACUUM");
             }
 
+            stmt.execute("PRAGMA foreign_keys = ON");
             isInitialized = true;
             LOGGER.info("Base de données initialisée avec succès");
 
@@ -94,7 +84,6 @@ public class DatabaseManager {
     public static void checkDatabaseHealth() throws SQLException {
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement()) {
-
             stmt.execute("PRAGMA quick_check");
             stmt.execute("PRAGMA integrity_check");
             stmt.execute("PRAGMA foreign_key_check");
