@@ -332,21 +332,47 @@ public class ReportViewSwing {
                     try {
                         // Créer une vente factice pour la prévisualisation
                         List<Vente> ventes = new ArrayList<>();
+
                         // Créer un client factice
                         Client clientDemo = new Client(1, "Client Démo", "0123456789", "demo@email.com", "123 rue Demo");
 
-                        // Créer une vente avec les paramètres requis
-                        double montantTotal = 100.0; // Définir explicitement comme double
+                        // Définir les valeurs monétaires explicitement comme doubles
+                        double prixUnitaire = 20.0;
+                        int quantite = 2;
+                        double montantTotal = prixUnitaire * quantite;
+
+                        // Créer la vente démo
                         Vente venteDemo = new Vente(
                             1,                          // id
                             LocalDateTime.now(),        // date
                             clientDemo,                 // client
                             false,                      // credit
-                            montantTotal,              // total (défini comme double)
-                            Vente.ModePaiement.ESPECES  // mode de paiement
+                            montantTotal,              // total
+                            Vente.ModePaiement.ESPECES // mode de paiement
                         );
                         ventes.add(venteDemo);
 
+                        // Créer et ajouter le produit démo
+                        double prixAchat = 10.0;
+                        double prixVente = 20.0;
+                        int stock = 50;
+                        Produit produitDemo = new Produit(
+                            1,                  // id
+                            "Poisson Démo",     // nom
+                            "Description démo", // description
+                            prixAchat,         // prix d'achat
+                            prixVente,         // prix de vente
+                            stock,             // stock
+                            "Poissons frais"   // catégorie
+                        );
+
+                        // Créer et ajouter la ligne de vente
+                        Vente.LigneVente ligneVente = new Vente.LigneVente(produitDemo, quantite, prixUnitaire);
+                        List<Vente.LigneVente> lignes = new ArrayList<>();
+                        lignes.add(ligneVente);
+                        venteDemo.setLignes(lignes);
+
+                        // Générer le PDF
                         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                         reportController.genererTicketPDF(ventes.get(0), outputStream);
                         byte[] pdfData = PDFGenerator.getBytes(outputStream);
@@ -441,7 +467,6 @@ public class ReportViewSwing {
 
         mainPanel.add(panel, BorderLayout.CENTER);
     }
-
 
 
 
@@ -853,7 +878,7 @@ public class ReportViewSwing {
             clientController.chargerClients();
             List<Client> clients = clientController.getClients();
 
-            List<Client> clientsAvecCreances = clients.stream()
+            List<Client> clientsAvecCreances= clients.stream()
                 .filter(c -> c.getSolde() > 0)
                 .collect(Collectors.toList());
 

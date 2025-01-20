@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Optional;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.StandardCopyOption;
+import java.text.DecimalFormat;
 
 public class ConfigurationViewSwing {
     private static final Logger LOGGER = Logger.getLogger(ConfigurationViewSwing.class.getName());
@@ -95,6 +96,13 @@ public class ConfigurationViewSwing {
     public static final String CLE_TEXTE_CONDITIONS = "TEXTE_CONDITIONS";
     public static final String CLE_AFFICHER_COORDONNEES_CLIENT = "AFFICHER_COORDONNEES_CLIENT";
 
+    // Ajout des nouvelles constantes pour les clés de configuration
+    public static final String CLE_ESPACEMENT_LIGNES_RECU = "ESPACEMENT_LIGNES_RECU";
+    public static final String CLE_STYLE_SEPARATEUR_RECU = "STYLE_SEPARATEUR_RECU";
+    public static final String CLE_TAILLE_LOGO_OPTIONS = "TAILLE_LOGO_OPTIONS";
+    public static final String CLE_FORMAT_PRIX = "FORMAT_PRIX";
+    public static final String CLE_FORMAT_QUANTITE = "FORMAT_QUANTITE";
+
 
     public ConfigurationViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -109,11 +117,11 @@ public class ConfigurationViewSwing {
         JPanel panel = new JPanel(new GridBagLayout());
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createEmptyBorder(5, 5, 5, 5),
-            BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
-                BorderFactory.createEmptyBorder(15, 15, 15, 15)
-            )
+                BorderFactory.createEmptyBorder(5, 5, 5, 5),
+                BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                        BorderFactory.createEmptyBorder(15, 15, 15, 15)
+                )
         ));
 
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
@@ -146,8 +154,8 @@ public class ConfigurationViewSwing {
 
     private void styleTextField(JTextField textField) {
         textField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200)),
-            BorderFactory.createEmptyBorder(5, 5, 5, 5)
+                BorderFactory.createLineBorder(new Color(200, 200, 200)),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
     }
 
@@ -156,8 +164,8 @@ public class ConfigurationViewSwing {
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
         textArea.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200)),
-            BorderFactory.createEmptyBorder(5, 5, 5, 5)
+                BorderFactory.createLineBorder(new Color(200, 200, 200)),
+                BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
     }
 
@@ -221,8 +229,8 @@ public class ConfigurationViewSwing {
         previewPanel = createPreviewPanel();
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-            new JScrollPane(configPanel),
-            previewPanel);
+                new JScrollPane(configPanel),
+                previewPanel);
         splitPane.setResizeWeight(0.6);
         splitPane.setBorder(null);
 
@@ -236,11 +244,11 @@ public class ConfigurationViewSwing {
     private JPanel createPreviewPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         Border titledBorder = BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200)),
-            "Prévisualisation du reçu",
-            TitledBorder.LEFT,
-            TitledBorder.TOP,
-            sousTitreFont
+                BorderFactory.createLineBorder(new Color(200, 200, 200)),
+                "Prévisualisation du reçu",
+                TitledBorder.LEFT,
+                TitledBorder.TOP,
+                sousTitreFont
         );
         panel.setBorder(titledBorder);
         panel.setBackground(Color.WHITE);
@@ -253,11 +261,26 @@ public class ConfigurationViewSwing {
         panel.add(new JScrollPane(previewArea), BorderLayout.CENTER);
 
         JButton updatePreviewButton = createStyledButton("Mettre à jour la prévisualisation",
-            MaterialDesign.MDI_REFRESH, new Color(76, 175, 80));
+                MaterialDesign.MDI_REFRESH, new Color(76, 175, 80));
         updatePreviewButton.addActionListener(e -> updatePreview());
         panel.add(updatePreviewButton, BorderLayout.SOUTH);
 
         return panel;
+    }
+
+    private String getSeparateurLigne(String style) {
+        switch (style) {
+            case "DOUBLE":
+                return "================================";
+            case "POINTILLES":
+                return "--------------------------------";
+            case "ETOILES":
+                return "********************************";
+            case "VAGUE":
+                return "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+            default: // SIMPLE
+                return "--------------------------------";
+        }
     }
 
     private void updatePreview() {
@@ -266,53 +289,71 @@ public class ConfigurationViewSwing {
             StringBuilder preview = new StringBuilder();
 
             // Récupération des paramètres avec gestion des valeurs null
-            String styleBordure = Optional.ofNullable(champsSaisie.get(ConfigurationParam.CLE_STYLE_BORDURE_RECU))
-                .map(comp -> ((JComboBox<?>) comp).getSelectedItem().toString())
-                .orElse("SIMPLE");
+            String styleSeparateur = Optional.ofNullable(champsSaisie.get(CLE_STYLE_SEPARATEUR_RECU))
+                    .map(comp -> ((JComboBox<?>) comp).getSelectedItem().toString())
+                    .orElse("SIMPLE");
 
-            String alignementTitre = Optional.ofNullable(champsSaisie.get(ConfigurationParam.CLE_ALIGNEMENT_TITRE_RECU))
-                .map(comp -> ((JComboBox<?>) comp).getSelectedItem().toString())
-                .orElse("GAUCHE");
+            String tailleLogo = Optional.ofNullable(champsSaisie.get(CLE_TAILLE_LOGO_OPTIONS))
+                    .map(comp -> ((JComboBox<?>) comp).getSelectedItem().toString())
+                    .orElse("MOYEN");
 
-            boolean afficherTVADetails = Optional.ofNullable(champsSaisie.get(ConfigurationParam.CLE_AFFICHER_TVA_DETAILS))
-                .map(comp -> ((JCheckBox) comp).isSelected())
-                .orElse(false);
+            double espacement = Optional.ofNullable(champsSaisie.get(CLE_ESPACEMENT_LIGNES_RECU))
+                    .map(comp -> (Double) ((JSpinner) comp).getValue())
+                    .orElse(1.0);
 
-            // Définition des caractères de bordure selon le style
-            String ligneBordure;
-            switch (styleBordure) {
-                case "DOUBLE":
-                    ligneBordure = "================================";
-                    break;
-                case "POINTILLES":
-                    ligneBordure = "--------------------------------";
-                    break;
-                default:
-                    ligneBordure = "--------------------------------";
-                    break;
+            String formatPrix = Optional.ofNullable(champsSaisie.get(CLE_FORMAT_PRIX))
+                    .map(comp -> ((JComboBox<?>) comp).getSelectedItem().toString())
+                    .orElse("###,##0.00 €");
+
+            // Ligne de séparation selon le style choisi
+            String ligneSeparatrice = getSeparateurLigne(styleSeparateur);
+
+            // Affichage du logo selon la taille choisie
+            if (!tailleLogo.equals("MASQUER")) {
+                int tailleLogoChars = switch (tailleLogo) {
+                    case "PETIT" -> 20;
+                    case "GRAND" -> 40;
+                    default -> 30; // MOYEN
+                };
+                preview.append("[LOGO - ").append(tailleLogoChars).append(" chars]\n");
             }
+
+            // En-tête avec espacement
+            preview.append(ligneSeparatrice).append("\n");
+            if (espacement > 1.0) preview.append("\n");
+
+            // Utilisation du format de prix personnalisé
+            DecimalFormat prixFormat = new DecimalFormat(formatPrix);
+            double prixExemple = 123456.78;
+            preview.append("Prix formaté: ").append(prixFormat.format(prixExemple)).append("\n");
+
+            if (espacement > 1.0) preview.append("\n");
+            preview.append(ligneSeparatrice).append("\n");
 
             // Logo
             String logoPath = Optional.ofNullable(champsSaisie.get(ConfigurationParam.CLE_LOGO_PATH))
-                .map(comp -> ((JTextField) comp).getText().trim())
-                .orElse("");
+                    .map(comp -> ((JTextField) comp).getText().trim())
+                    .orElse("");
 
             if (!logoPath.isEmpty()) {
                 preview.append("[LOGO]\n");
             }
 
             // En-tête
-            preview.append(ligneBordure).append("\n");
-
+            
             String nomEntreprise = Optional.ofNullable(champsSaisie.get(ConfigurationParam.CLE_NOM_ENTREPRISE))
-                .map(comp -> ((JTextField) comp).getText().trim())
-                .orElse("");
+                    .map(comp -> ((JTextField) comp).getText().trim())
+                    .orElse("");
 
             String enTete = Optional.ofNullable(champsSaisie.get(ConfigurationParam.CLE_EN_TETE_RECU))
-                .map(comp -> ((JTextArea) comp).getText().trim())
-                .orElse("");
+                    .map(comp -> ((JTextArea) comp).getText().trim())
+                    .orElse("");
 
             // Alignement du titre
+            String alignementTitre = Optional.ofNullable(champsSaisie.get(ConfigurationParam.CLE_ALIGNEMENT_TITRE_RECU))
+                    .map(comp -> ((JComboBox<?>) comp).getSelectedItem().toString())
+                    .orElse("GAUCHE");
+
             if (!nomEntreprise.isEmpty()) {
                 String titreAligne = alignerTexte(nomEntreprise, alignementTitre, 32);
                 preview.append(titreAligne).append("\n");
@@ -322,50 +363,54 @@ public class ConfigurationViewSwing {
                 preview.append(enTete).append("\n");
             }
 
-            preview.append(ligneBordure).append("\n");
+            preview.append(ligneSeparatrice).append("\n");
 
             // Informations de l'entreprise
             String adresse = Optional.ofNullable(champsSaisie.get(ConfigurationParam.CLE_ADRESSE_ENTREPRISE))
-                .map(comp -> ((JTextField) comp).getText().trim())
-                .orElse("");
+                    .map(comp -> ((JTextField) comp).getText().trim())
+                    .orElse("");
             String telephone = Optional.ofNullable(champsSaisie.get(ConfigurationParam.CLE_TELEPHONE_ENTREPRISE))
-                .map(comp -> ((JTextField) comp).getText().trim())
-                .orElse("");
+                    .map(comp -> ((JTextField) comp).getText().trim())
+                    .orElse("");
             String siret = Optional.ofNullable(champsSaisie.get(ConfigurationParam.CLE_SIRET_ENTREPRISE))
-                .map(comp -> ((JTextField) comp).getText().trim())
-                .orElse("");
+                    .map(comp -> ((JTextField) comp).getText().trim())
+                    .orElse("");
 
             if (!adresse.isEmpty()) preview.append(adresse).append("\n");
             if (!telephone.isEmpty()) preview.append("Tel: ").append(telephone).append("\n");
             if (!siret.isEmpty()) preview.append("SIRET: ").append(siret).append("\n");
 
-            preview.append(ligneBordure).append("\n");
+            preview.append(ligneSeparatrice).append("\n");
 
             // Message commercial
             String msgCommercial = Optional.ofNullable(champsSaisie.get(ConfigurationParam.CLE_MESSAGE_COMMERCIAL_RECU))
-                .map(comp -> ((JTextArea) comp).getText().trim())
-                .orElse("");
+                    .map(comp -> ((JTextArea) comp).getText().trim())
+                    .orElse("");
             if (!msgCommercial.isEmpty()) {
                 preview.append(msgCommercial).append("\n");
-                preview.append(ligneBordure).append("\n");
+                preview.append(ligneSeparatrice).append("\n");
             }
 
             // Articles exemple
             double sousTotal = 25.00;
             preview.append(String.format("Article 1%14.2f EUR\n", 10.00));
             preview.append(String.format("Article 2%14.2f EUR\n", 15.00));
-            preview.append(ligneBordure).append("\n");
+            preview.append(ligneSeparatrice).append("\n");
             preview.append(String.format("Sous-total:%14.2f EUR\n", sousTotal));
 
             // TVA
             boolean tvaEnabled = Optional.ofNullable(champsSaisie.get(ConfigurationParam.CLE_TVA_ENABLED))
-                .map(comp -> ((JCheckBox) comp).isSelected())
-                .orElse(false);
+                    .map(comp -> ((JCheckBox) comp).isSelected())
+                    .orElse(false);
             if (tvaEnabled) {
                 double tauxTva = Optional.ofNullable(champsSaisie.get(ConfigurationParam.CLE_TAUX_TVA))
-                    .map(comp -> (double) ((JSpinner) comp).getValue())
-                    .orElse(20.0);
+                        .map(comp -> (double) ((JSpinner) comp).getValue())
+                        .orElse(20.0);
                 double montantTva = sousTotal * (tauxTva / 100);
+
+                boolean afficherTVADetails = Optional.ofNullable(champsSaisie.get(ConfigurationParam.CLE_AFFICHER_TVA_DETAILS))
+                        .map(comp -> ((JCheckBox) comp).isSelected())
+                        .orElse(false);
 
                 if (afficherTVADetails) {
                     preview.append(String.format("Base HT:%16.2f EUR\n", sousTotal));
@@ -378,12 +423,12 @@ public class ConfigurationViewSwing {
                 preview.append(String.format("TOTAL:%18.2f EUR\n", sousTotal));
             }
 
-            preview.append(ligneBordure).append("\n");
+            preview.append(ligneSeparatrice).append("\n");
 
             // Pied de page
             String piedPage = Optional.ofNullable(champsSaisie.get(ConfigurationParam.CLE_PIED_PAGE_RECU))
-                .map(comp -> ((JTextArea) comp).getText().trim())
-                .orElse("");
+                    .map(comp -> ((JTextArea) comp).getText().trim())
+                    .orElse("");
             if (!piedPage.isEmpty()) {
                 preview.append(piedPage).append("\n");
             } else {
@@ -392,19 +437,19 @@ public class ConfigurationViewSwing {
 
             // Informations supplémentaires
             String infosSup = Optional.ofNullable(champsSaisie.get(ConfigurationParam.CLE_INFO_SUPPLEMENTAIRE_RECU))
-                .map(comp -> ((JTextArea) comp).getText().trim())
-                .orElse("");
+                    .map(comp -> ((JTextArea) comp).getText().trim())
+                    .orElse("");
             if (!infosSup.isEmpty()) {
-                preview.append(ligneBordure).append("\n");
+                preview.append(ligneSeparatrice).append("\n");
                 preview.append(infosSup).append("\n");
             }
 
-            preview.append(ligneBordure).append("\n");
+            preview.append(ligneSeparatrice).append("\n");
 
             // Format détaillé
             String format = Optional.ofNullable(champsSaisie.get(ConfigurationParam.CLE_FORMAT_RECU))
-                .map(comp -> ((JComboBox<?>) comp).getSelectedItem().toString())
-                .orElse("COMPACT");
+                    .map(comp -> ((JComboBox<?>) comp).getSelectedItem().toString())
+                    .orElse("COMPACT");
             if (format.equals("DETAILLE")) {
                 preview.append("\nMode de paiement: ESPECES\n");
                 preview.append("Date: ").append(LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))).append("\n");
@@ -516,10 +561,10 @@ public class ConfigurationViewSwing {
         JPanel panel = createSectionPanel("Informations de l'entreprise", MaterialDesign.MDI_DOMAIN);
 
         String[][] champs = {
-            {ConfigurationParam.CLE_NOM_ENTREPRISE, "Nom de l'entreprise"},
-            {ConfigurationParam.CLE_ADRESSE_ENTREPRISE, "Adresse"},
-            {ConfigurationParam.CLE_TELEPHONE_ENTREPRISE, "Téléphone"},
-            {ConfigurationParam.CLE_SIRET_ENTREPRISE, "Numéro SIRET"}
+                {ConfigurationParam.CLE_NOM_ENTREPRISE, "Nom de l'entreprise"},
+                {ConfigurationParam.CLE_ADRESSE_ENTREPRISE, "Adresse"},
+                {ConfigurationParam.CLE_TELEPHONE_ENTREPRISE, "Téléphone"},
+                {ConfigurationParam.CLE_SIRET_ENTREPRISE, "Numéro SIRET"}
         };
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -573,7 +618,7 @@ public class ConfigurationViewSwing {
         // Vérifier l'extension
         String fileName = file.getName().toLowerCase();
         boolean validExtension = FORMATS_IMAGE_AUTORISES.stream()
-            .anyMatch(ext -> fileName.endsWith("." + ext));
+                .anyMatch(ext -> fileName.endsWith("." + ext));
 
         if (!validExtension) return false;
 
@@ -751,8 +796,8 @@ public class ConfigurationViewSwing {
 
         // Ajout des listeners pour la mise à jour de la prévisualisation
         JComponent[] composantsAvecUpdate = {
-            formatCombo, bordureCombo, policeTitreSpinner, policeTexteSpinner,
-            alignementTitreCombo, alignementTexteCombo, afficherTVACheck
+                formatCombo, bordureCombo, policeTitreSpinner, policeTexteSpinner,
+                alignementTitreCombo, alignementTexteCombo, afficherTVACheck
         };
 
         for (JComponent composant : composantsAvecUpdate) {
@@ -768,9 +813,17 @@ public class ConfigurationViewSwing {
         JTextArea[] textAreas = {enTeteArea, msgCommercialArea, piedPageArea, infoSupArea};
         for (JTextArea textArea : textAreas) {
             textArea.getDocument().addDocumentListener(new DocumentListener() {
-                public void changedUpdate(DocumentEvent e) { updatePreview(); }
-                public void removeUpdate(DocumentEvent e) { updatePreview(); }
-                public void insertUpdate(DocumentEvent e) { updatePreview(); }
+                public void changedUpdate(DocumentEvent e) {
+                    updatePreview();
+                }
+
+                public void removeUpdate(DocumentEvent e) {
+                    updatePreview();
+                }
+
+                public void insertUpdate(DocumentEvent e) {
+                    updatePreview();
+                }
             });
         }
 
@@ -830,35 +883,35 @@ public class ConfigurationViewSwing {
 
     private void showSuccessMessage(String message) {
         JOptionPane.showMessageDialog(
-            mainPanel,
-            message,
-            "Succès",
-            JOptionPane.INFORMATION_MESSAGE
+                mainPanel,
+                message,
+                "Succès",
+                JOptionPane.INFORMATION_MESSAGE
         );
     }
 
     private void showErrorMessage(String message) {
         JOptionPane.showMessageDialog(
-            mainPanel,
-            message,
-            "Erreur",
-            JOptionPane.ERROR_MESSAGE
+                mainPanel,
+                message,
+                "Erreur",
+                JOptionPane.ERROR_MESSAGE
         );
     }
 
     private boolean showConfirmDialog(String message) {
         return JOptionPane.showConfirmDialog(
-            mainPanel,
-            message,
-            "Confirmation",
-            JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+                mainPanel,
+                message,
+                "Confirmation",
+                JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
     }
 
     private void choisirLogo(JTextField logoPathField) {
         JFileChooser chooser = new JFileChooser();
         chooser.setDialogTitle("Sélectionner un logo");
         chooser.setFileFilter(new FileNameExtensionFilter(
-            "Images (*.jpg, *.jpeg, *.png, *.gif)", "jpg", "jpeg", "png", "gif"));
+                "Images (*.jpg, *.jpeg, *.png, *.gif)", "jpg", "jpeg", "png", "gif"));
 
         if (chooser.showOpenDialog(mainPanel) == JFileChooser.APPROVE_OPTION) {
             File selectedFile = chooser.getSelectedFile();
@@ -872,17 +925,17 @@ public class ConfigurationViewSwing {
 
                     // Générer un nom unique pour le fichier
                     String extension = selectedFile.getName().substring(
-                        selectedFile.getName().lastIndexOf("."));
+                            selectedFile.getName().lastIndexOf("."));
                     String hashedName = generateHashedFileName(selectedFile.getName()) + extension;
                     Path destination = destinationDir.resolve(hashedName);
 
                     // Copier le fichier
                     Files.copy(selectedFile.toPath(), destination,
-                        StandardCopyOption.REPLACE_EXISTING);
+                            StandardCopyOption.REPLACE_EXISTING);
 
                     // Mettre à jour le champ avec le chemin relatif
                     logoPathField.setText(destinationDir.getFileName().toString() +
-                        File.separator + hashedName);
+                            File.separator + hashedName);
 
                     updatePreview();
                 } catch (Exception e) {
@@ -891,8 +944,8 @@ public class ConfigurationViewSwing {
                 }
             } else {
                 showErrorMessage("Le fichier sélectionné n'est pas une image valide.\n" +
-                    "Formats acceptés : JPG, JPEG, PNG, GIF\n" +
-                    "Taille maximale : 1 MB");
+                        "Formats acceptés : JPG, JPEG, PNG, GIF\n" +
+                        "Taille maximale : 1 MB");
             }
         }
     }
@@ -900,7 +953,7 @@ public class ConfigurationViewSwing {
     private String generateHashedFileName(String originalName) {
         try {
             String timestamp = LocalDateTime.now().format(
-                DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+                    DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
             String input = originalName + timestamp;
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
@@ -989,7 +1042,7 @@ public class ConfigurationViewSwing {
                 String ancienneValeur = controller.getValeur(cle);
                 if (!nouvelleValeur.equals(ancienneValeur)) {
                     LOGGER.log(Level.INFO, "Mise à jour de la configuration: {0} = {1}",
-                        new Object[]{cle, nouvelleValeur});
+                            new Object[]{cle, nouvelleValeur});
                     ConfigurationParam config = new ConfigurationParam(0, cle, nouvelleValeur, "");
                     controller.mettreAJourConfiguration(config);
                     hasChanges = true;
@@ -1084,8 +1137,8 @@ public class ConfigurationViewSwing {
             JComponent composant = entry.getValue();
             if (composant instanceof JTextField || composant instanceof JTextArea) {
                 String texte = composant instanceof JTextField ?
-                    ((JTextField) composant).getText() :
-                    ((JTextArea) composant).getText();
+                        ((JTextField) composant).getText() :
+                        ((JTextArea) composant).getText();
 
                 if (contientCodeMalveillant(texte)) {
                     erreurs.add("Le champ " + entry.getKey() + " contient des caractères non autorisés");
@@ -1104,8 +1157,8 @@ public class ConfigurationViewSwing {
     private boolean validerCleSIRET(String siret) {
         try {
             int[] chiffres = siret.chars()
-                .map(Character::getNumericValue)
-                .toArray();
+                    .map(Character::getNumericValue)
+                    .toArray();
 
             int somme = 0;
             for (int i = 0; i < 14; i++) {
@@ -1130,15 +1183,15 @@ public class ConfigurationViewSwing {
 
         // Liste de motifs suspects
         String[] motifsSuspects = {
-            "<script", "javascript:", "onerror=", "onload=", "onclick=",
-            "data:text/html", "data:text/javascript", "&#", "\\x", "\\u",
-            "expression(", "document.cookie", "eval(", "fromCharCode",
-            "parseInt", "String.fromCharCode"
+                "<script", "javascript:", "onerror=", "onload=", "onclick=",
+                "data:text/html", "data:text/javascript", "&#", "\\x", "\\u",
+                "expression(", "document.cookie", "eval(", "fromCharCode",
+                "parseInt", "String.fromCharCode"
         };
 
         String inputLower = input.toLowerCase();
         return Arrays.stream(motifsSuspects)
-            .anyMatch(motif -> inputLower.contains(motif.toLowerCase()));
+                .anyMatch(motif -> inputLower.contains(motif.toLowerCase()));
     }
 
     private String sanitizeInput(String input) {
@@ -1147,7 +1200,7 @@ public class ConfigurationViewSwing {
     }
 
     private JPanel createRecusAdvancedSection() {
-        JPanel panel = createSectionPanel("Options avancées des reçus", MaterialDesign.MDI_RECEIPT);
+        JPanel panel = createSectionPanel("Options avancées du ticket", MaterialDesign.MDI_TUNE);
         panel.setLayout(new GridBagLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -1157,136 +1210,83 @@ public class ConfigurationViewSwing {
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Format d'impression
-        JLabel formatImpressionLabel = new JLabel("Format d'impression:");
-        JComboBox<String> formatImpressionCombo = new JComboBox<>(new String[]{"A4", "A5", "80MM"});
-        formatImpressionCombo.setFont(texteNormalFont);
-        champsSaisie.put(CLE_FORMAT_IMPRESSION, formatImpressionCombo);
+        // Espacement des lignes
+        JLabel espacementLabel = new JLabel("Espacement des lignes:");
+        JSpinner espacementSpinner = new JSpinner(new SpinnerNumberModel(1.0, 1.0, 2.0, 0.1));
+        espacementSpinner.setFont(texteNormalFont);
+        champsSaisie.put(CLE_ESPACEMENT_LIGNES_RECU, espacementSpinner);
 
-        panel.add(formatImpressionLabel, gbc);
+        panel.add(espacementLabel, gbc);
         gbc.gridx = 1;
-        panel.add(formatImpressionCombo, gbc);
+        panel.add(espacementSpinner, gbc);
 
-        // Orientation
+        // Style de séparateur
         gbc.gridx = 0;
         gbc.gridy++;
-        JLabel orientationLabel = new JLabel("Orientation:");
-        JComboBox<String> orientationCombo = new JComboBox<>(new String[]{"PORTRAIT", "PAYSAGE"});
-        orientationCombo.setFont(texteNormalFont);
-        champsSaisie.put(CLE_ORIENTATION_IMPRESSION, orientationCombo);
+        JLabel separateurLabel = new JLabel("Style de séparateur:");
+        String[] stylesSeparateur = {"SIMPLE", "DOUBLE", "POINTILLES", "ETOILES", "VAGUE"};
+        JComboBox<String> separateurCombo = new JComboBox<>(stylesSeparateur);
+        separateurCombo.setFont(texteNormalFont);
+        champsSaisie.put(CLE_STYLE_SEPARATEUR_RECU, separateurCombo);
 
-        panel.add(orientationLabel, gbc);
+        panel.add(separateurLabel, gbc);
         gbc.gridx = 1;
-        panel.add(orientationCombo, gbc);
+        panel.add(separateurCombo, gbc);
 
-        // Style tableau produits
+        // Options de taille du logo
         gbc.gridx = 0;
         gbc.gridy++;
-        JLabel styleTableauLabel = new JLabel("Style du tableau des produits:");
-        JComboBox<String> styleTableauCombo = new JComboBox<>(new String[]{"GRILLE", "SIMPLE", "COMPACT"});
-        styleTableauCombo.setFont(texteNormalFont);
-        champsSaisie.put(CLE_STYLE_TABLEAU_PRODUITS, styleTableauCombo);
+        JLabel logoSizeLabel = new JLabel("Taille du logo:");
+        String[] taillesLogo = {"PETIT", "MOYEN", "GRAND", "MASQUER"};
+        JComboBox<String> logoSizeCombo = new JComboBox<>(taillesLogo);
+        logoSizeCombo.setFont(texteNormalFont);
+        champsSaisie.put(CLE_TAILLE_LOGO_OPTIONS, logoSizeCombo);
 
-        panel.add(styleTableauLabel, gbc);
+        panel.add(logoSizeLabel, gbc);
         gbc.gridx = 1;
-        panel.add(styleTableauCombo, gbc);
+        panel.add(logoSizeCombo, gbc);
 
-        // Options d'affichage
+        // Format des prix
         gbc.gridx = 0;
         gbc.gridy++;
-        gbc.gridwidth = 2;
-        JPanel optionsPanel = new JPanel(new GridLayout(0, 2, 10, 5));
-        optionsPanel.setBorder(BorderFactory.createTitledBorder("Options d'affichage"));
+        JLabel prixFormatLabel = new JLabel("Format des prix:");
+        String[] formatsPrix = {"###,##0.00 €", "###,##0.00€", "### ##0.00 €", "0.00 €"};
+        JComboBox<String> prixFormatCombo = new JComboBox<>(formatsPrix);
+        prixFormatCombo.setFont(texteNormalFont);
+        champsSaisie.put(CLE_FORMAT_PRIX, prixFormatCombo);
 
-        // Codes-barres
-        JCheckBox codeBarresCheck = new JCheckBox("Afficher le code-barres");
-        codeBarresCheck.setFont(texteNormalFont);
-        champsSaisie.put(CLE_AFFICHER_CODE_BARRES, codeBarresCheck);
+        panel.add(prixFormatLabel, gbc);
+        gbc.gridx = 1;
+        panel.add(prixFormatCombo, gbc);
 
-        JComboBox<String> positionCodeBarresCombo = new JComboBox<>(new String[]{"HAUT", "BAS"});
-        positionCodeBarresCombo.setFont(texteNormalFont);
-        champsSaisie.put(CLE_POSITION_CODE_BARRES, positionCodeBarresCombo);
-
-        optionsPanel.add(codeBarresCheck);
-        optionsPanel.add(positionCodeBarresCombo);
-
-        // QR Code
-        JCheckBox qrCodeCheck = new JCheckBox("Afficher le QR code");
-        qrCodeCheck.setFont(texteNormalFont);
-        champsSaisie.put(CLE_AFFICHER_QR_CODE, qrCodeCheck);
-
-        JComboBox<String> contenuQRCodeCombo = new JComboBox<>(new String[]{"NUMERO_TICKET", "URL_VERIFICATION"});
-        contenuQRCodeCombo.setFont(texteNormalFont);
-        champsSaisie.put(CLE_CONTENU_QR_CODE, contenuQRCodeCombo);
-
-        optionsPanel.add(qrCodeCheck);
-        optionsPanel.add(contenuQRCodeCombo);
-
-        // Coordonnées client
-        JCheckBox coordonneesClientCheck = new JCheckBox("Afficher coordonnées client");
-        coordonneesClientCheck.setFont(texteNormalFont);
-        champsSaisie.put(CLE_AFFICHER_COORDONNEES_CLIENT, coordonneesClientCheck);
-
-        optionsPanel.add(coordonneesClientCheck);
-
-        panel.add(optionsPanel, gbc);
-
-        // Options supplémentaires
+        // Format des quantités
+        gbc.gridx = 0;
         gbc.gridy++;
-        JPanel optionsSupPanel = new JPanel(new GridLayout(0, 2, 10, 5));
-        optionsSupPanel.setBorder(BorderFactory.createTitledBorder("Options supplémentaires"));
+        JLabel qteFormatLabel = new JLabel("Format des quantités:");
+        String[] formatsQuantite = {"###,##0", "### ##0", "#,##0", "0"};
+        JComboBox<String> qteFormatCombo = new JComboBox<>(formatsQuantite);
+        qteFormatCombo.setFont(texteNormalFont);
+        champsSaisie.put(CLE_FORMAT_QUANTITE, qteFormatCombo);
 
-        // Signature
-        JCheckBox signatureCheck = new JCheckBox("Espace pour signature");
-        signatureCheck.setFont(texteNormalFont);
-        champsSaisie.put(CLE_AFFICHER_SIGNATURE, signatureCheck);
+        panel.add(qteFormatLabel, gbc);
+        gbc.gridx = 1;
+        panel.add(qteFormatCombo, gbc);
 
-        JComboBox<String> positionSignatureCombo = new JComboBox<>(new String[]{"BAS", "DROITE"});
-        positionSignatureCombo.setFont(texteNormalFont);
-        champsSaisie.put(CLE_POSITION_SIGNATURE, positionSignatureCombo);
-
-        optionsSupPanel.add(signatureCheck);
-        optionsSupPanel.add(positionSignatureCombo);
-
-        // Conditions
-        JCheckBox conditionsCheck = new JCheckBox("Afficher conditions");
-        conditionsCheck.setFont(texteNormalFont);
-        champsSaisie.put(CLE_AFFICHER_CONDITIONS, conditionsCheck);
-
-        JTextField texteConditionsField = new JTextField();
-        texteConditionsField.setFont(texteNormalFont);
-        styleTextField(texteConditionsField);
-        champsSaisie.put(CLE_TEXTE_CONDITIONS, texteConditionsField);
-
-        optionsSupPanel.add(conditionsCheck);
-        optionsSupPanel.add(texteConditionsField);
-
-        panel.add(optionsSupPanel, gbc);
-
-        // Ajouter les listeners pour la mise à jour de la prévisualisation
+        // Aperçu en direct
         JComponent[] composantsAvecUpdate = {
-            formatImpressionCombo, orientationCombo, styleTableauCombo,
-            codeBarresCheck, positionCodeBarresCombo,
-            qrCodeCheck, contenuQRCodeCombo,
-            coordonneesClientCheck,
-            signatureCheck, positionSignatureCombo,
-            conditionsCheck, texteConditionsField
+                espacementSpinner, separateurCombo, logoSizeCombo,
+                prixFormatCombo, qteFormatCombo
         };
 
         for (JComponent composant : composantsAvecUpdate) {
-            if (composant instanceof JComboBox) {
+            if (composant instanceof JSpinner) {
+                ((JSpinner) composant).addChangeListener(e -> updatePreview());
+            } else if (composant instanceof JComboBox) {
                 ((JComboBox<?>) composant).addActionListener(e -> updatePreview());
-            } else if (composant instanceof JCheckBox) {
-                ((JCheckBox) composant).addActionListener(e -> updatePreview());
-            } else if (composant instanceof JTextField) {
-                ((JTextField) composant).getDocument().addDocumentListener(new DocumentListener() {
-                    public void changedUpdate(DocumentEvent e) { updatePreview(); }
-                    public void removeUpdate(DocumentEvent e) { updatePreview(); }
-                    public void insertUpdate(DocumentEvent e) { updatePreview(); }
-                });
             }
         }
 
         return panel;
     }
+
 }
