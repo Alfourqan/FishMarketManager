@@ -855,7 +855,7 @@ public class ReportViewSwing {
         contentArea.setWrapStyleWord(true);
 
         panel.add(titleLabel, BorderLayout.NORTH);
-        panel.add(contentArea, BorderLayout.CENTER);
+        paneladd(contentArea, BorderLayout.CENTER);
 
         chartPanel.add(panel);
     }
@@ -1177,42 +1177,41 @@ public class ReportViewSwing {
         try {
             if (previewDialog == null) {
                 previewDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel), "Prévisualisation du rapport", true);
-                previewDialog.setSize(800, 900);
+                previewDialog.setLayout(new BorderLayout());
+                previewDialog.setSize(800, 1000);
                 previewDialog.setLocationRelativeTo(null);
 
-                JPanel controlPanel = new JPanel();
-                JButton prevButton = createStyledButton("Précédent", MaterialDesign.MDI_CHEVRON_LEFT, PRIMARY_COLOR);
+                // Panel de navigation
+                JPanel navigationPanel = new JPanel(new FlowLayout());
+                JButton previousButton = createStyledButton("Précédent", MaterialDesign.MDI_CHEVRON_LEFT, PRIMARY_COLOR);
                 JButton nextButton = createStyledButton("Suivant", MaterialDesign.MDI_CHEVRON_RIGHT, PRIMARY_COLOR);
                 JButton printButton = createStyledButton("Imprimer", MaterialDesign.MDI_PRINTER, SUCCESS_COLOR);
 
-                prevButton.addActionListener(e -> afficherPage(currentPage - 1));
-                nextButton.addActionListener(e -> afficherPage(currentPage + 1));
-                printButton.addActionListener(e -> imprimerDocument());
+                previousButton.addActionListener(e -> afficherPagePrecedente());
+                nextButton.addActionListener(e -> afficherPageSuivante());
+                printButton.addActionListener(e -> imprimerRapport());
 
-                controlPanel.add(prevButton);
-                controlPanel.add(nextButton);
-                controlPanel.add(printButton);
+                navigationPanel.add(previousButton);
+                navigationPanel.add(nextButton);
+                navigationPanel.add(printButton);
 
-                JPanel contentPanel = new JPanel(new BorderLayout());
+                // Label pour l'aperçu
                 previewLabel = new JLabel();
                 JScrollPane scrollPane = new JScrollPane(previewLabel);
+                scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
-                contentPanel.add(controlPanel, BorderLayout.NORTH);
-                contentPanel.add(scrollPane, BorderLayout.CENTER);
-
-                previewDialog.setContentPane(contentPanel);
+                previewDialog.add(navigationPanel, BorderLayout.NORTH);
+                previewDialog.add(scrollPane, BorderLayout.CENTER);
             }
 
-            // Charger le nouveau document
-            if (currentDocument != null) {
-                currentDocument.close();
-            }
-            currentDocument = PDDocument.load(new ByteArrayInputStream(pdfData));
+            // Charger le PDF
+            ByteArrayInputStream bais = new ByteArrayInputStream(pdfData);
+            currentDocument = PDDocument.load(bais);
             pdfRenderer = new PDFRenderer(currentDocument);
             currentPage = 0;
 
             // Afficher la première page
-            afficherPage(0);
+            afficherPage(currentPage);
             previewDialog.setVisible(true);
 
         } catch (Exception e) {
@@ -1224,39 +1223,52 @@ public class ReportViewSwing {
     private void afficherPage(int pageNumber) {
         try {
             if (currentDocument != null && pageNumber >= 0 && pageNumber < currentDocument.getNumberOfPages()) {
-                currentPage = pageNumber;
-                BufferedImage image = pdfRenderer.renderImageWithDPI(currentPage, 150); // 150 DPI pour un bon compromis
-
-                // Redimensionner l'image pour qu'elle tienne dans la fenêtre
-                double scale = Math.min(700.0 / image.getWidth(), 800.0 / image.getHeight());
-                int scaledWidth = (int) (image.getWidth() * scale);
-                int scaledHeight = (int) (image.getHeight() * scale);
-
-                Image scaledImage = image.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH);
-                previewLabel.setIcon(new ImageIcon(scaledImage));
-                previewLabel.revalidate();
+                BufferedImage image = pdfRenderer.renderImageWithDPI(pageNumber, 100);
+                ImageIcon icon = new ImageIcon(image);
+                previewLabel.setIcon(icon);
+                previewDialog.setTitle(String.format("Prévisualisation du rapport (Page %d/%d)", 
+                    pageNumber + 1, currentDocument.getNumberOfPages()));
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de l'affichage de la page " + pageNumber, e);
-            showErrorMessage("Erreur", "Impossible d'afficher la page : " + e.getMessage());
         }
     }
 
-    private void imprimerDocument() {
-        try {
-            if (currentDocument != null) {
-                PrinterJob job = PrinterJob.getPrinterJob();
-                job.setPageable(new PDFPageable(currentDocument));
+    private void afficherPageSuivante() {
+        if (currentDocument != null && currentPage < currentDocument.getNumberOfPages() - 1) {
+            currentPage++;
+            afficherPage(currentPage);
+        }
+    }
 
-                if (job.printDialog()) {
-                    job.print();
-                    showSuccessMessage("Succès", "Document envoyé à l'impression");
-                }
+    private void afficherPagePrecedente() {
+        if (currentDocument != null && currentPage > 0) {
+            currentPage--;
+            afficherPage(currentPage);
+        }
+    }
+
+    private void imprimerRapport() {
+        try {
+            PrinterJob job = PrinterJob.getPrinterJob();
+            job.setPageable(new PDFPageable(currentDocument));
+
+            if (job.printDialog()) {
+                job.print();
+                showSuccessMessage("Impression", "Le rapport a été envoyé à l'imprimante avec succès");
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de l'impression", e);
-            showErrorMessage("Erreur", "Impossible d'imprimer le document : " + e.getMessage());
+            showErrorMessage("Erreur", "Impossible d'imprimer le rapport : " + e.getMessage());
         }
+    }
+
+    private void afficherMessageErreur(String titre, String message) {
+        JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.ERROR_MESSAGE);
+    }
+
+    private void afficherMessageSuccess(String titre, String message) {
+        JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.INFORMATION_MESSAGE);
     }
 
     private static class PDFPageable implements Printable, java.awt.print.Pageable {

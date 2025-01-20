@@ -8,6 +8,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.io.ByteArrayOutputStream;
 
 public class ReportController {
     private static final Logger LOGGER = Logger.getLogger(ReportController.class.getName());
@@ -37,9 +38,9 @@ public class ReportController {
         }
     }
 
-    public void genererRapportStocksPDF(List<Produit> produits, Map<String, Double> statistiques, String cheminFichier) {
+    public void genererRapportStocksPDF(List<Produit> produits, Map<String, Double> statistiques, ByteArrayOutputStream outputStream) {
         try {
-            PDFGenerator.genererRapportStocks(produits, statistiques, cheminFichier);
+            PDFGenerator.genererRapportStocks(produits, statistiques, outputStream);
             LOGGER.info("Rapport des stocks PDF généré avec succès");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF des stocks", e);
@@ -155,19 +156,31 @@ public class ReportController {
         return stats;
     }
 
-
-    public void genererRapportFinancierPDF(LocalDateTime debut, LocalDateTime fin, String cheminFichier) {
+    public void genererRapportFinancierPDF(LocalDateTime debut, LocalDateTime fin, ByteArrayOutputStream outputStream) {
         try {
             Map<String, Double> chiffreAffaires = calculerChiffreAffaires(debut, fin);
             Map<String, Double> couts = calculerCouts(debut, fin);
             Map<String, Double> benefices = calculerBenefices(chiffreAffaires, couts);
             Map<String, Double> marges = calculerMarges(chiffreAffaires, couts);
 
-            PDFGenerator.genererRapportFinancier(chiffreAffaires, couts, benefices, marges, cheminFichier);
+            PDFGenerator.genererRapportFinancier(chiffreAffaires, couts, benefices, marges, outputStream);
             LOGGER.info("Rapport financier PDF généré avec succès");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport financier PDF", e);
             throw new RuntimeException("Erreur lors de la génération du rapport financier PDF", e);
+        }
+    }
+
+    public void genererRapportVentesPDF(LocalDateTime debut, LocalDateTime fin, ByteArrayOutputStream outputStream) {
+        try {
+            List<Vente> ventes = venteController.getVentes().stream()
+                .filter(v -> !v.getDate().isBefore(debut) && !v.getDate().isAfter(fin))
+                .collect(Collectors.toList());
+            PDFGenerator.genererRapportVentes(ventes, outputStream);
+            LOGGER.info("Rapport des ventes PDF généré avec succès");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF des ventes", e);
+            throw new RuntimeException("Erreur lors de la génération du rapport PDF des ventes", e);
         }
     }
 
@@ -305,23 +318,10 @@ public class ReportController {
         return marges;
     }
 
-    public void genererRapportVentesPDF(LocalDateTime debut, LocalDateTime fin, String cheminFichier) {
-        try {
-            List<Vente> ventes = venteController.getVentes().stream()
-                .filter(v -> !v.getDate().isBefore(debut) && !v.getDate().isAfter(fin))
-                .collect(Collectors.toList());
-            PDFGenerator.genererRapportVentes(ventes, cheminFichier);
-            LOGGER.info("Rapport des ventes PDF généré avec succès");
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF des ventes", e);
-            throw new RuntimeException("Erreur lors de la génération du rapport PDF des ventes", e);
-        }
-    }
-
-    public void genererRapportFournisseursPDF(String cheminFichier) {
+    public void genererRapportFournisseursPDF(ByteArrayOutputStream outputStream) {
         try {
             List<Fournisseur> fournisseurs = getFournisseursAvecStats();
-            PDFGenerator.genererRapportFournisseurs(fournisseurs, cheminFichier);
+            PDFGenerator.genererRapportFournisseurs(fournisseurs, outputStream);
             LOGGER.info("Rapport des fournisseurs PDF généré avec succès");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF des fournisseurs", e);
@@ -329,12 +329,12 @@ public class ReportController {
         }
     }
 
-    public void genererRapportCreancesPDF(String cheminFichier) {
+    public void genererRapportCreancesPDF(ByteArrayOutputStream outputStream) {
         try {
             List<Client> clients = clientController.getClients().stream()
                 .filter(c -> c.getSolde() > 0)
                 .collect(Collectors.toList());
-            PDFGenerator.genererRapportCreances(clients, cheminFichier);
+            PDFGenerator.genererRapportCreances(clients, outputStream);
             LOGGER.info("Rapport des créances PDF généré avec succès");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF des créances", e);
