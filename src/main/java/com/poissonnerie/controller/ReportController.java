@@ -52,12 +52,18 @@ public class ReportController {
         try {
             List<Client> clients = clientController.getClients().stream()
                 .filter(c -> c.getSolde() > 0)
+                .sorted((c1, c2) -> Double.compare(c2.getSolde(), c1.getSolde()))
                 .collect(Collectors.toList());
+
+            if (clients.isEmpty()) {
+                LOGGER.warning("Aucun client avec des créances n'a été trouvé");
+            }
+
             ExcelGenerator.genererRapportCreances(clients, cheminFichier);
             LOGGER.info("Rapport des créances Excel généré avec succès");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport Excel des créances", e);
-            throw new RuntimeException("Erreur lors de la génération du rapport Excel des créances", e);
+            throw new RuntimeException("Erreur lors de la génération du rapport Excel des créances: " + e.getMessage(), e);
         }
     }
 
@@ -333,12 +339,18 @@ public class ReportController {
         try {
             List<Client> clients = clientController.getClients().stream()
                 .filter(c -> c.getSolde() > 0)
+                .sorted((c1, c2) -> Double.compare(c2.getSolde(), c1.getSolde()))
                 .collect(Collectors.toList());
+
+            if (clients.isEmpty()) {
+                LOGGER.warning("Aucun client avec des créances n'a été trouvé");
+            }
+
             PDFGenerator.genererRapportCreances(clients, outputStream);
             LOGGER.info("Rapport des créances PDF généré avec succès");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF des créances", e);
-            throw new RuntimeException("Erreur lors de la génération du rapport PDF des créances", e);
+            throw new RuntimeException("Erreur lors de la génération du rapport PDF des créances: " + e.getMessage(), e);
         }
     }
 

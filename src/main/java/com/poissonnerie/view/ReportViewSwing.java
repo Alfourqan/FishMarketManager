@@ -70,7 +70,6 @@ import java.awt.print.Book;
 import java.awt.Graphics2D;
 
 
-
 public class ReportViewSwing {
     private static final Logger LOGGER = Logger.getLogger(ReportViewSwing.class.getName());
 
@@ -728,8 +727,9 @@ public class ReportViewSwing {
 
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            String typeLowerCase = type.toLowerCase().replace("é", "e");
 
-            switch (type) {
+            switch (typeLowerCase) {
                 case "ventes":
                     if (!(donnees.stream().allMatch(d -> d instanceof Vente))) {
                         throw new IllegalArgumentException("Type de données incorrect pour le rapport des ventes");
@@ -745,7 +745,6 @@ public class ReportViewSwing {
                         throw new IllegalArgumentException("Type de données incorrect pour le rapport des stocks");
                     }
                     List<Produit> produits = (List<Produit>) donnees;
-                    // Calcul des statistiques pour les stocks
                     Map<String, Double> statistiques = new HashMap<>();
                     double valeurTotale = produits.stream()
                         .mapToDouble(p -> p.getPrixAchat() * p.getQuantite())
@@ -871,8 +870,7 @@ public class ReportViewSwing {
             produitController.chargerProduits();
             return produitController.getProduits().size();
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du chargement des produits", e);
-            return 0;
+            LOGGER.log(Level.SEVERE, "Erreur lors du chargement des produits", e);            return 0;
         }
     }
 
