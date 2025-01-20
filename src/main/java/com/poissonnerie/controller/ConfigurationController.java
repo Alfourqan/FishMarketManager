@@ -103,6 +103,7 @@ public class ConfigurationController {
 
         try {
             StringBuilder sql = new StringBuilder("UPDATE configurations SET valeur = CASE ");
+            // Options existantes
             sql.append("WHEN cle = 'TAUX_TVA' THEN '20.0' ")
                .append("WHEN cle = 'TVA_ENABLED' THEN 'true' ")
                .append("WHEN cle = 'FORMAT_RECU' THEN 'COMPACT' ")
@@ -128,14 +129,33 @@ public class ConfigurationController {
                .append("WHEN cle = 'SEPARATEUR_MILLIERS' THEN ' ' ")
                .append("WHEN cle = 'DECIMALES' THEN '2' ")
                .append("WHEN cle = 'SIRET_ENTREPRISE' THEN '12345678901234' ")
+
+
+               // Nouvelles options de personnalisation
+               .append("WHEN cle = 'AFFICHER_CODE_BARRES' THEN 'true' ")
+               .append("WHEN cle = 'POSITION_CODE_BARRES' THEN 'BOTTOM' ")
+               .append("WHEN cle = 'AFFICHER_QR_CODE' THEN 'false' ")
+               .append("WHEN cle = 'CONTENU_QR_CODE' THEN 'NUMERO_TICKET' ")
+               .append("WHEN cle = 'AFFICHER_COORDONNEES_CLIENT' THEN 'true' ")
+               .append("WHEN cle = 'STYLE_TABLEAU_PRODUITS' THEN 'GRILLE' ")
+               .append("WHEN cle = 'AFFICHER_SIGNATURE' THEN 'false' ")
+               .append("WHEN cle = 'POSITION_SIGNATURE' THEN 'BOTTOM' ")
+               .append("WHEN cle = 'AFFICHER_CONDITIONS' THEN 'true' ")
+               .append("WHEN cle = 'TEXTE_CONDITIONS' THEN 'Ni repris ni échangé' ")
+               .append("WHEN cle = 'AFFICHER_POINTS_FIDELITE' THEN 'false' ")
+               .append("WHEN cle = 'FORMAT_IMPRESSION' THEN 'A4' ")
+               .append("WHEN cle = 'ORIENTATION_IMPRESSION' THEN 'PORTRAIT' ")
+               .append("WHEN cle = 'LANGUE_TICKET' THEN 'FR' ")
                .append("ELSE valeur END ");
 
-            sql.append("WHERE cle IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            // Mise à jour de la liste des clés dans la clause WHERE
+            sql.append("WHERE cle IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
             try (Connection conn = DatabaseManager.getConnection();
                  PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
 
                 int paramIndex = 1;
+                // Paramètres existants
                 stmt.setString(paramIndex++, ConfigurationParam.CLE_TAUX_TVA);
                 stmt.setString(paramIndex++, ConfigurationParam.CLE_TVA_ENABLED);
                 stmt.setString(paramIndex++, ConfigurationParam.CLE_FORMAT_RECU);
@@ -161,6 +181,22 @@ public class ConfigurationController {
                 stmt.setString(paramIndex++, ConfigurationParam.CLE_SEPARATEUR_MILLIERS);
                 stmt.setString(paramIndex++, ConfigurationParam.CLE_DECIMALES);
                 stmt.setString(paramIndex++, ConfigurationParam.CLE_SIRET_ENTREPRISE);
+
+                // Nouveaux paramètres
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_AFFICHER_CODE_BARRES);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_POSITION_CODE_BARRES);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_AFFICHER_QR_CODE);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_CONTENU_QR_CODE);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_AFFICHER_COORDONNEES_CLIENT);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_STYLE_TABLEAU_PRODUITS);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_AFFICHER_SIGNATURE);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_POSITION_SIGNATURE);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_AFFICHER_CONDITIONS);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_TEXTE_CONDITIONS);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_AFFICHER_POINTS_FIDELITE);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_FORMAT_IMPRESSION);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_ORIENTATION_IMPRESSION);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_LANGUE_TICKET);
 
                 stmt.executeUpdate();
                 LOGGER.info("Configurations réinitialisées avec succès");
@@ -222,6 +258,87 @@ public class ConfigurationController {
                                .replace("_recu", ""), getValeur(cle));
         }
         return infos;
+    }
+
+    public Map<String, Object> getOptionsPersonnalisationTicket() {
+        Map<String, Object> options = new HashMap<>();
+
+        // Options d'affichage
+        options.put("afficherCodeBarres", Boolean.parseBoolean(getValeur(ConfigurationParam.CLE_AFFICHER_CODE_BARRES)));
+        options.put("positionCodeBarres", getValeur(ConfigurationParam.CLE_POSITION_CODE_BARRES));
+        options.put("afficherQRCode", Boolean.parseBoolean(getValeur(ConfigurationParam.CLE_AFFICHER_QR_CODE)));
+        options.put("contenuQRCode", getValeur(ConfigurationParam.CLE_CONTENU_QR_CODE));
+        options.put("afficherCoordonneesClient", Boolean.parseBoolean(getValeur(ConfigurationParam.CLE_AFFICHER_COORDONNEES_CLIENT)));
+        options.put("styleTableauProduits", getValeur(ConfigurationParam.CLE_STYLE_TABLEAU_PRODUITS));
+        options.put("afficherSignature", Boolean.parseBoolean(getValeur(ConfigurationParam.CLE_AFFICHER_SIGNATURE)));
+        options.put("positionSignature", getValeur(ConfigurationParam.CLE_POSITION_SIGNATURE));
+        options.put("afficherConditions", Boolean.parseBoolean(getValeur(ConfigurationParam.CLE_AFFICHER_CONDITIONS)));
+        options.put("texteConditions", getValeur(ConfigurationParam.CLE_TEXTE_CONDITIONS));
+        options.put("afficherPointsFidelite", Boolean.parseBoolean(getValeur(ConfigurationParam.CLE_AFFICHER_POINTS_FIDELITE)));
+
+        // Options d'impression
+        options.put("formatImpression", getValeur(ConfigurationParam.CLE_FORMAT_IMPRESSION));
+        options.put("orientationImpression", getValeur(ConfigurationParam.CLE_ORIENTATION_IMPRESSION));
+        options.put("langueTicket", getValeur(ConfigurationParam.CLE_LANGUE_TICKET));
+
+        return options;
+    }
+
+    public void sauvegarderOptionsPersonnalisationTicket(Map<String, String> options) {
+        if (options == null) {
+            throw new IllegalArgumentException("Les options ne peuvent pas être null");
+        }
+
+        options.forEach((cle, valeur) -> {
+            switch (cle) {
+                case "afficherCodeBarres":
+                    mettreAJourConfiguration(new ConfigurationParam(-1, ConfigurationParam.CLE_AFFICHER_CODE_BARRES, valeur, ""));
+                    break;
+                case "positionCodeBarres":
+                    mettreAJourConfiguration(new ConfigurationParam(-1, ConfigurationParam.CLE_POSITION_CODE_BARRES, valeur, ""));
+                    break;
+                case "afficherQRCode":
+                    mettreAJourConfiguration(new ConfigurationParam(-1, ConfigurationParam.CLE_AFFICHER_QR_CODE, valeur, ""));
+                    break;
+                case "contenuQRCode":
+                    mettreAJourConfiguration(new ConfigurationParam(-1, ConfigurationParam.CLE_CONTENU_QR_CODE, valeur, ""));
+                    break;
+                case "afficherCoordonneesClient":
+                    mettreAJourConfiguration(new ConfigurationParam(-1, ConfigurationParam.CLE_AFFICHER_COORDONNEES_CLIENT, valeur, ""));
+                    break;
+                case "styleTableauProduits":
+                    mettreAJourConfiguration(new ConfigurationParam(-1, ConfigurationParam.CLE_STYLE_TABLEAU_PRODUITS, valeur, ""));
+                    break;
+                case "afficherSignature":
+                    mettreAJourConfiguration(new ConfigurationParam(-1, ConfigurationParam.CLE_AFFICHER_SIGNATURE, valeur, ""));
+                    break;
+                case "positionSignature":
+                    mettreAJourConfiguration(new ConfigurationParam(-1, ConfigurationParam.CLE_POSITION_SIGNATURE, valeur, ""));
+                    break;
+                case "afficherConditions":
+                    mettreAJourConfiguration(new ConfigurationParam(-1, ConfigurationParam.CLE_AFFICHER_CONDITIONS, valeur, ""));
+                    break;
+                case "texteConditions":
+                    mettreAJourConfiguration(new ConfigurationParam(-1, ConfigurationParam.CLE_TEXTE_CONDITIONS, valeur, ""));
+                    break;
+                case "afficherPointsFidelite":
+                    mettreAJourConfiguration(new ConfigurationParam(-1, ConfigurationParam.CLE_AFFICHER_POINTS_FIDELITE, valeur, ""));
+                    break;
+                case "formatImpression":
+                    mettreAJourConfiguration(new ConfigurationParam(-1, ConfigurationParam.CLE_FORMAT_IMPRESSION, valeur, ""));
+                    break;
+                case "orientationImpression":
+                    mettreAJourConfiguration(new ConfigurationParam(-1, ConfigurationParam.CLE_ORIENTATION_IMPRESSION, valeur, ""));
+                    break;
+                case "langueTicket":
+                    mettreAJourConfiguration(new ConfigurationParam(-1, ConfigurationParam.CLE_LANGUE_TICKET, valeur, ""));
+                    break;
+                default:
+                    LOGGER.warning("Option de personnalisation inconnue ignorée: " + cle);
+            }
+        });
+
+        LOGGER.info("Options de personnalisation des tickets mises à jour avec succès");
     }
 
     private void validateConfiguration(ConfigurationParam config) {
