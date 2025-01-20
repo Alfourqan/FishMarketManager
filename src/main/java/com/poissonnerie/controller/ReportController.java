@@ -462,16 +462,7 @@ public class ReportController {
     // Ajout de la méthode pour gérer la génération des tickets
     public void genererTicketPDF(Map<String, Object> parametresTicket, ByteArrayOutputStream outputStream) {
         try {
-            // Configuration des données du ticket
-            Map<String, Object> donnees = new HashMap<>();
-            if (parametresTicket.containsKey("donnees")) {
-                donnees.put("items", parametresTicket.get("donnees"));
-            }
-            if (parametresTicket.containsKey("date")) {
-                donnees.put("date", parametresTicket.get("date"));
-            }
-
-            PDFGenerator.genererTicket(donnees, outputStream);
+            PDFGenerator.genererTicket(parametresTicket, outputStream);
             LOGGER.info("Ticket PDF généré avec succès");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du ticket PDF", e);

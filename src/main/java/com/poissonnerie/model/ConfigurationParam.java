@@ -227,6 +227,22 @@ public class ConfigurationParam {
     public static final String CLE_AFFICHER_TVA_DETAILS = "AFFICHER_TVA_DETAILS";
     public static final String CLE_INFO_SUPPLEMENTAIRE_RECU = "INFO_SUPPLEMENTAIRE_RECU";
 
+    // Nouvelles constantes pour la personnalisation des reçus
+    public static final String CLE_COULEUR_TITRE_RECU = "COULEUR_TITRE_RECU";
+    public static final String CLE_COULEUR_TEXTE_RECU = "COULEUR_TEXTE_RECU";
+    public static final String CLE_MARGE_HAUT_RECU = "MARGE_HAUT_RECU";
+    public static final String CLE_MARGE_BAS_RECU = "MARGE_BAS_RECU";
+    public static final String CLE_MARGE_GAUCHE_RECU = "MARGE_GAUCHE_RECU";
+    public static final String CLE_MARGE_DROITE_RECU = "MARGE_DROITE_RECU";
+    public static final String CLE_FORMAT_DATE_RECU = "FORMAT_DATE_RECU";
+    public static final String CLE_POSITION_LOGO_RECU = "POSITION_LOGO_RECU";
+    public static final String CLE_TAILLE_LOGO_RECU = "TAILLE_LOGO_RECU";
+    public static final String CLE_STYLE_NUMEROTATION = "STYLE_NUMEROTATION";
+    public static final String CLE_DEVISE = "DEVISE";
+    public static final String CLE_SEPARATEUR_MILLIERS = "SEPARATEUR_MILLIERS";
+    public static final String CLE_DECIMALES = "NOMBRE_DECIMALES";
+
+
     private static final java.util.Set<String> CLES_SENSIBLES = new java.util.HashSet<>(java.util.Arrays.asList(
         CLE_EMAIL,
         CLE_TELEPHONE_ENTREPRISE,

@@ -70,6 +70,17 @@ public class ConfigurationViewSwing {
     public static final String CLE_ADRESSE_ENTREPRISE = "ADRESSE_ENTREPRISE";
     public static final String CLE_TELEPHONE_ENTREPRISE = "TELEPHONE_ENTREPRISE";
     public static final String CLE_SIRET_ENTREPRISE = "SIRET_ENTREPRISE";
+    public static final String CLE_FORMAT_DATE_RECU = "FORMAT_DATE_RECU";
+    public static final String CLE_MARGE_HAUT_RECU = "MARGE_HAUT_RECU";
+    public static final String CLE_MARGE_BAS_RECU = "MARGE_BAS_RECU";
+    public static final String CLE_MARGE_GAUCHE_RECU = "MARGE_GAUCHE_RECU";
+    public static final String CLE_MARGE_DROITE_RECU = "MARGE_DROITE_RECU";
+    public static final String CLE_POSITION_LOGO_RECU = "POSITION_LOGO_RECU";
+    public static final String CLE_TAILLE_LOGO_RECU = "TAILLE_LOGO_RECU";
+    public static final String CLE_STYLE_NUMEROTATION = "STYLE_NUMEROTATION";
+    public static final String CLE_DEVISE = "DEVISE";
+    public static final String CLE_SEPARATEUR_MILLIERS = "SEPARATEUR_MILLIERS";
+    public static final String CLE_DECIMALES = "DECIMALES";
 
 
     public ConfigurationViewSwing() {
@@ -191,6 +202,8 @@ public class ConfigurationViewSwing {
         configPanel.add(createEntrepriseSection());
         configPanel.add(Box.createVerticalStrut(15));
         configPanel.add(createRecusSection());
+        configPanel.add(Box.createVerticalStrut(15));
+        configPanel.add(createRecusAdvancedSection());
 
         previewPanel = createPreviewPanel();
 
@@ -1118,5 +1131,138 @@ public class ConfigurationViewSwing {
     private String sanitizeInput(String input) {
         if (input == null) return "";
         return input.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+    }
+
+    private JPanel createRecusAdvancedSection() {
+        JPanel panel = createSectionPanel("Style avancé des reçus", MaterialDesign.MDI_RECEIPT);
+        panel.setLayout(new GridBagLayout());
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // Format de date
+        JLabel dateFormatLabel = new JLabel("Format de date:");
+        JComboBox<String> dateFormatCombo = new JComboBox<>(new String[]{
+            "dd/MM/yyyy HH:mm",
+            "dd-MM-yyyy HH:mm",
+            "yyyy-MM-dd HH:mm",
+            "dd/MM/yyyy",
+            "dd-MM-yyyy",
+            "yyyy-MM-dd"
+        });
+        dateFormatCombo.setFont(texteNormalFont);
+        champsSaisie.put(ConfigurationParam.CLE_FORMAT_DATE_RECU, dateFormatCombo);
+        panel.add(dateFormatLabel, gbc);
+        gbc.gridx = 1;
+        panel.add(dateFormatCombo, gbc);
+
+        // Marges
+        gbc.gridx = 0;
+        gbc.gridy++;
+        JPanel margesPanel = new JPanel(new GridLayout(2, 4, 5, 5));
+        margesPanel.setBorder(BorderFactory.createTitledBorder("Marges (mm)"));
+
+        String[] margeLabels = {"Haut", "Bas", "Gauche", "Droite"};
+        String[] margeCles = {
+            ConfigurationParam.CLE_MARGE_HAUT_RECU,
+            ConfigurationParam.CLE_MARGE_BAS_RECU,
+            ConfigurationParam.CLE_MARGE_GAUCHE_RECU,
+            ConfigurationParam.CLE_MARGE_DROITE_RECU
+        };
+
+        for (int i = 0; i < margeLabels.length; i++) {
+            margesPanel.add(new JLabel(margeLabels[i]));
+            JSpinner margeSpinner = new JSpinner(new SpinnerNumberModel(10, 0, 50, 1));
+            margeSpinner.setFont(texteNormalFont);
+            champsSaisie.put(margeCles[i], margeSpinner);
+            margesPanel.add(margeSpinner);
+        }
+
+        gbc.gridwidth = 2;
+        panel.add(margesPanel, gbc);
+
+        // Position du logo
+        gbc.gridy++;
+        gbc.gridwidth = 1;
+        JLabel logoPositionLabel = new JLabel("Position du logo:");
+        JComboBox<String> logoPositionCombo = new JComboBox<>(new String[]{
+            "HAUT_GAUCHE", "HAUT_CENTRE", "HAUT_DROITE"
+        });
+        logoPositionCombo.setFont(texteNormalFont);
+        champsSaisie.put(ConfigurationParam.CLE_POSITION_LOGO_RECU, logoPositionCombo);
+        panel.add(logoPositionLabel, gbc);
+        gbc.gridx = 1;
+        panel.add(logoPositionCombo, gbc);
+
+        // Taille du logo
+        gbc.gridx = 0;
+        gbc.gridy++;
+        JLabel logoSizeLabel = new JLabel("Taille du logo (mm):");
+        JSpinner logoSizeSpinner = new JSpinner(new SpinnerNumberModel(30, 10, 100, 5));
+        logoSizeSpinner.setFont(texteNormalFont);
+        champsSaisie.put(ConfigurationParam.CLE_TAILLE_LOGO_RECU, logoSizeSpinner);
+        panel.add(logoSizeLabel, gbc);
+        gbc.gridx = 1;
+        panel.add(logoSizeSpinner, gbc);
+
+        // Style de numérotation
+        gbc.gridx = 0;
+        gbc.gridy++;
+        JLabel numerotationLabel = new JLabel("Style de numérotation:");
+        JComboBox<String> numerotationCombo = new JComboBox<>(new String[]{
+            "STANDARD (#0001)",
+            "ANNEE_NUMERO (2025-0001)",
+            "PREFIXE_NUMERO (TICKET-0001)"
+        });
+        numerotationCombo.setFont(texteNormalFont);
+        champsSaisie.put(ConfigurationParam.CLE_STYLE_NUMEROTATION, numerotationCombo);
+        panel.add(numerotationLabel, gbc);
+        gbc.gridx = 1;
+        panel.add(numerotationCombo, gbc);
+
+        // Format monétaire
+        gbc.gridx = 0;
+        gbc.gridy++;
+        JPanel monnaiePanel = new JPanel(new GridLayout(3, 2, 5, 5));
+        monnaiePanel.setBorder(BorderFactory.createTitledBorder("Format monétaire"));
+
+        // Devise
+        monnaiePanel.add(new JLabel("Devise:"));
+        JComboBox<String> deviseCombo = new JComboBox<>(new String[]{"€", "$", "£", "CHF"});
+        deviseCombo.setFont(texteNormalFont);
+        champsSaisie.put(ConfigurationParam.CLE_DEVISE, deviseCombo);
+        monnaiePanel.add(deviseCombo);
+
+        // Séparateur de milliers
+        monnaiePanel.add(new JLabel("Séparateur milliers:"));
+        JComboBox<String> sepCombo = new JComboBox<>(new String[]{" ", ".", ","});
+        sepCombo.setFont(texteNormalFont);
+        champsSaisie.put(ConfigurationParam.CLE_SEPARATEUR_MILLIERS, sepCombo);
+        monnaiePanel.add(sepCombo);
+
+        // Nombre de décimales
+        monnaiePanel.add(new JLabel("Décimales:"));
+        JSpinner decimalesSpinner = new JSpinner(new SpinnerNumberModel(2, 0, 4, 1));
+        decimalesSpinner.setFont(texteNormalFont);
+        champsSaisie.put(ConfigurationParam.CLE_DECIMALES, decimalesSpinner);
+        monnaiePanel.add(decimalesSpinner);
+
+        gbc.gridwidth = 2;
+        panel.add(monnaiePanel, gbc);
+
+        // Ajouter les listeners pour la mise à jour de la prévisualisation
+        for (JComponent composant : champsSaisie.values()) {
+            if (composant instanceof JSpinner) {
+                ((JSpinner) composant).addChangeListener(e -> updatePreview());
+            } else if (composant instanceof JComboBox) {
+                ((JComboBox<?>) composant).addActionListener(e -> updatePreview());
+            }
+        }
+
+        return panel;
     }
 }

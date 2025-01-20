@@ -518,27 +518,74 @@ public class PDFGenerator {
         }
     }
 
-    public static void genererTicket(Vente vente, String cheminFichier) {
-        // Créer et imprimer le ticket texte
-        TextBillPrinter printer = new TextBillPrinter(vente);
-        printer.imprimer();
 
-        // Sauvegarder aussi une copie PDF pour l'archivage
+    public static void genererTicket(Map<String, Object> donnees, ByteArrayOutputStream outputStream) throws DocumentException {
         Document document = null;
         try {
             document = new Document(PageSize.A4);
-            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
+            PdfWriter writer = PdfWriter.getInstance(document, outputStream);
             document.open();
 
             // Utiliser une police monospace pour maintenir l'alignement
-            Font ticketFont = new Font(Font.FontFamily.COURIER, 10, Font.NORMAL);
-            String[] lines = printer.getBillContent().split("\n");
+            Font titleFont = new Font(Font.FontFamily.COURIER, 14, Font.BOLD);
+            Font normalFont = new Font(Font.FontFamily.COURIER, 10, Font.NORMAL);
+            Font boldFont = new Font(Font.FontFamily.COURIER, 10, Font.BOLD);
 
-            for (String line : lines) {
-                document.add(new Paragraph(line, ticketFont));
+            // En-tête
+            document.add(new Paragraph("                         MA POISSONNERIE", titleFont));
+            document.add(new Paragraph("\t123 Rue de la Mer", normalFont));
+            document.add(new Paragraph("\t75001 PARIS", normalFont));
+            document.add(new Paragraph("\t+33 1 23 45 67 89", normalFont));
+            document.add(new Paragraph("----------------------------------------------------------------", normalFont));
+
+            // Date
+            String date = (String) donnees.getOrDefault("date",
+                    DATE_FORMATTER.format(LocalDateTime.now()));
+            document.add(new Paragraph("Date: " + date, normalFont));
+            document.add(new Paragraph("----------------------------------------------------------------", normalFont));
+
+            // En-tête des colonnes
+            document.add(new Paragraph(" Article\t\tQté\tPrix", normalFont));
+            document.add(new Paragraph("----------------------------------------------------------------", normalFont));
+
+            // Articles
+            double total = 0.0;
+            if (donnees.containsKey("items")) {
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> items = (List<Map<String, Object>>) donnees.get("items");
+                for (Map<String, Object> item : items) {
+                    String nom = (String) item.get("nom");
+                    int quantite = ((Number) item.get("quantite")).intValue();
+                    double prix = ((Number) item.get("prix")).doubleValue();
+                    total += prix * quantite;
+
+                    if (nom.length() > 20) {
+                        nom = nom.substring(0, 17) + "...";
+                    }
+
+                    String ligne = String.format("%-20s\t%d\t%.2f",
+                            nom, quantite, prix * quantite);
+                    document.add(new Paragraph(ligne, normalFont));
+                }
             }
 
-            LOGGER.info("Ticket de vente généré avec succès: " + cheminFichier);
+            document.add(new Paragraph("----------------------------------------------------------------", normalFont));
+
+            // Totaux
+            document.add(new Paragraph(String.format("Total: %.2f €", total), boldFont));
+
+            // Mode de paiement si spécifié
+            String modePaiement = (String) donnees.getOrDefault("modePaiement", "");
+            if (!modePaiement.isEmpty()) {
+                document.add(new Paragraph("Mode de paiement: " + modePaiement, normalFont));
+            }
+
+            document.add(new Paragraph("====================================", normalFont));
+            document.add(new Paragraph("                     Merci de votre visite !", boldFont));
+            document.add(new Paragraph("----------------------------------------------------------------", normalFont));
+            document.add(new Paragraph("                     Logiciel MA POISSONNERIE", normalFont));
+
+            LOGGER.info("Ticket PDF généré avec succès");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du ticket", e);
             throw new RuntimeException("Erreur lors de la génération du ticket", e);
@@ -549,58 +596,7 @@ public class PDFGenerator {
         }
     }
 
-    private static void genererContenuTicket(Document document, Vente vente) throws DocumentException {
-        // Configuration de la page pour le format ticket
-        document.setMargins(20, 20, 20, 20);
-
-        // Utiliser une police monospace pour maintenir l'alignement
-        Font titleFont = new Font(Font.FontFamily.COURIER, 14, Font.BOLD);
-        Font normalFont = new Font(Font.FontFamily.COURIER, 10, Font.NORMAL);
-        Font boldFont = new Font(Font.FontFamily.COURIER, 10, Font.BOLD);
-
-        // En-tête
-        Paragraph businessName = new Paragraph("                         MA POISSONNERIE", titleFont);
-        businessName.setAlignment(Element.ALIGN_LEFT);
-        document.add(businessName);
-
-        // Adresse
-        document.add(new Paragraph("\t123 Rue de la Mer", normalFont));
-        document.add(new Paragraph("\t75001 PARIS", normalFont));
-        document.add(new Paragraph("\t+33 1 23 45 67 89", normalFont));
-        document.add(new Paragraph("----------------------------------------------------------------", normalFont));
-
-        // En-tête des colonnes
-        document.add(new Paragraph(" Iteam\t\tQty\tPrice", normalFont));
-        document.add(new Paragraph("----------------------------------------------------------------", normalFont));
-
-        // Articles
-        for (Vente.LigneVente ligne : vente.getLignes()) {
-            String nomProduit = ligne.getProduit().getNom();
-            if (nomProduit.length() > 20) {
-                nomProduit = nomProduit.substring(0, 17) + "...";
-            }
-
-            // Format: Nom du produit (aligné à gauche) Quantité Prix
-            String articleLine = String.format("%-20s\t%d\t%.2f",
-                    nomProduit,
-                    ligne.getQuantite(),
-                    ligne.getPrixUnitaire() * ligne.getQuantite());
-            document.add(new Paragraph(articleLine, normalFont));
-        }
-
-        document.add(new Paragraph("----------------------------------------------------------------", normalFont));
-
-        // Totaux
-        document.add(new Paragraph(String.format("SubTotal :\t\t%.2f", vente.getTotalHT()), normalFont));
-        document.add(new Paragraph(String.format("Cash :\t\t\t%.2f", vente.getTotal()), normalFont));
-        document.add(new Paragraph(String.format("Balance :\t\t%.2f", 0.00), normalFont));
-
-        document.add(new Paragraph("====================================", normalFont));
-        document.add(new Paragraph("                     Thanks For Your Business...!", boldFont));
-        document.add(new Paragraph("----------------------------------------------------------------", normalFont));
-        document.add(new Paragraph("                     Software by MA POISSONNERIE", normalFont));
-    }
-
+    // Reste du fichier inchangé
     public static void genererRapportCreances(List<Client> clients, String cheminFichier) {
         Document document = null;
         try {
