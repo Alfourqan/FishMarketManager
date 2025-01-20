@@ -1,1 +1,0 @@
-// Ce fichier est déprécié. Utiliser com.poissonnerie.model.Vente à la place

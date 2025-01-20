@@ -334,17 +334,19 @@ public class ReportViewSwing {
                         List<Vente> ventes = new ArrayList<>();
                         // Créer un client factice
                         Client clientDemo = new Client(1, "Client Démo", "0123456789", "demo@email.com", "123 rue Demo");
+
                         // Créer une vente avec les paramètres requis
+                        double montantTotal = 100.0; // Définir explicitement comme double
                         Vente venteDemo = new Vente(
                             1,                          // id
                             LocalDateTime.now(),        // date
                             clientDemo,                 // client
                             false,                      // credit
-                            100.0,                      // total (maintenant en double)
+                            montantTotal,              // total (défini comme double)
                             Vente.ModePaiement.ESPECES  // mode de paiement
                         );
                         ventes.add(venteDemo);
-                        donnees = ventes;
+
                         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                         reportController.genererTicketPDF(ventes.get(0), outputStream);
                         byte[] pdfData = PDFGenerator.getBytes(outputStream);
@@ -439,7 +441,6 @@ public class ReportViewSwing {
 
         mainPanel.add(panel, BorderLayout.CENTER);
     }
-
 
 
 
@@ -865,8 +866,7 @@ public class ReportViewSwing {
             dialog.setVisible(true);
 
         } catch (Exception e) {
-            handleError("affichage des créances", e);
-        }
+            handleError("affichage des créances", e);        }
     }
 
     private JDialog createCreancesDialog(List<Client> clientsAvecCreances) {
