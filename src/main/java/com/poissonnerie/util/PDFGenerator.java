@@ -518,6 +518,7 @@ public class PDFGenerator {
     }
 
     public static void genererTicket(Vente vente, String cheminFichier) {
+        // Créer le PDF comme avant
         Document document = null;
         try {
             document = new Document(PageSize.A4);
@@ -527,6 +528,11 @@ public class PDFGenerator {
             document.open();
             genererContenuTicket(document, vente);
             LOGGER.info("Ticket de vente généré avec succès: " + cheminFichier);
+
+            // Imprimer directement via BillPrint
+            BillPrintGenerator billPrinter = new BillPrintGenerator(vente);
+            billPrinter.print();
+
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du ticket", e);
             throw new RuntimeException("Erreur lors de la génération du ticket", e);
