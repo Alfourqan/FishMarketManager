@@ -332,12 +332,12 @@ public class ReportViewSwing {
                 case "Ticket":
                     try {
                         // Créer les données du ticket
-                        Map<String, Object> ticketData = new HashMap<>();
-                        // Ajouter les données nécessaires pour le ticket
-                        ticketData.put("donnees", donnees);
-                        ticketData.put("date", LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+                        List<Vente> ventes = new ArrayList<>();
+                        // Simuler l'obtention d'une vente (remplacez par votre logique réelle)
+                        ventes.add(new Vente());
+                        donnees = ventes;
                         ByteArrayOutputStream outputStream = new ByteArrayOutputStream(); // Fixed: outputStream is now defined here
-                        reportController.genererTicketPDF(ticketData, outputStream);
+                        reportController.genererTicketPDF(ventes.get(0), outputStream);
                         byte[] pdfData = PDFGenerator.getBytes(outputStream);
                         afficherPreviewTicket(pdfData);
                     } catch (Exception e) {
@@ -430,7 +430,6 @@ public class ReportViewSwing {
 
         mainPanel.add(panel, BorderLayout.CENTER);
     }
-
 
 
 
@@ -787,10 +786,10 @@ public class ReportViewSwing {
                     reportController.genererRapportCreancesPDF(outputStream);
                     break;
                 case "ticket":
-                    Map<String, Object> ticketData = new HashMap<>();
-                    // Ajouter les données nécessaires pour le ticket
-                    ticketData.put("donnees", donnees);
-                    reportController.genererTicketPDF(ticketData, outputStream);
+                    if (!(donnees.get(0) instanceof Vente)) {
+                        throw new IllegalArgumentException("Type de données incorrect pour le ticket");
+                    }
+                    reportController.genererTicketPDF((Vente) donnees.get(0), outputStream);
                     break;
                 default:
                     throw new IllegalArgumentException("Type de rapport inconnu: " + type);

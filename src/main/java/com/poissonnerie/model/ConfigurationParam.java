@@ -127,6 +127,7 @@ public class ConfigurationParam {
             case CLE_AFFICHER_SIGNATURE:
             case CLE_AFFICHER_CONDITIONS:
             case CLE_AFFICHER_POINTS_FIDELITE:
+            case CLE_AFFICHER_TVA_DETAILS: //Added from edited snippet
                 lowercaseValue = cleanValue.toLowerCase();
                 if (!lowercaseValue.equals("true") && !lowercaseValue.equals("false")) {
                     throw new IllegalArgumentException("La valeur doit être 'true' ou 'false'");
@@ -279,6 +280,17 @@ public class ConfigurationParam {
     public static final String CLE_FORMAT_RECU = "FORMAT_RECU";
     public static final String CLE_PIED_PAGE_RECU = "PIED_PAGE_RECU";
     public static final String CLE_EN_TETE_RECU = "EN_TETE_RECU";
+
+
+    // Constantes pour le style des tickets
+    public static final String CLE_STYLE_BORDURE_RECU = "STYLE_BORDURE_RECU";
+    public static final String CLE_POLICE_TITRE_RECU = "POLICE_TITRE_RECU";
+    public static final String CLE_POLICE_TEXTE_RECU = "POLICE_TEXTE_RECU";
+    public static final String CLE_ALIGNEMENT_TITRE_RECU = "ALIGNEMENT_TITRE_RECU";
+    public static final String CLE_ALIGNEMENT_TEXTE_RECU = "ALIGNEMENT_TEXTE_RECU";
+    public static final String CLE_MESSAGE_COMMERCIAL_RECU = "MESSAGE_COMMERCIAL_RECU";
+    public static final String CLE_INFO_SUPPLEMENTAIRE_RECU = "INFO_SUPPLEMENTAIRE_RECU";
+    public static final String CLE_AFFICHER_TVA_DETAILS = "AFFICHER_TVA_DETAILS";
 
     // Nouvelles constantes pour la personnalisation avancée des tickets
     public static final String CLE_AFFICHER_CODE_BARRES = "AFFICHER_CODE_BARRES";

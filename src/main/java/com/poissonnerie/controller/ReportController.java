@@ -462,7 +462,7 @@ public class ReportController {
     // Ajout de la méthode pour gérer la génération des tickets
     public void genererTicketPDF(Vente vente, ByteArrayOutputStream outputStream) {
         try {
-            PDFGenerator.genererPreviewTicket(vente, outputStream); // Added outputStream parameter
+            PDFGenerator.genererPreviewTicket(vente, outputStream); 
             LOGGER.info("Ticket PDF généré avec succès");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du ticket PDF", e);
