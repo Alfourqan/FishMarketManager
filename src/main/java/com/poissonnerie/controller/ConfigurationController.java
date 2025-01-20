@@ -99,27 +99,68 @@ public class ConfigurationController {
     }
 
     public void reinitialiserConfigurations() {
-        // Désactiver temporairement la validation SIRET
         System.setProperty("SKIP_SIRET_VALIDATION", "true");
 
         try {
-            String sql = "UPDATE configurations SET valeur = CASE " +
-                        "WHEN cle = 'TAUX_TVA' THEN '20.0' " +
-                        "WHEN cle = 'TVA_ENABLED' THEN 'true' " +
-                        "WHEN cle = 'FORMAT_RECU' THEN 'COMPACT' " +
-                        "WHEN cle = 'PIED_PAGE_RECU' THEN 'Merci de votre visite !' " +
-                        "WHEN cle = 'SIRET_ENTREPRISE' THEN '12345678901234' " +
-                        "ELSE valeur END " +
-                        "WHERE cle IN (?, ?, ?, ?, ?)";
+            StringBuilder sql = new StringBuilder("UPDATE configurations SET valeur = CASE ");
+            sql.append("WHEN cle = 'TAUX_TVA' THEN '20.0' ")
+               .append("WHEN cle = 'TVA_ENABLED' THEN 'true' ")
+               .append("WHEN cle = 'FORMAT_RECU' THEN 'COMPACT' ")
+               .append("WHEN cle = 'PIED_PAGE_RECU' THEN 'Merci de votre visite !' ")
+               .append("WHEN cle = 'POLICE_TITRE_RECU' THEN '14' ")
+               .append("WHEN cle = 'POLICE_TEXTE_RECU' THEN '10' ")
+               .append("WHEN cle = 'ALIGNEMENT_TITRE_RECU' THEN 'CENTER' ")
+               .append("WHEN cle = 'ALIGNEMENT_TEXTE_RECU' THEN 'LEFT' ")
+               .append("WHEN cle = 'STYLE_BORDURE_RECU' THEN 'SIMPLE' ")
+               .append("WHEN cle = 'MESSAGE_COMMERCIAL_RECU' THEN 'À bientôt !' ")
+               .append("WHEN cle = 'AFFICHER_TVA_DETAILS' THEN 'true' ")
+               .append("WHEN cle = 'COULEUR_TITRE_RECU' THEN '#000000' ")
+               .append("WHEN cle = 'COULEUR_TEXTE_RECU' THEN '#000000' ")
+               .append("WHEN cle = 'MARGE_HAUT_RECU' THEN '10' ")
+               .append("WHEN cle = 'MARGE_BAS_RECU' THEN '10' ")
+               .append("WHEN cle = 'MARGE_GAUCHE_RECU' THEN '10' ")
+               .append("WHEN cle = 'MARGE_DROITE_RECU' THEN '10' ")
+               .append("WHEN cle = 'FORMAT_DATE_RECU' THEN 'dd/MM/yyyy HH:mm' ")
+               .append("WHEN cle = 'POSITION_LOGO_RECU' THEN 'TOP' ")
+               .append("WHEN cle = 'TAILLE_LOGO_RECU' THEN '50' ")
+               .append("WHEN cle = 'STYLE_NUMEROTATION' THEN 'STANDARD' ")
+               .append("WHEN cle = 'DEVISE' THEN '€' ")
+               .append("WHEN cle = 'SEPARATEUR_MILLIERS' THEN ' ' ")
+               .append("WHEN cle = 'DECIMALES' THEN '2' ")
+               .append("WHEN cle = 'SIRET_ENTREPRISE' THEN '12345678901234' ")
+               .append("ELSE valeur END ");
+
+            sql.append("WHERE cle IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
             try (Connection conn = DatabaseManager.getConnection();
-                 PreparedStatement stmt = conn.prepareStatement(sql)) {
+                 PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
 
-                stmt.setString(1, ConfigurationParam.CLE_TAUX_TVA);
-                stmt.setString(2, ConfigurationParam.CLE_TVA_ENABLED);
-                stmt.setString(3, ConfigurationParam.CLE_FORMAT_RECU);
-                stmt.setString(4, ConfigurationParam.CLE_PIED_PAGE_RECU);
-                stmt.setString(5, ConfigurationParam.CLE_SIRET_ENTREPRISE);
+                int paramIndex = 1;
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_TAUX_TVA);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_TVA_ENABLED);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_FORMAT_RECU);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_PIED_PAGE_RECU);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_POLICE_TITRE_RECU);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_POLICE_TEXTE_RECU);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_ALIGNEMENT_TITRE_RECU);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_ALIGNEMENT_TEXTE_RECU);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_STYLE_BORDURE_RECU);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_MESSAGE_COMMERCIAL_RECU);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_AFFICHER_TVA_DETAILS);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_COULEUR_TITRE_RECU);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_COULEUR_TEXTE_RECU);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_MARGE_HAUT_RECU);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_MARGE_BAS_RECU);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_MARGE_GAUCHE_RECU);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_MARGE_DROITE_RECU);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_FORMAT_DATE_RECU);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_POSITION_LOGO_RECU);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_TAILLE_LOGO_RECU);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_STYLE_NUMEROTATION);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_DEVISE);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_SEPARATEUR_MILLIERS);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_DECIMALES);
+                stmt.setString(paramIndex++, ConfigurationParam.CLE_SIRET_ENTREPRISE);
 
                 stmt.executeUpdate();
                 LOGGER.info("Configurations réinitialisées avec succès");
@@ -131,7 +172,6 @@ public class ConfigurationController {
             LOGGER.log(Level.SEVERE, "Erreur lors de la réinitialisation des configurations", e);
             throw new RuntimeException("Erreur lors de la réinitialisation des configurations", e);
         } finally {
-            // Réactiver la validation SIRET
             System.clearProperty("SKIP_SIRET_VALIDATION");
         }
     }

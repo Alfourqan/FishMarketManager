@@ -505,7 +505,7 @@ public class PDFGenerator {
     private static void genererContenuTicket(Document document, Vente vente) throws DocumentException {
         ConfigurationController configController = new ConfigurationController();
 
-        // Récupération des paramètres de configuration
+        // Récupération des paramètres de configuration pour les polices
         Font titleFont = new Font(Font.FontFamily.COURIER,
                 Float.parseFloat(configController.getConfiguration("POLICE_TITRE_RECU", "14")), Font.BOLD);
         Font normalFont = new Font(Font.FontFamily.COURIER,
@@ -513,36 +513,65 @@ public class PDFGenerator {
         Font boldFont = new Font(Font.FontFamily.COURIER,
                 Float.parseFloat(configController.getConfiguration("POLICE_TEXTE_RECU", "10")), Font.BOLD);
 
+        // Configuration des couleurs
+        BaseColor couleurTitre = convertirCouleur(configController.getConfiguration("COULEUR_TITRE_RECU", "#000000"));
+        BaseColor couleurTexte = convertirCouleur(configController.getConfiguration("COULEUR_TEXTE_RECU", "#000000"));
+        titleFont.setColor(couleurTitre);
+        normalFont.setColor(couleurTexte);
+        boldFont.setColor(couleurTexte);
+
+        // Configuration du format de date
         String formatDate = configController.getConfiguration("FORMAT_DATE_RECU", "dd/MM/yyyy HH:mm");
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(formatDate);
+
+        // Configuration des préférences monétaires
         String devise = configController.getConfiguration("DEVISE", "€");
         String separateurMilliers = configController.getConfiguration("SEPARATEUR_MILLIERS", " ");
         int decimales = Integer.parseInt(configController.getConfiguration("DECIMALES", "2"));
 
         // En-tête
         String nomEntreprise = configController.getConfiguration("NOM_ENTREPRISE", "MA POISSONNERIE");
-        document.add(new Paragraph(centerText(nomEntreprise), titleFont));
-        document.add(new Paragraph("\t" + configController.getConfiguration("ADRESSE_ENTREPRISE", ""), normalFont));
-        document.add(new Paragraph("\t" + configController.getConfiguration("TELEPHONE_ENTREPRISE", ""), normalFont));
-        document.add(new Paragraph(generateSeparatorLine(), normalFont));
+        int alignementTitre = getAlignement(configController.getConfiguration("ALIGNEMENT_TITRE_RECU", "CENTER"));
+        Paragraph titre = new Paragraph(nomEntreprise, titleFont);
+        titre.setAlignment(alignementTitre);
+        document.add(titre);
+
+        // Informations de l'entreprise avec alignement personnalisé
+        int alignementTexte = getAlignement(configController.getConfiguration("ALIGNEMENT_TEXTE_RECU", "LEFT"));
+        Paragraph adresse = new Paragraph(configController.getConfiguration("ADRESSE_ENTREPRISE", ""), normalFont);
+        adresse.setAlignment(alignementTexte);
+        document.add(adresse);
+
+        Paragraph telephone = new Paragraph(configController.getConfiguration("TELEPHONE_ENTREPRISE", ""), normalFont);
+        telephone.setAlignment(alignementTexte);
+        document.add(telephone);
+
+        // Style de bordure personnalisé
+        String styleBordure = configController.getConfiguration("STYLE_BORDURE_RECU", "SIMPLE");
+        document.add(new Paragraph(genererLigneSeparation(styleBordure), normalFont));
 
         // Date et numéro de ticket
         String date = vente.getDate().format(dateFormatter);
         String styleNumerotation = configController.getConfiguration("STYLE_NUMEROTATION", "STANDARD");
         String numeroTicket = genererNumeroTicket(vente.getId(), styleNumerotation);
-        document.add(new Paragraph("Date: " + date + "\nTicket N°: " + numeroTicket, normalFont));
-        document.add(new Paragraph(generateSeparatorLine(), normalFont));
+        Paragraph dateTicket = new Paragraph("Date: " + date + "\nTicket N°: " + numeroTicket, normalFont);
+        dateTicket.setAlignment(alignementTexte);
+        document.add(dateTicket);
+        document.add(new Paragraph(genererLigneSeparation(styleBordure), normalFont));
 
         // En-tête des colonnes
-        document.add(new Paragraph(" Article\t\tQté\tPrix", normalFont));
-        document.add(new Paragraph(generateSeparatorLine(), normalFont));
+        Paragraph colonnes = new Paragraph(" Article\t\tQté\tPrix", normalFont);
+        colonnes.setAlignment(alignementTexte);
+        document.add(colonnes);
+        document.add(new Paragraph(genererLigneSeparation(styleBordure), normalFont));
 
-        // Articles
+        // Formatage des nombres
         NumberFormat formatNombre = NumberFormat.getInstance(Locale.FRANCE);
         formatNombre.setGroupingUsed(true);
         formatNombre.setMinimumFractionDigits(decimales);
         formatNombre.setMaximumFractionDigits(decimales);
 
+        // Articles
         for (LigneVente ligne : vente.getLignes()) {
             String nom = ligne.getProduit().getNom();
             if (nom.length() > 20) {
@@ -554,37 +583,92 @@ public class PDFGenerator {
 
             String ligneTicket = String.format("%-20s\t%d\t%s %s",
                     nom, ligne.getQuantite(), prix, devise);
-            document.add(new Paragraph(ligneTicket, normalFont));
+            Paragraph ligneProduit = new Paragraph(ligneTicket, normalFont);
+            ligneProduit.setAlignment(alignementTexte);
+            document.add(ligneProduit);
         }
 
-        document.add(new Paragraph(generateSeparatorLine(), normalFont));
+        document.add(new Paragraph(genererLigneSeparation(styleBordure), normalFont));
 
-        // Totaux
+        // Totaux avec alignement personnalisé
         String total = formatNombre.format(vente.getTotal()).replace(" ", separateurMilliers);
-        document.add(new Paragraph(String.format("Total: %s %s", total, devise), boldFont));
+        Paragraph totalParagraph = new Paragraph(String.format("Total: %s %s", total, devise), boldFont);
+        totalParagraph.setAlignment(alignementTexte);
+        document.add(totalParagraph);
 
         // TVA si activée
         if (Boolean.parseBoolean(configController.getConfiguration("AFFICHER_TVA_DETAILS", "true"))) {
             String tva = formatNombre.format(vente.getMontantTVA()).replace(" ", separateurMilliers);
-            document.add(new Paragraph(String.format("Dont TVA: %s %s", tva, devise), normalFont));
+            Paragraph tvaParagraph = new Paragraph(String.format("Dont TVA: %s %s", tva, devise), normalFont);
+            tvaParagraph.setAlignment(alignementTexte);
+            document.add(tvaParagraph);
         }
 
         // Mode de paiement
-        document.add(new Paragraph("Mode de paiement: " + vente.getModePaiement().getLibelle(), normalFont));
+        Paragraph modePaiement = new Paragraph("Mode de paiement: " + vente.getModePaiement().getLibelle(), normalFont);
+        modePaiement.setAlignment(alignementTexte);
+        document.add(modePaiement);
 
-        document.add(new Paragraph("====================================", normalFont));
-        // Message de pied de page
-        String piedPage = configController.getConfiguration("PIED_PAGE_RECU", "Merci de votre visite !");
-        document.add(new Paragraph(centerText(piedPage), boldFont));
-        document.add(new Paragraph(generateSeparatorLine(), normalFont));
+        document.add(new Paragraph(genererLigneSeparation(styleBordure), normalFont));
+
+        // Message commercial personnalisé
+        String messageCommercial = configController.getConfiguration("MESSAGE_COMMERCIAL_RECU", "Merci de votre visite !");
+        Paragraph message = new Paragraph(messageCommercial, boldFont);
+        message.setAlignment(alignementTitre);
+        document.add(message);
+
+        // Informations supplémentaires si configurées
+        String infoSupp = configController.getConfiguration("INFO_SUPPLEMENTAIRE_RECU", "");
+        if (!infoSupp.isEmpty()) {
+            Paragraph infos = new Paragraph(infoSupp, normalFont);
+            infos.setAlignment(alignementTexte);
+            document.add(infos);
+        }
+
+        document.add(new Paragraph(genererLigneSeparation(styleBordure), normalFont));
     }
 
-    private static String centerText(String text) {
-        return String.format("%25s", text);
+    private static BaseColor convertirCouleur(String couleurHex) {
+        try {
+            if (couleurHex.startsWith("#")) {
+                couleurHex = couleurHex.substring(1);
+            }
+            int rgb = Integer.parseInt(couleurHex, 16);
+            return new BaseColor(
+                    (rgb >> 16) & 0xFF, // Rouge
+                    (rgb >> 8) & 0xFF,  // Vert
+                    rgb & 0xFF          // Bleu
+            );
+        } catch (Exception e) {
+            LOGGER.warning("Erreur de conversion de couleur, utilisation du noir par défaut");
+            return BaseColor.BLACK;
+        }
     }
 
-    private static String generateSeparatorLine() {
-        return "----------------------------------------------------------------";
+    private static int getAlignement(String alignement) {
+        switch (alignement.toUpperCase()) {
+            case "CENTER":
+                return Element.ALIGN_CENTER;
+            case "RIGHT":
+                return Element.ALIGN_RIGHT;
+            case "JUSTIFIED":
+                return Element.ALIGN_JUSTIFIED;
+            default:
+                return Element.ALIGN_LEFT;
+        }
+    }
+
+    private static String genererLigneSeparation(String style) {
+        switch (style.toUpperCase()) {
+            case "DOUBLE":
+                return "================================================";
+            case "POINTILLE":
+                return "------------------------------------------------";
+            case "ETOILE":
+                return "************************************************";
+            default: // SIMPLE
+                return "----------------------------------------------------------------";
+        }
     }
 
     private static String genererNumeroTicket(long id, String style) {
@@ -598,12 +682,11 @@ public class PDFGenerator {
         }
     }
 
-    public static String genererPreviewTicket(Vente vente) {
+    public static void genererPreviewTicket(Vente vente, ByteArrayOutputStream outputStream) throws DocumentException {
         Document document = null;
-        String tempFile = "preview_ticket_" + System.currentTimeMillis() + ".pdf";
         try {
             document = new Document(PageSize.A4);
-            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(tempFile));
+            PdfWriter writer = PdfWriter.getInstance(document, outputStream);
             SimpleFooter footer = new SimpleFooter();
             writer.setPageEvent(footer);
             document.open();
@@ -618,7 +701,7 @@ public class PDFGenerator {
             document.setMargins(margeGauche, margeDroite, margeHaut, margeBas);
 
             genererContenuTicket(document, vente);
-            return tempFile;
+            LOGGER.info("Prévisualisation du ticket générée avec succès");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération de la prévisualisation du ticket", e);
             throw new RuntimeException("Erreur lors de la génération de la prévisualisation", e);

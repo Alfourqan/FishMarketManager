@@ -460,9 +460,9 @@ public class ReportController {
     }
 
     // Ajout de la méthode pour gérer la génération des tickets
-    public void genererTicketPDF(Map<String, Object> parametresTicket, ByteArrayOutputStream outputStream) {
+    public void genererTicketPDF(Vente vente, ByteArrayOutputStream outputStream) {
         try {
-            PDFGenerator.genererTicket(parametresTicket, outputStream);
+            PDFGenerator.genererPreviewTicket(vente, outputStream); // Added outputStream parameter
             LOGGER.info("Ticket PDF généré avec succès");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du ticket PDF", e);
@@ -471,11 +471,15 @@ public class ReportController {
     }
 
     // Mise à jour de la méthode existante pour inclure les tickets
-    public void genererRapportPDF(String type, Map<String, Object> donnees, ByteArrayOutputStream outputStream) {
+    public void genererRapportPDF(String type, Object donnees, ByteArrayOutputStream outputStream) {
         try {
             switch (type.toLowerCase()) {
                 case "ticket":
-                    genererTicketPDF(donnees, outputStream);
+                    if (donnees instanceof Vente) {
+                        genererTicketPDF((Vente) donnees, outputStream);
+                    } else {
+                        throw new IllegalArgumentException("Les données doivent être une instance de Vente");
+                    }
                     break;
                 default:
                     throw new IllegalArgumentException("Type de rapport non supporté: " + type);
