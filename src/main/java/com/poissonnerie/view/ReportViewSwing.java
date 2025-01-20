@@ -282,6 +282,7 @@ public class ReportViewSwing {
         addReportButton(panel, "Fournisseurs", MaterialDesign.MDI_TRUCK_DELIVERY);
         addReportButton(panel, "Créances", MaterialDesign.MDI_CASH_MULTIPLE);
         addReportButton(panel, "Chiffre d'affaires", MaterialDesign.MDI_CHART_LINE);
+        addReportButton(panel, "Ticket", MaterialDesign.MDI_TICKET); // Add Ticket button
 
         return panel;
     }
@@ -328,6 +329,12 @@ public class ReportViewSwing {
                     venteController.chargerVentes();
                     donnees = venteController.getVentes();
                     break;
+                case "Ticket":
+                    // Handle ticket generation (assuming you have a method for this)
+                    //  For example:  donnees = getTicketData();
+                    donnees = new ArrayList<>(); // Placeholder
+                    break;
+
             }
             genererRapport(type.toLowerCase(), donnees, nomFichier);
         } catch (Exception e) {
@@ -729,7 +736,7 @@ public class ReportViewSwing {
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-            switch (type) {
+            switch (type.toLowerCase()) {
                 case "ventes":
                     if (!(donnees.stream().allMatch(d -> d instanceof Vente))) {
                         throw new IllegalArgumentException("Type de données incorrect pour le rapport des ventes");
@@ -745,18 +752,11 @@ public class ReportViewSwing {
                         throw new IllegalArgumentException("Type de données incorrect pour le rapport des stocks");
                     }
                     List<Produit> produits = (List<Produit>) donnees;
-                    // Calcul des statistiques pour les stocks
                     Map<String, Double> statistiques = new HashMap<>();
                     double valeurTotale = produits.stream()
                         .mapToDouble(p -> p.getPrixAchat() * p.getQuantite())
                         .sum();
                     statistiques.put("Valeur totale du stock", valeurTotale);
-
-                    double moyenneQuantites = produits.stream()
-                        .mapToDouble(Produit::getQuantite)
-                        .average()
-                        .orElse(0.0);
-                    statistiques.put("Moyenne des quantités", moyenneQuantites);
 
                     reportController.genererRapportStocksPDF(produits, statistiques, outputStream);
                     break;
@@ -772,17 +772,29 @@ public class ReportViewSwing {
                     }
                     reportController.genererRapportCreancesPDF(outputStream);
                     break;
+                case "ticket":
+                    // Nouveau cas pour la génération de tickets
+                    PDFGenerator.genererTicket(donnees, outputStream);
+                    break;
                 default:
                     throw new IllegalArgumentException("Type de rapport inconnu: " + type);
             }
 
             // Afficher la prévisualisation
             byte[] pdfData = PDFGenerator.getBytes(outputStream);
-            afficherPrevisualisation(pdfData);
+            if (type.equalsIgnoreCase("ticket")) {
+                // Pour les tickets, on affiche directement dans la vue de configuration
+                afficherPreviewTicket(pdfData);
+            } else {
+                // Pour les autres rapports, on utilise la prévisualisation standard
+                afficherPrevisualisation(pdfData);
+            }
 
-            // Sauvegarder le fichier
-            PDFGenerator.sauvegarderPDF(pdfData, nomFichier);
-            showSuccessMessage("Succès", MSG_SUCCES_GENERATION + nomFichier);
+            // Sauvegarder le fichier uniquement pour les rapports (pas pour les tickets)
+            if (!type.equalsIgnoreCase("ticket")) {
+                PDFGenerator.sauvegarderPDF(pdfData, nomFichier);
+                showSuccessMessage("Succès", MSG_SUCCES_GENERATION + nomFichier);
+            }
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport", e);
@@ -1305,6 +1317,111 @@ public class ReportViewSwing {
             } catch (IOException e) {
                 throw new PrinterException(e.getMessage());
             }
+        }
+    }
+
+    private void afficherPreviewTicket(byte[] pdfData) {
+        try {
+            // Créer une nouvelle fenêtre de prévisualisation pour le ticket
+            if (previewDialog != null && previewDialog.isDisplayable()) {
+                previewDialog.dispose();
+            }
+
+            previewDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel), "Aperçu du ticket", true);
+            previewDialog.setLayout(new BorderLayout());
+
+            // Charger le PDF en mémoire
+            currentDocument = PDDocument.load(new ByteArrayInputStream(pdfData));
+            pdfRenderer = new PDFRenderer(currentDocument);
+            currentPage = 0;
+
+            // Créer le panel de prévisualisation
+            JPanel previewPanel = new JPanel(new BorderLayout());
+            previewLabel = new JLabel();
+            previewLabel.setHorizontalAlignment(JLabel.CENTER);
+
+            // Afficher la première page
+            afficherPage(currentPage);
+
+            // Ajouter les contrôles de navigation
+            JPanel navigationPanel = new JPanel(new FlowLayout());
+            JButton prevButton = new JButton("<<");
+            JButton nextButton = new JButton(">>");
+            JButton printButton = new JButton("Imprimer");
+
+            prevButton.addActionListener(e -> {
+                if (currentPage > 0) {
+                    currentPage--;
+                    afficherPage(currentPage);
+                }
+            });
+
+            nextButton.addActionListener(e -> {
+                if (currentPage < currentDocument.getNumberOfPages() - 1) {
+                    currentPage++;
+                    afficherPage(currentPage);
+                }
+            });
+
+            printButton.addActionListener(e -> imprimerTicket());
+
+            navigationPanel.add(prevButton);
+            navigationPanel.add(printButton);
+            navigationPanel.add(nextButton);
+
+            JScrollPane scrollPane = new JScrollPane(previewLabel);
+            previewPanel.add(scrollPane, BorderLayout.CENTER);
+            previewPanel.add(navigationPanel, BorderLayout.SOUTH);
+
+            previewDialog.add(previewPanel);
+            previewDialog.setSize(600, 800);
+            previewDialog.setLocationRelativeTo(mainPanel);
+            previewDialog.setVisible(true);
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'affichage de la prévisualisation du ticket", e);
+            showErrorMessage("Erreur", "Impossible d'afficher la prévisualisation : " + e.getMessage());
+        }
+    }
+
+    private void imprimerTicket() {
+        try {
+            PrinterJob job = PrinterJob.getPrinterJob();
+            job.setJobName("Impression Ticket");
+
+            PageFormat pageFormat = job.defaultPage();
+            pageFormat.setOrientation(PageFormat.PORTRAIT);
+
+            job.setPrintable((graphics, pf, pageIndex) -> {
+                if (pageIndex != 0) return Printable.NO_SUCH_PAGE;
+
+                try {
+                    BufferedImage image = pdfRenderer.renderImageWithDPI(0, 300);
+                    Graphics2D g2d = (Graphics2D) graphics;
+                    g2d.translate(pf.getImageableX(), pf.getImageableY());
+
+                    // Ajuster l'échelle pour s'adapter à la page
+                    double scaleX = pf.getImageableWidth() / image.getWidth();
+                    double scaleY = pf.getImageableHeight() / image.getHeight();
+                    double scale = Math.min(scaleX, scaleY);
+
+                    g2d.scale(scale, scale);
+                    g2d.drawImage(image, 0, 0, null);
+
+                    return Printable.PAGE_EXISTS;
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors de l'impression", e);
+                    return Printable.NO_SUCH_PAGE;
+                }
+            });
+
+            if (job.printDialog()) {
+                job.print();
+                showSuccessMessage("Succès", "Impression lancée avec succès");
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'impression", e);
+            showErrorMessage("Erreur", "Impossible d'imprimer : " + e.getMessage());
         }
     }
 
