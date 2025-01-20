@@ -4,6 +4,7 @@ import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import com.poissonnerie.model.*;
 import com.poissonnerie.model.Vente.ModePaiement;
+import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -39,13 +40,11 @@ public class PDFGenerator {
             Map<String, Double> couts,
             Map<String, Double> benefices,
             Map<String, Double> marges,
-            String cheminFichier) {
+            ByteArrayOutputStream outputStream) throws DocumentException {
         Document document = null;
         try {
             document = new Document(PageSize.A4.rotate());
-            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
-            SimpleFooter footer = new SimpleFooter();
-            writer.setPageEvent(footer);
+            PdfWriter writer = PdfWriter.getInstance(document, outputStream);
             document.open();
 
             // En-tête avec date et titre
@@ -84,11 +83,7 @@ public class PDFGenerator {
             document.add(Chunk.NEWLINE);
             ajouterSectionFinanciere(document, "Analyse des Marges", marges);
 
-
-            LOGGER.info("Rapport financier PDF généré avec succès: " + cheminFichier);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport financier PDF", e);
-            throw new RuntimeException("Erreur lors de la génération du rapport PDF", e);
+            LOGGER.info("Rapport financier PDF généré avec succès");
         } finally {
             if (document != null && document.isOpen()) {
                 document.close();
@@ -153,13 +148,11 @@ public class PDFGenerator {
         document.add(table);
     }
 
-    public static void genererRapportStocks(List<Produit> produits, Map<String, Double> statistiques, String cheminFichier) {
+    public static void genererRapportStocks(List<Produit> produits, Map<String, Double> statistiques, ByteArrayOutputStream outputStream) throws DocumentException {
         Document document = null;
         try {
             document = new Document(PageSize.A4.rotate());
-            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
-            SimpleFooter footer = new SimpleFooter();
-            writer.setPageEvent(footer);
+            PdfWriter writer = PdfWriter.getInstance(document, outputStream);
             document.open();
 
             // En-tête
@@ -174,7 +167,7 @@ public class PDFGenerator {
             table.setSpacingBefore(10f);
             table.setSpacingAfter(10f);
 
-            // En-têtes
+            // En-têtes du tableau
             String[] headers = {
                     "Référence", "Nom", "Catégorie", "Prix Achat", "Prix Vente",
                     "Stock", "Seuil", "Valeur Stock"
@@ -249,16 +242,13 @@ public class PDFGenerator {
             if (statistiques != null && !statistiques.isEmpty()) {
                 for (Map.Entry<String, Double> stat : statistiques.entrySet()) {
                     addTableCell(analyseTable, stat.getKey(),
-                            String.format("%.2f €", stat.getValue()), false);
+                            String.format("%.2f", stat.getValue()), false);
                 }
             }
 
             document.add(analyseTable);
 
-            LOGGER.info("Rapport des stocks PDF généré avec succès: " + cheminFichier);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF des stocks", e);
-            throw new RuntimeException("Erreur lors de la génération du rapport PDF", e);
+            LOGGER.info("Rapport des stocks PDF généré avec succès");
         } finally {
             if (document != null && document.isOpen()) {
                 document.close();
@@ -266,20 +256,17 @@ public class PDFGenerator {
         }
     }
 
-    public static void genererRapportVentes(List<Vente> ventes, String cheminFichier) {
+    public static void genererRapportVentes(List<Vente> ventes, ByteArrayOutputStream outputStream) throws DocumentException {
         Document document = null;
         try {
             document = new Document(PageSize.A4.rotate());
-            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
-            SimpleFooter footer = new SimpleFooter();
-            writer.setPageEvent(footer);
+            PdfWriter writer = PdfWriter.getInstance(document, outputStream);
             document.open();
 
             // En-tête
             Paragraph titre = new Paragraph("Rapport des Ventes", TITLE_FONT);
             titre.setAlignment(Element.ALIGN_CENTER);
             document.add(titre);
-            document.add(new Paragraph("Période: " + DATE_FORMATTER.format(LocalDateTime.now()), NORMAL_FONT));
             document.add(Chunk.NEWLINE);
 
             // Tableau principal des ventes
@@ -307,7 +294,6 @@ public class PDFGenerator {
             double totalMarge = 0;
             Map<String, Double> ventesParJour = new TreeMap<>();
             Map<ModePaiement, Double> ventesParMode = new EnumMap<>(ModePaiement.class);
-            Map<String, Double> ventesParCategorie = new HashMap<>();
 
             // Données
             for (Vente v : ventes) {
@@ -322,13 +308,8 @@ public class PDFGenerator {
                 // Calcul de la marge
                 double margeVente = 0.0;
                 for (Vente.LigneVente ligne : v.getLignes()) {
-                    Produit produit = ligne.getProduit();
-                    double marge = (ligne.getPrixUnitaire() - produit.getPrixAchat()) * ligne.getQuantite();
+                    double marge = (ligne.getPrixUnitaire() - ligne.getProduit().getPrixAchat()) * ligne.getQuantite();
                     margeVente += marge;
-
-                    // Agrégation par catégorie
-                    ventesParCategorie.merge(produit.getCategorie(),
-                            ligne.getPrixUnitaire() * ligne.getQuantite(), Double::sum);
                 }
                 table.addCell(new Phrase(String.format("%.2f €", margeVente), NORMAL_FONT));
 
@@ -383,28 +364,7 @@ public class PDFGenerator {
 
             document.add(modeTable);
 
-            // Répartition par catégorie
-            if (!ventesParCategorie.isEmpty()) {
-                document.add(Chunk.NEWLINE);
-                Paragraph catTitre = new Paragraph("Ventes par catégorie", SUBTITLE_FONT);
-                document.add(catTitre);
-
-                PdfPTable catTable = new PdfPTable(2);
-                catTable.setWidthPercentage(70);
-                catTable.setSpacingBefore(10f);
-
-                for (Map.Entry<String, Double> entry : ventesParCategorie.entrySet()) {
-                    addTableCell(catTable, entry.getKey(),
-                            String.format("%.2f €", entry.getValue()), false);
-                }
-
-                document.add(catTable);
-            }
-
-            LOGGER.info("Rapport des ventes PDF généré avec succès: " + cheminFichier);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF des ventes", e);
-            throw new RuntimeException("Erreur lors de la génération du rapport PDF", e);
+            LOGGER.info("Rapport des ventes PDF généré avec succès");
         } finally {
             if (document != null && document.isOpen()) {
                 document.close();
@@ -412,6 +372,93 @@ public class PDFGenerator {
         }
     }
 
+    public static void genererRapportCreances(List<Client> clients, ByteArrayOutputStream outputStream) throws DocumentException {
+        Document document = null;
+        try {
+            document = new Document();
+            PdfWriter writer = PdfWriter.getInstance(document, outputStream);
+            document.open();
+
+            Paragraph titre = new Paragraph("État des Créances", TITLE_FONT);
+            titre.setAlignment(Element.ALIGN_CENTER);
+            document.add(titre);
+            document.add(Chunk.NEWLINE);
+
+            PdfPTable table = new PdfPTable(4);
+            table.setWidthPercentage(100);
+            table.setSpacingBefore(10f);
+            table.setSpacingAfter(10f);
+
+            // En-têtes
+            String[] headers = {"Client", "Téléphone", "Solde", "Dernière Échéance"};
+            for (String header : headers) {
+                PdfPCell cell = new PdfPCell(new Phrase(header, SUBTITLE_FONT));
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+                table.addCell(cell);
+            }
+
+            // Données
+            for (Client client : clients) {
+                if (client.getSolde() > 0) {
+                    table.addCell(new Phrase(client.getNom(), NORMAL_FONT));
+                    table.addCell(new Phrase(client.getTelephone(), NORMAL_FONT));
+                    table.addCell(new Phrase(String.format("%.2f €", client.getSolde()), NORMAL_FONT));
+                    table.addCell(new Phrase("-", NORMAL_FONT)); // TODO: Implémenter la date d'échéance
+                }
+            }
+
+            document.add(table);
+            LOGGER.info("Rapport des créances PDF généré avec succès");
+        } finally {
+            if (document != null && document.isOpen()) {
+                document.close();
+            }
+        }
+    }
+
+    public static void genererRapportFournisseurs(List<Fournisseur> fournisseurs, ByteArrayOutputStream outputStream) throws DocumentException {
+        Document document = null;
+        try {
+            document = new Document();
+            PdfWriter writer = PdfWriter.getInstance(document, outputStream);
+            document.open();
+
+            Paragraph titre = new Paragraph("Liste des Fournisseurs", TITLE_FONT);
+            titre.setAlignment(Element.ALIGN_CENTER);
+            document.add(titre);
+            document.add(Chunk.NEWLINE);
+
+            PdfPTable table = new PdfPTable(4);
+            table.setWidthPercentage(100);
+            table.setSpacingBefore(10f);
+            table.setSpacingAfter(10f);
+
+            // En-têtes
+            String[] headers = {"Nom", "Contact", "Téléphone", "Email"};
+            for (String header : headers) {
+                PdfPCell cell = new PdfPCell(new Phrase(header, SUBTITLE_FONT));
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                cell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+                table.addCell(cell);
+            }
+
+            // Données
+            for (Fournisseur fournisseur : fournisseurs) {
+                table.addCell(new Phrase(fournisseur.getNom(), NORMAL_FONT));
+                table.addCell(new Phrase(fournisseur.getContact(), NORMAL_FONT));
+                table.addCell(new Phrase(fournisseur.getTelephone(), NORMAL_FONT));
+                table.addCell(new Phrase(fournisseur.getEmail(), NORMAL_FONT));
+            }
+
+            document.add(table);
+            LOGGER.info("Rapport des fournisseurs PDF généré avec succès");
+        } finally {
+            if (document != null && document.isOpen()) {
+                document.close();
+            }
+        }
+    }
     public static void genererReglementCreance(Client client, double montantPaye, double nouveauSolde, String cheminFichier) {
         Document document = null;
         try {

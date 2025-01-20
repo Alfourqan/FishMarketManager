@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import org.kordamp.ikonli.materialdesign.MaterialDesign;
 import org.kordamp.ikonli.swing.FontIcon;
-import com.poissonnerie.util.PDFGenerator;
+import com.poissonnerie.util.PDFUtils;
 import com.poissonnerie.util.ExcelGenerator;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -67,6 +67,9 @@ import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
 import java.io.IOException;
 import java.awt.print.Book;
+import java.awt.Graphics2D;
+
+
 
 public class ReportViewSwing {
     private static final Logger LOGGER = Logger.getLogger(ReportViewSwing.class.getName());
@@ -161,10 +164,9 @@ public class ReportViewSwing {
         splitPane.setBorder(null);
 
         JPanel leftPanel = createLeftPanel();
-        createRightPanel(); //call createRightPanel here
+        createRightPanel();
 
         splitPane.setLeftComponent(leftPanel);
-        //splitPane.setRightComponent(rightPanel); //removed
 
         mainPanel.add(splitPane, BorderLayout.CENTER);
     }
@@ -303,54 +305,31 @@ public class ReportViewSwing {
     private void genererRapportPDF(String type) {
         try {
             String nomFichier = "rapport_" + type.toLowerCase() + "_" + LocalDate.now() + ".pdf";
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
+            List<?> donnees = null;
             switch (type) {
                 case "Ventes":
-                    reportController.genererRapportVentesPDF(
-                        dateDebut.atStartOfDay(),
-                        dateFin.atTime(23, 59, 59),
-                        outputStream
-                    );
+                    venteController.chargerVentes();
+                    donnees = venteController.getVentes();
                     break;
                 case "Stocks":
-                    List<Produit> produits = produitController.getProduits();
-                    Map<String, Double> statistiques = new HashMap<>();
-                    double valeurTotale = produits.stream()
-                        .mapToDouble(p -> p.getPrixAchat() * p.getQuantite())
-                        .sum();
-                    statistiques.put("Valeur totale du stock", valeurTotale);
-
-                    double moyenneQuantites = produits.stream()
-                        .mapToDouble(Produit::getQuantite)
-                        .average()
-                        .orElse(0.0);
-                    statistiques.put("Moyenne des quantités", moyenneQuantites);
-
-                    reportController.genererRapportStocksPDF(produits, statistiques, outputStream);
+                    produitController.chargerProduits();
+                    donnees = produitController.getProduits();
                     break;
                 case "Fournisseurs":
-                    reportController.genererRapportFournisseursPDF(outputStream);
+                    fournisseurController.chargerFournisseurs();
+                    donnees = fournisseurController.getFournisseurs();
                     break;
                 case "Créances":
-                    reportController.genererRapportCreancesPDF(outputStream);
+                    ClientController clientController = new ClientController();
+                    clientController.chargerClients();
+                    donnees = clientController.getClients();
                     break;
                 case "Chiffre d'affaires":
-                    reportController.genererRapportFinancierPDF(
-                        dateDebut.atStartOfDay(),
-                        dateFin.atTime(23, 59, 59),
-                        outputStream
-                    );
+                    venteController.chargerVentes();
+                    donnees = venteController.getVentes();
                     break;
             }
-
-            // Afficher la prévisualisation
-            afficherPrevisualisation(outputStream.toByteArray());
-
-            // Sauvegarder aussi le fichier
-            PDFGenerator.sauvegarderPDF(outputStream.toByteArray(), nomFichier);
-            showSuccessMessage("Succès", MSG_SUCCES_GENERATION + nomFichier);
-
+            genererRapport(type.toLowerCase(), donnees, nomFichier);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF", e);
             showErrorMessage("Erreur", MSG_ERREUR_GENERATION + e.getMessage());
@@ -433,6 +412,8 @@ public class ReportViewSwing {
 
         mainPanel.add(panel, BorderLayout.CENTER);
     }
+
+
 
 
     private void updateCharts() {
@@ -739,21 +720,26 @@ public class ReportViewSwing {
         return button;
     }
 
-    /* Ajout des vérifications de type */
     private void genererRapport(String type, List<?> donnees, String nomFichier) {
         if (donnees == null) {
             LOGGER.severe("Les données ne peuvent pas être null");
-            afficherMessageErreur("Erreur", "Données invalides pour la génération du rapport");
+            showErrorMessage("Erreur", "Données invalides pour la génération du rapport");
             return;
         }
 
         try {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
             switch (type) {
                 case "ventes":
                     if (!(donnees.stream().allMatch(d -> d instanceof Vente))) {
                         throw new IllegalArgumentException("Type de données incorrect pour le rapport des ventes");
                     }
-                    PDFGenerator.genererRapportVentes((List<Vente>) donnees, nomFichier);
+                    reportController.genererRapportVentesPDF(
+                        dateDebut.atStartOfDay(),
+                        dateFin.atTime(23, 59, 59),
+                        outputStream
+                    );
                     break;
                 case "stocks":
                     if (!(donnees.stream().allMatch(d -> d instanceof Produit))) {
@@ -773,29 +759,35 @@ public class ReportViewSwing {
                         .orElse(0.0);
                     statistiques.put("Moyenne des quantités", moyenneQuantites);
 
-                    PDFGenerator.genererRapportStocks(produits, statistiques, nomFichier);
+                    reportController.genererRapportStocksPDF(produits, statistiques, outputStream);
                     break;
                 case "fournisseurs":
                     if (!(donnees.stream().allMatch(d -> d instanceof Fournisseur))) {
                         throw new IllegalArgumentException("Type de données incorrect pour le rapport des fournisseurs");
                     }
-                    PDFGenerator.genererRapportFournisseurs((List<Fournisseur>) donnees, nomFichier);
+                    reportController.genererRapportFournisseursPDF(outputStream);
                     break;
                 case "creances":
                     if (!(donnees.stream().allMatch(d -> d instanceof Client))) {
                         throw new IllegalArgumentException("Type de données incorrect pour le rapport des créances");
                     }
-                    PDFGenerator.genererRapportCreances((List<Client>) donnees, nomFichier);
+                    reportController.genererRapportCreancesPDF(outputStream);
                     break;
                 default:
                     throw new IllegalArgumentException("Type de rapport inconnu: " + type);
             }
-            LOGGER.info("Rapport généré avec succès: " + nomFichier);
-            afficherMessageSuccess("Rapport généré", MSG_SUCCES_GENERATION + nomFichier);
-            ouvrirFichierPDF(nomFichier);
+
+            // Afficher la prévisualisation
+            byte[] pdfData = PDFUtils.getBytes(outputStream);
+            afficherPrevisualisation(pdfData);
+
+            // Sauvegarder le fichier
+            PDFUtils.sauvegarderPDF(pdfData, nomFichier);
+            showSuccessMessage("Succès", MSG_SUCCES_GENERATION + nomFichier);
+
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport", e);
-            afficherMessageErreur("Erreur", MSG_ERREUR_GENERATION + e.getMessage());
+            showErrorMessage("Erreur", MSG_ERREUR_GENERATION + e.getMessage());
         }
     }
 
@@ -855,7 +847,7 @@ public class ReportViewSwing {
         contentArea.setWrapStyleWord(true);
 
         panel.add(titleLabel, BorderLayout.NORTH);
-        paneladd(contentArea, BorderLayout.CENTER);
+        panel.add(contentArea, BorderLayout.CENTER);
 
         chartPanel.add(panel);
     }
@@ -1204,6 +1196,11 @@ public class ReportViewSwing {
                 previewDialog.add(scrollPane, BorderLayout.CENTER);
             }
 
+            // Fermer le document précédent s'il existe
+            if (currentDocument != null) {
+                currentDocument.close();
+            }
+
             // Charger le PDF
             ByteArrayInputStream bais = new ByteArrayInputStream(pdfData);
             currentDocument = PDDocument.load(bais);
@@ -1231,6 +1228,7 @@ public class ReportViewSwing {
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de l'affichage de la page " + pageNumber, e);
+            showErrorMessage("Erreur", "Impossible d'afficher la page : " + e.getMessage());
         }
     }
 
@@ -1263,16 +1261,8 @@ public class ReportViewSwing {
         }
     }
 
-    private void afficherMessageErreur(String titre, String message) {
-        JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.ERROR_MESSAGE);
-    }
-
-    private void afficherMessageSuccess(String titre, String message) {
-        JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.INFORMATION_MESSAGE);
-    }
-
     private static class PDFPageable implements Printable, java.awt.print.Pageable {
-        private final PDDocument document;
+        private PDDocument document;
 
         public PDFPageable(PDDocument document) {
             this.document = document;
@@ -1284,24 +1274,37 @@ public class ReportViewSwing {
         }
 
         @Override
-        public PageFormat getPageFormat(int pageIndex) throws IndexOutOfBoundsException {
+        public PageFormat getPageFormat(int pageIndex) {
             return PrinterJob.getPrinterJob().defaultPage();
         }
 
         @Override
-        public Printable getPrintable(int pageIndex) throws IndexOutOfBoundsException {
+        public Printable getPrintable(int pageIndex) {
             return this;
         }
 
         @Override
         public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) throws PrinterException {
+            if (pageIndex >= document.getNumberOfPages()) {
+                return Printable.NO_SUCH_PAGE;
+            }
+
             try {
-                PDFRenderer pdfRenderer = new PDFRenderer(document);
-                BufferedImage image = pdfRenderer.renderImageWithDPI(pageIndex, 150);
-                graphics.drawImage(image, 0, 0, null);
+                Graphics2D g2d = (Graphics2D) graphics;
+                g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
+
+                BufferedImage image = new PDFRenderer(document).renderImageWithDPI(pageIndex, 300);
+                double scale = Math.min(
+                    pageFormat.getImageableWidth() / image.getWidth(),
+                    pageFormat.getImageableHeight() / image.getHeight()
+                );
+
+                g2d.scale(scale, scale);
+                g2d.drawImage(image, 0, 0, null);
+
                 return Printable.PAGE_EXISTS;
             } catch (IOException e) {
-                throw new PrinterException(e);
+                throw new PrinterException(e.getMessage());
             }
         }
     }

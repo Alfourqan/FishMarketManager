@@ -20,6 +20,7 @@
 /home/runner/workspace/src/main/java/com/poissonnerie/model/ConfigurationParam.java
 /home/runner/workspace/src/main/java/com/poissonnerie/controller/ConfigurationController.java
 /home/runner/workspace/src/main/java/com/poissonnerie/Main.java
+/home/runner/workspace/src/main/java/com/poissonnerie/util/PDFUtils.java
 /home/runner/workspace/src/main/java/com/poissonnerie/controller/model/Client.java
 /home/runner/workspace/src/main/java/com/poissonnerie/util/ExcelGenerator.java
 /home/runner/workspace/src/main/java/com/poissonnerie/model/MouvementCaisse.java
