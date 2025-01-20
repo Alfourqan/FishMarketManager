@@ -518,21 +518,26 @@ public class PDFGenerator {
     }
 
     public static void genererTicket(Vente vente, String cheminFichier) {
-        // Créer le PDF comme avant
+        // Créer et imprimer le ticket texte
+        TextBillPrinter printer = new TextBillPrinter(vente);
+        printer.imprimer();
+
+        // Sauvegarder aussi une copie PDF pour l'archivage
         Document document = null;
         try {
             document = new Document(PageSize.A4);
             PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(cheminFichier));
-            SimpleFooter footer = new SimpleFooter();
-            writer.setPageEvent(footer);
             document.open();
-            genererContenuTicket(document, vente);
+
+            // Utiliser une police monospace pour maintenir l'alignement
+            Font ticketFont = new Font(Font.FontFamily.COURIER, 10, Font.NORMAL);
+            String[] lines = printer.getBillContent().split("\n");
+
+            for (String line : lines) {
+                document.add(new Paragraph(line, ticketFont));
+            }
+
             LOGGER.info("Ticket de vente généré avec succès: " + cheminFichier);
-
-            // Imprimer directement via BillPrint
-            BillPrintGenerator billPrinter = new BillPrintGenerator(vente);
-            billPrinter.imprimer();
-
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du ticket", e);
             throw new RuntimeException("Erreur lors de la génération du ticket", e);
@@ -547,115 +552,52 @@ public class PDFGenerator {
         // Configuration de la page pour le format ticket
         document.setMargins(20, 20, 20, 20);
 
+        // Utiliser une police monospace pour maintenir l'alignement
+        Font titleFont = new Font(Font.FontFamily.COURIER, 14, Font.BOLD);
+        Font normalFont = new Font(Font.FontFamily.COURIER, 10, Font.NORMAL);
+        Font boldFont = new Font(Font.FontFamily.COURIER, 10, Font.BOLD);
+
         // En-tête
-        Paragraph businessName = new Paragraph("BUSINESS NAME", new Font(Font.FontFamily.COURIER, 14, Font.BOLD));
-        businessName.setAlignment(Element.ALIGN_CENTER);
+        Paragraph businessName = new Paragraph("                         MA POISSONNERIE", titleFont);
+        businessName.setAlignment(Element.ALIGN_LEFT);
         document.add(businessName);
 
         // Adresse
-        Font normalFont = new Font(Font.FontFamily.COURIER, 10, Font.NORMAL);
-        String[] addressLines = {
-            "1234 Main Street",
-            "Suite 567",
-            "City Name, State 54321",
-            "123-456-7890"
-        };
+        document.add(new Paragraph("\t123 Rue de la Mer", normalFont));
+        document.add(new Paragraph("\t75001 PARIS", normalFont));
+        document.add(new Paragraph("\t+33 1 23 45 67 89", normalFont));
+        document.add(new Paragraph("----------------------------------------------------------------", normalFont));
 
-        for (String line : addressLines) {
-            Paragraph address = new Paragraph(line, normalFont);
-            address.setAlignment(Element.ALIGN_CENTER);
-            document.add(address);
-        }
+        // En-tête des colonnes
+        document.add(new Paragraph(" Iteam\t\tQty\tPrice", normalFont));
+        document.add(new Paragraph("----------------------------------------------------------------", normalFont));
 
-        // Ligne de séparation
-        document.add(new Paragraph("..........................................................", normalFont));
-
-        // Informations de transaction
-        document.add(new Paragraph(String.format("Merchant ID:      %s", "987-654321"), normalFont));
-        document.add(new Paragraph(String.format("Terminal ID:      %s", "0123456789"), normalFont));
-        document.add(new Paragraph("\n", normalFont));
-
-        document.add(new Paragraph(String.format("Transaction ID:   #%s", vente.getId()), normalFont));
-        document.add(new Paragraph(String.format("Type:            %s", vente.getModePaiement().getLibelle()), normalFont));
-
-        // Date d'achat
-        Paragraph purchaseTitle = new Paragraph("PURCHASE", normalFont);
-        purchaseTitle.setAlignment(Element.ALIGN_CENTER);
-        document.add(purchaseTitle);
-
-        Paragraph dateTime = new Paragraph(DATE_FORMATTER.format(vente.getDate()), normalFont);
-        dateTime.setAlignment(Element.ALIGN_CENTER);
-        document.add(dateTime);
-
-        // Informations de carte
-        document.add(new Paragraph("Number:          " + "************1234", normalFont));
-        document.add(new Paragraph("Entry Mode:      Swiped", normalFont));
-        document.add(new Paragraph("Card:            Card Name", normalFont));
-        document.add(new Paragraph("Response:        APPROVED", normalFont));
-        document.add(new Paragraph("Approval Code:   789-1234", normalFont));
-
-        // Ligne de séparation
-        document.add(new Paragraph("..........................................................", normalFont));
-
-        // Détails des articles
+        // Articles
         for (Vente.LigneVente ligne : vente.getLignes()) {
             String nomProduit = ligne.getProduit().getNom();
             if (nomProduit.length() > 20) {
                 nomProduit = nomProduit.substring(0, 17) + "...";
             }
 
-            // Format: Nom du produit (aligné à gauche) Prix (aligné à droite)
-            String articleLine = String.format("%-30s$%8.2f",
-                nomProduit,
-                ligne.getPrixUnitaire() * ligne.getQuantite());
+            // Format: Nom du produit (aligné à gauche) Quantité Prix
+            String articleLine = String.format("%-20s\t%d\t%.2f",
+                    nomProduit,
+                    ligne.getQuantite(),
+                    ligne.getPrixUnitaire() * ligne.getQuantite());
             document.add(new Paragraph(articleLine, normalFont));
-
-            // Si quantité > 1, ajouter une ligne de détail
-            if (ligne.getQuantite() > 1) {
-                String detailLine = String.format("  %d x $%.2f", 
-                    ligne.getQuantite(), 
-                    ligne.getPrixUnitaire());
-                document.add(new Paragraph(detailLine, normalFont));
-            }
         }
 
-        // Ligne de séparation
-        document.add(new Paragraph("..........................................................", normalFont));
+        document.add(new Paragraph("----------------------------------------------------------------", normalFont));
 
         // Totaux
-        Font boldFont = new Font(Font.FontFamily.COURIER, 10, Font.BOLD);
+        document.add(new Paragraph(String.format("SubTotal :\t\t%.2f", vente.getTotalHT()), normalFont));
+        document.add(new Paragraph(String.format("Cash :\t\t\t%.2f", vente.getTotal()), normalFont));
+        document.add(new Paragraph(String.format("Balance :\t\t%.2f", 0.00), normalFont));
 
-        // Sous-total
-        String subTotalLine = String.format("Sub Total        $%8.2f", vente.getTotalHT());
-        Paragraph subTotal = new Paragraph(subTotalLine, normalFont);
-        subTotal.setAlignment(Element.ALIGN_RIGHT);
-        document.add(subTotal);
-
-        // TVA (Sales Tax)
-        String taxLine = String.format("Sales Tax        $%8.2f", vente.getMontantTVA());
-        Paragraph tax = new Paragraph(taxLine, normalFont);
-        tax.setAlignment(Element.ALIGN_RIGHT);
-        document.add(tax);
-
-        // Ligne de séparation
-        document.add(new Paragraph("..........................................................", normalFont));
-
-        // Total
-        String totalLine = String.format("TOTAL (USD)      $%8.2f", vente.getTotal());
-        Paragraph total = new Paragraph(totalLine, boldFont);
-        total.setAlignment(Element.ALIGN_RIGHT);
-        document.add(total);
-
-        document.add(new Paragraph("\n", normalFont));
-
-        // Message de remerciement
-        Paragraph thankYou = new Paragraph("THANK YOU FOR", boldFont);
-        thankYou.setAlignment(Element.ALIGN_CENTER);
-        document.add(thankYou);
-
-        Paragraph yourPurchase = new Paragraph("YOUR PURCHASE", boldFont);
-        yourPurchase.setAlignment(Element.ALIGN_CENTER);
-        document.add(yourPurchase);
+        document.add(new Paragraph("====================================", normalFont));
+        document.add(new Paragraph("                     Thanks For Your Business...!", boldFont));
+        document.add(new Paragraph("----------------------------------------------------------------", normalFont));
+        document.add(new Paragraph("                     Software by MA POISSONNERIE", normalFont));
     }
 
     public static void genererRapportCreances(List<Client> clients, String cheminFichier) {

@@ -14,6 +14,7 @@ com/poissonnerie/util/PDFGenerator$1.class
 com/poissonnerie/controller/ConfigurationController.class
 com/poissonnerie/view/FournisseurViewSwing$3.class
 com/poissonnerie/view/InventaireViewSwing$2.class
+com/poissonnerie/util/TextBillPrinter.class
 com/poissonnerie/view/InventaireViewSwing$ButtonEditor.class
 com/poissonnerie/view/InventaireViewSwing$ButtonRenderer.class
 com/poissonnerie/controller/CaisseController.class
