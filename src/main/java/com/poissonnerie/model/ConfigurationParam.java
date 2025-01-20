@@ -120,73 +120,9 @@ public class ConfigurationParam {
                     throw new IllegalArgumentException("Le format du reçu doit être 'COMPACT' ou 'DETAILLE'");
                 }
                 return cleanValue;
-
-            case CLE_AFFICHER_CODE_BARRES:
-            case CLE_AFFICHER_QR_CODE:
-            case CLE_AFFICHER_COORDONNEES_CLIENT:
-            case CLE_AFFICHER_SIGNATURE:
-            case CLE_AFFICHER_CONDITIONS:
-            case CLE_AFFICHER_POINTS_FIDELITE:
-            case CLE_AFFICHER_TVA_DETAILS:
-                lowercaseValue = cleanValue.toLowerCase();
-                if (!lowercaseValue.equals("true") && !lowercaseValue.equals("false")) {
-                    throw new IllegalArgumentException("La valeur doit être 'true' ou 'false'");
-                }
-                return lowercaseValue;
-
-            case CLE_POSITION_CODE_BARRES:
-            case CLE_POSITION_SIGNATURE:
-                if (!cleanValue.equals("TOP") && !cleanValue.equals("BOTTOM")) {
-                    throw new IllegalArgumentException("La position doit être 'TOP' ou 'BOTTOM'");
-                }
-                return cleanValue;
-
-            case CLE_CONTENU_QR_CODE:
-                if (!cleanValue.equals("NUMERO_TICKET") && !cleanValue.equals("URL") &&
-                    !cleanValue.equals("PERSONNALISE")) {
-                    throw new IllegalArgumentException(
-                        "Le contenu du QR code doit être 'NUMERO_TICKET', 'URL' ou 'PERSONNALISE'");
-                }
-                return cleanValue;
-
-            case CLE_STYLE_TABLEAU_PRODUITS:
-                if (!cleanValue.equals("GRILLE") && !cleanValue.equals("SIMPLE") &&
-                    !cleanValue.equals("COMPACT")) {
-                    throw new IllegalArgumentException(
-                        "Le style du tableau doit être 'GRILLE', 'SIMPLE' ou 'COMPACT'");
-                }
-                return cleanValue;
-
-            case CLE_FORMAT_IMPRESSION:
-                if (!cleanValue.equals("A4") && !cleanValue.equals("A5") &&
-                    !cleanValue.equals("TICKET")) {
-                    throw new IllegalArgumentException(
-                        "Le format d'impression doit être 'A4', 'A5' ou 'TICKET'");
-                }
-                return cleanValue;
-
-            case CLE_ORIENTATION_IMPRESSION:
-                if (!cleanValue.equals("PORTRAIT") && !cleanValue.equals("PAYSAGE")) {
-                    throw new IllegalArgumentException(
-                        "L'orientation doit être 'PORTRAIT' ou 'PAYSAGE'");
-                }
-                return cleanValue;
-
-            case CLE_LANGUE_TICKET:
-                if (!cleanValue.matches("^[A-Z]{2}$")) {
-                    throw new IllegalArgumentException(
-                        "La langue doit être un code ISO à 2 lettres (ex: FR, EN)");
-                }
-                return cleanValue;
-
-            case CLE_TEXTE_CONDITIONS:
-                if (cleanValue.length() > 500) {
-                    throw new IllegalArgumentException(
-                        "Le texte des conditions ne peut pas dépasser 500 caractères");
-                }
-                return sanitizeInput(cleanValue);
         }
 
+        // Pour les autres types de configuration, appliquer le nettoyage standard
         return sanitizeInput(cleanValue);
     }
 
@@ -244,7 +180,7 @@ public class ConfigurationParam {
     public void setValeur(String valeur) {
         try {
             String validatedValue = validateValeur(valeur, this.cle);
-            if (estCrypte && validatedValue != null && !validatedValue.isEmpty() &&
+            if (estCrypte && validatedValue != null && !validatedValue.isEmpty() && 
                 System.getenv().get("CONFIG_SECRET_KEY") != null) {
                 this.valeur = encryptValue(validatedValue);
             } else {
@@ -252,7 +188,7 @@ public class ConfigurationParam {
             }
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Erreur lors du traitement de la valeur", e);
-            if (this.cle.equals(CLE_SIRET_ENTREPRISE) &&
+            if (this.cle.equals(CLE_SIRET_ENTREPRISE) && 
                 System.getProperty("SKIP_SIRET_VALIDATION") != null) {
                 // Si la validation SIRET est désactivée, accepter la valeur telle quelle
                 this.valeur = valeur;
@@ -281,49 +217,15 @@ public class ConfigurationParam {
     public static final String CLE_PIED_PAGE_RECU = "PIED_PAGE_RECU";
     public static final String CLE_EN_TETE_RECU = "EN_TETE_RECU";
 
-
-    // Constantes pour le style des tickets
-    public static final String CLE_STYLE_BORDURE_RECU = "STYLE_BORDURE_RECU";
+    // Nouvelles constantes pour la personnalisation des reçus
     public static final String CLE_POLICE_TITRE_RECU = "POLICE_TITRE_RECU";
     public static final String CLE_POLICE_TEXTE_RECU = "POLICE_TEXTE_RECU";
     public static final String CLE_ALIGNEMENT_TITRE_RECU = "ALIGNEMENT_TITRE_RECU";
     public static final String CLE_ALIGNEMENT_TEXTE_RECU = "ALIGNEMENT_TEXTE_RECU";
+    public static final String CLE_STYLE_BORDURE_RECU = "STYLE_BORDURE_RECU";
     public static final String CLE_MESSAGE_COMMERCIAL_RECU = "MESSAGE_COMMERCIAL_RECU";
-    public static final String CLE_INFO_SUPPLEMENTAIRE_RECU = "INFO_SUPPLEMENTAIRE_RECU";
     public static final String CLE_AFFICHER_TVA_DETAILS = "AFFICHER_TVA_DETAILS";
-
-    // Nouvelles constantes pour la personnalisation avancée des tickets
-    public static final String CLE_AFFICHER_CODE_BARRES = "AFFICHER_CODE_BARRES";
-    public static final String CLE_POSITION_CODE_BARRES = "POSITION_CODE_BARRES";
-    public static final String CLE_AFFICHER_QR_CODE = "AFFICHER_QR_CODE";
-    public static final String CLE_CONTENU_QR_CODE = "CONTENU_QR_CODE";
-    public static final String CLE_AFFICHER_COORDONNEES_CLIENT = "AFFICHER_COORDONNEES_CLIENT";
-    public static final String CLE_STYLE_TABLEAU_PRODUITS = "STYLE_TABLEAU_PRODUITS";
-    public static final String CLE_AFFICHER_SIGNATURE = "AFFICHER_SIGNATURE";
-    public static final String CLE_POSITION_SIGNATURE = "POSITION_SIGNATURE";
-    public static final String CLE_AFFICHER_CONDITIONS = "AFFICHER_CONDITIONS";
-    public static final String CLE_TEXTE_CONDITIONS = "TEXTE_CONDITIONS";
-    public static final String CLE_AFFICHER_POINTS_FIDELITE = "AFFICHER_POINTS_FIDELITE";
-    public static final String CLE_FORMAT_IMPRESSION = "FORMAT_IMPRESSION";
-    public static final String CLE_ORIENTATION_IMPRESSION = "ORIENTATION_IMPRESSION";
-    public static final String CLE_LANGUE_TICKET = "LANGUE_TICKET";
-
-
-    // Nouvelles constantes pour la personnalisation des reçus
-    public static final String CLE_COULEUR_TITRE_RECU = "COULEUR_TITRE_RECU";
-    public static final String CLE_COULEUR_TEXTE_RECU = "COULEUR_TEXTE_RECU";
-    public static final String CLE_MARGE_HAUT_RECU = "MARGE_HAUT_RECU";
-    public static final String CLE_MARGE_BAS_RECU = "MARGE_BAS_RECU";
-    public static final String CLE_MARGE_GAUCHE_RECU = "MARGE_GAUCHE_RECU";
-    public static final String CLE_MARGE_DROITE_RECU = "MARGE_DROITE_RECU";
-    public static final String CLE_FORMAT_DATE_RECU = "FORMAT_DATE_RECU";
-    public static final String CLE_POSITION_LOGO_RECU = "POSITION_LOGO_RECU";
-    public static final String CLE_TAILLE_LOGO_RECU = "TAILLE_LOGO_RECU";
-    public static final String CLE_STYLE_NUMEROTATION = "STYLE_NUMEROTATION";
-    public static final String CLE_DEVISE = "DEVISE";
-    public static final String CLE_SEPARATEUR_MILLIERS = "SEPARATEUR_MILLIERS";
-    public static final String CLE_DECIMALES = "NOMBRE_DECIMALES";
-
+    public static final String CLE_INFO_SUPPLEMENTAIRE_RECU = "INFO_SUPPLEMENTAIRE_RECU";
 
     private static final java.util.Set<String> CLES_SENSIBLES = new java.util.HashSet<>(java.util.Arrays.asList(
         CLE_EMAIL,

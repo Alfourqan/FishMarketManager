@@ -282,7 +282,6 @@ public class ReportViewSwing {
         addReportButton(panel, "Fournisseurs", MaterialDesign.MDI_TRUCK_DELIVERY);
         addReportButton(panel, "Créances", MaterialDesign.MDI_CASH_MULTIPLE);
         addReportButton(panel, "Chiffre d'affaires", MaterialDesign.MDI_CHART_LINE);
-        addReportButton(panel, "Ticket", MaterialDesign.MDI_TICKET); // Add Ticket button
 
         return panel;
     }
@@ -329,64 +328,6 @@ public class ReportViewSwing {
                     venteController.chargerVentes();
                     donnees = venteController.getVentes();
                     break;
-                case "Ticket":
-                    try {
-                        // Créer une vente factice pour la prévisualisation
-                        List<Vente> ventes = new ArrayList<>();
-
-                        // Créer un client factice
-                        Client clientDemo = new Client(
-                            1,                      // id
-                            "Client Démo",         // nom
-                            "0123456789",          // téléphone
-                            "demo@email.com",      // email
-                            "123 rue Demo"         // adresse
-                        );
-
-                        // Valeurs pour la vente démo
-                        double prixUnitaire = 20.0;
-                        int quantite = 2;
-                        double montantTotal = prixUnitaire * quantite;
-
-                        // Créer la vente démo
-                        Vente venteDemo = new Vente(
-                            1,                           // id
-                            LocalDateTime.now(),         // date
-                            clientDemo,                  // client
-                            false,                       // credit
-                            montantTotal,                // total
-                            Vente.ModePaiement.ESPECES  // mode de paiement
-                        );
-                        ventes.add(venteDemo);
-
-                        // Créer le produit démo avec des valeurs numériques explicites
-                        Produit produitDemo = new Produit(
-                            1,                     // id
-                            "Poisson Démo",        // nom
-                            "Description démo",    // description
-                            10.0,                  // prix d'achat
-                            20.0,                  // prix de vente
-                            20,                    // stock initial
-                            "Poissons frais"      // catégorie
-                        );
-
-                        // Créer et ajouter la ligne de vente
-                        Vente.LigneVente ligneVente = venteDemo.new LigneVente(produitDemo, quantite, prixUnitaire);
-                        List<Vente.LigneVente> lignes = new ArrayList<>();
-                        lignes.add(ligneVente);
-                        venteDemo.setLignes(lignes);
-
-                        // Générer le PDF
-                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                        reportController.genererTicketPDF(ventes.get(0), outputStream);
-                        byte[] pdfData = outputStream.toByteArray();
-                        afficherPreviewTicket(pdfData);
-                    } catch (Exception e) {
-                        LOGGER.log(Level.SEVERE, "Erreur lors de la génération du ticket", e);
-                        throw new RuntimeException("Erreur lors de la génération du ticket", e);
-                    }
-                    break;
-
             }
             genererRapport(type.toLowerCase(), donnees, nomFichier);
         } catch (Exception e) {
@@ -788,7 +729,7 @@ public class ReportViewSwing {
         try {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-            switch (type.toLowerCase()) {
+            switch (type) {
                 case "ventes":
                     if (!(donnees.stream().allMatch(d -> d instanceof Vente))) {
                         throw new IllegalArgumentException("Type de données incorrect pour le rapport des ventes");
@@ -804,11 +745,18 @@ public class ReportViewSwing {
                         throw new IllegalArgumentException("Type de données incorrect pour le rapport des stocks");
                     }
                     List<Produit> produits = (List<Produit>) donnees;
+                    // Calcul des statistiques pour les stocks
                     Map<String, Double> statistiques = new HashMap<>();
                     double valeurTotale = produits.stream()
                         .mapToDouble(p -> p.getPrixAchat() * p.getQuantite())
                         .sum();
                     statistiques.put("Valeur totale du stock", valeurTotale);
+
+                    double moyenneQuantites = produits.stream()
+                        .mapToDouble(Produit::getQuantite)
+                        .average()
+                        .orElse(0.0);
+                    statistiques.put("Moyenne des quantités", moyenneQuantites);
 
                     reportController.genererRapportStocksPDF(produits, statistiques, outputStream);
                     break;
@@ -824,37 +772,164 @@ public class ReportViewSwing {
                     }
                     reportController.genererRapportCreancesPDF(outputStream);
                     break;
-                case "ticket":
-                    if (!(donnees.get(0) instanceof Vente)) {
-                        throw new IllegalArgumentException("Type de données incorrect pour le ticket");
-                    }
-                    reportController.genererTicketPDF((Vente) donnees.get(0), outputStream);
-                    break;
                 default:
                     throw new IllegalArgumentException("Type de rapport inconnu: " + type);
             }
 
             // Afficher la prévisualisation
             byte[] pdfData = PDFGenerator.getBytes(outputStream);
-            if (type.equalsIgnoreCase("ticket")) {
-                // Pour les tickets, on affiche directement dans la vue de configuration
-                afficherPreviewTicket(pdfData);
-            } else {
-                // Pour les autres rapports, on utilise la prévisualisation standard
-                afficherPrevisualisation(pdfData);
-            }
+            afficherPrevisualisation(pdfData);
 
-            // Sauvegarder le fichier uniquement pour les rapports (pas pour les tickets)
-            if (!type.equalsIgnoreCase("ticket")) {
-                PDFGenerator.sauvegarderPDF(pdfData, nomFichier);
-                showSuccessMessage("Succès", MSG_SUCCES_GENERATION + nomFichier);
-            }
+            // Sauvegarder le fichier
+            PDFGenerator.sauvegarderPDF(pdfData, nomFichier);
+            showSuccessMessage("Succès", MSG_SUCCES_GENERATION + nomFichier);
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport", e);
             showErrorMessage("Erreur", MSG_ERREUR_GENERATION + e.getMessage());
         }
     }
+
+    private void afficherStatistiques() {
+        chartPanel.removeAll();
+        chartPanel.setLayout(new GridLayout(2, 2, 15, 15));
+
+        addStatPanel("Ventes", String.format(
+            "Aujourd'hui: %.2f €\nCette semaine: %.2f €\nCe mois: %.2f €",
+            calculerVentesTotal(LocalDate.now(), LocalDate.now()),
+            calculerVentesTotal(LocalDate.now().minusWeeks(1), LocalDate.now()),
+            calculerVentesTotal(LocalDate.now().minusMonths(1), LocalDate.now())
+        ));
+
+        addStatPanel("Stock", String.format(
+            "Total produits: %d\nEn alerte: %d\nValeur totale: %.2f €",
+            getNombreProduits(),
+            getNombreProduitsEnAlerte(),
+            getValeurTotaleStock()
+        ));
+
+        addStatPanel("Fournisseurs", String.format(
+            "Total: %d\nCommandes en cours: %d",
+            getNombreFournisseurs(),
+            getCommandesEnCours()
+        ));
+
+        addStatPanel("Performance", String.format(
+            "Marge brute: %.2f %%\nRotation stock: %.1f jours",
+            calculerMargeBrute(),
+            calculerRotationStock()
+        ));
+
+        chartPanel.revalidate();
+        chartPanel.repaint();
+    }
+
+    private void addStatPanel(String title, String content) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BorderLayout(0, 10));
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(220, 220, 220)),
+            BorderFactory.createEmptyBorder(15, 15, 15, 15)
+        ));
+        panel.setBackground(Color.WHITE);
+
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(SUBTITLE_FONT);
+        titleLabel.setForeground(new Color(33, 33, 33));
+
+        JTextArea contentArea = new JTextArea(content);
+        contentArea.setFont(REGULAR_FONT);
+        contentArea.setEditable(false);
+        contentArea.setBackground(panel.getBackground());
+        contentArea.setBorder(null);
+        contentArea.setLineWrap(true);
+        contentArea.setWrapStyleWord(true);
+
+        panel.add(titleLabel, BorderLayout.NORTH);
+        panel.add(contentArea, BorderLayout.CENTER);
+
+        chartPanel.add(panel);
+    }
+
+    // Méthodes utilitaires pour les statistiques
+    private double calculerVentesTotal(LocalDate debut, LocalDate fin) {
+        try {
+            venteController.chargerVentes();
+            return venteController.getVentes().stream()
+                .filter(v -> !v.getDate().toLocalDate().isBefore(debut) &&
+                           !v.getDate().toLocalDate().isAfter(fin))
+                .mapToDouble(Vente::getMontantTotal)
+                .sum();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors du calcul du total des ventes", e);
+            return 0.0;
+        }
+    }
+
+    private int getNombreProduits() {
+        try {
+            produitController.chargerProduits();
+            return produitController.getProduits().size();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors du chargement des produits", e);
+            return 0;
+        }
+    }
+
+    private int getNombreProduitsEnAlerte() {
+        try {
+            produitController.chargerProduits();
+            return (int) produitController.getProduits().stream()
+                .filter(p -> p.getQuantite() <= p.getSeuilAlerte())
+                .count();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors du calcul des produits en alerte", e);
+            return 0;
+        }
+    }
+
+    private double getValeurTotaleStock() {
+        try {
+            produitController.chargerProduits();
+            return produitController.getProduits().stream()
+                .mapToDouble(p -> p.getPrixAchat() * p.getQuantite())
+                .sum();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors du calcul de la valeur totale du stock", e);
+            return 0.0;
+        }
+    }
+
+    private int getNombreFournisseurs() {
+        try {
+            fournisseurController.chargerFournisseurs();
+            return fournisseurController.getFournisseurs().size();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors du chargement des fournisseurs", e);
+            return 0;
+        }
+    }
+
+    private int getCommandesEnCours() {
+        // À implémenter selon la logique métier
+        return 0;
+    }
+
+    private double calculerMargeBrute() {
+        // À implémenter selon la logique métier
+        return 25.5; // Exemple
+    }
+
+    private double calculerRotationStock() {
+        try {
+            Map<String, Double> performances = reportController.analyserPerformanceStock();
+            return performances.getOrDefault("Taux de rotation du stock", 0.0);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors du calcul de la rotation du stock", e);
+            return 0.0;
+        }
+    }
+
 
     private void ouvrirFichierPDF(String nomFichier) {
         try {
@@ -872,7 +947,8 @@ public class ReportViewSwing {
         JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.INFORMATION_MESSAGE);
     }
 
-    private void afficherMessageErreur(String titre, String message) {        JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.ERROR_MESSAGE);
+    private void afficherMessageErreur(String titre, String message) {
+        JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.ERROR_MESSAGE);
     }
 
     private void afficherEtatCreances() {
@@ -881,7 +957,7 @@ public class ReportViewSwing {
             clientController.chargerClients();
             List<Client> clients = clientController.getClients();
 
-            List<Client> clientsAvecCreances= clients.stream()
+            List<Client> clientsAvecCreances = clients.stream()
                 .filter(c -> c.getSolde() > 0)
                 .collect(Collectors.toList());
 
@@ -894,7 +970,8 @@ public class ReportViewSwing {
             dialog.setVisible(true);
 
         } catch (Exception e) {
-            handleError("affichage des créances", e);        }
+            handleError("affichage des créances", e);
+        }
     }
 
     private JDialog createCreancesDialog(List<Client> clientsAvecCreances) {
@@ -1228,111 +1305,6 @@ public class ReportViewSwing {
             } catch (IOException e) {
                 throw new PrinterException(e.getMessage());
             }
-        }
-    }
-
-    private void afficherPreviewTicket(byte[] pdfData) {
-        try {
-            // Créer une nouvelle fenêtre de prévisualisation pour le ticket
-            if (previewDialog != null && previewDialog.isDisplayable()) {
-                previewDialog.dispose();
-            }
-
-            previewDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel), "Aperçu du ticket", true);
-            previewDialog.setLayout(new BorderLayout());
-
-            // Charger le PDF en mémoire
-            currentDocument = PDDocument.load(new ByteArrayInputStream(pdfData));
-            pdfRenderer = new PDFRenderer(currentDocument);
-            currentPage = 0;
-
-            // Créer le panel de prévisualisation
-            JPanel previewPanel = new JPanel(new BorderLayout());
-            previewLabel = new JLabel();
-            previewLabel.setHorizontalAlignment(JLabel.CENTER);
-
-            // Afficher la première page
-            afficherPage(currentPage);
-
-            // Ajouter les contrôles de navigation
-            JPanel navigationPanel = new JPanel(new FlowLayout());
-            JButton prevButton = new JButton("<<");
-            JButton nextButton = new JButton(">>");
-            JButton printButton = new JButton("Imprimer");
-
-            prevButton.addActionListener(e -> {
-                if (currentPage > 0) {
-                    currentPage--;
-                    afficherPage(currentPage);
-                }
-            });
-
-            nextButton.addActionListener(e -> {
-                if (currentPage < currentDocument.getNumberOfPages() - 1) {
-                    currentPage++;
-                    afficherPage(currentPage);
-                }
-            });
-
-            printButton.addActionListener(e -> imprimerTicket());
-
-            navigationPanel.add(prevButton);
-            navigationPanel.add(printButton);
-            navigationPanel.add(nextButton);
-
-            JScrollPane scrollPane = new JScrollPane(previewLabel);
-            previewPanel.add(scrollPane, BorderLayout.CENTER);
-            previewPanel.add(navigationPanel, BorderLayout.SOUTH);
-
-            previewDialog.add(previewPanel);
-            previewDialog.setSize(600, 800);
-            previewDialog.setLocationRelativeTo(mainPanel);
-            previewDialog.setVisible(true);
-
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de l'affichage de la prévisualisation du ticket", e);
-            showErrorMessage("Erreur", "Impossible d'afficher la prévisualisation : " + e.getMessage());
-        }
-    }
-
-    private void imprimerTicket() {
-        try {
-            PrinterJob job = PrinterJob.getPrinterJob();
-            job.setJobName("Impression Ticket");
-
-            PageFormat pageFormat = job.defaultPage();
-            pageFormat.setOrientation(PageFormat.PORTRAIT);
-
-            job.setPrintable((graphics, pf, pageIndex) -> {
-                if (pageIndex != 0) return Printable.NO_SUCH_PAGE;
-
-                try {
-                    BufferedImage image = pdfRenderer.renderImageWithDPI(0, 300);
-                    Graphics2D g2d = (Graphics2D) graphics;
-                    g2d.translate(pf.getImageableX(), pf.getImageableY());
-
-                    // Ajuster l'échelle pour s'adapter à la page
-                    double scaleX = pf.getImageableWidth() / image.getWidth();
-                    double scaleY = pf.getImageableHeight() / image.getHeight();
-                    double scale = Math.min(scaleX, scaleY);
-
-                    g2d.scale(scale, scale);
-                    g2d.drawImage(image, 0, 0, null);
-
-                    return Printable.PAGE_EXISTS;
-                } catch (Exception e) {
-                    LOGGER.log(Level.SEVERE, "Erreur lors de l'impression", e);
-                    return Printable.NO_SUCH_PAGE;
-                }
-            });
-
-            if (job.printDialog()) {
-                job.print();
-                showSuccessMessage("Succès", "Impression lancée avec succès");
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de l'impression", e);
-            showErrorMessage("Erreur", "Impossible d'imprimer : " + e.getMessage());
         }
     }
 

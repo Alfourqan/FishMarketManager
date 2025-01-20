@@ -458,35 +458,4 @@ public class ReportController {
             return new HashMap<>();
         }
     }
-
-    // Ajout de la méthode pour gérer la génération des tickets
-    public void genererTicketPDF(Vente vente, ByteArrayOutputStream outputStream) {
-        try {
-            PDFGenerator.genererPreviewTicket(vente, outputStream); 
-            LOGGER.info("Ticket PDF généré avec succès");
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du ticket PDF", e);
-            throw new RuntimeException("Erreur lors de la génération du ticket PDF", e);
-        }
-    }
-
-    // Mise à jour de la méthode existante pour inclure les tickets
-    public void genererRapportPDF(String type, Object donnees, ByteArrayOutputStream outputStream) {
-        try {
-            switch (type.toLowerCase()) {
-                case "ticket":
-                    if (donnees instanceof Vente) {
-                        genererTicketPDF((Vente) donnees, outputStream);
-                    } else {
-                        throw new IllegalArgumentException("Les données doivent être une instance de Vente");
-                    }
-                    break;
-                default:
-                    throw new IllegalArgumentException("Type de rapport non supporté: " + type);
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF", e);
-            throw new RuntimeException("Erreur lors de la génération du rapport PDF", e);
-        }
-    }
 }

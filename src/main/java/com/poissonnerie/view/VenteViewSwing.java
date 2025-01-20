@@ -19,9 +19,6 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 import org.kordamp.ikonli.materialdesign.MaterialDesign;
 import org.kordamp.ikonli.swing.FontIcon;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-
 
 public class VenteViewSwing {
     private static final Logger LOGGER = Logger.getLogger(VenteViewSwing.class.getName());
@@ -287,78 +284,64 @@ public class VenteViewSwing {
                     );
                     vente.setLignes(new ArrayList<>(panier));
 
-                    try {
-                        // Créer un ByteArrayOutputStream pour le preview
-                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                        PDFGenerator.genererPreviewTicket(vente, outputStream);
+                    String preview = PDFGenerator.genererPreviewTicket(vente);
 
-                        // Convertir le PDF en texte pour prévisualisation  (This might need adjustment depending on PDFGenerator output)
-                        String preview = new String(outputStream.toByteArray(), "UTF-8");
+                    JDialog previewDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel),
+                            "Prévisualisation du ticket", true);
+                    previewDialog.setLayout(new BorderLayout(10, 10));
 
+                    JTextArea previewArea = new JTextArea(preview);
+                    previewArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+                    previewArea.setEditable(false);
+                    previewArea.setBackground(Color.WHITE);
+                    JScrollPane scrollPane = new JScrollPane(previewArea);
+                    previewDialog.add(scrollPane, BorderLayout.CENTER);
 
-                        JDialog previewDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel),
-                                "Prévisualisation du ticket", true);
-                        previewDialog.setLayout(new BorderLayout(10, 10));
+                    JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+                    JButton confirmerBtn = createStyledButton("Confirmer et imprimer",
+                            MaterialDesign.MDI_PRINTER, new Color(76, 175, 80));
+                    JButton cancelBtn = createStyledButton("Annuler",
+                            MaterialDesign.MDI_CLOSE, new Color(244, 67, 54));
 
-                        JTextArea previewArea = new JTextArea(preview);
-                        previewArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
-                        previewArea.setEditable(false);
-                        previewArea.setBackground(Color.WHITE);
-                        JScrollPane scrollPane = new JScrollPane(previewArea);
-                        previewDialog.add(scrollPane, BorderLayout.CENTER);
+                    confirmerBtn.addActionListener(confirmEvent -> {
+                        try {
+                            venteController.enregistrerVente(vente);
 
-                        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-                        JButton confirmerBtn = createStyledButton("Confirmer et imprimer",
-                                MaterialDesign.MDI_PRINTER, new Color(76, 175, 80));
-                        JButton cancelBtn = createStyledButton("Annuler",
-                                MaterialDesign.MDI_CLOSE, new Color(244, 67, 54));
+                            // Utilisation du constructeur simple pour ticket de vente
+                            TextBillPrinter printer = new TextBillPrinter(vente);
+                            printer.imprimer();
 
-                        confirmerBtn.addActionListener(confirmEvent -> {
-                            try {
-                                venteController.enregistrerVente(vente);
+                            previewDialog.dispose();
+                            resetForm();
+                            refreshComboBoxes();
+                            refreshVentesTable();
 
-                                // Utilisation du constructeur simple pour ticket de vente
-                                TextBillPrinter printer = new TextBillPrinter(vente);
-                                printer.imprimer();
+                            LOGGER.info(String.format("Vente enregistrée avec succès: ID=%d, Total=%.2f€",
+                                    vente.getId(), vente.getTotal()));
 
-                                previewDialog.dispose();
-                                resetForm();
-                                refreshComboBoxes();
-                                refreshVentesTable();
+                            JOptionPane.showMessageDialog(mainPanel,
+                                    "Vente enregistrée avec succès",
+                                    "Succès",
+                                    JOptionPane.INFORMATION_MESSAGE);
+                        } catch (Exception ex) {
+                            LOGGER.log(Level.SEVERE, "Erreur lors de l'enregistrement de la vente", ex);
+                            JOptionPane.showMessageDialog(previewDialog,
+                                    "Erreur lors de l'enregistrement de la vente : " + ex.getMessage(),
+                                    "Erreur",
+                                    JOptionPane.ERROR_MESSAGE);
+                        }
+                    });
 
-                                LOGGER.info(String.format("Vente enregistrée avec succès: ID=%d, Total=%.2f€",
-                                        vente.getId(), vente.getTotal()));
+                    cancelBtn.addActionListener(cancelEvent -> previewDialog.dispose());
 
-                                JOptionPane.showMessageDialog(mainPanel,
-                                        "Vente enregistrée avec succès",
-                                        "Succès",
-                                        JOptionPane.INFORMATION_MESSAGE);
-                            } catch (Exception ex) {
-                                LOGGER.log(Level.SEVERE, "Erreur lors de l'enregistrement de la vente", ex);
-                                JOptionPane.showMessageDialog(previewDialog,
-                                        "Erreur lors de l'enregistrement de la vente : " + ex.getMessage(),
-                                        "Erreur",
-                                        JOptionPane.ERROR_MESSAGE);
-                            }
-                        });
+                    buttonPanel.add(confirmerBtn);
+                    buttonPanel.add(cancelBtn);
+                    previewDialog.add(buttonPanel, BorderLayout.SOUTH);
 
-                        cancelBtn.addActionListener(cancelEvent -> previewDialog.dispose());
+                    previewDialog.setSize(500, 600);
+                    previewDialog.setLocationRelativeTo(mainPanel);
+                    previewDialog.setVisible(true);
 
-                        buttonPanel.add(confirmerBtn);
-                        buttonPanel.add(cancelBtn);
-                        previewDialog.add(buttonPanel, BorderLayout.SOUTH);
-
-                        previewDialog.setSize(500, 600);
-                        previewDialog.setLocationRelativeTo(mainPanel);
-                        previewDialog.setVisible(true);
-
-                    } catch (Exception ex) {
-                        LOGGER.log(Level.SEVERE, "Erreur lors de la prévisualisation", ex);
-                        JOptionPane.showMessageDialog(mainPanel,
-                                "Erreur lors de la prévisualisation : " + ex.getMessage(),
-                                "Erreur",
-                                JOptionPane.ERROR_MESSAGE);
-                    }
                 } catch (Exception ex) {
                     LOGGER.log(Level.SEVERE, "Erreur lors de la prévisualisation", ex);
                     JOptionPane.showMessageDialog(mainPanel,
