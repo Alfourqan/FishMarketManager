@@ -310,6 +310,38 @@ public class ConfigurationViewSwing {
         return headerPanel;
     }
 
+    private JPanel createSectionPanel(String title, MaterialDesign icon) {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setOpaque(false);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200)),
+                title,
+                TitledBorder.LEFT,
+                TitledBorder.TOP,
+                sousTitreFont,
+                new Color(33, 33, 33)
+            ),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+
+        // Ajout de l'icône
+        if (icon != null) {
+            FontIcon fontIcon = FontIcon.of(icon);
+            fontIcon.setIconSize(24);
+            fontIcon.setIconColor(couleurPrincipale);
+            JLabel iconLabel = new JLabel(fontIcon);
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.gridx = 0;
+            gbc.gridy = 0;
+            gbc.anchor = GridBagConstraints.NORTHWEST;
+            gbc.insets = new Insets(0, 0, 10, 0);
+            panel.add(iconLabel, gbc);
+        }
+
+        return panel;
+    }
+
     private JPanel createTVASection() {
         JPanel panel = createSectionPanel("Configuration TVA", MaterialDesign.MDI_PERCENT);
 
@@ -943,21 +975,25 @@ public class ConfigurationViewSwing {
         }
     }
 
-    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
-        FontIcon icon = FontIcon.of(iconCode);
-        icon.setIconSize(18);
-        icon.setIconColor(Color.WHITE);
-
+    private JButton createStyledButton(String text, MaterialDesign icon, Color color) {
         JButton button = new JButton(text);
-        button.setIcon(icon);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        button.setBackground(color);
+        button.setFont(texteNormalFont);
+
+        // Configuration de l'icône
+        FontIcon fontIcon = FontIcon.of(icon);
+        fontIcon.setIconSize(16);
+        fontIcon.setIconColor(Color.WHITE);
+        button.setIcon(fontIcon);
+
+        // Style du bouton
         button.setForeground(Color.WHITE);
+        button.setBackground(color);
         button.setFocusPainted(false);
         button.setBorderPainted(false);
-        button.setMargin(new Insets(8, 16, 8, 16));
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setOpaque(true);
+        button.setMargin(new Insets(8, 15, 8, 15));
 
+        // Effet de survol
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(color.darker());
@@ -973,18 +1009,25 @@ public class ConfigurationViewSwing {
     private void styleTextField(JTextField textField) {
         textField.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(200, 200, 200)),
-            BorderFactory.createEmptyBorder(8, 10, 8, 10)
+            BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
-    }
-
-    private void showSuccessMessage(String message) {
-        JOptionPane.showMessageDialog(mainPanel, message, "Succès",
-            JOptionPane.INFORMATION_MESSAGE);
+        textField.setBackground(Color.WHITE);
+        textField.setFont(texteNormalFont);
+        textField.setPreferredSize(new Dimension(textField.getPreferredSize().width, 30));
     }
 
     private void showErrorMessage(String message) {
-        JOptionPane.showMessageDialog(mainPanel, message, "Erreur",
+        JOptionPane.showMessageDialog(mainPanel,
+            message,
+            "Erreur",
             JOptionPane.ERROR_MESSAGE);
+    }
+
+    private void showSuccessMessage(String message) {
+        JOptionPane.showMessageDialog(mainPanel,
+            message,
+            "Succès",
+            JOptionPane.INFORMATION_MESSAGE);
     }
 
     private boolean showConfirmDialog(String message) {
