@@ -83,4 +83,17 @@ INSERT OR IGNORE INTO configurations (cle, valeur, description) VALUES
 ('STYLE_BORDURE_RECU', 'SIMPLE', 'Style de bordure du reçu (SIMPLE, DOUBLE, POINTILLES)'),
 ('MESSAGE_COMMERCIAL_RECU', '', 'Message commercial ou promotionnel sur le reçu'),
 ('AFFICHER_TVA_DETAILS', 'true', 'Afficher les détails de TVA sur le reçu'),
-('INFO_SUPPLEMENTAIRE_RECU', '', 'Informations supplémentaires sur le reçu');
+('INFO_SUPPLEMENTAIRE_RECU', '', 'Informations supplémentaires sur le reçu'),
+('COULEUR_TITRE_RECU', '#000000', 'Couleur du titre du reçu'),
+('COULEUR_TEXTE_RECU', '#000000', 'Couleur du texte du reçu'),
+('MARGE_HAUT_RECU', '10', 'Marge haute du reçu en mm'),
+('MARGE_BAS_RECU', '10', 'Marge basse du reçu en mm'),
+('MARGE_GAUCHE_RECU', '10', 'Marge gauche du reçu en mm'),
+('MARGE_DROITE_RECU', '10', 'Marge droite du reçu en mm'),
+('FORMAT_DATE_RECU', 'dd/MM/yyyy HH:mm', 'Format de la date sur le reçu'),
+('POSITION_LOGO_RECU', 'HAUT_GAUCHE', 'Position du logo sur le reçu'),
+('TAILLE_LOGO_RECU', '30', 'Taille du logo en mm'),
+('STYLE_NUMEROTATION', 'STANDARD', 'Style de numérotation des reçus'),
+('DEVISE', '€', 'Symbole de la devise'),
+('SEPARATEUR_MILLIERS', ' ', 'Séparateur des milliers'),
+('DECIMALES', '2', 'Nombre de décimales pour les montants');
