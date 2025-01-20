@@ -144,6 +144,11 @@ public class ConfigurationController {
         return sanitizeInput(configCache.getOrDefault(cle, ""));
     }
 
+    public String getConfiguration(String cle, String defaultValue) {
+        String valeur = getValeur(cle);
+        return valeur.isEmpty() ? defaultValue : valeur;
+    }
+
     public List<ConfigurationParam> getConfigurations() {
         return new ArrayList<>(configurations);
     }
