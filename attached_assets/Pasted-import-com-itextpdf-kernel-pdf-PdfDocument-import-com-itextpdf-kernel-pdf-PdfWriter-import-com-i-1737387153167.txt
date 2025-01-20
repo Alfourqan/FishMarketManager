@@ -1,0 +1,97 @@
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.property.TextAlignment;
+
+import java.io.File;
+
+public class ReceiptGenerator {
+
+    public static void main(String[] args) {
+        try {
+            String dest = "receipt.pdf";
+            File file = new File(dest);
+            file.getParentFile().mkdirs();
+
+            // Création du document PDF
+            PdfWriter writer = new PdfWriter(dest);
+            PdfDocument pdfDoc = new PdfDocument(writer);
+            Document document = new Document(pdfDoc);
+
+            // Ajout du titre
+            document.add(new Paragraph("BUSINESS NAME")
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setBold()
+                    .setFontSize(16));
+            document.add(new Paragraph("1234 Main Street\nSuite 567\nCity Name, State, 54321\n123-456-7890")
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setFontSize(10));
+            document.add(new Paragraph("-----------------------------------------------------")
+                    .setTextAlignment(TextAlignment.CENTER));
+
+            // Tableau des articles
+            Table table = new Table(new float[]{4, 1});
+            table.setWidthPercent(100);
+            table.addCell("Item");
+            table.addCell("Price");
+            String[][] items = {
+                    {"Lorem ipsum", "1.25"},
+                    {"Dolor sit amet", "7.99"},
+                    {"Consectetur", "26.70"},
+                    {"Adipiscing elit", "15.49"},
+                    {"Sed semper", "18.79"},
+                    {"Accumsan ante", "42.99"},
+                    {"Non laoreet", "9.99"},
+                    {"Dui dapibus eu", "27.50"}
+            };
+
+            for (String[] item : items) {
+                table.addCell(item[0]);
+                table.addCell("$" + item[1]);
+            }
+
+            document.add(table);
+
+            // Sous-total, taxe et total
+            document.add(new Paragraph("\nSub Total: $150.70")
+                    .setTextAlignment(TextAlignment.RIGHT)
+                    .setFontSize(10));
+            document.add(new Paragraph("Sales Tax: $5.29")
+                    .setTextAlignment(TextAlignment.RIGHT)
+                    .setFontSize(10));
+            document.add(new Paragraph("TOTAL: $155.99")
+                    .setTextAlignment(TextAlignment.RIGHT)
+                    .setBold()
+                    .setFontSize(12));
+
+            // Type de paiement
+            document.add(new Paragraph("\nPaid By: Credit")
+                    .setTextAlignment(TextAlignment.LEFT)
+                    .setFontSize(10));
+
+            // Informations supplémentaires
+            document.add(new Paragraph("Date: 02/08/2022 09:36")
+                    .setTextAlignment(TextAlignment.LEFT)
+                    .setFontSize(10));
+            document.add(new Paragraph("Transaction ID: 234-567890")
+                    .setTextAlignment(TextAlignment.LEFT)
+                    .setFontSize(10));
+            document.add(new Paragraph("Vendor ID: 987654-321")
+                    .setTextAlignment(TextAlignment.LEFT)
+                    .setFontSize(10));
+
+            // Message de remerciement
+            document.add(new Paragraph("\nTHANK YOU FOR YOUR PURCHASE")
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setBold()
+                    .setFontSize(10));
+
+            document.close();
+            System.out.println("Receipt generated successfully!");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
