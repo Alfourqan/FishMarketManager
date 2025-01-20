@@ -5,7 +5,7 @@ import com.poissonnerie.controller.ProduitController;
 import com.poissonnerie.controller.ClientController;
 import com.poissonnerie.model.*;
 import com.poissonnerie.util.PDFGenerator;
-import com.poissonnerie.util.BillPrint; // Import the BillPrint class
+import com.poissonnerie.util.TextBillPrinter; 
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -72,15 +72,11 @@ public class VenteViewSwing {
         try {
             LOGGER.info("Chargement des données de vente...");
 
-            // Sauvegarder la sélection actuelle
             int selectedRow = tableVentes.getSelectedRow();
-
-            // Désactiver les contrôles pendant le chargement
             setControlsEnabled(false);
             mainPanel.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
             try {
-                // Charger les données
                 produitController.chargerProduits();
                 LOGGER.info("Produits chargés");
 
@@ -90,18 +86,15 @@ public class VenteViewSwing {
                 venteController.chargerVentes();
                 LOGGER.info("Ventes chargées: " + venteController.getVentes().size() + " ventes");
 
-                // Mettre à jour l'interface
                 refreshComboBoxes();
                 refreshVentesTable();
 
-                // Restaurer la sélection si possible
                 if (selectedRow >= 0 && selectedRow < tableVentes.getRowCount()) {
                     tableVentes.setRowSelectionInterval(selectedRow, selectedRow);
                 }
 
                 LOGGER.info("Données chargées avec succès");
             } finally {
-                // Réactiver les contrôles
                 setControlsEnabled(true);
                 mainPanel.setCursor(Cursor.getDefaultCursor());
             }
@@ -168,13 +161,9 @@ public class VenteViewSwing {
             LOGGER.info("Début de l'actualisation des données...");
             setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
-            // Sauvegarder l'état actuel
             int selectedRow = tableVentes.getSelectedRow();
-
-            // Recharger les données
             loadData();
 
-            // Restaurer la sélection
             if (selectedRow >= 0 && selectedRow < tableVentes.getRowCount()) {
                 tableVentes.setRowSelectionInterval(selectedRow, selectedRow);
             }
@@ -217,7 +206,6 @@ public class VenteViewSwing {
                     return;
                 }
 
-                // Vérifier si le produit est déjà dans le panier
                 Optional<Vente.LigneVente> ligneExistante = panier.stream()
                         .filter(ligne -> ligne.getProduit().getId() == produit.getId())
                         .findFirst();
@@ -234,7 +222,6 @@ public class VenteViewSwing {
                                 JOptionPane.ERROR_MESSAGE);
                         return;
                     }
-                    // Créer une nouvelle ligne avec la nouvelle quantité
                     panier.remove(ancienneLigne);
                     Vente.LigneVente nouvelleLigne = new Vente.LigneVente(produit, nouvelleQuantite, produit.getPrixVente());
                     panier.add(nouvelleLigne);
@@ -297,15 +284,12 @@ public class VenteViewSwing {
                     );
                     vente.setLignes(new ArrayList<>(panier));
 
-                    // Générer la prévisualisation du ticket
                     String preview = PDFGenerator.genererPreviewTicket(vente);
 
-                    // Créer une fenêtre de prévisualisation
                     JDialog previewDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel),
                             "Prévisualisation du ticket", true);
                     previewDialog.setLayout(new BorderLayout(10, 10));
 
-                    // Zone de texte pour la prévisualisation
                     JTextArea previewArea = new JTextArea(preview);
                     previewArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
                     previewArea.setEditable(false);
@@ -313,7 +297,6 @@ public class VenteViewSwing {
                     JScrollPane scrollPane = new JScrollPane(previewArea);
                     previewDialog.add(scrollPane, BorderLayout.CENTER);
 
-                    // Panneau de boutons
                     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
                     JButton confirmerBtn = createStyledButton("Confirmer et imprimer",
                             MaterialDesign.MDI_PRINTER, new Color(76, 175, 80));
@@ -324,7 +307,6 @@ public class VenteViewSwing {
                         try {
                             venteController.enregistrerVente(vente);
 
-                            // Préparer les données comme dans le format Python
                             String businessName = "MA POISSONNERIE";
                             String[] address = {
                                     "123 Rue de la Mer",
@@ -333,8 +315,7 @@ public class VenteViewSwing {
                                     "SIRET: 123 568 941 00056"
                             };
 
-                            // Utiliser directement BillPrint pour l'impression
-                            BillPrint printer = new BillPrint(vente);
+                            TextBillPrinter printer = new TextBillPrinter(vente);
                             printer.imprimer();
 
                             previewDialog.dispose();
@@ -364,7 +345,6 @@ public class VenteViewSwing {
                     buttonPanel.add(cancelBtn);
                     previewDialog.add(buttonPanel, BorderLayout.SOUTH);
 
-                    // Configurer et afficher la fenêtre de prévisualisation
                     previewDialog.setSize(500, 600);
                     previewDialog.setLocationRelativeTo(mainPanel);
                     previewDialog.setVisible(true);
@@ -412,7 +392,6 @@ public class VenteViewSwing {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
             List<Vente> ventesTriees = new ArrayList<>(venteController.getVentes());
-            // Tri des ventes par date décroissante
             ventesTriees.sort((v1, v2) -> v2.getDate().compareTo(v1.getDate()));
 
             for (Vente vente : ventesTriees) {
@@ -451,7 +430,6 @@ public class VenteViewSwing {
 
     private synchronized void refreshComboBoxes() {
         SwingUtilities.invokeLater(() -> {
-            // Mise à jour ComboBox clients avec protection contre les entrées malveillantes
             DefaultComboBoxModel<Object> clientModel = new DefaultComboBoxModel<>();
             clientModel.addElement(null);
             List<Client> clients = new ArrayList<>(clientController.getClients());
@@ -459,11 +437,9 @@ public class VenteViewSwing {
             clients.forEach(client -> clientModel.addElement(client));
             clientCombo.setModel(clientModel);
 
-            // Mise à jour ComboBox produits avec protection contre les entrées malveillantes
             DefaultComboBoxModel<Object> produitModel = new DefaultComboBoxModel<>();
             produitModel.addElement(null);
 
-            // Regrouper les produits par catégorie
             Map<String, List<Produit>> produitsParCategorie = produitController.getProduits().stream()
                     .filter(p -> p.getStock() > 0)
                     .collect(Collectors.groupingBy(
@@ -472,7 +448,6 @@ public class VenteViewSwing {
                             Collectors.toList()
                     ));
 
-            // Ajouter les produits par catégorie
             produitsParCategorie.forEach((categorie, produits) -> {
                 produitModel.addElement("━━━ " + sanitizeInput(categorie).toUpperCase() + " ━━━");
                 produits.stream()
@@ -482,7 +457,6 @@ public class VenteViewSwing {
 
             produitCombo.setModel(produitModel);
 
-            // Configuration des renderers personnalisés avec protection XSS
             clientCombo.setRenderer(new DefaultListCellRenderer() {
                 @Override
                 public Component getListCellRendererComponent(JList<?> list, Object value,
@@ -540,7 +514,6 @@ public class VenteViewSwing {
                 }
             });
 
-            // Empêcher la sélection des séparateurs
             produitCombo.addActionListener(e -> {
                 Object selectedItem = produitCombo.getSelectedItem();
                 if (selectedItem instanceof String && ((String) selectedItem).startsWith("━━━")) {
@@ -573,7 +546,6 @@ public class VenteViewSwing {
         button.setMargin(new Insets(8, 16, 8, 16));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // Effet de survol
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 if (button.isEnabled()) {
@@ -593,7 +565,6 @@ public class VenteViewSwing {
     private void initializeComponents() {
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // Section nouvelle vente
         JPanel nouvelleVentePanel = createNouvelleVentePanel();
         JPanel historiquePanel = createHistoriquePanel();
 
@@ -601,7 +572,6 @@ public class VenteViewSwing {
                 nouvelleVentePanel, historiquePanel);
         splitPane.setResizeWeight(0.5);
 
-        // Bouton d'actualisation
         JPanel actionPanel = createActionPanel();
 
         mainPanel.add(splitPane, BorderLayout.CENTER);
@@ -612,13 +582,8 @@ public class VenteViewSwing {
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         actionPanel.setOpaque(false);
 
-        // Création du bouton d'actualisation avec style moderne
         JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH, new Color(156, 39, 176));
-
-        // Ajout du gestionnaire d'événements
         actualiserBtn.addActionListener(e -> actualiserDonnees());
-
-        // Ajout du bouton au panel
         actionPanel.add(actualiserBtn);
 
         return actionPanel;
@@ -629,12 +594,10 @@ public class VenteViewSwing {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
         panel.setBorder(BorderFactory.createTitledBorder("Nouvelle Vente"));
 
-        // En-tête de vente
         JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         clientCombo = new JComboBox<>();
         creditCheck = new JCheckBox("Vente à crédit");
 
-        // Ajout d'icône au checkbox crédit
         FontIcon creditIcon = FontIcon.of(MaterialDesign.MDI_CREDIT_CARD);
         creditIcon.setIconSize(16);
         creditCheck.setIcon(creditIcon);
@@ -647,7 +610,6 @@ public class VenteViewSwing {
             }
         });
 
-        // Ajout d'icône client
         JLabel clientLabel = new JLabel("Client:");
         FontIcon clientIcon = FontIcon.of(MaterialDesign.MDI_ACCOUNT);
         clientIcon.setIconSize(16);
@@ -657,19 +619,16 @@ public class VenteViewSwing {
         headerPanel.add(clientCombo);
         headerPanel.add(creditCheck);
 
-        // Sélection des produits
         JPanel selectionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         produitCombo = new JComboBox<>();
         JTextField quantiteField = new JTextField(5);
         JButton ajouterBtn = createStyledButton("Ajouter au panier", MaterialDesign.MDI_CART_PLUS, new Color(33, 150, 243));
 
-        // Ajout d'icône produit
         JLabel produitLabel = new JLabel("Produit:");
         FontIcon produitIcon = FontIcon.of(MaterialDesign.MDI_PACKAGE);
         produitIcon.setIconSize(16);
         produitLabel.setIcon(produitIcon);
 
-        // Ajout d'icône quantité
         JLabel quantiteLabel = new JLabel("Quantité:");
         FontIcon quantiteIcon = FontIcon.of(MaterialDesign.MDI_NUMERIC);
         quantiteIcon.setIconSize(16);
@@ -681,15 +640,12 @@ public class VenteViewSwing {
         selectionPanel.add(quantiteField);
         selectionPanel.add(ajouterBtn);
 
-        // Panier
         JScrollPane panierScroll = new JScrollPane(tablePanier);
 
-        // Footer avec boutons modernisés
         JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
         totalLabel = new JLabel("Total: 0.00 €");
         totalLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
 
-        // Icône pour le total
         FontIcon totalIcon = FontIcon.of(MaterialDesign.MDI_CASH);
         totalIcon.setIconSize(18);
         totalIcon.setIconColor(new Color(76, 175, 80));
@@ -702,7 +658,6 @@ public class VenteViewSwing {
         footerPanel.add(validerBtn);
         footerPanel.add(annulerBtn);
 
-        // Event handlers
         ajouterBtn.addActionListener(e -> {
             try {
                 Object selectedItem = produitCombo.getSelectedItem();
@@ -741,7 +696,6 @@ public class VenteViewSwing {
 
         annulerBtn.addActionListener(e -> resetForm());
 
-        // Layout
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.add(headerPanel, BorderLayout.NORTH);
         topPanel.add(selectionPanel, BorderLayout.CENTER);
@@ -756,7 +710,6 @@ public class VenteViewSwing {
     private JPanel createHistoriquePanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
 
-        // Titre avec icône
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         FontIcon historyIcon = FontIcon.of(MaterialDesign.MDI_HISTORY);
         historyIcon.setIconSize(18);
