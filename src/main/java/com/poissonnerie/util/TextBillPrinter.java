@@ -19,9 +19,12 @@ public class TextBillPrinter implements Printable {
     public TextBillPrinter(Vente vente) {
         this.vente = vente;
         this.bill = new StringBuilder();
+        generateBillContent(); // Générer le contenu immédiatement à la création
     }
 
     private void generateBillContent() {
+        bill.setLength(0); // Nettoyer le contenu précédent
+
         // En-tête
         bill.append("                         MA POISSONNERIE\n");
         bill.append("\t123 Rue de la Mer\n");
@@ -71,38 +74,12 @@ public class TextBillPrinter implements Printable {
         bill.append("                     Software by MA POISSONNERIE\n");
     }
 
-    @Override
-    public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) throws PrinterException {
-        if (pageIndex > 0) {
-            return NO_SUCH_PAGE;
-        }
-
-        Graphics2D g2d = (Graphics2D) graphics;
-        g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
-
-        // Configuration de la police pour un meilleur alignement
-        g2d.setFont(new Font("Monospaced", Font.PLAIN, 10));
-
-        // Impression ligne par ligne
-        String[] lines = bill.toString().split("\n");
-        int y = 15;
-        for (String line : lines) {
-            g2d.drawString(line, 10, y);
-            y += 12;
-        }
-
-        return PAGE_EXISTS;
-    }
-
     public void imprimer() {
         showPreview();
     }
 
     private void showPreview() {
         try {
-            // Générer le contenu du ticket
-            generateBillContent();
-
             // Créer la boîte de dialogue de prévisualisation
             previewDialog = new JDialog((Frame)null, "Prévisualisation du ticket", true);
             previewDialog.setLayout(new BorderLayout());
@@ -164,10 +141,30 @@ public class TextBillPrinter implements Printable {
         }
     }
 
-    public String getBillContent() {
-        if (bill.length() == 0) {
-            generateBillContent();
+    @Override
+    public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) throws PrinterException {
+        if (pageIndex > 0) {
+            return NO_SUCH_PAGE;
         }
+
+        Graphics2D g2d = (Graphics2D) graphics;
+        g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
+
+        // Configuration de la police pour un meilleur alignement
+        g2d.setFont(new Font("Monospaced", Font.PLAIN, 10));
+
+        // Impression ligne par ligne
+        String[] lines = bill.toString().split("\n");
+        int y = 15;
+        for (String line : lines) {
+            g2d.drawString(line, 10, y);
+            y += 12;
+        }
+
+        return PAGE_EXISTS;
+    }
+
+    public String getBillContent() {
         return bill.toString();
     }
 }
