@@ -70,7 +70,6 @@ import java.awt.print.Book;
 import java.awt.Graphics2D;
 
 
-
 public class ReportViewSwing {
     private static final Logger LOGGER = Logger.getLogger(ReportViewSwing.class.getName());
 
@@ -331,12 +330,22 @@ public class ReportViewSwing {
                     break;
                 case "Ticket":
                     try {
-                        // Créer les données du ticket
+                        // Créer une vente factice pour la prévisualisation
                         List<Vente> ventes = new ArrayList<>();
-                        // Simuler l'obtention d'une vente (remplacez par votre logique réelle)
-                        ventes.add(new Vente());
+                        // Créer un client factice
+                        Client clientDemo = new Client(1, "Client Démo", "0123456789", "demo@email.com", "123 rue Demo");
+                        // Créer une vente avec les paramètres requis
+                        Vente venteDemo = new Vente(
+                            1,                          // id
+                            LocalDateTime.now(),        // date
+                            clientDemo,                 // client
+                            false,                      // credit
+                            100.0,                      // total
+                            Vente.ModePaiement.ESPECES  // mode de paiement
+                        );
+                        ventes.add(venteDemo);
                         donnees = ventes;
-                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(); // Fixed: outputStream is now defined here
+                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                         reportController.genererTicketPDF(ventes.get(0), outputStream);
                         byte[] pdfData = PDFGenerator.getBytes(outputStream);
                         afficherPreviewTicket(pdfData);
@@ -430,6 +439,7 @@ public class ReportViewSwing {
 
         mainPanel.add(panel, BorderLayout.CENTER);
     }
+
 
 
 

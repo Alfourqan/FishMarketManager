@@ -729,7 +729,7 @@ public class ConfigurationViewSwing {
         gbc.gridy++;
         panel.add(messagesPanel, gbc);
 
-                // Options supplémentaires
+        // Options supplémentaires
         gbc.gridy++;
         JPanel optionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         optionsPanel.setBorder(BorderFactory.createTitledBorder("Options supplémentaires"));
@@ -1146,7 +1146,7 @@ public class ConfigurationViewSwing {
     }
 
     private JPanel createRecusAdvancedSection() {
-        JPanel panel = createSectionPanel("Options avancées des reçus", MaterialDesign.MDI_RECEIPT_TEXT_PLUS);
+        JPanel panel = createSectionPanel("Options avancées des reçus", MaterialDesign.MDI_RECEIPT_TEXT);
         panel.setLayout(new GridBagLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
