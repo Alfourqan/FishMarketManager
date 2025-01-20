@@ -307,16 +307,8 @@ public class VenteViewSwing {
                         try {
                             venteController.enregistrerVente(vente);
 
-                            String businessName = "MA POISSONNERIE";
-                            String[] address = {
-                                    "123 Rue de la Mer",
-                                    "75001 PARIS",
-                                    "Tel: 01 23 45 67 89",
-                                    "SIRET: 123 568 941 00056"
-                            };
-
-                            // Utilisation du nouveau constructeur pour ticket de vente
-                            TextBillPrinter printer = new TextBillPrinter(vente, businessName, address);
+                            // Utilisation du constructeur simple pour ticket de vente
+                            TextBillPrinter printer = new TextBillPrinter(vente);
                             printer.imprimer();
 
                             previewDialog.dispose();
@@ -659,6 +651,14 @@ public class VenteViewSwing {
         footerPanel.add(validerBtn);
         footerPanel.add(annulerBtn);
 
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.add(headerPanel, BorderLayout.NORTH);
+        topPanel.add(selectionPanel, BorderLayout.CENTER);
+
+        panel.add(topPanel, BorderLayout.NORTH);
+        panel.add(panierScroll, BorderLayout.CENTER);
+        panel.add(footerPanel, BorderLayout.SOUTH);
+
         ajouterBtn.addActionListener(e -> {
             try {
                 Object selectedItem = produitCombo.getSelectedItem();
@@ -697,14 +697,6 @@ public class VenteViewSwing {
 
         annulerBtn.addActionListener(e -> resetForm());
 
-        JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.add(headerPanel, BorderLayout.NORTH);
-        topPanel.add(selectionPanel, BorderLayout.CENTER);
-
-        panel.add(topPanel, BorderLayout.NORTH);
-        panel.add(panierScroll, BorderLayout.CENTER);
-        panel.add(footerPanel, BorderLayout.SOUTH);
-
         return panel;
     }
 
@@ -720,15 +712,141 @@ public class VenteViewSwing {
         titleLabel.setIcon(historyIcon);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
 
-        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        // Ajout du bouton de règlement pour les clients avec crédit
+        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        if (tableVentes.getSelectedRow() != -1) {
+            int row = tableVentes.getSelectedRow();
+            String clientName = (String) tableVentes.getValueAt(row, 1);
+            String type = (String) tableVentes.getValueAt(row, 2);
+
+            if ("Crédit".equals(type)) {
+                Client client = clientController.getClients().stream()
+                        .filter(c -> clientName.equals(c.getNom()))
+                        .findFirst()
+                        .orElse(null);
+
+                if (client != null && client.getSolde() > 0) {
+                    actionPanel.add(createReglerButton(client));
+                }
+            }
+        }
+
         titlePanel.add(titleLabel);
+        titlePanel.add(actionPanel);
+
+        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
         JScrollPane scrollPane = new JScrollPane(tableVentes);
         tableVentes.setFillsViewportHeight(true);
+
+        // Ajouter un listener pour mettre à jour le bouton de règlement
+        tableVentes.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                actionPanel.removeAll();
+                if (tableVentes.getSelectedRow() != -1) {
+                    int row = tableVentes.getSelectedRow();
+                    String clientName = (String) tableVentes.getValueAt(row, 1);
+                    String type = (String) tableVentes.getValueAt(row, 2);
+
+                    if ("Crédit".equals(type)) {
+                        Client client = clientController.getClients().stream()
+                                .filter(c -> clientName.equals(c.getNom()))
+                                .findFirst()
+                                .orElse(null);
+
+                        if (client != null && client.getSolde() > 0) {
+                            actionPanel.add(createReglerButton(client));
+                        }
+                    }
+                }
+                actionPanel.revalidate();
+                actionPanel.repaint();
+            }
+        });
 
         panel.add(titlePanel, BorderLayout.NORTH);
         panel.add(scrollPane, BorderLayout.CENTER);
 
         return panel;
+    }
+
+    private void validerReglement(Client client, double montantRegle) {
+        if (!checkAndSetProcessing()) {
+            JOptionPane.showMessageDialog(mainPanel,
+                    "Une opération est déjà en cours, veuillez patienter",
+                    "Information",
+                    JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        try {
+            // Mettre à jour le solde du client
+            double ancienSolde = client.getSolde();
+            double nouveauSolde = ancienSolde - montantRegle;
+            client.setSolde(nouveauSolde);
+            clientController.mettreAJourClient(client);
+
+            // Générer et imprimer le reçu
+            TextBillPrinter printer = new TextBillPrinter(
+                    "REÇU DE RÈGLEMENT",
+                    client,
+                    montantRegle,
+                    nouveauSolde
+            );
+            printer.imprimer();
+
+            // Rafraîchir l'affichage
+            refreshComboBoxes();
+            refreshVentesTable();
+
+            LOGGER.info(String.format("Règlement effectué pour le client %s: %.2f€, nouveau solde: %.2f€",
+                    client.getNom(), montantRegle, nouveauSolde));
+
+            JOptionPane.showMessageDialog(mainPanel,
+                    "Règlement enregistré avec succès",
+                    "Succès",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, "Erreur lors du règlement", ex);
+            JOptionPane.showMessageDialog(mainPanel,
+                    "Erreur lors du règlement : " + ex.getMessage(),
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
+        } finally {
+            releaseProcessing();
+        }
+    }
+
+    private JButton createReglerButton(Client client) {
+        JButton reglerBtn = createStyledButton("Régler", MaterialDesign.MDI_CASH_MULTIPLE, new Color(0, 150, 136));
+        reglerBtn.addActionListener(e -> {
+            String montantStr = JOptionPane.showInputDialog(mainPanel,
+                    String.format("Solde actuel: %.2f€\nMontant à régler:", client.getSolde()));
+
+            if (montantStr != null && !montantStr.trim().isEmpty()) {
+                try {
+                    double montant = Double.parseDouble(montantStr.replace(",", ".").trim());
+                    if (montant <= 0) {
+                        throw new IllegalArgumentException("Le montant doit être positif");
+                    }
+                    if (montant > client.getSolde()) {
+                        throw new IllegalArgumentException("Le montant ne peut pas dépasser le solde");
+                    }
+                    validerReglement(client, montant);
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(mainPanel,
+                            "Veuillez entrer un montant valide",
+                            "Erreur",
+                            JOptionPane.ERROR_MESSAGE);
+                } catch (IllegalArgumentException ex) {
+                    JOptionPane.showMessageDialog(mainPanel,
+                            ex.getMessage(),
+                            "Erreur",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+        return reglerBtn;
     }
 }

@@ -27,14 +27,15 @@ public class TextBillPrinter implements Printable {
     // Variable pour le ticket de vente
     private Vente vente;
 
-    // Constructeur pour ticket de vente
+    // Unified constructor
     public TextBillPrinter(Vente vente) {
         this.vente = vente;
+        this.type = "TICKET DE VENTE"; // Added type for vente
         this.bill = new StringBuilder();
         generateVenteBillContent();
     }
 
-    // Constructeur pour reçu de règlement
+    // Unified constructor for Reglement
     public TextBillPrinter(String type, Client client, double montantRegle, double nouveauSolde) {
         this.type = type;
         this.client = client;
@@ -56,8 +57,9 @@ public class TextBillPrinter implements Printable {
         bill.append("----------------------------------------------------------------\n");
 
         // Informations de la vente
+        bill.append(String.format("Type: %s\n", type));
         bill.append(String.format("Date: %s\n", DATE_FORMATTER.format(vente.getDate())));
-        bill.append(String.format("Type: %s\n", vente.getModePaiement().getLibelle()));
+        bill.append(String.format("Mode: %s\n", vente.getModePaiement().getLibelle()));
         if (vente.getClient() != null) {
             bill.append(String.format("Client: %s\n", vente.getClient().getNom()));
         }
