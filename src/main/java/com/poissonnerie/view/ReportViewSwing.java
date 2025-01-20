@@ -330,9 +330,20 @@ public class ReportViewSwing {
                     donnees = venteController.getVentes();
                     break;
                 case "Ticket":
-                    // Handle ticket generation (assuming you have a method for this)
-                    //  For example:  donnees = getTicketData();
-                    donnees = new ArrayList<>(); // Placeholder
+                    try {
+                        // Créer les données du ticket
+                        Map<String, Object> ticketData = new HashMap<>();
+                        // Ajouter les données nécessaires pour le ticket
+                        ticketData.put("donnees", donnees);
+                        ticketData.put("date", LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(); // Fixed: outputStream is now defined here
+                        reportController.genererTicketPDF(ticketData, outputStream);
+                        byte[] pdfData = PDFGenerator.getBytes(outputStream);
+                        afficherPreviewTicket(pdfData);
+                    } catch (Exception e) {
+                        LOGGER.log(Level.SEVERE, "Erreur lors de la génération du ticket", e);
+                        throw new RuntimeException("Erreur lors de la génération du ticket", e);
+                    }
                     break;
 
             }
@@ -419,6 +430,9 @@ public class ReportViewSwing {
 
         mainPanel.add(panel, BorderLayout.CENTER);
     }
+
+
+
 
 
 
@@ -773,8 +787,10 @@ public class ReportViewSwing {
                     reportController.genererRapportCreancesPDF(outputStream);
                     break;
                 case "ticket":
-                    // Nouveau cas pour la génération de tickets
-                    PDFGenerator.genererTicket(donnees, outputStream);
+                    Map<String, Object> ticketData = new HashMap<>();
+                    // Ajouter les données nécessaires pour le ticket
+                    ticketData.put("donnees", donnees);
+                    reportController.genererTicketPDF(ticketData, outputStream);
                     break;
                 default:
                     throw new IllegalArgumentException("Type de rapport inconnu: " + type);
@@ -801,147 +817,6 @@ public class ReportViewSwing {
             showErrorMessage("Erreur", MSG_ERREUR_GENERATION + e.getMessage());
         }
     }
-
-    private void afficherStatistiques() {
-        chartPanel.removeAll();
-        chartPanel.setLayout(new GridLayout(2, 2, 15, 15));
-
-        addStatPanel("Ventes", String.format(
-            "Aujourd'hui: %.2f €\nCette semaine: %.2f €\nCe mois: %.2f €",
-            calculerVentesTotal(LocalDate.now(), LocalDate.now()),
-            calculerVentesTotal(LocalDate.now().minusWeeks(1), LocalDate.now()),
-            calculerVentesTotal(LocalDate.now().minusMonths(1), LocalDate.now())
-        ));
-
-        addStatPanel("Stock", String.format(
-            "Total produits: %d\nEn alerte: %d\nValeur totale: %.2f €",
-            getNombreProduits(),
-            getNombreProduitsEnAlerte(),
-            getValeurTotaleStock()
-        ));
-
-        addStatPanel("Fournisseurs", String.format(
-            "Total: %d\nCommandes en cours: %d",
-            getNombreFournisseurs(),
-            getCommandesEnCours()
-        ));
-
-        addStatPanel("Performance", String.format(
-            "Marge brute: %.2f %%\nRotation stock: %.1f jours",
-            calculerMargeBrute(),
-            calculerRotationStock()
-        ));
-
-        chartPanel.revalidate();
-        chartPanel.repaint();
-    }
-
-    private void addStatPanel(String title, String content) {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout(0, 10));
-        panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(220, 220, 220)),
-            BorderFactory.createEmptyBorder(15, 15, 15, 15)
-        ));
-        panel.setBackground(Color.WHITE);
-
-        JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(SUBTITLE_FONT);
-        titleLabel.setForeground(new Color(33, 33, 33));
-
-        JTextArea contentArea = new JTextArea(content);
-        contentArea.setFont(REGULAR_FONT);
-        contentArea.setEditable(false);
-        contentArea.setBackground(panel.getBackground());
-        contentArea.setBorder(null);
-        contentArea.setLineWrap(true);
-        contentArea.setWrapStyleWord(true);
-
-        panel.add(titleLabel, BorderLayout.NORTH);
-        panel.add(contentArea, BorderLayout.CENTER);
-
-        chartPanel.add(panel);
-    }
-
-    // Méthodes utilitaires pour les statistiques
-    private double calculerVentesTotal(LocalDate debut, LocalDate fin) {
-        try {
-            venteController.chargerVentes();
-            return venteController.getVentes().stream()
-                .filter(v -> !v.getDate().toLocalDate().isBefore(debut) &&
-                           !v.getDate().toLocalDate().isAfter(fin))
-                .mapToDouble(Vente::getMontantTotal)
-                .sum();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du calcul du total des ventes", e);
-            return 0.0;
-        }
-    }
-
-    private int getNombreProduits() {
-        try {
-            produitController.chargerProduits();
-            return produitController.getProduits().size();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du chargement des produits", e);
-            return 0;
-        }
-    }
-
-    private int getNombreProduitsEnAlerte() {
-        try {
-            produitController.chargerProduits();
-            return (int) produitController.getProduits().stream()
-                .filter(p -> p.getQuantite() <= p.getSeuilAlerte())
-                .count();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du calcul des produits en alerte", e);
-            return 0;
-        }
-    }
-
-    private double getValeurTotaleStock() {
-        try {
-            produitController.chargerProduits();
-            return produitController.getProduits().stream()
-                .mapToDouble(p -> p.getPrixAchat() * p.getQuantite())
-                .sum();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du calcul de la valeur totale du stock", e);
-            return 0.0;
-        }
-    }
-
-    private int getNombreFournisseurs() {
-        try {
-            fournisseurController.chargerFournisseurs();
-            return fournisseurController.getFournisseurs().size();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du chargement des fournisseurs", e);
-            return 0;
-        }
-    }
-
-    private int getCommandesEnCours() {
-        // À implémenter selon la logique métier
-        return 0;
-    }
-
-    private double calculerMargeBrute() {
-        // À implémenter selon la logique métier
-        return 25.5; // Exemple
-    }
-
-    private double calculerRotationStock() {
-        try {
-            Map<String, Double> performances = reportController.analyserPerformanceStock();
-            return performances.getOrDefault("Taux de rotation du stock", 0.0);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du calcul de la rotation du stock", e);
-            return 0.0;
-        }
-    }
-
 
     private void ouvrirFichierPDF(String nomFichier) {
         try {

@@ -462,7 +462,16 @@ public class ReportController {
     // Ajout de la méthode pour gérer la génération des tickets
     public void genererTicketPDF(Map<String, Object> parametresTicket, ByteArrayOutputStream outputStream) {
         try {
-            PDFGenerator.genererTicket(parametresTicket, outputStream);
+            // Configuration des données du ticket
+            Map<String, Object> donnees = new HashMap<>();
+            if (parametresTicket.containsKey("donnees")) {
+                donnees.put("items", parametresTicket.get("donnees"));
+            }
+            if (parametresTicket.containsKey("date")) {
+                donnees.put("date", parametresTicket.get("date"));
+            }
+
+            PDFGenerator.genererTicket(donnees, outputStream);
             LOGGER.info("Ticket PDF généré avec succès");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du ticket PDF", e);
@@ -477,7 +486,6 @@ public class ReportController {
                 case "ticket":
                     genererTicketPDF(donnees, outputStream);
                     break;
-                // Les autres cas restent inchangés
                 default:
                     throw new IllegalArgumentException("Type de rapport non supporté: " + type);
             }
