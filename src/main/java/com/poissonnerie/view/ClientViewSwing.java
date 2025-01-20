@@ -3,6 +3,7 @@ package com.poissonnerie.view;
 import com.poissonnerie.controller.ClientController;
 import com.poissonnerie.model.Client;
 import com.poissonnerie.util.PDFGenerator;
+import com.poissonnerie.util.TextBillPrinter; // Assuming this import is needed
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
@@ -421,20 +422,25 @@ public class ClientViewSwing {
                 }
 
                 // Tentative de règlement
+                double ancienSolde = client.getSolde();
                 controller.reglerCreance(client, montant);
 
-                // Générer le reçu de règlement
-                String nomFichier = String.format("reglement_%s_%d.pdf",
-                    client.getNom().toLowerCase().replace(" ", "_"),
-                    System.currentTimeMillis());
-                PDFGenerator.genererReglementCreance(client, montant,
-                    client.getSolde(), nomFichier);
+                // Générer et afficher le reçu
+                TextBillPrinter printer = new TextBillPrinter(
+                    "REÇU DE RÈGLEMENT",
+                    client,
+                    montant,
+                    client.getSolde()
+                );
+
+                // Fermer le dialogue de règlement
+                dialog.dispose();
+
+                // Afficher la prévisualisation du reçu
+                printer.imprimer();
 
                 // Rafraîchir l'affichage
                 refreshTable();
-
-                // Fermer le dialogue
-                dialog.dispose();
 
                 // Afficher confirmation
                 JOptionPane.showMessageDialog(mainPanel,
@@ -443,9 +449,8 @@ public class ClientViewSwing {
                         "<table>" +
                         "<tr><td><b>Montant réglé:</b></td><td style='padding-left: 10px'>%.2f €</td></tr>" +
                         "<tr><td><b>Nouveau solde:</b></td><td style='padding-left: 10px'>%.2f €</td></tr>" +
-                        "<tr><td colspan='2'><br>Reçu généré: <b>%s</b></td></tr>" +
                         "</table></html>",
-                        montant, client.getSolde(), nomFichier),
+                        montant, client.getSolde()),
                     "Succès",
                     JOptionPane.INFORMATION_MESSAGE);
 
