@@ -123,10 +123,10 @@ public class ReportViewSwing {
         splitPane.setBorder(null);
 
         JPanel leftPanel = createLeftPanel();
-        JPanel rightPanel = createRightPanel();
+        createRightPanel(); //call createRightPanel here
 
         splitPane.setLeftComponent(leftPanel);
-        splitPane.setRightComponent(rightPanel);
+        //splitPane.setRightComponent(rightPanel); //removed
 
         mainPanel.add(splitPane, BorderLayout.CENTER);
     }
@@ -353,7 +353,7 @@ public class ReportViewSwing {
         }
     }
 
-    private JPanel createRightPanel() {
+    private void createRightPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -370,19 +370,25 @@ public class ReportViewSwing {
 
         headerPanel.add(titleLabel, BorderLayout.CENTER);
 
-        // Panel des statistiques et graphiques
-        statistiquesPanel = new JPanel(new GridLayout(2, 2, 15, 15));
+        // Panel des statistiques et graphiques avec GridLayout optimisé
+        statistiquesPanel = new JPanel(new GridLayout(3, 2, 15, 15));
         statistiquesPanel.setBackground(Color.WHITE);
         statistiquesPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 0, 0));
 
+        // ScrollPane pour gérer le défilement
+        JScrollPane scrollPane = new JScrollPane(statistiquesPanel);
+        scrollPane.setBorder(null);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
         // Ajout des composants
         panel.add(headerPanel, BorderLayout.NORTH);
-        panel.add(statistiquesPanel, BorderLayout.CENTER);
+        panel.add(scrollPane, BorderLayout.CENTER);
 
         // Mise à jour initiale des graphiques
         updateCharts();
 
-        return panel;
+        mainPanel.add(panel, BorderLayout.CENTER);
     }
 
 
@@ -398,14 +404,42 @@ public class ReportViewSwing {
         // Graphique des modes de paiement
         addPaiementsChart();
 
+        // Graphique de performance du stock
+        addPerformanceChart();
+
         // Graphique de rentabilité par produit
         addRentabiliteChart();
 
-        // Graphique d'évolution des ventes
-        addEvolutionVentesChart();
-
+        // Rafraîchissement du panel
         statistiquesPanel.revalidate();
         statistiquesPanel.repaint();
+    }
+
+    private void addPerformanceChart() {
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+        try {
+            Map<String, Double> performances = reportController.analyserPerformanceStock();
+
+            for (Map.Entry<String, Double> entry : performances.entrySet()) {
+                dataset.addValue(entry.getValue(), "Performance", entry.getKey());
+            }
+
+            JFreeChart chart = ChartFactory.createBarChart(
+                "Performance du stock",
+                "Indicateur",
+                "Valeur",
+                dataset
+            );
+
+            ChartPanel chartPanel = new ChartPanel(chart);
+            chartPanel.setPreferredSize(new Dimension(300, 200));
+            addStyledChartPanel(chartPanel, "Performance du stock");
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la création du graphique de performance", e);
+            showErrorMessage("Erreur", "Impossible de générer le graphique de performance");
+        }
     }
 
     private void addVentesChart() {
@@ -853,8 +887,13 @@ public class ReportViewSwing {
     }
 
     private double calculerRotationStock() {
-        // À implémenter selon la logique métier
-        return 15.3; // Exemple
+        try {
+            Map<String, Double> performances = reportController.analyserPerformanceStock();
+            return performances.getOrDefault("Taux de rotation du stock", 0.0);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors du calcul de la rotation du stock", e);
+            return 0.0;
+        }
     }
 
 
