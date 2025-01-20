@@ -531,7 +531,7 @@ public class PDFGenerator {
 
             // Imprimer directement via BillPrint
             BillPrintGenerator billPrinter = new BillPrintGenerator(vente);
-            billPrinter.print();
+            billPrinter.imprimer();
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du ticket", e);

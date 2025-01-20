@@ -4,6 +4,7 @@ com/poissonnerie/view/InventaireViewSwing$5.class
 com/poissonnerie/view/VenteViewSwing$3.class
 com/poissonnerie/view/SplashScreen.class
 com/poissonnerie/controller/ClientController.class
+com/poissonnerie/util/BillPrint.class
 com/poissonnerie/util/BillPrintGenerator.class
 com/poissonnerie/controller/FournisseurController.class
 com/poissonnerie/view/ClientViewSwing$1.class

@@ -5,6 +5,7 @@ import com.poissonnerie.controller.ProduitController;
 import com.poissonnerie.controller.ClientController;
 import com.poissonnerie.model.*;
 import com.poissonnerie.util.PDFGenerator;
+import com.poissonnerie.util.BillPrint; // Import the BillPrint class
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -322,9 +323,12 @@ public class VenteViewSwing {
                     confirmerBtn.addActionListener(confirmEvent -> {
                         try {
                             venteController.enregistrerVente(vente);
-                            PDFGenerator.genererTicket(vente, "ticket_" + vente.getId() + ".pdf");
-                            previewDialog.dispose();
 
+                            // Utiliser la nouvelle classe BillPrint pour l'impression
+                            BillPrint printer = new BillPrint(vente);
+                            printer.imprimer();
+
+                            previewDialog.dispose();
                             resetForm();
                             refreshComboBoxes();
                             refreshVentesTable();
@@ -333,8 +337,7 @@ public class VenteViewSwing {
                                     vente.getId(), vente.getTotal()));
 
                             JOptionPane.showMessageDialog(mainPanel,
-                                    "<html>Vente enregistrée avec succès<br>Ticket généré: <b>ticket_" +
-                                            vente.getId() + ".pdf</b></html>",
+                                    "Vente enregistrée avec succès",
                                     "Succès",
                                     JOptionPane.INFORMATION_MESSAGE);
                         } catch (Exception ex) {

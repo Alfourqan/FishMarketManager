@@ -25,7 +25,7 @@ public class BillPrintGenerator implements Printable {
     private static final String BUSINESS_CITY = "City Name, State 54321";
     private static final String BUSINESS_PHONE = "123-456-7890";
 
-    // Merchant information
+    // Informations du marchand
     private static final String MERCHANT_ID = "987-654321";
     private static final String TERMINAL_ID = "0123456789";
 
@@ -44,8 +44,9 @@ public class BillPrintGenerator implements Printable {
 
         int y = 10;
         int leftMargin = 10;
+        int contentWidth = (int) pageFormat.getImageableWidth() - 20;
 
-        // Business Information
+        // En-tête de l'entreprise
         g2d.setFont(new Font("Monospaced", Font.BOLD, 12));
         centerText(g2d, BUSINESS_NAME, pageFormat, y);
         y += 15;
@@ -60,32 +61,29 @@ public class BillPrintGenerator implements Printable {
         centerText(g2d, BUSINESS_PHONE, pageFormat, y);
         y += 20;
 
-        // Merchant Information
-        g2d.setFont(new Font("Monospaced", Font.PLAIN, 10));
+        // Information du marchand et terminal
         String merchantInfo = String.format("Merchant ID:      %s", MERCHANT_ID);
+        String terminalInfo = String.format("Terminal ID:      %s", TERMINAL_ID);
         g2d.drawString(merchantInfo, leftMargin, y);
         y += 15;
-        String terminalInfo = String.format("Terminal ID:      %s", TERMINAL_ID);
         g2d.drawString(terminalInfo, leftMargin, y);
-        y += 15;
+        y += 20;
 
-        // Transaction Information
+        // Information de transaction
         String transactionId = String.format("Transaction ID:   #%s", vente.getId());
+        String type = String.format("Type:            %s", vente.getModePaiement().getLibelle());
         g2d.drawString(transactionId, leftMargin, y);
         y += 15;
-        String type = String.format("Type:            %s", vente.getModePaiement().getLibelle());
         g2d.drawString(type, leftMargin, y);
         y += 20;
 
-        // Purchase Date
-        String purchaseTitle = "PURCHASE";
-        centerText(g2d, purchaseTitle, pageFormat, y);
+        // Date d'achat
+        centerText(g2d, "PURCHASE", pageFormat, y);
         y += 15;
-        String date = DATE_FORMATTER.format(vente.getDate());
-        centerText(g2d, date, pageFormat, y);
+        centerText(g2d, DATE_FORMATTER.format(vente.getDate()), pageFormat, y);
         y += 20;
 
-        // Payment card details (masked)
+        // Détails de la carte
         String cardNumber = "************1234";
         g2d.drawString("Number:          " + cardNumber, leftMargin, y);
         y += 15;
@@ -99,11 +97,10 @@ public class BillPrintGenerator implements Printable {
         y += 20;
 
         // Ligne de séparation
-        drawDottedLine(g2d, leftMargin, y, (int)pageFormat.getImageableWidth() - 20);
+        drawDottedLine(g2d, leftMargin, y, contentWidth);
         y += 15;
 
         // Articles
-        g2d.setFont(new Font("Monospaced", Font.PLAIN, 10));
         for (Vente.LigneVente ligne : vente.getLignes()) {
             String article = String.format("%-20s %8.2f", 
                 truncateString(ligne.getProduit().getNom(), 20),
@@ -113,7 +110,7 @@ public class BillPrintGenerator implements Printable {
         }
 
         y += 5;
-        drawDottedLine(g2d, leftMargin, y, (int)pageFormat.getImageableWidth() - 20);
+        drawDottedLine(g2d, leftMargin, y, contentWidth);
         y += 15;
 
         // Totaux
@@ -125,7 +122,7 @@ public class BillPrintGenerator implements Printable {
         g2d.drawString(salesTax, leftMargin, y);
         y += 15;
 
-        drawDottedLine(g2d, leftMargin, y, (int)pageFormat.getImageableWidth() - 20);
+        drawDottedLine(g2d, leftMargin, y, contentWidth);
         y += 15;
 
         // Total final
@@ -162,16 +159,17 @@ public class BillPrintGenerator implements Printable {
         return str.substring(0, length - 3) + "...";
     }
 
-    public boolean print() {
+    public void imprimer() {
         try {
             PrinterJob job = PrinterJob.getPrinterJob();
             job.setPrintable(this);
 
+            // Configuration de l'impression
             PrintRequestAttributeSet attributes = new HashPrintRequestAttributeSet();
             attributes.add(new Copies(1));
             attributes.add(MediaSizeName.INVOICE);
 
-            // Chercher l'imprimante de tickets
+            // Recherche d'une imprimante de tickets
             PrintService[] services = PrintServiceLookup.lookupPrintServices(null, null);
             PrintService selectedService = null;
 
@@ -192,25 +190,15 @@ public class BillPrintGenerator implements Printable {
             if (selectedService != null) {
                 job.setPrintService(selectedService);
                 LOGGER.info("Configuration de l'impression avec l'imprimante: " + selectedService.getName());
-
-                if (job.printDialog(attributes)) {
-                    job.print(attributes);
-                    LOGGER.info("Ticket imprimé avec succès");
-                    return true;
-                } else {
-                    LOGGER.info("Impression annulée par l'utilisateur");
-                    return false;
-                }
+                job.print(attributes);
+                LOGGER.info("Ticket imprimé avec succès");
             } else {
                 LOGGER.warning("Aucune imprimante de tickets trouvée. Utilisation de l'imprimante par défaut.");
                 if (job.printDialog(attributes)) {
                     job.print(attributes);
                     LOGGER.info("Ticket imprimé avec succès sur l'imprimante par défaut");
-                    return true;
                 }
             }
-
-            return false;
         } catch (PrinterException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de l'impression du ticket", e);
             throw new RuntimeException("Erreur d'impression: " + e.getMessage());
