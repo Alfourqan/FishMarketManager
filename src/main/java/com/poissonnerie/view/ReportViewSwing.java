@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import org.kordamp.ikonli.materialdesign.MaterialDesign;
 import org.kordamp.ikonli.swing.FontIcon;
-import com.poissonnerie.util.PDFUtils;
+import com.poissonnerie.util.PDFGenerator;
 import com.poissonnerie.util.ExcelGenerator;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -415,7 +415,6 @@ public class ReportViewSwing {
 
 
 
-
     private void updateCharts() {
         statistiquesPanel.removeAll();
 
@@ -778,11 +777,11 @@ public class ReportViewSwing {
             }
 
             // Afficher la prévisualisation
-            byte[] pdfData = PDFUtils.getBytes(outputStream);
+            byte[] pdfData = PDFGenerator.getBytes(outputStream);
             afficherPrevisualisation(pdfData);
 
             // Sauvegarder le fichier
-            PDFUtils.sauvegarderPDF(pdfData, nomFichier);
+            PDFGenerator.sauvegarderPDF(pdfData, nomFichier);
             showSuccessMessage("Succès", MSG_SUCCES_GENERATION + nomFichier);
 
         } catch (Exception e) {

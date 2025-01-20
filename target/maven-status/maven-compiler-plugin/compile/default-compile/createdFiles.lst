@@ -56,7 +56,6 @@ com/poissonnerie/model/ConfigurationParam.class
 com/poissonnerie/view/SplashScreen$2.class
 com/poissonnerie/view/ConfigurationViewSwing.class
 com/poissonnerie/view/VenteViewSwing$4.class
-com/poissonnerie/util/PDFUtils.class
 com/poissonnerie/view/FournisseurViewSwing.class
 com/poissonnerie/view/VenteViewSwing$2.class
 com/poissonnerie/view/ProduitViewSwing$1.class
