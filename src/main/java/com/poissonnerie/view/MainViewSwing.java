@@ -75,7 +75,7 @@ public class MainViewSwing {
             {"Produits", MaterialDesign.MDI_PACKAGE},
             {"Ventes", MaterialDesign.MDI_CART},
             {"Clients", MaterialDesign.MDI_ACCOUNT},
-            {"Factures", MaterialDesign.MDI_FILE},
+            //{"Factures", MaterialDesign.MDI_FILE},
             {"Fournisseurs", MaterialDesign.MDI_TRUCK},
             {"Inventaire", MaterialDesign.MDI_CLIPBOARD},
             {"Caisse", MaterialDesign.MDI_CASH},

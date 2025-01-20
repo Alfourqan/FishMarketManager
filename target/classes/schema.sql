@@ -1,3 +1,20 @@
+-- Ajout des index pour optimiser les performances
+CREATE INDEX IF NOT EXISTS idx_produits_nom ON produits(nom);
+CREATE INDEX IF NOT EXISTS idx_produits_categorie ON produits(categorie);
+CREATE INDEX IF NOT EXISTS idx_clients_nom ON clients(nom);
+CREATE INDEX IF NOT EXISTS idx_ventes_date ON ventes(date);
+CREATE INDEX IF NOT EXISTS idx_ventes_client ON ventes(client_id);
+CREATE INDEX IF NOT EXISTS idx_lignes_vente_vente ON lignes_vente(vente_id);
+CREATE INDEX IF NOT EXISTS idx_lignes_vente_produit ON lignes_vente(produit_id);
+CREATE INDEX IF NOT EXISTS idx_mouvements_caisse_date ON mouvements_caisse(date);
+CREATE INDEX IF NOT EXISTS idx_mouvements_caisse_type ON mouvements_caisse(type);
+
+PRAGMA journal_mode = WAL;
+PRAGMA synchronous = NORMAL;
+PRAGMA cache_size = 20000;
+PRAGMA page_size = 4096;
+PRAGMA temp_store = MEMORY;
+PRAGMA mmap_size = 30000000000;
 PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS configurations (

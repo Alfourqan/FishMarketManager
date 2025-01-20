@@ -32,7 +32,8 @@ import java.util.Set;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ConfigurationViewSwing {
     private static final Logger LOGGER = Logger.getLogger(ConfigurationViewSwing.class.getName());
@@ -47,21 +48,13 @@ public class ConfigurationViewSwing {
     private JPanel previewPanel;
     private static final Set<String> FORMATS_IMAGE_AUTORISES = new HashSet<>(Arrays.asList("jpg", "jpeg", "png", "gif"));
     private static final long TAILLE_MAX_LOGO = 1024 * 1024; // 1MB
+    private static final ExecutorService previewExecutor = Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "PreviewUpdater");
+        t.setDaemon(true);
+        return t;
+    });
 
-    public static final String CLE_TAUX_TVA = "TAUX_TVA";
-    public static final String CLE_TVA_ENABLED = "TVA_ENABLED";
-    public static final String CLE_TVA_CODE = "TVA_CODE";
-    public static final String CLE_TVA_TYPE = "TVA_TYPE";
-    public static final String CLE_STYLE_BORDURE_RECU = "STYLE_BORDURE_RECU";
-    public static final String CLE_POLICE_TITRE_RECU = "POLICE_TITRE_RECU";
-    public static final String CLE_POLICE_TEXTE_RECU = "POLICE_TEXTE_RECU";
-    public static final String CLE_ALIGNEMENT_TITRE_RECU = "ALIGNEMENT_TITRE_RECU";
-    public static final String CLE_ALIGNEMENT_TEXTE_RECU = "ALIGNEMENT_TEXTE_RECU";
-    public static final String CLE_MESSAGE_COMMERCIAL_RECU = "MESSAGE_COMMERCIAL_RECU";
-    public static final String CLE_AFFICHER_TVA_DETAILS = "AFFICHER_TVA_DETAILS";
-    public static final String CLE_INFO_SUPPLEMENTAIRE_RECU = "INFO_SUPPLEMENTAIRE_RECU";
-    public static final String CLE_EN_TETE_RECU = "CLE_EN_TETE_RECU";
-    public static final String CLE_PIED_PAGE_RECU = "CLE_PIED_PAGE_RECU";
+    private Timer previewUpdateTimer;
 
 
     public ConfigurationViewSwing() {
@@ -69,6 +62,37 @@ public class ConfigurationViewSwing {
         controller = new ConfigurationController();
         champsSaisie = new HashMap<>();
 
+        SwingUtilities.invokeLater(this::initializeComponents);
+        Runtime.getRuntime().addShutdownHook(new Thread(previewExecutor::shutdown));
+    }
+
+    private void initializeComponents() {
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        mainPanel.setBackground(couleurFond);
+
+        // Initialisation des composants en arrière-plan
+        SwingWorker<Void, Void> worker = new SwingWorker<>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                initializeFields();
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    get();
+                    completeInitialization();
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation", e);
+                    showErrorMessage("Erreur d'initialisation : " + e.getMessage());
+                }
+            }
+        };
+        worker.execute();
+    }
+
+    private void initializeFields() {
         // Initialisation des champs de base
         champsSaisie.put(ConfigurationParam.CLE_NOM_ENTREPRISE, new JTextField());
         champsSaisie.put(ConfigurationParam.CLE_ADRESSE_ENTREPRISE, new JTextField());
@@ -94,19 +118,9 @@ public class ConfigurationViewSwing {
         champsSaisie.put(ConfigurationParam.CLE_POLICE_TITRE_RECU, new JSpinner(new SpinnerNumberModel(14, 8, 24, 1)));
         champsSaisie.put(ConfigurationParam.CLE_POLICE_TEXTE_RECU, new JSpinner(new SpinnerNumberModel(12, 8, 20, 1)));
         champsSaisie.put(ConfigurationParam.CLE_AFFICHER_TVA_DETAILS, new JCheckBox("Afficher les détails de TVA"));
-
-        initializeComponents();
-        loadData();
     }
 
-    private void initializeComponents() {
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        mainPanel.setBackground(couleurFond);
-
-        // Initialisation des champs manquants
-        JTextField logoPathField = new JTextField();
-        champsSaisie.put(ConfigurationParam.CLE_LOGO_PATH, logoPathField);
-
+    private void completeInitialization() {
         JPanel configPanel = new JPanel();
         configPanel.setLayout(new BoxLayout(configPanel, BoxLayout.Y_AXIS));
         configPanel.setOpaque(false);
@@ -132,72 +146,29 @@ public class ConfigurationViewSwing {
         mainPanel.add(headerPanel, BorderLayout.NORTH);
         mainPanel.add(splitPane, BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+
+        // Chargement initial des données
+        SwingWorker<Void, Void> dataLoader = new SwingWorker<>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                loadData();
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    get();
+                    updatePreview();
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors du chargement des données", e);
+                    showErrorMessage("Erreur de chargement : " + e.getMessage());
+                }
+            }
+        };
+        dataLoader.execute();
     }
 
-    private JPanel createPreviewPanel() {
-        JPanel panel = new JPanel(new BorderLayout());
-        Border titledBorder = BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200)),
-            "Prévisualisation du reçu",
-            TitledBorder.LEFT,
-            TitledBorder.TOP,
-            sousTitreFont
-        );
-        panel.setBorder(titledBorder);
-        panel.setBackground(Color.WHITE);
-
-        JTextArea previewArea = new JTextArea();
-        previewArea.setFont(new Font("Monospace", Font.PLAIN, 12));
-        previewArea.setEditable(false);
-        previewArea.setMargin(new Insets(10, 10, 10, 10));
-
-        panel.add(new JScrollPane(previewArea), BorderLayout.CENTER);
-
-        JButton updatePreviewButton = createStyledButton("Mettre à jour la prévisualisation",
-            MaterialDesign.MDI_REFRESH, new Color(76, 175, 80));
-        updatePreviewButton.addActionListener(e -> updatePreview());
-        panel.add(updatePreviewButton, BorderLayout.SOUTH);
-
-        return panel;
-    }
-
-    private String repeat(String str, int count) {
-        if (str == null) {
-            return null;
-        }
-        if (count <= 0) {
-            return "";
-        }
-        StringBuilder result = new StringBuilder();
-        for (int i = 0; i < count; i++) {
-            result.append(str);
-        }
-        return result.toString();
-    }
-
-    private String alignerTexte(String texte, String alignement, int largeur) {
-        if (texte.length() > largeur) {
-            return texte.substring(0, largeur);
-        }
-
-        int espaces = largeur - texte.length();
-        String resultat;
-
-        switch (alignement) {
-            case "DROITE":
-                resultat = repeat(" ", espaces) + texte;
-                break;
-            case "CENTRE":
-                int espacesAvant = espaces / 2;
-                int espacesApres = espaces - espacesAvant;
-                resultat = repeat(" ", espacesAvant) + texte + repeat(" ", espacesApres);
-                break;
-            default: // GAUCHE
-                resultat = texte + repeat(" ", espaces);
-                break;
-        }
-        return resultat;
-    }
 
     private void updatePreview() {
         if (!SwingUtilities.isEventDispatchThread()) {
@@ -205,15 +176,14 @@ public class ConfigurationViewSwing {
             return;
         }
 
-        // Utiliser un timer pour débouncer les mises à jour
         if (previewUpdateTimer != null && previewUpdateTimer.isRunning()) {
             previewUpdateTimer.restart();
             return;
         }
 
         if (previewUpdateTimer == null) {
-            previewUpdateTimer = new Timer(500, e -> {
-                updatePreviewContent();
+            previewUpdateTimer = new Timer(250, e -> {
+                previewExecutor.submit(this::updatePreviewContent);
                 previewUpdateTimer.stop();
             });
             previewUpdateTimer.setRepeats(false);
@@ -225,7 +195,7 @@ public class ConfigurationViewSwing {
     private void updatePreviewContent() {
         try {
             JTextArea previewArea = (JTextArea) ((JScrollPane) previewPanel.getComponent(0)).getViewport().getView();
-            StringBuilder preview = new StringBuilder();
+            StringBuilder preview = new StringBuilder(1024); // Pré-allocation pour éviter les réallocations
 
             // Récupération des paramètres de style
             String styleBordure = ((JComboBox<?>) champsSaisie.get(ConfigurationParam.CLE_STYLE_BORDURE_RECU)).getSelectedItem().toString();
@@ -345,9 +315,76 @@ public class ConfigurationViewSwing {
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la mise à jour de l'aperçu", e);
-            showErrorMessage("Erreur lors de la mise à jour de l'aperçu : " + e.getMessage());
+            SwingUtilities.invokeLater(() ->
+                showErrorMessage("Erreur lors de la mise à jour de l'aperçu : " + e.getMessage()));
         }
     }
+
+    private JPanel createPreviewPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        Border titledBorder = BorderFactory.createTitledBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            "Prévisualisation du reçu",
+            TitledBorder.LEFT,
+            TitledBorder.TOP,
+            sousTitreFont
+        );
+        panel.setBorder(titledBorder);
+        panel.setBackground(Color.WHITE);
+
+        JTextArea previewArea = new JTextArea();
+        previewArea.setFont(new Font("Monospace", Font.PLAIN, 12));
+        previewArea.setEditable(false);
+        previewArea.setMargin(new Insets(10, 10, 10, 10));
+
+        panel.add(new JScrollPane(previewArea), BorderLayout.CENTER);
+
+        JButton updatePreviewButton = createStyledButton("Mettre à jour la prévisualisation",
+            MaterialDesign.MDI_REFRESH, new Color(76, 175, 80));
+        updatePreviewButton.addActionListener(e -> updatePreview());
+        panel.add(updatePreviewButton, BorderLayout.SOUTH);
+
+        return panel;
+    }
+
+    private String repeat(String str, int count) {
+        if (str == null) {
+            return null;
+        }
+        if (count <= 0) {
+            return "";
+        }
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < count; i++) {
+            result.append(str);
+        }
+        return result.toString();
+    }
+
+    private String alignerTexte(String texte, String alignement, int largeur) {
+        if (texte.length() > largeur) {
+            return texte.substring(0, largeur);
+        }
+
+        int espaces = largeur - texte.length();
+        String resultat;
+
+        switch (alignement) {
+            case "DROITE":
+                resultat = repeat(" ", espaces) + texte;
+                break;
+            case "CENTRE":
+                int espacesAvant = espaces / 2;
+                int espacesApres = espaces - espacesAvant;
+                resultat = repeat(" ", espacesAvant) + texte + repeat(" ", espacesApres);
+                break;
+            default: // GAUCHE
+                resultat = texte + repeat(" ", espaces);
+                break;
+        }
+        return resultat;
+    }
+
 
     private JPanel createHeaderPanel() {
         JPanel headerPanel = new JPanel(new BorderLayout(15, 0));
@@ -835,7 +872,7 @@ public class ConfigurationViewSwing {
                 if (!champsSaisie.containsKey(cle)) {
                     LOGGER.warning("Champ manquant dans champsSaisie: " + cle);
                     // Créer un composant par défaut selon le type
-                    if (cle.equals(ConfigurationParam.CLE_TVA_ENABLED) || 
+                    if (cle.equals(ConfigurationParam.CLE_TVA_ENABLED) ||
                         cle.equals(ConfigurationParam.CLE_AFFICHER_TVA_DETAILS)) {
                         champsSaisie.put(cle, new JCheckBox());
                     } else if (cle.equals(ConfigurationParam.CLE_TAUX_TVA)) {
@@ -845,7 +882,7 @@ public class ConfigurationViewSwing {
                              cle.equals(ConfigurationParam.CLE_ALIGNEMENT_TITRE_RECU) ||
                              cle.equals(ConfigurationParam.CLE_ALIGNEMENT_TEXTE_RECU)) {
                         champsSaisie.put(cle, new JComboBox<>(new String[]{"COMPACT", "DETAILLE"}));
-                    } else if (cle.contains("MESSAGE") || cle.contains("EN_TETE") || 
+                    } else if (cle.contains("MESSAGE") || cle.contains("EN_TETE") ||
                               cle.contains("PIED_PAGE") || cle.contains("INFO")) {
                         champsSaisie.put(cle, new JTextArea());
                     } else {
@@ -1129,6 +1166,4 @@ public class ConfigurationViewSwing {
     public JPanel getMainPanel() {
         return mainPanel;
     }
-    // Ajout d'une variable pour le timer de débounce
-    private Timer previewUpdateTimer;
 }
