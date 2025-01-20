@@ -97,3 +97,19 @@ INSERT OR IGNORE INTO configurations (cle, valeur, description) VALUES
 ('DEVISE', '€', 'Symbole de la devise'),
 ('SEPARATEUR_MILLIERS', ' ', 'Séparateur des milliers'),
 ('DECIMALES', '2', 'Nombre de décimales pour les montants');
+-- Nouvelles options de personnalisation des tickets
+INSERT OR IGNORE INTO configurations (cle, valeur, description) VALUES
+('AFFICHER_CODE_BARRES', 'true', 'Afficher le code-barres sur le ticket'),
+('POSITION_CODE_BARRES', 'BOTTOM', 'Position du code-barres (TOP ou BOTTOM)'),
+('AFFICHER_QR_CODE', 'false', 'Afficher un QR code sur le ticket'),
+('CONTENU_QR_CODE', 'NUMERO_TICKET', 'Contenu du QR code (NUMERO_TICKET, URL, ou PERSONNALISE)'),
+('AFFICHER_COORDONNEES_CLIENT', 'true', 'Afficher les coordonnées du client sur le ticket'),
+('STYLE_TABLEAU_PRODUITS', 'GRILLE', 'Style du tableau des produits (GRILLE, SIMPLE, ou COMPACT)'),
+('AFFICHER_SIGNATURE', 'false', 'Afficher un espace pour la signature'),
+('POSITION_SIGNATURE', 'BOTTOM', 'Position de la signature (TOP ou BOTTOM)'),
+('AFFICHER_CONDITIONS', 'true', 'Afficher les conditions générales de vente'),
+('TEXTE_CONDITIONS', 'Merci de votre confiance !', 'Texte des conditions à afficher'),
+('AFFICHER_POINTS_FIDELITE', 'false', 'Afficher les points de fidélité'),
+('FORMAT_IMPRESSION', 'A4', 'Format d''impression (A4, A5, ou TICKET)'),
+('ORIENTATION_IMPRESSION', 'PORTRAIT', 'Orientation de l''impression (PORTRAIT ou PAYSAGE)'),
+('LANGUE_TICKET', 'FR', 'Langue du ticket (FR, EN)');

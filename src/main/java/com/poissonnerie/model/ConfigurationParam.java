@@ -127,7 +127,7 @@ public class ConfigurationParam {
             case CLE_AFFICHER_SIGNATURE:
             case CLE_AFFICHER_CONDITIONS:
             case CLE_AFFICHER_POINTS_FIDELITE:
-            case CLE_AFFICHER_TVA_DETAILS: //Added from edited snippet
+            case CLE_AFFICHER_TVA_DETAILS:
                 lowercaseValue = cleanValue.toLowerCase();
                 if (!lowercaseValue.equals("true") && !lowercaseValue.equals("false")) {
                     throw new IllegalArgumentException("La valeur doit être 'true' ou 'false'");

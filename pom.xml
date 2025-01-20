@@ -3,6 +3,13 @@
   <groupId>com.poissonnerie</groupId>
   <artifactId>gestion-poissonnerie</artifactId>
   <version>1.0-SNAPSHOT</version>
+
+  <properties>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>com.formdev</groupId>
@@ -100,6 +107,7 @@
       <type>jar</type>
     </dependency>
   </dependencies>
+
   <build>
     <plugins>
       <plugin>
@@ -107,24 +115,20 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.11.0</version>
         <configuration>
-          <dynamicDependencies></dynamicDependencies>
+          <source>17</source>
+          <target>17</target>
+          <release>17</release>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.0.0</version>
-        <configuration>
-          <dynamicDependencies></dynamicDependencies>
-        </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.1.0</version>
-        <configuration>
-          <dynamicDependencies></dynamicDependencies>
-        </configuration>
       </plugin>
     </plugins>
   </build>
