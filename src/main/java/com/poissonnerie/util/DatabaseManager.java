@@ -9,61 +9,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import org.sqlite.SQLiteConfig;
-import org.sqlite.SQLiteDataSource;
 
 public class DatabaseManager {
     private static final Logger LOGGER = Logger.getLogger(DatabaseManager.class.getName());
-    private static final String DB_FILE = "poissonnerie.db";
-    private static final String DB_URL = "jdbc:sqlite:" + DB_FILE;
-    private static ThreadLocal<Connection> connectionHolder = new ThreadLocal<>();
-    private static volatile SQLiteDataSource dataSource;
     private static boolean isInitialized = false;
 
-    private static void initializeDataSource() {
-        synchronized (DatabaseManager.class) {
-            if (dataSource == null) {
-                try {
-                    SQLiteConfig config = new SQLiteConfig();
-                    config.enforceForeignKeys(true);
-                    config.setBusyTimeout(30000);
-                    config.setReadOnly(false);
-                    config.setJournalMode(SQLiteConfig.JournalMode.WAL);
-                    config.setSynchronous(SQLiteConfig.SynchronousMode.NORMAL);
-                    config.setCacheSize(2000);
-                    config.setPageSize(4096);
-
-                    dataSource = new SQLiteDataSource(config);
-                    dataSource.setUrl(DB_URL);
-
-                    LOGGER.info("DataSource initialisé avec succès");
-                } catch (Exception e) {
-                    LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation du DataSource", e);
-                    throw new RuntimeException("Impossible d'initialiser le DataSource", e);
-                }
-            }
-        }
-    }
-
     public static synchronized Connection getConnection() throws SQLException {
-        if (dataSource == null) {
-            initializeDataSource();
-        }
-
-        Connection conn = connectionHolder.get();
-        if (conn == null || conn.isClosed()) {
-            conn = dataSource.getConnection();
-            connectionHolder.set(conn);
-
-            try (Statement stmt = conn.createStatement()) {
-                stmt.execute("PRAGMA foreign_keys = ON");
-                stmt.execute("PRAGMA journal_mode = WAL");
-                stmt.execute("PRAGMA synchronous = NORMAL");
-            }
-
-            LOGGER.info("Nouvelle connexion créée et configurée");
-        }
-        return conn;
+        return DatabaseConnectionPool.getConnection();
     }
 
     public static void initDatabase() {
@@ -127,30 +79,12 @@ public class DatabaseManager {
     }
 
     public static void closeConnections() {
-        Connection conn = connectionHolder.get();
-        if (conn != null) {
-            try {
-                if (!conn.isClosed()) {
-                    conn.close();
-                    LOGGER.info("Connexion fermée avec succès");
-                }
-            } catch (SQLException e) {
-                LOGGER.log(Level.WARNING, "Erreur lors de la fermeture de la connexion", e);
-            } finally {
-                connectionHolder.remove();
-            }
-        }
+        DatabaseConnectionPool.closePool();
     }
 
     public static void resetConnection() {
         LOGGER.info("Réinitialisation de la connexion à la base de données");
-        closeConnections();
-        try {
-            getConnection();
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la réinitialisation de la connexion", e);
-            throw new RuntimeException("Erreur lors de la réinitialisation de la connexion", e);
-        }
+        DatabaseConnectionPool.closePool();
     }
 
     public static void checkDatabaseHealth() throws SQLException {

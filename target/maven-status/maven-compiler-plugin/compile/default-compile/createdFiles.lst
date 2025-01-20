@@ -8,6 +8,7 @@ com/poissonnerie/controller/FournisseurController.class
 com/poissonnerie/view/ClientViewSwing$1.class
 com/poissonnerie/model/MouvementCaisse.class
 com/poissonnerie/model/Client.class
+com/poissonnerie/util/DatabaseConnectionPool.class
 com/poissonnerie/util/PDFGenerator$1.class
 com/poissonnerie/controller/ConfigurationController.class
 com/poissonnerie/view/FournisseurViewSwing$3.class

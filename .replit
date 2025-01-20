@@ -89,7 +89,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "mvn clean compile exec:java -Dexec.mainClass=\"com.poissonnerie.util.DatabaseManager\" -Dexec.args=\"init\""
+args = "mvn clean compile exec:java -Dexec.mainClass='com.poissonnerie.util.DatabaseManager' -Dexec.args='init'"
 
 [[workflows.workflow]]
 name = "Java Build"

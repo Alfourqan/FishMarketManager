@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Optional;
 
 
-
 public class ConfigurationViewSwing {
     private static final Logger LOGGER = Logger.getLogger(ConfigurationViewSwing.class.getName());
     private final JPanel mainPanel;
@@ -201,6 +200,29 @@ public class ConfigurationViewSwing {
     }
 
     private void updatePreview() {
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(this::updatePreview);
+            return;
+        }
+
+        // Utiliser un timer pour débouncer les mises à jour
+        if (previewUpdateTimer != null && previewUpdateTimer.isRunning()) {
+            previewUpdateTimer.restart();
+            return;
+        }
+
+        if (previewUpdateTimer == null) {
+            previewUpdateTimer = new Timer(500, e -> {
+                updatePreviewContent();
+                previewUpdateTimer.stop();
+            });
+            previewUpdateTimer.setRepeats(false);
+        }
+
+        previewUpdateTimer.start();
+    }
+
+    private void updatePreviewContent() {
         try {
             JTextArea previewArea = (JTextArea) ((JScrollPane) previewPanel.getComponent(0)).getViewport().getView();
             StringBuilder preview = new StringBuilder();
@@ -316,7 +338,11 @@ public class ConfigurationViewSwing {
                 preview.append("N° Ticket: #").append(String.format("%05d", 12345)).append("\n");
             }
 
-            previewArea.setText(preview.toString());
+            // Mise à jour efficace du texte
+            String newPreview = preview.toString();
+            if (!newPreview.equals(previewArea.getText())) {
+                previewArea.setText(newPreview);
+            }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la mise à jour de l'aperçu", e);
             showErrorMessage("Erreur lors de la mise à jour de l'aperçu : " + e.getMessage());
@@ -1103,4 +1129,6 @@ public class ConfigurationViewSwing {
     public JPanel getMainPanel() {
         return mainPanel;
     }
+    // Ajout d'une variable pour le timer de débounce
+    private Timer previewUpdateTimer;
 }

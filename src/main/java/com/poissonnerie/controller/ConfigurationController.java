@@ -1,8 +1,7 @@
 package com.poissonnerie.controller;
 
 import com.poissonnerie.model.ConfigurationParam;
-import com.poissonnerie.util.DatabaseManager;
-
+import com.poissonnerie.util.DatabaseConnectionPool;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +11,7 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.security.SecureRandom;
 import java.util.regex.Pattern;
+import javax.swing.SwingUtilities;
 
 public class ConfigurationController {
     private static final Logger LOGGER = Logger.getLogger(ConfigurationController.class.getName());
@@ -20,13 +20,20 @@ public class ConfigurationController {
     private static final int MAX_RETRIES = 3;
     private static final Pattern SAFE_KEY_PATTERN = Pattern.compile("^[A-Z_]{1,50}$");
     private static final SecureRandom secureRandom = new SecureRandom();
+    private boolean isLoading = false;
 
     public void chargerConfigurations() {
+        if (isLoading) {
+            LOGGER.info("Chargement déjà en cours, ignoré");
+            return;
+        }
+
+        isLoading = true;
         configurations.clear();
         configCache.clear();
         String sql = "SELECT * FROM configurations ORDER BY cle";
 
-        try (Connection conn = DatabaseManager.getConnection();
+        try (Connection conn = DatabaseConnectionPool.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             ResultSet rs = stmt.executeQuery();
@@ -36,7 +43,6 @@ public class ConfigurationController {
                     String valeur = sanitizeInput(rs.getString("valeur"));
                     String description = sanitizeInput(rs.getString("description"));
 
-                    // Désactiver temporairement la validation SIRET pendant l'initialisation
                     if (cle.equals(ConfigurationParam.CLE_SIRET_ENTREPRISE)) {
                         System.setProperty("SKIP_SIRET_VALIDATION", "true");
                     }
@@ -56,23 +62,23 @@ public class ConfigurationController {
                     configCache.put(config.getCle(), config.getValeur());
                 } catch (Exception e) {
                     LOGGER.warning("Configuration invalide ignorée: " + e.getMessage());
-                    // Continue avec la prochaine configuration
                 }
             }
             LOGGER.info("Configurations chargées: " + configurations.size() + " entrées");
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors du chargement des configurations", e);
             throw new RuntimeException("Erreur lors du chargement des configurations", e);
+        } finally {
+            isLoading = false;
         }
     }
 
     public void mettreAJourConfiguration(ConfigurationParam config) {
         validateConfiguration(config);
-
         String sql = "UPDATE configurations SET valeur = ? WHERE cle = ?";
         LOGGER.info("Mise à jour de la configuration: " + config.getCle());
 
-        try (Connection conn = DatabaseManager.getConnection();
+        try (Connection conn = DatabaseConnectionPool.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, sanitizeInput(config.getValeur()));
@@ -99,9 +105,7 @@ public class ConfigurationController {
     }
 
     public void reinitialiserConfigurations() {
-        // Désactiver temporairement la validation SIRET
         System.setProperty("SKIP_SIRET_VALIDATION", "true");
-
         try {
             String sql = "UPDATE configurations SET valeur = CASE " +
                         "WHEN cle = 'TAUX_TVA' THEN '20.0' " +
@@ -112,7 +116,7 @@ public class ConfigurationController {
                         "ELSE valeur END " +
                         "WHERE cle IN (?, ?, ?, ?, ?)";
 
-            try (Connection conn = DatabaseManager.getConnection();
+            try (Connection conn = DatabaseConnectionPool.getConnection();
                  PreparedStatement stmt = conn.prepareStatement(sql)) {
 
                 stmt.setString(1, ConfigurationParam.CLE_TAUX_TVA);
@@ -125,13 +129,12 @@ public class ConfigurationController {
                 LOGGER.info("Configurations réinitialisées avec succès");
 
                 // Recharger les configurations après réinitialisation
-                chargerConfigurations();
+                SwingUtilities.invokeLater(this::chargerConfigurations);
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la réinitialisation des configurations", e);
             throw new RuntimeException("Erreur lors de la réinitialisation des configurations", e);
         } finally {
-            // Réactiver la validation SIRET
             System.clearProperty("SKIP_SIRET_VALIDATION");
         }
     }
@@ -141,7 +144,7 @@ public class ConfigurationController {
             LOGGER.warning("Tentative d'accès avec une clé invalide: " + cle);
             return "";
         }
-        return sanitizeInput(configCache.getOrDefault(cle, ""));
+        return configCache.getOrDefault(cle, "");
     }
 
     public List<ConfigurationParam> getConfigurations() {
@@ -154,29 +157,13 @@ public class ConfigurationController {
             double tauxTVA = Double.parseDouble(taux);
             if (tauxTVA < 0 || tauxTVA > 100) {
                 LOGGER.warning("Taux TVA invalide: " + tauxTVA);
-                return 20.0; // Valeur par défaut standard
+                return 20.0;
             }
             return tauxTVA;
         } catch (NumberFormatException e) {
             LOGGER.log(Level.WARNING, "Erreur de conversion du taux TVA", e);
-            return 20.0; // Valeur par défaut standard
+            return 20.0;
         }
-    }
-
-    public Map<String, String> getInfosEntreprise() {
-        Map<String, String> infos = new HashMap<>();
-        String[] cles = {
-            ConfigurationParam.CLE_NOM_ENTREPRISE,
-            ConfigurationParam.CLE_ADRESSE_ENTREPRISE,
-            ConfigurationParam.CLE_TELEPHONE_ENTREPRISE,
-            ConfigurationParam.CLE_PIED_PAGE_RECU
-        };
-
-        for (String cle : cles) {
-            infos.put(cle.toLowerCase().replace("_entreprise", "")
-                               .replace("_recu", ""), getValeur(cle));
-        }
-        return infos;
     }
 
     private void validateConfiguration(ConfigurationParam config) {
@@ -195,7 +182,7 @@ public class ConfigurationController {
         if (input == null) {
             return "";
         }
-        return input.replaceAll("[<>\"'&/\\\\]", "_")
+        return input.replaceAll("[<>\"'%;)(&+\\[\\]{}]", "_")
                    .replaceAll("(?i)javascript:", "")
                    .replaceAll("(?i)data:", "")
                    .replaceAll("(?i)vbscript:", "");
