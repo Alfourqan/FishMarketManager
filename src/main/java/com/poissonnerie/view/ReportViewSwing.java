@@ -36,6 +36,37 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.Map;
 import java.util.HashMap;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.PDFRenderer;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import javax.swing.ImageIcon;
+import javax.print.attribute.HashPrintRequestAttributeSet;
+import javax.print.attribute.standard.MediaSizeName;
+import javax.print.attribute.standard.OrientationRequested;
+import javax.print.attribute.standard.Copies;
+import javax.print.attribute.standard.JobName;
+import javax.print.attribute.standard.Sides;
+import javax.print.attribute.standard.PrintQuality;
+import javax.print.attribute.standard.PrinterResolution;
+
+import javax.print.PrintService;
+import javax.print.PrintServiceLookup;
+import javax.print.attribute.PrintRequestAttributeSet;
+import javax.print.attribute.standard.Copies;
+import javax.print.attribute.standard.MediaSizeName;
+import javax.print.attribute.standard.OrientationRequested;
+import javax.print.attribute.standard.PageRanges;
+import javax.print.attribute.standard.PrinterName;
+import javax.print.event.PrintJobAdapter;
+import javax.print.event.PrintJobEvent;
+import java.awt.print.PageFormat;
+import java.awt.print.Printable;
+import java.awt.print.PrinterException;
+import java.awt.print.PrinterJob;
+import java.io.IOException;
+import java.awt.print.Book;
 
 public class ReportViewSwing {
     private static final Logger LOGGER = Logger.getLogger(ReportViewSwing.class.getName());
@@ -67,6 +98,13 @@ public class ReportViewSwing {
     private JComboBox<String> periodeCombo;
     private JComboBox<String> modePaiementCombo;
     private JPanel statistiquesPanel;
+
+    private JDialog previewDialog;
+    private JLabel previewLabel;
+    private int currentPage = 0;
+    private PDDocument currentDocument;
+    private PDFRenderer pdfRenderer;
+
 
     public ReportViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -265,13 +303,14 @@ public class ReportViewSwing {
     private void genererRapportPDF(String type) {
         try {
             String nomFichier = "rapport_" + type.toLowerCase() + "_" + LocalDate.now() + ".pdf";
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
             switch (type) {
                 case "Ventes":
                     reportController.genererRapportVentesPDF(
                         dateDebut.atStartOfDay(),
                         dateFin.atTime(23, 59, 59),
-                        nomFichier
+                        outputStream
                     );
                     break;
                 case "Stocks":
@@ -288,25 +327,29 @@ public class ReportViewSwing {
                         .orElse(0.0);
                     statistiques.put("Moyenne des quantités", moyenneQuantites);
 
-                    reportController.genererRapportStocksPDF(produits, statistiques, nomFichier);
+                    reportController.genererRapportStocksPDF(produits, statistiques, outputStream);
                     break;
                 case "Fournisseurs":
-                    reportController.genererRapportFournisseursPDF(nomFichier);
+                    reportController.genererRapportFournisseursPDF(outputStream);
                     break;
                 case "Créances":
-                    reportController.genererRapportCreancesPDF(nomFichier);
+                    reportController.genererRapportCreancesPDF(outputStream);
                     break;
                 case "Chiffre d'affaires":
                     reportController.genererRapportFinancierPDF(
                         dateDebut.atStartOfDay(),
                         dateFin.atTime(23, 59, 59),
-                        nomFichier
+                        outputStream
                     );
                     break;
             }
 
+            // Afficher la prévisualisation
+            afficherPrevisualisation(outputStream.toByteArray());
+
+            // Sauvegarder aussi le fichier
+            PDFGenerator.sauvegarderPDF(outputStream.toByteArray(), nomFichier);
             showSuccessMessage("Succès", MSG_SUCCES_GENERATION + nomFichier);
-            ouvrirFichier(nomFichier);
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF", e);
@@ -1130,4 +1173,125 @@ public class ReportViewSwing {
 
         return dialog;
     }
+    private void afficherPrevisualisation(byte[] pdfData) {
+        try {
+            if (previewDialog == null) {
+                previewDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel), "Prévisualisation du rapport", true);
+                previewDialog.setSize(800, 900);
+                previewDialog.setLocationRelativeTo(null);
+
+                JPanel controlPanel = new JPanel();
+                JButton prevButton = createStyledButton("Précédent", MaterialDesign.MDI_CHEVRON_LEFT, PRIMARY_COLOR);
+                JButton nextButton = createStyledButton("Suivant", MaterialDesign.MDI_CHEVRON_RIGHT, PRIMARY_COLOR);
+                JButton printButton = createStyledButton("Imprimer", MaterialDesign.MDI_PRINTER, SUCCESS_COLOR);
+
+                prevButton.addActionListener(e -> afficherPage(currentPage - 1));
+                nextButton.addActionListener(e -> afficherPage(currentPage + 1));
+                printButton.addActionListener(e -> imprimerDocument());
+
+                controlPanel.add(prevButton);
+                controlPanel.add(nextButton);
+                controlPanel.add(printButton);
+
+                JPanel contentPanel = new JPanel(new BorderLayout());
+                previewLabel = new JLabel();
+                JScrollPane scrollPane = new JScrollPane(previewLabel);
+
+                contentPanel.add(controlPanel, BorderLayout.NORTH);
+                contentPanel.add(scrollPane, BorderLayout.CENTER);
+
+                previewDialog.setContentPane(contentPanel);
+            }
+
+            // Charger le nouveau document
+            if (currentDocument != null) {
+                currentDocument.close();
+            }
+            currentDocument = PDDocument.load(new ByteArrayInputStream(pdfData));
+            pdfRenderer = new PDFRenderer(currentDocument);
+            currentPage = 0;
+
+            // Afficher la première page
+            afficherPage(0);
+            previewDialog.setVisible(true);
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'affichage de la prévisualisation", e);
+            showErrorMessage("Erreur", "Impossible d'afficher la prévisualisation : " + e.getMessage());
+        }
+    }
+
+    private void afficherPage(int pageNumber) {
+        try {
+            if (currentDocument != null && pageNumber >= 0 && pageNumber < currentDocument.getNumberOfPages()) {
+                currentPage = pageNumber;
+                BufferedImage image = pdfRenderer.renderImageWithDPI(currentPage, 150); // 150 DPI pour un bon compromis
+
+                // Redimensionner l'image pour qu'elle tienne dans la fenêtre
+                double scale = Math.min(700.0 / image.getWidth(), 800.0 / image.getHeight());
+                int scaledWidth = (int) (image.getWidth() * scale);
+                int scaledHeight = (int) (image.getHeight() * scale);
+
+                Image scaledImage = image.getScaledInstance(scaledWidth, scaledHeight, Image.SCALE_SMOOTH);
+                previewLabel.setIcon(new ImageIcon(scaledImage));
+                previewLabel.revalidate();
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'affichage de la page " + pageNumber, e);
+            showErrorMessage("Erreur", "Impossible d'afficher la page : " + e.getMessage());
+        }
+    }
+
+    private void imprimerDocument() {
+        try {
+            if (currentDocument != null) {
+                PrinterJob job = PrinterJob.getPrinterJob();
+                job.setPageable(new PDFPageable(currentDocument));
+
+                if (job.printDialog()) {
+                    job.print();
+                    showSuccessMessage("Succès", "Document envoyé à l'impression");
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'impression", e);
+            showErrorMessage("Erreur", "Impossible d'imprimer le document : " + e.getMessage());
+        }
+    }
+
+    private static class PDFPageable implements Printable, java.awt.print.Pageable {
+        private final PDDocument document;
+
+        public PDFPageable(PDDocument document) {
+            this.document = document;
+        }
+
+        @Override
+        public int getNumberOfPages() {
+            return document.getNumberOfPages();
+        }
+
+        @Override
+        public PageFormat getPageFormat(int pageIndex) throws IndexOutOfBoundsException {
+            return PrinterJob.getPrinterJob().defaultPage();
+        }
+
+        @Override
+        public Printable getPrintable(int pageIndex) throws IndexOutOfBoundsException {
+            return this;
+        }
+
+        @Override
+        public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) throws PrinterException {
+            try {
+                PDFRenderer pdfRenderer = new PDFRenderer(document);
+                BufferedImage image = pdfRenderer.renderImageWithDPI(pageIndex, 150);
+                graphics.drawImage(image, 0, 0, null);
+                return Printable.PAGE_EXISTS;
+            } catch (IOException e) {
+                throw new PrinterException(e);
+            }
+        }
+    }
+
 }
