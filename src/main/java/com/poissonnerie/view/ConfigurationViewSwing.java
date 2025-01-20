@@ -93,6 +93,7 @@ public class ConfigurationViewSwing {
     public static final String CLE_POSITION_SIGNATURE = "POSITION_SIGNATURE";
     public static final String CLE_AFFICHER_CONDITIONS = "AFFICHER_CONDITIONS";
     public static final String CLE_TEXTE_CONDITIONS = "TEXTE_CONDITIONS";
+    public static final String CLE_AFFICHER_COORDONNEES_CLIENT = "AFFICHER_COORDONNEES_CLIENT";
 
 
     public ConfigurationViewSwing() {
@@ -1146,106 +1147,130 @@ public class ConfigurationViewSwing {
     }
 
     private JPanel createRecusAdvancedSection() {
-        JPanel panel = createSectionPanel("Options avancées des reçus", MaterialDesign.MDI_RECEIPT_TEXT);
+        JPanel panel = createSectionPanel("Options avancées des reçus", MaterialDesign.MDI_RECEIPT);
         panel.setLayout(new GridBagLayout());
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.WEST;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Codes-barres et QR codes
-        JPanel codesPanel = new JPanel(new GridLayout(0, 2, 10, 5));
-        codesPanel.setBorder(BorderFactory.createTitledBorder("Codes-barres et QR codes"));
+        // Format d'impression
+        JLabel formatImpressionLabel = new JLabel("Format d'impression:");
+        JComboBox<String> formatImpressionCombo = new JComboBox<>(new String[]{"A4", "A5", "80MM"});
+        formatImpressionCombo.setFont(texteNormalFont);
+        champsSaisie.put(CLE_FORMAT_IMPRESSION, formatImpressionCombo);
 
-        JCheckBox afficherCodeBarresCheck = new JCheckBox("Afficher le code-barres");
-        JComboBox<String> positionCodeBarresCombo = new JComboBox<>(new String[]{"HAUT", "BAS"});
-        JCheckBox afficherQRCodeCheck = new JCheckBox("Afficher le QR code");
-        JComboBox<String> contenuQRCodeCombo = new JComboBox<>(new String[]{"NUMERO_TICKET", "URL", "CONTACT"});
+        panel.add(formatImpressionLabel, gbc);
+        gbc.gridx = 1;
+        panel.add(formatImpressionCombo, gbc);
 
-        champsSaisie.put(ConfigurationParam.CLE_AFFICHER_CODE_BARRES, afficherCodeBarresCheck);
-        champsSaisie.put(ConfigurationParam.CLE_POSITION_CODE_BARRES, positionCodeBarresCombo);
-        champsSaisie.put(ConfigurationParam.CLE_AFFICHER_QR_CODE, afficherQRCodeCheck);
-        champsSaisie.put(ConfigurationParam.CLE_CONTENU_QR_CODE, contenuQRCodeCombo);
-
-        codesPanel.add(afficherCodeBarresCheck);
-        codesPanel.add(positionCodeBarresCombo);
-        codesPanel.add(afficherQRCodeCheck);
-        codesPanel.add(contenuQRCodeCombo);
-
-        // Options d'impression
-        JPanel impressionPanel = new JPanel(new GridLayout(0, 2, 10, 5));
-        impressionPanel.setBorder(BorderFactory.createTitledBorder("Options d'impression"));
-
-        JComboBox<String> formatImpressionCombo = new JComboBox<>(new String[]{"A4", "A5", "TICKET_80MM"});
-        JComboBox<String> orientationImpressionCombo = new JComboBox<>(new String[]{"PORTRAIT", "PAYSAGE"});
-        JComboBox<String> langueTicketCombo = new JComboBox<>(new String[]{"FR", "EN", "ES"});
-
-        champsSaisie.put(ConfigurationParam.CLE_FORMAT_IMPRESSION, formatImpressionCombo);
-        champsSaisie.put(ConfigurationParam.CLE_ORIENTATION_IMPRESSION, orientationImpressionCombo);
-        champsSaisie.put(ConfigurationParam.CLE_LANGUE_TICKET, langueTicketCombo);
-
-        impressionPanel.add(new JLabel("Format:"));
-        impressionPanel.add(formatImpressionCombo);
-        impressionPanel.add(new JLabel("Orientation:"));
-        impressionPanel.add(orientationImpressionCombo);
-        impressionPanel.add(new JLabel("Langue:"));
-        impressionPanel.add(langueTicketCombo);
-
-        // Style du tableau
-        JPanel tableauPanel = new JPanel(new GridLayout(0, 2, 10, 5));
-        tableauPanel.setBorder(BorderFactory.createTitledBorder("Style du tableau"));
-
-        JComboBox<String> styleTableauCombo = new JComboBox<>(new String[]{"SIMPLE", "GRILLE", "MINIMAL"});
-        champsSaisie.put(ConfigurationParam.CLE_STYLE_TABLEAU_PRODUITS, styleTableauCombo);
-
-        tableauPanel.add(new JLabel("Style:"));
-        tableauPanel.add(styleTableauCombo);
-
-        // Signature et conditions
-        JPanel signaturePanel = new JPanel(new GridLayout(0, 2, 10, 5));
-        signaturePanel.setBorder(BorderFactory.createTitledBorder("Signature et conditions"));
-
-        JCheckBox afficherSignatureCheck = new JCheckBox("Afficher la signature");
-        JComboBox<String> positionSignatureCombo = new JComboBox<>(new String[]{"BAS", "DROITE"});
-        JCheckBox afficherConditionsCheck = new JCheckBox("Afficher les conditions");
-        JTextField texteConditionsField = new JTextField();
-
-        champsSaisie.put(ConfigurationParam.CLE_AFFICHER_SIGNATURE, afficherSignatureCheck);
-        champsSaisie.put(ConfigurationParam.CLE_POSITION_SIGNATURE, positionSignatureCombo);
-        champsSaisie.put(ConfigurationParam.CLE_AFFICHER_CONDITIONS, afficherConditionsCheck);
-        champsSaisie.put(ConfigurationParam.CLE_TEXTE_CONDITIONS, texteConditionsField);
-
-        signaturePanel.add(afficherSignatureCheck);
-        signaturePanel.add(positionSignatureCombo);
-        signaturePanel.add(afficherConditionsCheck);
-        signaturePanel.add(texteConditionsField);
-
-        // Ajout des panneaux à la grille principale
+        // Orientation
         gbc.gridx = 0;
-        gbc.gridy = 0;
+        gbc.gridy++;
+        JLabel orientationLabel = new JLabel("Orientation:");
+        JComboBox<String> orientationCombo = new JComboBox<>(new String[]{"PORTRAIT", "PAYSAGE"});
+        orientationCombo.setFont(texteNormalFont);
+        champsSaisie.put(CLE_ORIENTATION_IMPRESSION, orientationCombo);
+
+        panel.add(orientationLabel, gbc);
+        gbc.gridx = 1;
+        panel.add(orientationCombo, gbc);
+
+        // Style tableau produits
+        gbc.gridx = 0;
+        gbc.gridy++;
+        JLabel styleTableauLabel = new JLabel("Style du tableau des produits:");
+        JComboBox<String> styleTableauCombo = new JComboBox<>(new String[]{"GRILLE", "SIMPLE", "COMPACT"});
+        styleTableauCombo.setFont(texteNormalFont);
+        champsSaisie.put(CLE_STYLE_TABLEAU_PRODUITS, styleTableauCombo);
+
+        panel.add(styleTableauLabel, gbc);
+        gbc.gridx = 1;
+        panel.add(styleTableauCombo, gbc);
+
+        // Options d'affichage
+        gbc.gridx = 0;
+        gbc.gridy++;
         gbc.gridwidth = 2;
-        panel.add(codesPanel, gbc);
+        JPanel optionsPanel = new JPanel(new GridLayout(0, 2, 10, 5));
+        optionsPanel.setBorder(BorderFactory.createTitledBorder("Options d'affichage"));
 
+        // Codes-barres
+        JCheckBox codeBarresCheck = new JCheckBox("Afficher le code-barres");
+        codeBarresCheck.setFont(texteNormalFont);
+        champsSaisie.put(CLE_AFFICHER_CODE_BARRES, codeBarresCheck);
+
+        JComboBox<String> positionCodeBarresCombo = new JComboBox<>(new String[]{"HAUT", "BAS"});
+        positionCodeBarresCombo.setFont(texteNormalFont);
+        champsSaisie.put(CLE_POSITION_CODE_BARRES, positionCodeBarresCombo);
+
+        optionsPanel.add(codeBarresCheck);
+        optionsPanel.add(positionCodeBarresCombo);
+
+        // QR Code
+        JCheckBox qrCodeCheck = new JCheckBox("Afficher le QR code");
+        qrCodeCheck.setFont(texteNormalFont);
+        champsSaisie.put(CLE_AFFICHER_QR_CODE, qrCodeCheck);
+
+        JComboBox<String> contenuQRCodeCombo = new JComboBox<>(new String[]{"NUMERO_TICKET", "URL_VERIFICATION"});
+        contenuQRCodeCombo.setFont(texteNormalFont);
+        champsSaisie.put(CLE_CONTENU_QR_CODE, contenuQRCodeCombo);
+
+        optionsPanel.add(qrCodeCheck);
+        optionsPanel.add(contenuQRCodeCombo);
+
+        // Coordonnées client
+        JCheckBox coordonneesClientCheck = new JCheckBox("Afficher coordonnées client");
+        coordonneesClientCheck.setFont(texteNormalFont);
+        champsSaisie.put(CLE_AFFICHER_COORDONNEES_CLIENT, coordonneesClientCheck);
+
+        optionsPanel.add(coordonneesClientCheck);
+
+        panel.add(optionsPanel, gbc);
+
+        // Options supplémentaires
         gbc.gridy++;
-        panel.add(impressionPanel, gbc);
+        JPanel optionsSupPanel = new JPanel(new GridLayout(0, 2, 10, 5));
+        optionsSupPanel.setBorder(BorderFactory.createTitledBorder("Options supplémentaires"));
 
-        gbc.gridy++;
-        panel.add(tableauPanel, gbc);
+        // Signature
+        JCheckBox signatureCheck = new JCheckBox("Espace pour signature");
+        signatureCheck.setFont(texteNormalFont);
+        champsSaisie.put(CLE_AFFICHER_SIGNATURE, signatureCheck);
 
-        gbc.gridy++;
-        panel.add(signaturePanel, gbc);
+        JComboBox<String> positionSignatureCombo = new JComboBox<>(new String[]{"BAS", "DROITE"});
+        positionSignatureCombo.setFont(texteNormalFont);
+        champsSaisie.put(CLE_POSITION_SIGNATURE, positionSignatureCombo);
 
-        // Ajout des listeners pour la mise à jour de la prévisualisation
+        optionsSupPanel.add(signatureCheck);
+        optionsSupPanel.add(positionSignatureCombo);
+
+        // Conditions
+        JCheckBox conditionsCheck = new JCheckBox("Afficher conditions");
+        conditionsCheck.setFont(texteNormalFont);
+        champsSaisie.put(CLE_AFFICHER_CONDITIONS, conditionsCheck);
+
+        JTextField texteConditionsField = new JTextField();
+        texteConditionsField.setFont(texteNormalFont);
+        styleTextField(texteConditionsField);
+        champsSaisie.put(CLE_TEXTE_CONDITIONS, texteConditionsField);
+
+        optionsSupPanel.add(conditionsCheck);
+        optionsSupPanel.add(texteConditionsField);
+
+        panel.add(optionsSupPanel, gbc);
+
+        // Ajouter les listeners pour la mise à jour de la prévisualisation
         JComponent[] composantsAvecUpdate = {
-            afficherCodeBarresCheck, positionCodeBarresCombo,
-            afficherQRCodeCheck, contenuQRCodeCombo,
-            formatImpressionCombo, orientationImpressionCombo,
-            langueTicketCombo, styleTableauCombo,
-            afficherSignatureCheck, positionSignatureCombo,
-            afficherConditionsCheck
+            formatImpressionCombo, orientationCombo, styleTableauCombo,
+            codeBarresCheck, positionCodeBarresCombo,
+            qrCodeCheck, contenuQRCodeCombo,
+            coordonneesClientCheck,
+            signatureCheck, positionSignatureCombo,
+            conditionsCheck, texteConditionsField
         };
 
         for (JComponent composant : composantsAvecUpdate) {
@@ -1253,16 +1278,15 @@ public class ConfigurationViewSwing {
                 ((JComboBox<?>) composant).addActionListener(e -> updatePreview());
             } else if (composant instanceof JCheckBox) {
                 ((JCheckBox) composant).addActionListener(e -> updatePreview());
+            } else if (composant instanceof JTextField) {
+                ((JTextField) composant).getDocument().addDocumentListener(new DocumentListener() {
+                    public void changedUpdate(DocumentEvent e) { updatePreview(); }
+                    public void removeUpdate(DocumentEvent e) { updatePreview(); }
+                    public void insertUpdate(DocumentEvent e) { updatePreview(); }
+                });
             }
         }
 
-        texteConditionsField.getDocument().addDocumentListener(new DocumentListener() {
-            public void changedUpdate(DocumentEvent e) { updatePreview(); }
-            public void removeUpdate(DocumentEvent e) { updatePreview(); }
-            public void insertUpdate(DocumentEvent e) { updatePreview(); }
-        });
-
         return panel;
     }
-
 }

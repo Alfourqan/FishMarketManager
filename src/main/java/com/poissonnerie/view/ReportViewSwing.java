@@ -340,7 +340,7 @@ public class ReportViewSwing {
                             LocalDateTime.now(),        // date
                             clientDemo,                 // client
                             false,                      // credit
-                            100.0,                      // total
+                            100.0,                      // total (maintenant en double)
                             Vente.ModePaiement.ESPECES  // mode de paiement
                         );
                         ventes.add(venteDemo);
@@ -439,7 +439,6 @@ public class ReportViewSwing {
 
         mainPanel.add(panel, BorderLayout.CENTER);
     }
-
 
 
 
