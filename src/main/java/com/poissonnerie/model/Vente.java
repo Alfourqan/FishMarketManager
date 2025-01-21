@@ -13,7 +13,7 @@ public class Vente {
 
     public enum ModePaiement {
         ESPECES("Espèces"),
-        CARTE("Carte bancaire"), 
+        CARTE("Carte bancaire"),
         CREDIT("Crédit");
 
         private final String libelle;
@@ -44,6 +44,8 @@ public class Vente {
     private List<LigneVente> lignes;
     private final ModePaiement modePaiement;
     private static final double TAUX_TVA_DEFAULT = 20.0;
+    private double montantRecu;
+    private double montantRendu;
 
     public Vente(int id, LocalDateTime date, Client client, boolean credit, double total, ModePaiement modePaiement) {
         if (date == null) {
@@ -72,14 +74,16 @@ public class Vente {
         this.total = total;
         this.modePaiement = modePaiement;
         this.lignes = new ArrayList<>();
+        this.montantRecu = 0.0;
+        this.montantRendu = 0.0;
     }
 
     public int getId() { return id; }
-    public void setId(int id) { 
+    public void setId(int id) {
         if (id <= 0) {
             throw new IllegalArgumentException("L'ID doit être positif");
         }
-        this.id = id; 
+        this.id = id;
     }
 
     public LocalDateTime getDate() { return date; }
@@ -100,8 +104,8 @@ public class Vente {
             );
         }
 
-        LOGGER.log(Level.INFO, 
-            String.format("Modification du total de la vente %d: %.2f → %.2f", 
+        LOGGER.log(Level.INFO,
+            String.format("Modification du total de la vente %d: %.2f → %.2f",
                 id, this.total, total));
         this.total = total;
     }
@@ -124,8 +128,8 @@ public class Vente {
             }
         }
 
-        LOGGER.log(Level.INFO, 
-            String.format("Mise à jour des lignes de la vente %d: %d lignes", 
+        LOGGER.log(Level.INFO,
+            String.format("Mise à jour des lignes de la vente %d: %d lignes",
                 id, lignes.size()));
         this.lignes = new ArrayList<>(lignes);
     }
@@ -197,8 +201,8 @@ public class Vente {
         public int getQuantite() { return quantite; }
         public void setQuantite(int quantite) {
             validateQuantite(quantite);
-            LOGGER.log(Level.INFO, 
-                String.format("Modification de la quantité pour %s: %d → %d", 
+            LOGGER.log(Level.INFO,
+                String.format("Modification de la quantité pour %s: %d → %d",
                     produit.getNom(), this.quantite, quantite));
             this.quantite = quantite;
         }
@@ -206,8 +210,8 @@ public class Vente {
         public double getPrixUnitaire() { return prixUnitaire; }
         public void setPrixUnitaire(double prixUnitaire) {
             validatePrixUnitaire(prixUnitaire);
-            LOGGER.log(Level.INFO, 
-                String.format("Modification du prix unitaire pour %s: %.2f → %.2f", 
+            LOGGER.log(Level.INFO,
+                String.format("Modification du prix unitaire pour %s: %.2f → %.2f",
                     produit.getNom(), this.prixUnitaire, prixUnitaire));
             this.prixUnitaire = prixUnitaire;
         }
@@ -263,6 +267,28 @@ public class Vente {
         return Math.round((total - totalHT) * 100.0) / 100.0;
     }
 
+    public double getMontantRecu() {
+        return montantRecu;
+    }
+
+    public void setMontantRecu(double montantRecu) {
+        if (montantRecu < 0) {
+            throw new IllegalArgumentException("Le montant reçu ne peut pas être négatif");
+        }
+        if (montantRecu < this.total && this.modePaiement == ModePaiement.ESPECES) {
+            throw new IllegalArgumentException("Le montant reçu doit être supérieur ou égal au total pour un paiement en espèces");
+        }
+        LOGGER.log(Level.INFO,
+            String.format("Enregistrement du montant reçu pour la vente %d: %.2f €",
+                id, montantRecu));
+        this.montantRecu = montantRecu;
+        this.montantRendu = montantRecu - this.total > 0 ? montantRecu - this.total : 0;
+    }
+
+    public double getMontantRendu() {
+        return montantRendu;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -271,6 +297,8 @@ public class Vente {
         return id == vente.id &&
                credit == vente.credit &&
                Double.compare(vente.total, total) == 0 &&
+               Double.compare(vente.montantRecu, montantRecu) == 0 &&
+               Double.compare(vente.montantRendu, montantRendu) == 0 &&
                Objects.equals(date, vente.date) &&
                Objects.equals(client, vente.client) &&
                Objects.equals(lignes, vente.lignes) &&
@@ -279,6 +307,6 @@ public class Vente {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, date, client, credit, total, lignes, modePaiement);
+        return Objects.hash(id, date, client, credit, total, lignes, modePaiement, montantRecu, montantRendu);
     }
 }
