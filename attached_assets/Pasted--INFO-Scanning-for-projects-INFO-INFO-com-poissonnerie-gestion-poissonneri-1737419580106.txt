@@ -1,0 +1,501 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------< com.poissonnerie:gestion-poissonnerie >----------------
+[INFO] Building gestion-poissonnerie 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ gestion-poissonnerie ---
+[INFO] Deleting /home/runner/workspace/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ gestion-poissonnerie ---
+[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ gestion-poissonnerie ---
+[INFO] Changes detected - recompiling the module! :source
+[WARNING] File encoding has not been set, using platform encoding UTF-8, i.e. build is platform dependent!
+[INFO] Compiling 33 source files with javac [debug target 17] to target/classes
+[WARNING] system modules path not set in conjunction with -source 17
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[561,77] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[574,78] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[616,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[619,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[504,33] unchecked call to setValue(K,java.lang.Number) as a member of the raw type org.jfree.data.general.DefaultPieDataset
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[535,33] unchecked call to setValue(K,java.lang.Number) as a member of the raw type org.jfree.data.general.DefaultPieDataset
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[747,62] unchecked cast
+  required: java.util.List<com.poissonnerie.model.Produit>
+  found:    java.util.List<capture#1 of ?>
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ gestion-poissonnerie ---
+Jan 21, 2025 12:30:33 AM com.poissonnerie.Main main
+INFO: Démarrage de l'application...
+Jan 21, 2025 12:30:34 AM com.poissonnerie.util.DatabaseManager initDatabase
+INFO: Initialisation de la base de données...
+00:30:34.639 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- PoissonneriePool - configuration:
+00:30:34.645 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- allowPoolSuspension.............false
+00:30:34.646 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- autoCommit......................true
+00:30:34.646 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- catalog.........................none
+00:30:34.646 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- connectionInitSql...............none
+00:30:34.646 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- connectionTestQuery.............none
+00:30:34.646 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- connectionTimeout...............5000
+00:30:34.647 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- dataSource......................none
+00:30:34.647 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- dataSourceClassName.............none
+00:30:34.647 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- dataSourceJNDI..................none
+00:30:34.647 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- dataSourceProperties............{password=<masked>, pragma.synchronous=NORMAL, pragma.journal_mode=WAL, pragma.foreign_keys=ON, busy_timeout=5000}
+00:30:34.647 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- driverClassName.................none
+00:30:34.647 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- exceptionOverrideClassName......none
+00:30:34.647 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- healthCheckProperties...........{}
+00:30:34.648 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- healthCheckRegistry.............none
+00:30:34.648 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- idleTimeout.....................30000
+00:30:34.648 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- initializationFailTimeout.......1
+00:30:34.648 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- isolateInternalQueries..........false
+00:30:34.648 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- jdbcUrl.........................jdbc:sqlite:poissonnerie.db
+00:30:34.648 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- keepaliveTime...................0
+00:30:34.648 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- leakDetectionThreshold..........0
+00:30:34.649 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- maxLifetime.....................60000
+00:30:34.649 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- maximumPoolSize.................5
+00:30:34.649 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- metricRegistry..................none
+00:30:34.649 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- metricsTrackerFactory...........none
+00:30:34.649 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- minimumIdle.....................2
+00:30:34.649 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- password........................<masked>
+00:30:34.650 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- poolName........................"PoissonneriePool"
+00:30:34.650 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- readOnly........................false
+00:30:34.650 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- registerMbeans..................false
+00:30:34.650 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- scheduledExecutor...............none
+00:30:34.650 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- schema..........................none
+00:30:34.650 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- threadFactory...................internal
+00:30:34.650 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- transactionIsolation............default
+00:30:34.651 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- username........................none
+00:30:34.651 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.HikariConfig -- validationTimeout...............5000
+00:30:34.655 [com.poissonnerie.Main.main()] INFO com.zaxxer.hikari.HikariDataSource -- PoissonneriePool - Starting...
+00:30:34.712 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.util.DriverDataSource -- Loaded driver with class name org.sqlite.JDBC for jdbcUrl=jdbc:sqlite:poissonnerie.db
+00:30:34.942 [com.poissonnerie.Main.main()] INFO com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Added connection org.sqlite.jdbc4.JDBC4Connection@86e0610
+00:30:34.944 [com.poissonnerie.Main.main()] INFO com.zaxxer.hikari.HikariDataSource -- PoissonneriePool - Start completed.
+Jan 21, 2025 12:30:34 AM com.poissonnerie.util.DatabaseConnectionPool initializeDataSource
+INFO: Pool de connexions initialisé avec succès
+Jan 21, 2025 12:30:34 AM com.poissonnerie.util.DatabaseManager initDatabase
+INFO: Base de données initialisée avec succès
+Jan 21, 2025 12:30:34 AM com.poissonnerie.controller.ClientController ajouterClientTest
+INFO: Ajout d'un client test avec créance...
+Jan 21, 2025 12:30:34 AM com.poissonnerie.controller.ClientController ajouterClient
+INFO: Tentative d'ajout d'un nouveau client: Client Test Créance
+Jan 21, 2025 12:30:34 AM com.poissonnerie.controller.ClientController ajouterClient
+INFO: Client ajouté avec succès, ID: 7
+00:30:35.000 [com.poissonnerie.Main.main()] DEBUG com.zaxxer.hikari.pool.PoolBase -- PoissonneriePool - Reset (autoCommit) on connection org.sqlite.jdbc4.JDBC4Connection@86e0610
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.ClientController ajouterClientTest
+INFO: Client test ajouté avec succès: Client Test Créance, Solde: 150.5
+00:30:35.044 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Before cleanup stats (total=1, active=0, idle=1, waiting=0)
+00:30:35.045 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - After cleanup  stats (total=1, active=0, idle=1, waiting=0)
+00:30:35.046 [PoissonneriePool connection adder] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Added connection org.sqlite.jdbc4.JDBC4Connection@6c1ca35
+00:30:35.077 [PoissonneriePool connection adder] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - After adding stats (total=2, active=0, idle=2, waiting=0)
+Jan 21, 2025 12:30:35 AM com.poissonnerie.Main configureUI
+INFO: Configuration de l'interface terminée
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Initialisation des tables de la base de données...
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Base de données optimisée avec succès
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Initialisation des tables de la base de données...
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Base de données optimisée avec succès
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Initialisation des tables de la base de données...
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Base de données optimisée avec succès
+Jan 21, 2025 12:30:35 AM com.poissonnerie.view.VenteViewSwing loadData
+INFO: Chargement des données de vente...
+Jan 21, 2025 12:30:35 AM com.poissonnerie.view.VenteViewSwing loadData
+INFO: Produits chargés
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.ClientController chargerClients
+INFO: Chargement des clients...
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.ClientController chargerClients
+INFO: Clients chargés avec succès: 7 clients, Solde total: 705.0
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test, Solde: 18.0
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test, Solde: 150.5
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: djata, Solde: 85.0
+00:30:35.891 [AWT-EventQueue-0] DEBUG com.zaxxer.hikari.pool.PoolBase -- PoissonneriePool - Reset (autoCommit) on connection org.sqlite.jdbc4.JDBC4Connection@86e0610
+Jan 21, 2025 12:30:35 AM com.poissonnerie.view.VenteViewSwing loadData
+INFO: Clients chargés
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Jan 21, 2025 12:30:35 AM com.poissonnerie.model.Vente setLignes
+INFO: Mise à jour des lignes de la vente 14: 1 lignes
+Jan 21, 2025 12:30:35 AM com.poissonnerie.model.Vente setLignes
+INFO: Mise à jour des lignes de la vente 13: 1 lignes
+Jan 21, 2025 12:30:35 AM com.poissonnerie.model.Vente setLignes
+INFO: Mise à jour des lignes de la vente 12: 1 lignes
+Jan 21, 2025 12:30:35 AM com.poissonnerie.model.Vente setLignes
+INFO: Mise à jour des lignes de la vente 11: 1 lignes
+Jan 21, 2025 12:30:35 AM com.poissonnerie.model.Vente setLignes
+INFO: Mise à jour des lignes de la vente 10: 1 lignes
+Jan 21, 2025 12:30:35 AM com.poissonnerie.model.Vente setLignes
+INFO: Mise à jour des lignes de la vente 9: 1 lignes
+Jan 21, 2025 12:30:35 AM com.poissonnerie.model.Vente setLignes
+INFO: Mise à jour des lignes de la vente 7: 1 lignes
+Jan 21, 2025 12:30:35 AM com.poissonnerie.model.Vente setLignes
+INFO: Mise à jour des lignes de la vente 8: 1 lignes
+Jan 21, 2025 12:30:35 AM com.poissonnerie.model.Vente setLignes
+INFO: Mise à jour des lignes de la vente 6: 1 lignes
+Jan 21, 2025 12:30:35 AM com.poissonnerie.model.Vente setLignes
+INFO: Mise à jour des lignes de la vente 5: 1 lignes
+Jan 21, 2025 12:30:35 AM com.poissonnerie.model.Vente setLignes
+INFO: Mise à jour des lignes de la vente 4: 1 lignes
+Jan 21, 2025 12:30:35 AM com.poissonnerie.model.Vente setLignes
+INFO: Mise à jour des lignes de la vente 3: 1 lignes
+Jan 21, 2025 12:30:35 AM com.poissonnerie.model.Vente setLignes
+INFO: Mise à jour des lignes de la vente 2: 1 lignes
+Jan 21, 2025 12:30:35 AM com.poissonnerie.model.Vente setLignes
+INFO: Mise à jour des lignes de la vente 1: 1 lignes
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 14 ventes
+Jan 21, 2025 12:30:35 AM com.poissonnerie.view.VenteViewSwing loadData
+INFO: Ventes chargées: 14 ventes
+Jan 21, 2025 12:30:35 AM com.poissonnerie.view.VenteViewSwing loadData
+INFO: Données chargées avec succès
+Chargement des clients...
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.ClientController chargerClients
+INFO: Chargement des clients...
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.ClientController chargerClients
+INFO: Clients chargés avec succès: 7 clients, Solde total: 705.0
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test, Solde: 18.0
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test, Solde: 150.5
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: djata, Solde: 85.0
+00:30:35.911 [AWT-EventQueue-0] DEBUG com.zaxxer.hikari.pool.PoolBase -- PoissonneriePool - Reset (autoCommit) on connection org.sqlite.jdbc4.JDBC4Connection@86e0610
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.ClientController getClients
+INFO: Retour de 7 clients, dont 6 avec solde positif
+Clients chargés avec succès
+Chargement des mouvements de caisse...
+Mouvements de caisse chargés avec succès: 12 mouvements
+État actuel de la caisse - Solde: 1000.0€, Ouverte: true
+Jan 21, 2025 12:30:35 AM com.poissonnerie.view.CaisseViewSwing updateCaisseState
+INFO: État de la caisse modifié: ouverte
+Jan 21, 2025 12:30:35 AM com.poissonnerie.view.InventaireViewSwing <init>
+INFO: Initialisation de InventaireViewSwing
+Jan 21, 2025 12:30:35 AM com.poissonnerie.model.InventaireManager ajouterObserver
+INFO: Observer ajouté. Total observers: 1
+Jan 21, 2025 12:30:35 AM com.poissonnerie.view.InventaireViewSwing refreshTable
+INFO: Rafraîchissement de la table d'inventaire
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Chargement des fournisseurs...
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Fournisseurs chargés avec succès: 34 enregistrements
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Initialisation des tables de la base de données...
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Base de données optimisée avec succès
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Initialisation des tables de la base de données...
+Jan 21, 2025 12:30:35 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Base de données optimisée avec succès
+Jan 21, 2025 12:30:36 AM com.poissonnerie.view.ReportViewSwing <init>
+INFO: ReportViewSwing initialisé avec succès
+Jan 21, 2025 12:30:36 AM com.poissonnerie.Main lambda$main$1
+INFO: Interface affichée avec succès
+Jan 21, 2025 12:30:36 AM com.poissonnerie.controller.ClientController getClients
+INFO: Retour de 7 clients, dont 6 avec solde positif
+Jan 21, 2025 12:30:36 AM com.poissonnerie.view.VenteViewSwing lambda$refreshVentesTable$7
+INFO: Table des ventes mise à jour avec 14 ventes
+Jan 21, 2025 12:30:36 AM com.poissonnerie.view.InventaireViewSwing lambda$updateStatus$3
+INFO: Status mis à jour: Chargement des données...
+Jan 21, 2025 12:30:36 AM com.poissonnerie.view.InventaireViewSwing lambda$refreshTable$6
+INFO: Table rafraîchie avec succès
+Jan 21, 2025 12:30:36 AM com.poissonnerie.view.InventaireViewSwing lambda$updateStatus$3
+INFO: Status mis à jour: Données chargées avec succès
+Jan 21, 2025 12:30:36 AM com.poissonnerie.view.ConfigurationViewSwing loadData
+INFO: Chargement des configurations...
+Jan 21, 2025 12:30:36 AM com.poissonnerie.model.ConfigurationParam decryptValue
+WARNING: Valeur non décryptée car clé de cryptage non configurée ou valeur vide
+Jan 21, 2025 12:30:36 AM com.poissonnerie.model.ConfigurationParam setValeur
+WARNING: Erreur lors du traitement de la valeur
+java.lang.IllegalArgumentException: Format de téléphone invalide
+    at com.poissonnerie.model.ConfigurationParam.validateValeur(ConfigurationParam.java:111)
+    at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:185)
+    at com.poissonnerie.model.ConfigurationParam.<init>(ConfigurationParam.java:36)
+    at com.poissonnerie.controller.ConfigurationController.chargerConfigurations(ConfigurationController.java:51)
+    at com.poissonnerie.view.ConfigurationViewSwing.loadData(ConfigurationViewSwing.java:846)
+    at com.poissonnerie.view.ConfigurationViewSwing$2.doInBackground(ConfigurationViewSwing.java:154)
+    at com.poissonnerie.view.ConfigurationViewSwing$2.doInBackground(ConfigurationViewSwing.java:151)
+    at java.desktop/javax.swing.SwingWorker$1.call(SwingWorker.java:305)
+    at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+    at java.desktop/javax.swing.SwingWorker.run(SwingWorker.java:342)
+    at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+    at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+    at java.base/java.lang.Thread.run(Thread.java:1583)
+
+Jan 21, 2025 12:30:36 AM com.poissonnerie.controller.ConfigurationController chargerConfigurations
+WARNING: Configuration invalide ignorée: Impossible de traiter la valeur: Format de téléphone invalide
+Jan 21, 2025 12:30:36 AM com.poissonnerie.controller.ConfigurationController chargerConfigurations
+INFO: Configurations chargées: 18 entrées
+Jan 21, 2025 12:30:36 AM com.poissonnerie.view.ConfigurationViewSwing loadData
+INFO: Configurations chargées avec succès
+00:31:05.046 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Before cleanup stats (total=2, active=0, idle=2, waiting=0)
+00:31:05.046 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - After cleanup  stats (total=2, active=0, idle=2, waiting=0)
+00:31:05.046 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Fill pool skipped, pool has sufficient level or currently being filled.
+Jan 21, 2025 12:31:13 AM com.poissonnerie.view.VenteViewSwing ajouterAuPanier
+INFO: Produit ajouté au panier: Produit Test, quantité: 12
+00:31:34.085 [PoissonneriePool connection closer] DEBUG com.zaxxer.hikari.pool.PoolBase -- PoissonneriePool - Closing connection org.sqlite.jdbc4.JDBC4Connection@6c1ca35: (connection has passed maxLifetime)
+00:31:34.086 [PoissonneriePool connection adder] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Added connection org.sqlite.jdbc4.JDBC4Connection@2477ca41
+00:31:34.116 [PoissonneriePool connection adder] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Connection not added, stats (total=2, active=0, idle=2, waiting=0)
+00:31:34.162 [PoissonneriePool connection closer] DEBUG com.zaxxer.hikari.pool.PoolBase -- PoissonneriePool - Closing connection org.sqlite.jdbc4.JDBC4Connection@86e0610: (connection has passed maxLifetime)
+00:31:34.185 [PoissonneriePool connection adder] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Added connection org.sqlite.jdbc4.JDBC4Connection@2ab030bf
+00:31:34.216 [PoissonneriePool connection adder] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Connection not added, stats (total=2, active=0, idle=2, waiting=0)
+00:31:35.046 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Before cleanup stats (total=2, active=0, idle=2, waiting=0)
+00:31:35.046 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - After cleanup  stats (total=2, active=0, idle=2, waiting=0)
+00:31:35.047 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Fill pool skipped, pool has sufficient level or currently being filled.
+Jan 21, 2025 12:31:37 AM com.poissonnerie.view.VenteViewSwing ajouterAuPanier
+INFO: Produit ajouté au panier: carpe, quantité: 1
+Jan 21, 2025 12:31:40 AM com.poissonnerie.model.Vente setLignes
+INFO: Mise à jour des lignes de la vente 0: 2 lignes
+Jan 21, 2025 12:31:43 AM com.poissonnerie.controller.VenteController enregistrerVente
+INFO: Début de l'enregistrement de la vente...
+Jan 21, 2025 12:31:43 AM com.poissonnerie.controller.VenteController validateVente
+INFO: Début de la validation de la vente...
+Jan 21, 2025 12:31:43 AM com.poissonnerie.controller.VenteController validateVente
+INFO: Validation de la vente réussie
+Jan 21, 2025 12:31:43 AM com.poissonnerie.controller.VenteController enregistrerVente
+SEVERE: Erreur lors de l'enregistrement de la vente
+org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (near "(": syntax error)
+    at org.sqlite.core.DB.newSQLException(DB.java:1179)
+    at org.sqlite.core.DB.newSQLException(DB.java:1190)
+    at org.sqlite.core.DB.throwex(DB.java:1150)
+    at org.sqlite.core.NativeDB.prepare_utf8(Native Method)
+    at org.sqlite.core.NativeDB.prepare(NativeDB.java:135)
+    at org.sqlite.core.DB.prepare(DB.java:264)
+    at org.sqlite.core.CorePreparedStatement.<init>(CorePreparedStatement.java:46)
+    at org.sqlite.jdbc3.JDBC3PreparedStatement.<init>(JDBC3PreparedStatement.java:32)
+    at org.sqlite.jdbc4.JDBC4PreparedStatement.<init>(JDBC4PreparedStatement.java:25)
+    at org.sqlite.jdbc4.JDBC4Connection.prepareStatement(JDBC4Connection.java:34)
+    at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:225)
+    at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:205)
+    at com.zaxxer.hikari.pool.ProxyConnection.prepareStatement(ProxyConnection.java:328)
+    at com.zaxxer.hikari.pool.HikariProxyConnection.prepareStatement(HikariProxyConnection.java)
+    at com.poissonnerie.controller.VenteController.verifierStockSuffisant(VenteController.java:192)
+    at com.poissonnerie.controller.VenteController.enregistrerVente(VenteController.java:156)
+    at com.poissonnerie.view.VenteViewSwing.lambda$validerVente$3(VenteViewSwing.java:308)
+    at java.desktop/javax.swing.AbstractButton.fireActionPerformed(AbstractButton.java:1972)
+    at java.desktop/javax.swing.AbstractButton$Handler.actionPerformed(AbstractButton.java:2314)
+    at java.desktop/javax.swing.DefaultButtonModel.fireActionPerformed(DefaultButtonModel.java:407)
+    at java.desktop/javax.swing.DefaultButtonModel.setPressed(DefaultButtonModel.java:262)
+    at java.desktop/javax.swing.plaf.basic.BasicButtonListener.mouseReleased(BasicButtonListener.java:279)
+    at java.desktop/java.awt.AWTEventMulticaster.mouseReleased(AWTEventMulticaster.java:297)
+    at java.desktop/java.awt.Component.processMouseEvent(Component.java:6621)
+    at java.desktop/javax.swing.JComponent.processMouseEvent(JComponent.java:3398)
+    at java.desktop/java.awt.Component.processEvent(Component.java:6386)
+    at java.desktop/java.awt.Container.processEvent(Container.java:2266)
+    at java.desktop/java.awt.Component.dispatchEventImpl(Component.java:4996)
+    at java.desktop/java.awt.Container.dispatchEventImpl(Container.java:2324)
+    at java.desktop/java.awt.Component.dispatchEvent(Component.java:4828)
+    at java.desktop/java.awt.LightweightDispatcher.retargetMouseEvent(Container.java:4948)
+    at java.desktop/java.awt.LightweightDispatcher.processMouseEvent(Container.java:4575)
+    at java.desktop/java.awt.LightweightDispatcher.dispatchEvent(Container.java:4516)
+    at java.desktop/java.awt.Container.dispatchEventImpl(Container.java:2310)
+    at java.desktop/java.awt.Window.dispatchEventImpl(Window.java:2780)
+    at java.desktop/java.awt.Component.dispatchEvent(Component.java:4828)
+    at java.desktop/java.awt.EventQueue.dispatchEventImpl(EventQueue.java:775)
+    at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:720)
+    at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:714)
+    at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+    at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:87)
+    at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:98)
+    at java.desktop/java.awt.EventQueue$5.run(EventQueue.java:747)
+    at java.desktop/java.awt.EventQueue$5.run(EventQueue.java:745)
+    at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+    at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:87)
+    at java.desktop/java.awt.EventQueue.dispatchEvent(EventQueue.java:744)
+    at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:203)
+    at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:124)
+    at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:117)
+    at java.desktop/java.awt.WaitDispatchSupport$2.run(WaitDispatchSupport.java:191)
+    at java.desktop/java.awt.WaitDispatchSupport$4.run(WaitDispatchSupport.java:236)
+    at java.desktop/java.awt.WaitDispatchSupport$4.run(WaitDispatchSupport.java:234)
+    at java.base/java.security.AccessController.doPrivileged(AccessController.java:319)
+    at java.desktop/java.awt.WaitDispatchSupport.enter(WaitDispatchSupport.java:234)
+    at java.desktop/java.awt.Dialog.show(Dialog.java:1079)
+    at java.desktop/java.awt.Component.show(Component.java:1728)
+    at java.desktop/java.awt.Component.setVisible(Component.java:1675)
+    at java.desktop/java.awt.Window.setVisible(Window.java:1036)
+    at java.desktop/java.awt.Dialog.setVisible(Dialog.java:1015)
+    at com.poissonnerie.view.VenteViewSwing.validerVente(VenteViewSwing.java:343)
+    at com.poissonnerie.view.VenteViewSwing.lambda$createNouvelleVentePanel$18(VenteViewSwing.java:696)
+    at java.desktop/javax.swing.AbstractButton.fireActionPerformed(AbstractButton.java:1972)
+    at java.desktop/javax.swing.AbstractButton$Handler.actionPerformed(AbstractButton.java:2314)
+    at java.desktop/javax.swing.DefaultButtonModel.fireActionPerformed(DefaultButtonModel.java:407)
+    at java.desktop/javax.swing.DefaultButtonModel.setPressed(DefaultButtonModel.java:262)
+    at java.desktop/javax.swing.plaf.basic.BasicButtonListener.mouseReleased(BasicButtonListener.java:279)
+    at java.desktop/java.awt.AWTEventMulticaster.mouseReleased(AWTEventMulticaster.java:297)
+    at java.desktop/java.awt.Component.processMouseEvent(Component.java:6621)
+    at java.desktop/javax.swing.JComponent.processMouseEvent(JComponent.java:3398)
+    at java.desktop/java.awt.Component.processEvent(Component.java:6386)
+    at java.desktop/java.awt.Container.processEvent(Container.java:2266)
+    at java.desktop/java.awt.Component.dispatchEventImpl(Component.java:4996)
+    at java.desktop/java.awt.Container.dispatchEventImpl(Container.java:2324)
+    at java.desktop/java.awt.Component.dispatchEvent(Component.java:4828)
+    at java.desktop/java.awt.LightweightDispatcher.retargetMouseEvent(Container.java:4948)
+    at java.desktop/java.awt.LightweightDispatcher.processMouseEvent(Container.java:4575)
+    at java.desktop/java.awt.LightweightDispatcher.dispatchEvent(Container.java:4516)
+    at java.desktop/java.awt.Container.dispatchEventImpl(Container.java:2310)
+    at java.desktop/java.awt.Window.dispatchEventImpl(Window.java:2780)
+    at java.desktop/java.awt.Component.dispatchEvent(Component.java:4828)
+    at java.desktop/java.awt.EventQueue.dispatchEventImpl(EventQueue.java:775)
+    at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:720)
+    at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:714)
+    at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+    at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:87)
+    at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:98)
+    at java.desktop/java.awt.EventQueue$5.run(EventQueue.java:747)
+    at java.desktop/java.awt.EventQueue$5.run(EventQueue.java:745)
+    at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+    at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:87)
+    at java.desktop/java.awt.EventQueue.dispatchEvent(EventQueue.java:744)
+    at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:203)
+    at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:124)
+    at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:113)
+    at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:109)
+    at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
+    at java.desktop/java.awt.EventDispatchThread.run(EventDispatchThread.java:90)
+
+00:31:43.646 [AWT-EventQueue-0] DEBUG com.zaxxer.hikari.pool.PoolBase -- PoissonneriePool - Reset (autoCommit) on connection org.sqlite.jdbc4.JDBC4Connection@2477ca41
+Jan 21, 2025 12:31:43 AM com.poissonnerie.view.VenteViewSwing lambda$validerVente$3
+SEVERE: Erreur lors de l'enregistrement de la vente
+java.lang.RuntimeException: Erreur lors de l'enregistrement: [SQLITE_ERROR] SQL error or missing database (near "(": syntax error)
+    at com.poissonnerie.controller.VenteController.enregistrerVente(VenteController.java:177)
+    at com.poissonnerie.view.VenteViewSwing.lambda$validerVente$3(VenteViewSwing.java:308)
+    at java.desktop/javax.swing.AbstractButton.fireActionPerformed(AbstractButton.java:1972)
+    at java.desktop/javax.swing.AbstractButton$Handler.actionPerformed(AbstractButton.java:2314)
+    at java.desktop/javax.swing.DefaultButtonModel.fireActionPerformed(DefaultButtonModel.java:407)
+    at java.desktop/javax.swing.DefaultButtonModel.setPressed(DefaultButtonModel.java:262)
+    at java.desktop/javax.swing.plaf.basic.BasicButtonListener.mouseReleased(BasicButtonListener.java:279)
+    at java.desktop/java.awt.AWTEventMulticaster.mouseReleased(AWTEventMulticaster.java:297)
+    at java.desktop/java.awt.Component.processMouseEvent(Component.java:6621)
+    at java.desktop/javax.swing.JComponent.processMouseEvent(JComponent.java:3398)
+    at java.desktop/java.awt.Component.processEvent(Component.java:6386)
+    at java.desktop/java.awt.Container.processEvent(Container.java:2266)
+    at java.desktop/java.awt.Component.dispatchEventImpl(Component.java:4996)
+    at java.desktop/java.awt.Container.dispatchEventImpl(Container.java:2324)
+    at java.desktop/java.awt.Component.dispatchEvent(Component.java:4828)
+    at java.desktop/java.awt.LightweightDispatcher.retargetMouseEvent(Container.java:4948)
+    at java.desktop/java.awt.LightweightDispatcher.processMouseEvent(Container.java:4575)
+    at java.desktop/java.awt.LightweightDispatcher.dispatchEvent(Container.java:4516)
+    at java.desktop/java.awt.Container.dispatchEventImpl(Container.java:2310)
+    at java.desktop/java.awt.Window.dispatchEventImpl(Window.java:2780)
+    at java.desktop/java.awt.Component.dispatchEvent(Component.java:4828)
+    at java.desktop/java.awt.EventQueue.dispatchEventImpl(EventQueue.java:775)
+    at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:720)
+    at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:714)
+    at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+    at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:87)
+    at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:98)
+    at java.desktop/java.awt.EventQueue$5.run(EventQueue.java:747)
+    at java.desktop/java.awt.EventQueue$5.run(EventQueue.java:745)
+    at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+    at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:87)
+    at java.desktop/java.awt.EventQueue.dispatchEvent(EventQueue.java:744)
+    at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:203)
+    at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:124)
+    at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:117)
+    at java.desktop/java.awt.WaitDispatchSupport$2.run(WaitDispatchSupport.java:191)
+    at java.desktop/java.awt.WaitDispatchSupport$4.run(WaitDispatchSupport.java:236)
+    at java.desktop/java.awt.WaitDispatchSupport$4.run(WaitDispatchSupport.java:234)
+    at java.base/java.security.AccessController.doPrivileged(AccessController.java:319)
+    at java.desktop/java.awt.WaitDispatchSupport.enter(WaitDispatchSupport.java:234)
+    at java.desktop/java.awt.Dialog.show(Dialog.java:1079)
+    at java.desktop/java.awt.Component.show(Component.java:1728)
+    at java.desktop/java.awt.Component.setVisible(Component.java:1675)
+    at java.desktop/java.awt.Window.setVisible(Window.java:1036)
+    at java.desktop/java.awt.Dialog.setVisible(Dialog.java:1015)
+    at com.poissonnerie.view.VenteViewSwing.validerVente(VenteViewSwing.java:343)
+    at com.poissonnerie.view.VenteViewSwing.lambda$createNouvelleVentePanel$18(VenteViewSwing.java:696)
+    at java.desktop/javax.swing.AbstractButton.fireActionPerformed(AbstractButton.java:1972)
+    at java.desktop/javax.swing.AbstractButton$Handler.actionPerformed(AbstractButton.java:2314)
+    at java.desktop/javax.swing.DefaultButtonModel.fireActionPerformed(DefaultButtonModel.java:407)
+    at java.desktop/javax.swing.DefaultButtonModel.setPressed(DefaultButtonModel.java:262)
+    at java.desktop/javax.swing.plaf.basic.BasicButtonListener.mouseReleased(BasicButtonListener.java:279)
+    at java.desktop/java.awt.AWTEventMulticaster.mouseReleased(AWTEventMulticaster.java:297)
+    at java.desktop/java.awt.Component.processMouseEvent(Component.java:6621)
+    at java.desktop/javax.swing.JComponent.processMouseEvent(JComponent.java:3398)
+    at java.desktop/java.awt.Component.processEvent(Component.java:6386)
+    at java.desktop/java.awt.Container.processEvent(Container.java:2266)
+    at java.desktop/java.awt.Component.dispatchEventImpl(Component.java:4996)
+    at java.desktop/java.awt.Container.dispatchEventImpl(Container.java:2324)
+    at java.desktop/java.awt.Component.dispatchEvent(Component.java:4828)
+    at java.desktop/java.awt.LightweightDispatcher.retargetMouseEvent(Container.java:4948)
+    at java.desktop/java.awt.LightweightDispatcher.processMouseEvent(Container.java:4575)
+    at java.desktop/java.awt.LightweightDispatcher.dispatchEvent(Container.java:4516)
+    at java.desktop/java.awt.Container.dispatchEventImpl(Container.java:2310)
+    at java.desktop/java.awt.Window.dispatchEventImpl(Window.java:2780)
+    at java.desktop/java.awt.Component.dispatchEvent(Component.java:4828)
+    at java.desktop/java.awt.EventQueue.dispatchEventImpl(EventQueue.java:775)
+    at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:720)
+    at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:714)
+    at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+    at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:87)
+    at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:98)
+    at java.desktop/java.awt.EventQueue$5.run(EventQueue.java:747)
+    at java.desktop/java.awt.EventQueue$5.run(EventQueue.java:745)
+    at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+    at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:87)
+    at java.desktop/java.awt.EventQueue.dispatchEvent(EventQueue.java:744)
+    at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:203)
+    at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:124)
+    at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:113)
+    at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:109)
+    at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
+    at java.desktop/java.awt.EventDispatchThread.run(EventDispatchThread.java:90)
+Caused by: org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (near "(": syntax error)
+    at org.sqlite.core.DB.newSQLException(DB.java:1179)
+    at org.sqlite.core.DB.newSQLException(DB.java:1190)
+    at org.sqlite.core.DB.throwex(DB.java:1150)
+    at org.sqlite.core.NativeDB.prepare_utf8(Native Method)
+    at org.sqlite.core.NativeDB.prepare(NativeDB.java:135)
+    at org.sqlite.core.DB.prepare(DB.java:264)
+    at org.sqlite.core.CorePreparedStatement.<init>(CorePreparedStatement.java:46)
+    at org.sqlite.jdbc3.JDBC3PreparedStatement.<init>(JDBC3PreparedStatement.java:32)
+    at org.sqlite.jdbc4.JDBC4PreparedStatement.<init>(JDBC4PreparedStatement.java:25)
+    at org.sqlite.jdbc4.JDBC4Connection.prepareStatement(JDBC4Connection.java:34)
+    at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:225)
+    at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:205)
+    at com.zaxxer.hikari.pool.ProxyConnection.prepareStatement(ProxyConnection.java:328)
+    at com.zaxxer.hikari.pool.HikariProxyConnection.prepareStatement(HikariProxyConnection.java)
+    at com.poissonnerie.controller.VenteController.verifierStockSuffisant(VenteController.java:192)
+    at com.poissonnerie.controller.VenteController.enregistrerVente(VenteController.java:156)
+    ... 82 more
+
+00:32:05.047 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Before cleanup stats (total=2, active=0, idle=2, waiting=0)
+00:32:05.047 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - After cleanup  stats (total=2, active=0, idle=2, waiting=0)
+00:32:05.047 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Fill pool skipped, pool has sufficient level or currently being filled.
+00:32:33.342 [PoissonneriePool connection closer] DEBUG com.zaxxer.hikari.pool.PoolBase -- PoissonneriePool - Closing connection org.sqlite.jdbc4.JDBC4Connection@2ab030bf: (connection has passed maxLifetime)
+00:32:33.343 [PoissonneriePool connection adder] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Added connection org.sqlite.jdbc4.JDBC4Connection@52410f82
+00:32:33.373 [PoissonneriePool connection adder] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Connection not added, stats (total=2, active=0, idle=2, waiting=0)
+00:32:33.682 [PoissonneriePool connection closer] DEBUG com.zaxxer.hikari.pool.PoolBase -- PoissonneriePool - Closing connection org.sqlite.jdbc4.JDBC4Connection@2477ca41: (connection has passed maxLifetime)
+00:32:33.683 [PoissonneriePool connection adder] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Added connection org.sqlite.jdbc4.JDBC4Connection@5c86fbba
+00:32:33.714 [PoissonneriePool connection adder] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Connection not added, stats (total=2, active=0, idle=2, waiting=0)
+00:32:35.047 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Before cleanup stats (total=2, active=0, idle=2, waiting=0)
+00:32:35.047 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - After cleanup  stats (total=2, active=0, idle=2, waiting=0)
+00:32:35.047 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Fill pool skipped, pool has sufficient level or currently being filled.

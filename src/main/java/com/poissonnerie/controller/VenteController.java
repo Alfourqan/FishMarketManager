@@ -183,14 +183,29 @@ public class VenteController {
     }
 
     private void verifierStockSuffisant(Connection conn, List<Vente.LigneVente> lignes) throws SQLException {
-        String sql = "SELECT p.id, p.stock, l.quantite " +
-                    "FROM produits p " +
-                    "JOIN (VALUES " + String.join(",", lignes.stream().map(l -> "(?,?)").toArray(String[]::new)) + ") " +
-                    "AS l(id, quantite) ON p.id = l.id " +
-                    "WHERE p.stock < l.quantite OR p.supprime = true";
+        StringBuilder sql = new StringBuilder(
+            "SELECT p.id, p.stock FROM produits p WHERE p.id IN (");
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        for (int i = 0; i < lignes.size(); i++) {
+            sql.append(i == 0 ? "?" : ", ?");
+        }
+        sql.append(") AND (");
+
+        for (int i = 0; i < lignes.size(); i++) {
+            if (i > 0) sql.append(" OR ");
+            sql.append("(p.id = ? AND p.stock < ?)");
+        }
+        sql.append(") OR p.supprime = true");
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql.toString())) {
             int paramIndex = 1;
+
+            // Première série de paramètres pour IN clause
+            for (Vente.LigneVente ligne : lignes) {
+                pstmt.setInt(paramIndex++, ligne.getProduit().getId());
+            }
+
+            // Deuxième série de paramètres pour les conditions de stock
             for (Vente.LigneVente ligne : lignes) {
                 pstmt.setInt(paramIndex++, ligne.getProduit().getId());
                 pstmt.setInt(paramIndex++, ligne.getQuantite());
@@ -198,7 +213,24 @@ public class VenteController {
 
             ResultSet rs = pstmt.executeQuery();
             if (rs.next()) {
-                throw new SQLException("Stock insuffisant pour certains produits");
+                int produitId = rs.getInt("id");
+                int stockActuel = rs.getInt("stock");
+                Vente.LigneVente ligneProblematique = lignes.stream()
+                    .filter(l -> l.getProduit().getId() == produitId)
+                    .findFirst()
+                    .orElse(null);
+
+                if (ligneProblematique != null) {
+                    throw new SQLException(String.format(
+                        "Stock insuffisant pour le produit %s (ID: %d). Stock actuel: %d, Quantité demandée: %d",
+                        ligneProblematique.getProduit().getNom(),
+                        produitId,
+                        stockActuel,
+                        ligneProblematique.getQuantite()
+                    ));
+                } else {
+                    throw new SQLException("Produit supprimé ou introuvable");
+                }
             }
         }
     }
