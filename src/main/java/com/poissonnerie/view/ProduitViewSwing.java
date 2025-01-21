@@ -2,17 +2,18 @@ package com.poissonnerie.view;
 
 import com.poissonnerie.controller.ProduitController;
 import com.poissonnerie.model.Produit;
-import com.poissonnerie.model.Fournisseur; // Added import
-import com.poissonnerie.controller.FournisseurController; // Added import
+import com.poissonnerie.model.Fournisseur;
+import com.poissonnerie.controller.FournisseurController;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
+import java.util.List;
 
 public class ProduitViewSwing {
     private final JPanel mainPanel;
     private final ProduitController controller;
-    private final FournisseurController fournisseurController; // Added field
+    private final FournisseurController fournisseurController;
     private final JTable tableProduits;
     private final DefaultTableModel tableModel;
     private JTextField searchField;
@@ -20,7 +21,18 @@ public class ProduitViewSwing {
     public ProduitViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
         controller = new ProduitController();
-        fournisseurController = new FournisseurController(); // Initialize fournisseurController
+        fournisseurController = new FournisseurController();
+
+        // Charger les fournisseurs immédiatement
+        try {
+            fournisseurController.chargerFournisseurs();
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(null, 
+                "Erreur lors du chargement des fournisseurs: " + e.getMessage(),
+                "Erreur",
+                JOptionPane.ERROR_MESSAGE);
+        }
 
         // Création du modèle de table
         String[] columnNames = {"Nom", "Catégorie", "Prix Achat (€)", "Prix Vente (€)", "Marge (%)", "Stock", "Seuil d'alerte"};
@@ -253,16 +265,30 @@ public class ProduitViewSwing {
 
         JTextField nomField = createStyledTextField();
         JComboBox<String> categorieCombo = new JComboBox<>(new String[]{"Frais", "Surgelé", "Transformé"});
-        JComboBox<Fournisseur> fournisseurCombo = new JComboBox<>(); // Nouveau champ
+        JComboBox<Fournisseur> fournisseurCombo = new JComboBox<>();
         JTextField prixAchatField = createStyledTextField();
         JTextField prixVenteField = createStyledTextField();
         JTextField stockField = createStyledTextField();
         JTextField seuilField = createStyledTextField();
 
         // Remplir la liste des fournisseurs
-        for (Fournisseur f : fournisseurController.getFournisseurs()) {
+        List<Fournisseur> listeFournisseurs = fournisseurController.getFournisseurs();
+        if (listeFournisseurs.isEmpty()) {
+            // Si la liste est vide, essayer de recharger
+            try {
+                fournisseurController.chargerFournisseurs();
+                listeFournisseurs = fournisseurController.getFournisseurs();
+            } catch (Exception e) {
+                e.printStackTrace();
+                showErrorMessage("Erreur lors du chargement des fournisseurs: " + e.getMessage());
+            }
+        }
+
+        for (Fournisseur f : listeFournisseurs) {
             fournisseurCombo.addItem(f);
         }
+
+        // Configuration du rendu du ComboBox des fournisseurs
         fournisseurCombo.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index,
@@ -276,7 +302,7 @@ public class ProduitViewSwing {
 
         addFormField(panel, gbc, "Nom:", nomField, 0);
         addFormField(panel, gbc, "Catégorie:", categorieCombo, 1);
-        addFormField(panel, gbc, "Fournisseur:", fournisseurCombo, 2); // Nouveau champ
+        addFormField(panel, gbc, "Fournisseur:", fournisseurCombo, 2);
         addFormField(panel, gbc, "Prix d'achat (€):", prixAchatField, 3);
         addFormField(panel, gbc, "Prix de vente (€):", prixVenteField, 4);
         addFormField(panel, gbc, "Stock:", stockField, 5);
