@@ -27,19 +27,21 @@ public class AccueilViewSwing {
     private JLabel produitsRuptureLabel;
     private JLabel encaissementsJourLabel;
     private JLabel chiffreAffairesLabel;
+    private Timer refreshTimer;
 
-    // Couleurs et polices
-    private static final Color BACKGROUND_COLOR = Color.WHITE;
-    private static final Color PRIMARY_COLOR = new Color(0, 135, 136);
+    // Couleurs et polices modernisées
+    private static final Color BACKGROUND_COLOR = new Color(245, 245, 245);
+    private static final Color PRIMARY_COLOR = new Color(33, 150, 243);
     private static final Color SUCCESS_COLOR = new Color(76, 175, 80);
     private static final Color WARNING_COLOR = new Color(255, 152, 0);
     private static final Color DANGER_COLOR = new Color(244, 67, 54);
     private static final Font TITLE_FONT = new Font("Segoe UI", Font.BOLD, 16);
-    private static final Font VALUE_FONT = new Font("Segoe UI", Font.BOLD, 24);
+    private static final Font VALUE_FONT = new Font("Segoe UI", Font.BOLD, 28);
+    private static final Font SUBTITLE_FONT = new Font("Segoe UI", Font.PLAIN, 14);
 
     public AccueilViewSwing() {
-        mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        mainPanel = new JPanel(new BorderLayout(20, 20));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(25, 25, 25, 25));
         mainPanel.setBackground(BACKGROUND_COLOR);
 
         venteController = new VenteController();
@@ -49,15 +51,23 @@ public class AccueilViewSwing {
         initializeComponents();
         loadData();
 
-        // Mettre en place une actualisation automatique toutes les 5 minutes
-        Timer refreshTimer = new Timer(300000, e -> loadData());
+        // Mise à jour automatique toutes les minutes
+        refreshTimer = new Timer(60000, e -> loadData());
         refreshTimer.start();
     }
 
     private void initializeComponents() {
-        // Panel principal avec GridLayout 2x2
-        JPanel kpiPanel = new JPanel(new GridLayout(2, 2, 15, 15));
-        kpiPanel.setBackground(BACKGROUND_COLOR);
+        // Panel principal avec GridBagLayout pour plus de flexibilité
+        JPanel contentPanel = new JPanel(new GridBagLayout());
+        contentPanel.setBackground(BACKGROUND_COLOR);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+        gbc.insets = new Insets(10, 10, 10, 10);
+
+        // En-tête avec titre et date
+        JPanel headerPanel = createHeaderPanel();
 
         // Initialisation des labels avec formatage monétaire
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.FRANCE);
@@ -66,71 +76,109 @@ public class AccueilViewSwing {
         encaissementsJourLabel = new JLabel(currencyFormat.format(0), SwingConstants.CENTER);
         chiffreAffairesLabel = new JLabel(currencyFormat.format(0), SwingConstants.CENTER);
 
-        // Création des cartes KPI avec icônes Material Design améliorées
-        kpiPanel.add(createKPIPanel("Ventes du jour", ventesJourLabel, SUCCESS_COLOR,
-            MaterialDesign.MDI_TRENDING_UP, "Chiffre d'affaires réalisé aujourd'hui"));
-        kpiPanel.add(createKPIPanel("Produits en rupture", produitsRuptureLabel, DANGER_COLOR,
-            MaterialDesign.MDI_ALERT_OCTAGON, "Nombre de produits en rupture de stock"));
-        kpiPanel.add(createKPIPanel("Encaissements du jour", encaissementsJourLabel, WARNING_COLOR,
-            MaterialDesign.MDI_CASH_MULTIPLE, "Total des encaissements de la journée"));
-        kpiPanel.add(createKPIPanel("Chiffre d'affaires total", chiffreAffairesLabel, PRIMARY_COLOR,
-            MaterialDesign.MDI_CHART_BAR, "Chiffre d'affaires global"));
+        // Création des cartes KPI avec disposition en grille 2x2
+        gbc.gridx = 0; gbc.gridy = 0;
+        contentPanel.add(createKPIPanel("Ventes du jour", ventesJourLabel,
+            MaterialDesign.MDI_CART_OUTLINE, SUCCESS_COLOR,
+            "Total des ventes réalisées aujourd'hui"), gbc);
 
-        // Bouton d'actualisation avec animation de chargement
-        JButton refreshButton = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH, PRIMARY_COLOR);
-        refreshButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                loadData();
-            }
-        });
+        gbc.gridx = 1;
+        contentPanel.add(createKPIPanel("Produits en rupture", produitsRuptureLabel,
+            MaterialDesign.MDI_ALERT_CIRCLE_OUTLINE, DANGER_COLOR,
+            "Nombre de produits en rupture de stock"), gbc);
 
+        gbc.gridx = 0; gbc.gridy = 1;
+        contentPanel.add(createKPIPanel("Encaissements", encaissementsJourLabel,
+            MaterialDesign.MDI_CASH_MULTIPLE, WARNING_COLOR,
+            "Total des encaissements du jour"), gbc);
+
+        gbc.gridx = 1;
+        contentPanel.add(createKPIPanel("Chiffre d'affaires", chiffreAffairesLabel,
+            MaterialDesign.MDI_CHART_LINE, PRIMARY_COLOR,
+            "Chiffre d'affaires total"), gbc);
+
+        // Bouton d'actualisation avec animation
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.setBackground(BACKGROUND_COLOR);
+        JButton refreshButton = createAnimatedButton("Actualiser", MaterialDesign.MDI_REFRESH);
         buttonPanel.add(refreshButton);
 
-        mainPanel.add(kpiPanel, BorderLayout.CENTER);
+        // Assemblage final
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
+        mainPanel.add(contentPanel, BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    private JPanel createKPIPanel(String title, JLabel valueLabel, Color color, MaterialDesign iconCode, String tooltip) {
-        JPanel panel = new JPanel(new BorderLayout(5, 10));
+    private JPanel createHeaderPanel() {
+        JPanel headerPanel = new JPanel(new BorderLayout(15, 5));
+        headerPanel.setBackground(BACKGROUND_COLOR);
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+
+        // Titre principal
+        JLabel titleLabel = new JLabel("Tableau de bord");
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 32));
+        titleLabel.setForeground(new Color(33, 33, 33));
+
+        // Date du jour
+        JLabel dateLabel = new JLabel(LocalDate.now().format(
+            java.time.format.DateTimeFormatter.ofPattern("EEEE dd MMMM yyyy", Locale.FRANCE)));
+        dateLabel.setFont(SUBTITLE_FONT);
+        dateLabel.setForeground(new Color(117, 117, 117));
+
+        headerPanel.add(titleLabel, BorderLayout.NORTH);
+        headerPanel.add(dateLabel, BorderLayout.CENTER);
+
+        return headerPanel;
+    }
+
+    private JPanel createKPIPanel(String title, JLabel valueLabel, MaterialDesign icon, Color color, String tooltip) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(color, 2, true),
-            new EmptyBorder(15, 15, 15, 15)
+            new EmptyBorder(20, 20, 20, 20)
         ));
-        panel.setBackground(BACKGROUND_COLOR);
+        panel.setBackground(Color.WHITE);
         panel.setToolTipText(tooltip);
 
-        // Panel pour le titre avec icône
-        JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
-        titlePanel.setBackground(BACKGROUND_COLOR);
-
         // Icône
-        FontIcon fontIcon = FontIcon.of(iconCode);
-        fontIcon.setIconSize(24);
+        FontIcon fontIcon = FontIcon.of(icon);
+        fontIcon.setIconSize(32);
         fontIcon.setIconColor(color);
         JLabel iconLabel = new JLabel(fontIcon);
+        iconLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         // Titre
         JLabel titleLabel = new JLabel(title);
         titleLabel.setFont(TITLE_FONT);
         titleLabel.setForeground(color);
-
-        titlePanel.add(iconLabel);
-        titlePanel.add(titleLabel);
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         // Valeur
         valueLabel.setFont(VALUE_FONT);
         valueLabel.setForeground(color);
+        valueLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        panel.add(titlePanel, BorderLayout.NORTH);
-        panel.add(valueLabel, BorderLayout.CENTER);
+        panel.add(iconLabel);
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(titleLabel);
+        panel.add(Box.createVerticalStrut(15));
+        panel.add(valueLabel);
+
+        // Effet de survol
+        panel.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                panel.setBackground(new Color(250, 250, 250));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                panel.setBackground(Color.WHITE);
+            }
+        });
 
         return panel;
     }
 
-    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
+    private JButton createAnimatedButton(String text, MaterialDesign iconCode) {
         JButton button = new JButton(text);
         FontIcon icon = FontIcon.of(iconCode);
         icon.setIconSize(18);
@@ -138,23 +186,32 @@ public class AccueilViewSwing {
         button.setIcon(icon);
 
         button.setFont(TITLE_FONT);
-        button.setBackground(color);
+        button.setBackground(PRIMARY_COLOR);
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
         button.setBorderPainted(false);
-        button.setMargin(new Insets(8, 16, 8, 16));
+        button.setMargin(new Insets(10, 20, 10, 20));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        // Animation de rotation pour l'icône lors du clic
+        button.addActionListener(e -> {
+            button.setEnabled(false);
+            loadData();
+            Timer enableTimer = new Timer(1000, ev -> button.setEnabled(true));
+            enableTimer.setRepeats(false);
+            enableTimer.start();
+        });
 
         // Effet de survol
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 if (button.isEnabled()) {
-                    button.setBackground(color.darker());
+                    button.setBackground(PRIMARY_COLOR.darker());
                 }
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 if (button.isEnabled()) {
-                    button.setBackground(color);
+                    button.setBackground(PRIMARY_COLOR);
                 }
             }
         });
@@ -163,27 +220,65 @@ public class AccueilViewSwing {
     }
 
     private void loadData() {
-        try {
-            // Calcul des KPIs
-            double ventesJour = calculerVentesJour();
-            int produitsRupture = calculerProduitsRupture();
-            double encaissementsJour = calculerEncaissementsJour();
-            double chiffreAffaires = calculerChiffreAffaires();
+        SwingWorker<Void, Void> worker = new SwingWorker<>() {
+            private double ventesJour = 0;
+            private int produitsRupture = 0;
+            private double encaissementsJour = 0;
+            private double chiffreAffaires = 0;
 
-            // Mise à jour des labels avec formatage monétaire
-            NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.FRANCE);
-            ventesJourLabel.setText(currencyFormat.format(ventesJour));
-            produitsRuptureLabel.setText(String.valueOf(produitsRupture));
-            encaissementsJourLabel.setText(currencyFormat.format(encaissementsJour));
-            chiffreAffairesLabel.setText(currencyFormat.format(chiffreAffaires));
+            @Override
+            protected Void doInBackground() {
+                try {
+                    ventesJour = calculerVentesJour();
+                    produitsRupture = calculerProduitsRupture();
+                    encaissementsJour = calculerEncaissementsJour();
+                    chiffreAffaires = calculerChiffreAffaires();
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors du calcul des KPIs", e);
+                }
+                return null;
+            }
 
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du chargement des données", e);
-            JOptionPane.showMessageDialog(mainPanel,
-                "Erreur lors du chargement des données : " + e.getMessage(),
-                "Erreur",
-                JOptionPane.ERROR_MESSAGE);
-        }
+            @Override
+            protected void done() {
+                try {
+                    // Mise à jour de l'interface avec animation
+                    NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.FRANCE);
+                    updateLabelWithAnimation(ventesJourLabel, ventesJour, currencyFormat);
+                    updateLabelWithAnimation(produitsRuptureLabel, produitsRupture, null);
+                    updateLabelWithAnimation(encaissementsJourLabel, encaissementsJour, currencyFormat);
+                    updateLabelWithAnimation(chiffreAffairesLabel, chiffreAffaires, currencyFormat);
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors de la mise à jour de l'interface", e);
+                    JOptionPane.showMessageDialog(mainPanel,
+                        "Erreur lors de la mise à jour des données : " + e.getMessage(),
+                        "Erreur",
+                        JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        };
+        worker.execute();
+    }
+
+    private void updateLabelWithAnimation(JLabel label, Number value, NumberFormat format) {
+        Timer timer = new Timer(50, null);
+        final int steps = 10;
+        final double increment = value.doubleValue() / steps;
+        final double[] current = {0};
+
+        timer.addActionListener(e -> {
+            current[0] += increment;
+            if (current[0] >= value.doubleValue()) {
+                current[0] = value.doubleValue();
+                timer.stop();
+            }
+            if (format != null) {
+                label.setText(format.format(current[0]));
+            } else {
+                label.setText(String.format("%d", (int)current[0]));
+            }
+        });
+        timer.start();
     }
 
     private double calculerVentesJour() {
@@ -204,6 +299,7 @@ public class AccueilViewSwing {
         LocalDate today = LocalDate.now();
         return caisseController.getMouvements().stream()
             .filter(m -> m.getDate().toLocalDate().equals(today))
+            .filter(m -> m.getType() == MouvementCaisse.TypeMouvement.ENTREE)
             .mapToDouble(MouvementCaisse::getMontant)
             .sum();
     }
