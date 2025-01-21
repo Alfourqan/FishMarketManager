@@ -44,15 +44,19 @@ public class AccueilViewSwing {
         mainPanel.setBorder(BorderFactory.createEmptyBorder(25, 25, 25, 25));
         mainPanel.setBackground(BACKGROUND_COLOR);
 
+        // Initialisation des contrôleurs
         venteController = new VenteController();
         produitController = new ProduitController();
         caisseController = new CaisseController();
 
+        // Initialisation des composants
         initializeComponents();
-        loadData();
 
-        // Mise à jour automatique toutes les minutes
-        refreshTimer = new Timer(60000, e -> loadData());
+        // Chargement initial des données
+        SwingUtilities.invokeLater(this::loadData);
+
+        // Mise à jour automatique toutes les 30 secondes
+        refreshTimer = new Timer(30000, e -> loadData());
         refreshTimer.start();
     }
 
@@ -71,10 +75,17 @@ public class AccueilViewSwing {
 
         // Initialisation des labels avec formatage monétaire
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.FRANCE);
-        ventesJourLabel = new JLabel(currencyFormat.format(0), SwingConstants.CENTER);
-        produitsRuptureLabel = new JLabel("0", SwingConstants.CENTER);
-        encaissementsJourLabel = new JLabel(currencyFormat.format(0), SwingConstants.CENTER);
-        chiffreAffairesLabel = new JLabel(currencyFormat.format(0), SwingConstants.CENTER);
+        ventesJourLabel = new JLabel("Chargement...", SwingConstants.CENTER);
+        produitsRuptureLabel = new JLabel("Chargement...", SwingConstants.CENTER);
+        encaissementsJourLabel = new JLabel("Chargement...", SwingConstants.CENTER);
+        chiffreAffairesLabel = new JLabel("Chargement...", SwingConstants.CENTER);
+
+        // Style des labels
+        ventesJourLabel.setFont(VALUE_FONT);
+        produitsRuptureLabel.setFont(VALUE_FONT);
+        encaissementsJourLabel.setFont(VALUE_FONT);
+        chiffreAffairesLabel.setFont(VALUE_FONT);
+
 
         // Création des cartes KPI avec disposition en grille 2x2
         gbc.gridx = 0; gbc.gridy = 0;
@@ -107,6 +118,96 @@ public class AccueilViewSwing {
         mainPanel.add(headerPanel, BorderLayout.NORTH);
         mainPanel.add(contentPanel, BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    private void loadData() {
+        LOGGER.log(Level.INFO, "Début du chargement des données...");
+
+        // Désactiver les composants pendant le chargement
+        setComponentsEnabled(false);
+
+        SwingWorker<Void, Void> worker = new SwingWorker<>() {
+            private double ventesJour = 0;
+            private int produitsRupture = 0;
+            private double encaissementsJour = 0;
+            private double chiffreAffaires = 0;
+            private boolean success = true;
+
+            @Override
+            protected Void doInBackground() {
+                try {
+                    // Chargement initial des données depuis les contrôleurs
+                    LOGGER.log(Level.INFO, "Chargement des ventes...");
+                    venteController.chargerVentes();
+                    LOGGER.log(Level.INFO, "Nombre de ventes chargées: {0}", venteController.getVentes().size());
+
+                    LOGGER.log(Level.INFO, "Chargement des produits...");
+                    produitController.chargerProduits();
+                    LOGGER.log(Level.INFO, "Nombre de produits chargés: {0}", produitController.getProduits().size());
+
+                    LOGGER.log(Level.INFO, "Chargement des mouvements de caisse...");
+                    caisseController.chargerMouvements();
+                    LOGGER.log(Level.INFO, "Nombre de mouvements chargés: {0}", caisseController.getMouvements().size());
+
+                    // Calcul des KPIs
+                    ventesJour = calculerVentesJour();
+                    produitsRupture = calculerProduitsRupture();
+                    encaissementsJour = calculerEncaissementsJour();
+                    chiffreAffaires = calculerChiffreAffaires();
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors du chargement des données", e);
+                    success = false;
+                }
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.FRANCE);
+                    if (success) {
+                        LOGGER.log(Level.INFO, "Mise à jour de l'interface avec les nouvelles valeurs...");
+                        LOGGER.log(Level.INFO, "Ventes du jour: {0,number,currency}", ventesJour);
+                        LOGGER.log(Level.INFO, "Produits en rupture: {0}", produitsRupture);
+                        LOGGER.log(Level.INFO, "Encaissements du jour: {0,number,currency}", encaissementsJour);
+                        LOGGER.log(Level.INFO, "Chiffre d'affaires: {0,number,currency}", chiffreAffaires);
+
+                        updateLabelWithAnimation(ventesJourLabel, ventesJour, currencyFormat);
+                        updateLabelWithAnimation(produitsRuptureLabel, produitsRupture, null);
+                        updateLabelWithAnimation(encaissementsJourLabel, encaissementsJour, currencyFormat);
+                        updateLabelWithAnimation(chiffreAffairesLabel, chiffreAffaires, currencyFormat);
+
+                        LOGGER.log(Level.INFO, "Mise à jour de l'interface terminée");
+                    } else {
+                        ventesJourLabel.setText("Erreur");
+                        produitsRuptureLabel.setText("Erreur");
+                        encaissementsJourLabel.setText("Erreur");
+                        chiffreAffairesLabel.setText("Erreur");
+
+                        JOptionPane.showMessageDialog(mainPanel,
+                            "Erreur lors du chargement des données. Veuillez réessayer.",
+                            "Erreur",
+                            JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors de la mise à jour de l'interface", e);
+                    JOptionPane.showMessageDialog(mainPanel,
+                        "Erreur lors de la mise à jour des données : " + e.getMessage(),
+                        "Erreur",
+                        JOptionPane.ERROR_MESSAGE);
+                } finally {
+                    setComponentsEnabled(true);
+                }
+            }
+        };
+        worker.execute();
+    }
+
+    private void setComponentsEnabled(boolean enabled) {
+        ventesJourLabel.setEnabled(enabled);
+        produitsRuptureLabel.setEnabled(enabled);
+        encaissementsJourLabel.setEnabled(enabled);
+        chiffreAffairesLabel.setEnabled(enabled);
     }
 
     private JPanel createHeaderPanel() {
@@ -219,46 +320,6 @@ public class AccueilViewSwing {
         return button;
     }
 
-    private void loadData() {
-        SwingWorker<Void, Void> worker = new SwingWorker<>() {
-            private double ventesJour = 0;
-            private int produitsRupture = 0;
-            private double encaissementsJour = 0;
-            private double chiffreAffaires = 0;
-
-            @Override
-            protected Void doInBackground() {
-                try {
-                    ventesJour = calculerVentesJour();
-                    produitsRupture = calculerProduitsRupture();
-                    encaissementsJour = calculerEncaissementsJour();
-                    chiffreAffaires = calculerChiffreAffaires();
-                } catch (Exception e) {
-                    LOGGER.log(Level.SEVERE, "Erreur lors du calcul des KPIs", e);
-                }
-                return null;
-            }
-
-            @Override
-            protected void done() {
-                try {
-                    // Mise à jour de l'interface avec animation
-                    NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.FRANCE);
-                    updateLabelWithAnimation(ventesJourLabel, ventesJour, currencyFormat);
-                    updateLabelWithAnimation(produitsRuptureLabel, produitsRupture, null);
-                    updateLabelWithAnimation(encaissementsJourLabel, encaissementsJour, currencyFormat);
-                    updateLabelWithAnimation(chiffreAffairesLabel, chiffreAffaires, currencyFormat);
-                } catch (Exception e) {
-                    LOGGER.log(Level.SEVERE, "Erreur lors de la mise à jour de l'interface", e);
-                    JOptionPane.showMessageDialog(mainPanel,
-                        "Erreur lors de la mise à jour des données : " + e.getMessage(),
-                        "Erreur",
-                        JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        };
-        worker.execute();
-    }
 
     private void updateLabelWithAnimation(JLabel label, Number value, NumberFormat format) {
         Timer timer = new Timer(50, null);
@@ -282,32 +343,44 @@ public class AccueilViewSwing {
     }
 
     private double calculerVentesJour() {
+        LOGGER.log(Level.INFO, "Calcul des ventes du jour...");
         LocalDate today = LocalDate.now();
-        return venteController.getVentes().stream()
+        double total = venteController.getVentes().stream()
             .filter(v -> v.getDate().toLocalDate().equals(today))
             .mapToDouble(Vente::getTotal)
             .sum();
+        LOGGER.log(Level.INFO, "Total des ventes du jour: {0,number,currency}", total);
+        return total;
     }
 
     private int calculerProduitsRupture() {
-        return (int) produitController.getProduits().stream()
+        LOGGER.log(Level.INFO, "Calcul des produits en rupture...");
+        int count = (int) produitController.getProduits().stream()
             .filter(p -> p.getStock() <= 0)
             .count();
+        LOGGER.log(Level.INFO, "Nombre de produits en rupture: {0}", count);
+        return count;
     }
 
     private double calculerEncaissementsJour() {
+        LOGGER.log(Level.INFO, "Calcul des encaissements du jour...");
         LocalDate today = LocalDate.now();
-        return caisseController.getMouvements().stream()
+        double total = caisseController.getMouvements().stream()
             .filter(m -> m.getDate().toLocalDate().equals(today))
             .filter(m -> m.getType() == MouvementCaisse.TypeMouvement.ENTREE)
             .mapToDouble(MouvementCaisse::getMontant)
             .sum();
+        LOGGER.log(Level.INFO, "Total des encaissements du jour: {0,number,currency}", total);
+        return total;
     }
 
     private double calculerChiffreAffaires() {
-        return venteController.getVentes().stream()
+        LOGGER.log(Level.INFO, "Calcul du chiffre d'affaires total...");
+        double total = venteController.getVentes().stream()
             .mapToDouble(Vente::getTotal)
             .sum();
+        LOGGER.log(Level.INFO, "Chiffre d'affaires total: {0,number,currency}", total);
+        return total;
     }
 
     public JPanel getMainPanel() {
