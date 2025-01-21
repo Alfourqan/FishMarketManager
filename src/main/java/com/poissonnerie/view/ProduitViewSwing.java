@@ -35,7 +35,7 @@ public class ProduitViewSwing {
         }
 
         // Création du modèle de table
-        String[] columnNames = {"Nom", "Catégorie", "Prix Achat (€)", "Prix Vente (€)", "Marge (%)", "Stock", "Seuil d'alerte"};
+        String[] columnNames = {"Nom", "Catégorie", "Prix Achat (FCFA)", "Prix Vente (FCFA)", "Marge (%)", "Stock", "Seuil d'alerte"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -303,8 +303,8 @@ public class ProduitViewSwing {
         addFormField(panel, gbc, "Nom:", nomField, 0);
         addFormField(panel, gbc, "Catégorie:", categorieCombo, 1);
         addFormField(panel, gbc, "Fournisseur:", fournisseurCombo, 2);
-        addFormField(panel, gbc, "Prix d'achat (€):", prixAchatField, 3);
-        addFormField(panel, gbc, "Prix de vente (€):", prixVenteField, 4);
+        addFormField(panel, gbc, "Prix d'achat (FCFA):", prixAchatField, 3);
+        addFormField(panel, gbc, "Prix de vente (FCFA):", prixVenteField, 4);
         addFormField(panel, gbc, "Stock:", stockField, 5);
         addFormField(panel, gbc, "Seuil d'alerte:", seuilField, 6);
 
@@ -470,8 +470,8 @@ public class ProduitViewSwing {
             tableModel.addRow(new Object[]{
                     produit.getNom(),
                     produit.getCategorie(),
-                    String.format("%.2f €", produit.getPrixAchat()),
-                    String.format("%.2f €", produit.getPrixVente()),
+                    String.format("%.0f FCFA", produit.getPrixAchat()),
+                    String.format("%.0f FCFA", produit.getPrixVente()),
                     String.format("%.1f%%", produit.getTauxMarge()),
                     produit.getStock(),
                     produit.getSeuilAlerte()

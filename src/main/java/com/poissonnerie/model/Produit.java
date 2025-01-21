@@ -110,7 +110,7 @@ public class Produit {
     @Override
     public String toString() {
         String fournisseurInfo = fournisseur != null ? ", Fournisseur: " + fournisseur.getNom() : "";
-        return String.format("%s (Réf: %s) - Achat: %.2f€, Vente: %.2f€ (%s)%s %s",
+        return String.format("%s (Réf: %s) - Achat: %.0f FCFA, Vente: %.0f FCFA (%s)%s %s",
             nom,
             reference,
             prixAchat,
