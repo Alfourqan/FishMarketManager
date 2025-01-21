@@ -20,34 +20,51 @@ public class ClientController {
 
     public ClientController() {
         this.clients = new ArrayList<>();
+        LOGGER.setLevel(Level.ALL);
     }
 
     public List<Client> getClients() {
-        return new ArrayList<>(clients); // Retourne une copie pour éviter les modifications externes
+        if (clients.isEmpty()) {
+            chargerClients();
+        }
+        LOGGER.info("Retour de " + clients.size() + " clients, dont " +
+            clients.stream().filter(c -> c.getSolde() > 0).count() + " avec solde positif");
+        return new ArrayList<>(clients);
     }
 
     public void chargerClients() {
         LOGGER.info("Chargement des clients...");
         clients.clear();
-        String sql = "SELECT * FROM clients ORDER BY nom";
+        String sql = "SELECT id, nom, telephone, adresse, solde FROM clients ORDER BY nom";
 
         try (Connection conn = DatabaseManager.getConnection();
-             Statement stmt = conn.createStatement()) {
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             conn.setAutoCommit(false);
-            try (ResultSet rs = stmt.executeQuery(sql)) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                int count = 0;
+                double totalSoldes = 0.0;
                 while (rs.next()) {
-                    Client client = new Client(
-                        rs.getInt("id"),
-                        rs.getString("nom"),
-                        rs.getString("telephone"),
-                        rs.getString("adresse"),
-                        rs.getDouble("solde")
-                    );
+                    int id = rs.getInt("id");
+                    String nom = rs.getString("nom");
+                    String telephone = rs.getString("telephone");
+                    String adresse = rs.getString("adresse");
+                    double solde = rs.getDouble("solde");
+
+                    Client client = new Client(id, nom, telephone, adresse, solde);
                     clients.add(client);
+                    count++;
+                    totalSoldes += solde;
+
+                    LOGGER.fine("Client chargé: ID=" + id + ", Nom=" + nom + ", Solde=" + solde);
                 }
                 conn.commit();
-                LOGGER.info("Clients chargés avec succès: " + clients.size() + " clients");
+                LOGGER.info("Clients chargés avec succès: " + count + " clients, Solde total: " + totalSoldes);
+
+                // Log des clients avec solde positif
+                clients.stream()
+                    .filter(c -> c.getSolde() > 0)
+                    .forEach(c -> LOGGER.info("Client avec créance: " + c.getNom() + ", Solde: " + c.getSolde()));
             } catch (SQLException e) {
                 conn.rollback();
                 LOGGER.log(Level.SEVERE, "Erreur lors du chargement des clients", e);
@@ -234,7 +251,7 @@ public class ClientController {
                         client.setSolde(client.getSolde() - montant);
                         conn.commit();
                         LOGGER.info("Créance réglée avec succès pour le client " + client.getNom() +
-                                " - Montant: " + montant + "€");
+                            " - Montant: " + montant + "€");
                     } else {
                         conn.rollback();
                         throw new IllegalStateException("Impossible de régler la créance. Vérifiez le solde du client.");
@@ -248,6 +265,18 @@ public class ClientController {
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur de connexion lors du règlement de la créance", e);
             throw new RuntimeException("Erreur de connexion lors du règlement de la créance", e);
+        }
+    }
+
+    public void ajouterClientTest() {
+        LOGGER.info("Ajout d'un client test avec créance...");
+        try {
+            Client clientTest = new Client(0, "Client Test Créance", "0123456789", "1 Rue Test", 150.50);
+            ajouterClient(clientTest);
+            LOGGER.info("Client test ajouté avec succès: " + clientTest.getNom() + ", Solde: " + clientTest.getSolde());
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'ajout du client test", e);
+            throw new RuntimeException("Erreur lors de l'ajout du client test: " + e.getMessage(), e);
         }
     }
 }

@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import com.poissonnerie.controller.ClientController;
 
 public class Main {
     private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
@@ -33,6 +34,11 @@ public class Main {
             // Initialisation de la base de données
             DatabaseManager.initDatabase();
             updateSplashProgress(30, "Base de données initialisée");
+
+            // Ajout d'un client test avec créance pour le développement
+            ClientController clientController = new ClientController();
+            clientController.ajouterClientTest();
+            updateSplashProgress(40, "Données de test ajoutées");
 
             // Configuration de l'interface graphique
             SwingUtilities.invokeAndWait(() -> {

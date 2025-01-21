@@ -344,7 +344,14 @@ public class ReportController {
 
             if (clients.isEmpty()) {
                 LOGGER.warning("Aucun client avec des créances n'a été trouvé");
+                return; // Sortir si aucun client avec créance n'est trouvé
             }
+
+            double totalCreances = clients.stream()
+                .mapToDouble(Client::getSolde)
+                .sum();
+            LOGGER.info("Génération du rapport de créances pour " + clients.size() + 
+                       " clients, total: " + String.format("%.2f €", totalCreances));
 
             PDFGenerator.genererRapportCreances(clients, outputStream);
             LOGGER.info("Rapport des créances PDF généré avec succès");
