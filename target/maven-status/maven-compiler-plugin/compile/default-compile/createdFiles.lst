@@ -10,6 +10,7 @@ com/poissonnerie/model/MouvementCaisse.class
 com/poissonnerie/model/Client.class
 com/poissonnerie/util/DatabaseConnectionPool.class
 com/poissonnerie/controller/ConfigurationController.class
+com/poissonnerie/view/ProduitViewSwing$6.class
 com/poissonnerie/view/FournisseurViewSwing$3.class
 com/poissonnerie/view/InventaireViewSwing$2.class
 com/poissonnerie/view/ConfigurationViewSwing$3.class

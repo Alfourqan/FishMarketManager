@@ -9,6 +9,7 @@ public class Produit {
     private int stock;
     private int seuilAlerte;
     private String reference;
+    private Fournisseur fournisseur;  // Nouveau champ
 
     public Produit(int id, String nom, String categorie, double prixAchat, double prixVente, int stock, int seuilAlerte) {
         this.id = id;
@@ -21,7 +22,11 @@ public class Produit {
         this.reference = generateReference();
     }
 
-    // Getters et setters
+    // Nouveau getter et setter pour fournisseur
+    public Fournisseur getFournisseur() { return fournisseur; }
+    public void setFournisseur(Fournisseur fournisseur) { this.fournisseur = fournisseur; }
+
+    // Getters et setters existants
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -37,7 +42,6 @@ public class Produit {
     public double getPrixVente() { return prixVente; }
     public void setPrixVente(double prixVente) { this.prixVente = prixVente; }
 
-    // Méthode pour PDFGenerator
     public double getPrix() { return prixVente; }
 
     public double getMarge() { return prixVente - prixAchat; }
@@ -56,12 +60,10 @@ public class Produit {
             categorie.substring(0, Math.min(3, categorie.length())).toUpperCase());
     }
 
-    // Alias de getStock() pour maintenir la compatibilité
     public int getQuantite() { 
         return getStock(); 
     }
 
-    // Méthodes améliorées pour la gestion du stock
     public void ajusterStock(int quantite) {
         int nouveauStock = this.stock + quantite;
         if (nouveauStock < 0) {
@@ -72,11 +74,6 @@ public class Produit {
         this.stock = nouveauStock;
     }
 
-    /**
-     * Détermine si le stock est bas selon les règles métier.
-     * Le stock est considéré bas uniquement s'il est supérieur à 0
-     * mais inférieur ou égal au seuil d'alerte.
-     */
     public boolean estStockBas() {
         return this.stock > 0 && this.stock <= this.seuilAlerte;
     }
@@ -85,10 +82,6 @@ public class Produit {
         return this.stock == 0;
     }
 
-    /**
-     * Retourne le statut détaillé du stock pour l'interface utilisateur.
-     * Cette méthode utilise des seuils plus larges pour une meilleure expérience utilisateur.
-     */
     public String getStatutStock() {
         if (this.stock == 0) {
             return "RUPTURE";
@@ -116,12 +109,14 @@ public class Produit {
 
     @Override
     public String toString() {
-        return String.format("%s (Réf: %s) - Achat: %.2f€, Vente: %.2f€ (%s) %s",
+        String fournisseurInfo = fournisseur != null ? ", Fournisseur: " + fournisseur.getNom() : "";
+        return String.format("%s (Réf: %s) - Achat: %.2f€, Vente: %.2f€ (%s)%s %s",
             nom,
             reference,
             prixAchat,
             prixVente,
             categorie,
+            fournisseurInfo,
             getStatutStockFormatted());
     }
 }
