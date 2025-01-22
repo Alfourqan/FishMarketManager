@@ -552,4 +552,87 @@ public class ExcelGenerator {
             sheet.autoSizeColumn(i);
         }
     }
+
+    public static void genererRapportAchatsFournisseurs(Map<String, Double> achatsFournisseurs, String cheminFichier) {
+        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+            XSSFSheet sheet = workbook.createSheet("Achats Fournisseurs");
+
+            // En-tête
+            Row headerRow = sheet.createRow(0);
+            String[] headers = {"Fournisseur", "Montant des achats"};
+
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
+                applyHeaderStyle(workbook, (XSSFCell)cell);
+                sheet.setColumnWidth(i, 256 * 20);
+            }
+
+            // Données
+            int rowNum = 1;
+            double totalAchats = 0.0;
+
+            for (Map.Entry<String, Double> entry : achatsFournisseurs.entrySet()) {
+                Row row = sheet.createRow(rowNum++);
+                row.createCell(0).setCellValue(entry.getKey());
+
+                Cell montantCell = row.createCell(1);
+                montantCell.setCellValue(entry.getValue());
+                applyCurrencyStyle(workbook, (XSSFCell)montantCell);
+
+                totalAchats += entry.getValue();
+            }
+
+            // Ligne du total
+            Row totalRow = sheet.createRow(rowNum++);
+            Cell totalLabelCell = totalRow.createCell(0);
+            totalLabelCell.setCellValue("TOTAL");
+            applyHeaderStyle(workbook, (XSSFCell)totalLabelCell);
+
+            Cell totalValueCell = totalRow.createCell(1);
+            totalValueCell.setCellValue(totalAchats);
+            applyCurrencyStyle(workbook, (XSSFCell)totalValueCell);
+
+            // Analyses
+            rowNum += 2;
+            XSSFSheet analyseSheet = workbook.createSheet("Analyses");
+
+            Row analyseTitleRow = analyseSheet.createRow(0);
+            Cell analyseTitleCell = analyseTitleRow.createCell(0);
+            analyseTitleCell.setCellValue("Analyse des Achats");
+            applyHeaderStyle(workbook, (XSSFCell)analyseTitleCell);
+
+            // Statistiques
+            double moyenneAchats = totalAchats / achatsFournisseurs.size();
+            double maxAchat = achatsFournisseurs.values().stream().mapToDouble(v -> v).max().orElse(0.0);
+
+
+            // Ajout des statistiques
+            Row moyenneRow = analyseSheet.createRow(rowNum++);
+            moyenneRow.createCell(0).setCellValue("Moyenne des achats par fournisseur");
+            Cell moyenneCell = moyenneRow.createCell(1);
+            moyenneCell.setCellValue(moyenneAchats);
+            applyCurrencyStyle(workbook, (XSSFCell)moyenneCell);
+
+            Row maxRow = analyseSheet.createRow(rowNum++);
+            maxRow.createCell(0).setCellValue("Achat le plus important");
+            Cell maxCell = maxRow.createCell(1);
+            maxCell.setCellValue(maxAchat);
+            applyCurrencyStyle(workbook, (XSSFCell)maxCell);
+
+            // Ajustement des colonnes
+            for (int i = 0; i < 2; i++) {
+                analyseSheet.autoSizeColumn(i);
+            }
+
+            try (FileOutputStream fileOut = new FileOutputStream(cheminFichier)) {
+                workbook.write(fileOut);
+            }
+
+            LOGGER.info("Rapport des achats fournisseurs Excel généré avec succès: " + cheminFichier);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport Excel des achats fournisseurs", e);
+            throw new RuntimeException("Erreur lors de la génération du rapport Excel", e);
+        }
+    }
 }
