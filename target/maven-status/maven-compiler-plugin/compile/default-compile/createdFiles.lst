@@ -50,6 +50,7 @@ com/poissonnerie/view/VenteViewSwing$1.class
 com/poissonnerie/model/Vente.class
 com/poissonnerie/view/ClientViewSwing.class
 com/poissonnerie/view/AccueilViewSwing$1.class
+com/poissonnerie/view/InventaireViewSwing$ButtonRenderer$1.class
 com/poissonnerie/view/InventaireViewSwing.class
 com/poissonnerie/controller/ProduitController.class
 com/poissonnerie/view/ProduitViewSwing$4.class
