@@ -565,10 +565,13 @@ public class InventaireViewSwing {
             if (isPushed) {
                 // Récupérer le produit de la ligne sélectionnée
                 int row = tableInventaire.getSelectedRow();
-                if (row >= 0 && row < produitController.getProduits().size()) {
+                if (row >= 0 && row < tableInventaire.getRowCount()) {
                     row = tableInventaire.convertRowIndexToModel(row);
-                    Produit produit = produitController.getProduits().get(row);
-                    SwingUtilities.invokeLater(() -> showAjustementDialog(produit));
+                    List<Produit> produits = produitController.getProduits();
+                    if (row < produits.size()) {
+                        Produit produit = produits.get(row);
+                        SwingUtilities.invokeLater(() -> showAjustementDialog(produit));
+                    }
                 }
             }
             isPushed = false;
