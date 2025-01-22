@@ -572,14 +572,34 @@ public class InventaireViewSwing {
     private class ButtonRenderer extends JButton implements TableCellRenderer {
         public ButtonRenderer() {
             setOpaque(true);
+            setFocusPainted(false);
+            setBorderPainted(true);
+            setFont(new Font("Segoe UI", Font.BOLD, 12));
+            setMargin(new Insets(2, 8, 2, 8));
+            setCursor(new Cursor(Cursor.HAND_CURSOR));
         }
 
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                                                       boolean isSelected, boolean hasFocus, int row, int column) {
-            setText("Ajuster");
-            setBackground(new Color(255, 165, 0));
+            setText("⚖️ Ajuster");
+            setBackground(new Color(14, 165, 233));  // Bleu plus moderne
             setForeground(Color.WHITE);
+            setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(2, 132, 199), 1),
+                    BorderFactory.createEmptyBorder(4, 8, 4, 8)
+            ));
+
+            // Effet de survol
+            addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseEntered(java.awt.event.MouseEvent evt) {
+                    setBackground(new Color(2, 132, 199));
+                }
+                public void mouseExited(java.awt.event.MouseEvent evt) {
+                    setBackground(new Color(14, 165, 233));
+                }
+            });
+
             return this;
         }
     }
@@ -592,6 +612,12 @@ public class InventaireViewSwing {
             super(checkBox);
             button = new JButton();
             button.setOpaque(true);
+            button.setFocusPainted(false);
+            button.setBorderPainted(true);
+            button.setFont(new Font("Segoe UI", Font.BOLD, 12));
+            button.setMargin(new Insets(2, 8, 2, 8));
+            button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
             button.addActionListener(e -> {
                 fireEditingStopped();
                 isPushed = true;
@@ -601,9 +627,13 @@ public class InventaireViewSwing {
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value,
                                                     boolean isSelected, int row, int column) {
-            button.setText("Ajuster");
-            button.setBackground(new Color(255, 165, 0));
+            button.setText("⚖️ Ajuster");
+            button.setBackground(new Color(14, 165, 233));
             button.setForeground(Color.WHITE);
+            button.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(2, 132, 199), 1),
+                    BorderFactory.createEmptyBorder(4, 8, 4, 8)
+            ));
             isPushed = false;
             return button;
         }
@@ -611,7 +641,6 @@ public class InventaireViewSwing {
         @Override
         public Object getCellEditorValue() {
             if (isPushed) {
-                // Récupérer le produit de la ligne sélectionnée
                 int row = tableInventaire.getSelectedRow();
                 if (row >= 0 && row < tableInventaire.getRowCount()) {
                     row = tableInventaire.convertRowIndexToModel(row);
@@ -623,7 +652,7 @@ public class InventaireViewSwing {
                 }
             }
             isPushed = false;
-            return "Ajuster";
+            return "⚖️ Ajuster";
         }
 
         @Override
