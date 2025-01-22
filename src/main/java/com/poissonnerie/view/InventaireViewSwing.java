@@ -537,13 +537,12 @@ public class InventaireViewSwing {
     }
 
     private class ButtonEditor extends DefaultCellEditor {
-        private JButton button;
+        private final JButton button;
 
         public ButtonEditor(JCheckBox checkBox) {
             super(checkBox);
             button = new JButton();
             button.setOpaque(true);
-            button.addActionListener(e -> fireEditingStopped());
         }
 
         @Override
@@ -553,11 +552,22 @@ public class InventaireViewSwing {
             button.setBackground(new Color(255, 165, 0));
             button.setForeground(Color.WHITE);
 
+            // Supprimer tous les listeners existants
+            for (ActionListener al : button.getActionListeners()) {
+                button.removeActionListener(al);
+            }
+
             // Récupérer le produit directement de la liste
             List<Produit> produits = produitController.getProduits();
             if (row >= 0 && row < produits.size()) {
                 final Produit produit = produits.get(row);
-                button.addActionListener(e -> showAjustementDialog(produit));
+                button.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        fireEditingStopped();
+                        showAjustementDialog(produit);
+                    }
+                });
             }
 
             return button;
@@ -566,6 +576,11 @@ public class InventaireViewSwing {
         @Override
         public Object getCellEditorValue() {
             return "Ajuster";
+        }
+
+        @Override
+        public boolean stopCellEditing() {
+            return super.stopCellEditing();
         }
     }
 
