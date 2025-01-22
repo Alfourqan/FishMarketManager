@@ -538,11 +538,16 @@ public class InventaireViewSwing {
 
     private class ButtonEditor extends DefaultCellEditor {
         private final JButton button;
+        private boolean isPushed;
 
         public ButtonEditor(JCheckBox checkBox) {
             super(checkBox);
             button = new JButton();
             button.setOpaque(true);
+            button.addActionListener(e -> {
+                fireEditingStopped();
+                isPushed = true;
+            });
         }
 
         @Override
@@ -551,35 +556,28 @@ public class InventaireViewSwing {
             button.setText("Ajuster");
             button.setBackground(new Color(255, 165, 0));
             button.setForeground(Color.WHITE);
-
-            // Supprimer tous les listeners existants
-            for (ActionListener al : button.getActionListeners()) {
-                button.removeActionListener(al);
-            }
-
-            // Récupérer le produit directement de la liste
-            List<Produit> produits = produitController.getProduits();
-            if (row >= 0 && row < produits.size()) {
-                final Produit produit = produits.get(row);
-                button.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        fireEditingStopped();
-                        showAjustementDialog(produit);
-                    }
-                });
-            }
-
+            isPushed = false;
             return button;
         }
 
         @Override
         public Object getCellEditorValue() {
+            if (isPushed) {
+                // Récupérer le produit de la ligne sélectionnée
+                int row = tableInventaire.getSelectedRow();
+                if (row >= 0 && row < produitController.getProduits().size()) {
+                    row = tableInventaire.convertRowIndexToModel(row);
+                    Produit produit = produitController.getProduits().get(row);
+                    SwingUtilities.invokeLater(() -> showAjustementDialog(produit));
+                }
+            }
+            isPushed = false;
             return "Ajuster";
         }
 
         @Override
         public boolean stopCellEditing() {
+            isPushed = false;
             return super.stopCellEditing();
         }
     }
