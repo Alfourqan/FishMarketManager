@@ -38,46 +38,6 @@ public class ReportController {
         }
     }
 
-    public void genererRapportStocksPDF(List<Produit> produits, Map<String, Double> statistiques, ByteArrayOutputStream outputStream) {
-        try {
-            PDFGenerator.genererRapportStocks(produits, statistiques, outputStream);
-            LOGGER.info("Rapport des stocks PDF généré avec succès");
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF des stocks", e);
-            throw new RuntimeException("Erreur lors de la génération du rapport PDF des stocks", e);
-        }
-    }
-
-    public void genererRapportCreancesExcel(String cheminFichier) {
-        try {
-            List<Client> clients = clientController.getClients().stream()
-                .filter(c -> c.getSolde() > 0)
-                .sorted((c1, c2) -> Double.compare(c2.getSolde(), c1.getSolde()))
-                .collect(Collectors.toList());
-
-            if (clients.isEmpty()) {
-                LOGGER.warning("Aucun client avec des créances n'a été trouvé");
-            }
-
-            ExcelGenerator.genererRapportCreances(clients, cheminFichier);
-            LOGGER.info("Rapport des créances Excel généré avec succès");
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport Excel des créances", e);
-            throw new RuntimeException("Erreur lors de la génération du rapport Excel des créances: " + e.getMessage(), e);
-        }
-    }
-
-    public void genererRapportFournisseursExcel(String cheminFichier) {
-        try {
-            List<Fournisseur> fournisseurs = fournisseurController.getFournisseurs();
-            ExcelGenerator.genererRapportFournisseurs(fournisseurs, cheminFichier);
-            LOGGER.info("Rapport des fournisseurs Excel généré avec succès");
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport Excel des fournisseurs", e);
-            throw new RuntimeException("Erreur lors de la génération du rapport Excel des fournisseurs", e);
-        }
-    }
-
     public void genererRapportVentesExcel(LocalDateTime debut, LocalDateTime fin, String cheminFichier) {
         try {
             List<Vente> ventes = venteController.getVentes().stream()
@@ -92,23 +52,7 @@ public class ReportController {
         }
     }
 
-    public void genererRapportFinancierExcel(LocalDateTime debut, LocalDateTime fin, String cheminFichier) {
-        try {
-            Map<String, Double> chiffreAffaires = calculerChiffreAffaires(debut, fin);
-            Map<String, Double> couts = calculerCouts(debut, fin);
-            Map<String, Double> benefices = calculerBenefices(chiffreAffaires, couts);
-            Map<String, Double> marges = calculerMarges(chiffreAffaires, couts);
-
-            ExcelGenerator.genererRapportFinancier(
-                chiffreAffaires, couts, benefices, marges, cheminFichier);
-            LOGGER.info("Rapport financier généré avec succès");
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport financier", e);
-            throw new RuntimeException("Erreur lors de la génération du rapport financier", e);
-        }
-    }
-
-    private Map<String, Object> analyserVentes(List<Vente> ventes) {
+    public Map<String, Object> analyserVentes(List<Vente> ventes) {
         Map<String, Object> analyses = new HashMap<>();
 
         // Chiffre d'affaires total
@@ -174,6 +118,150 @@ public class ReportController {
 
         return analyses;
     }
+
+    public void genererRapportFinancierExcel(Map<String, Double> chiffreAffaires, 
+                                           Map<String, Double> rentabilites,
+                                           String cheminFichier) {
+        try {
+            ExcelGenerator.genererRapportFinancier(chiffreAffaires, rentabilites, cheminFichier);
+            LOGGER.info("Rapport financier généré avec succès");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport financier", e);
+            throw new RuntimeException("Erreur lors de la génération du rapport financier", e);
+        }
+    }
+
+    public Map<String, Double> calculerChiffreAffaires(LocalDateTime debut, LocalDateTime fin) {
+        List<Vente> ventes = venteController.getVentes().stream()
+            .filter(v -> !v.getDate().isBefore(debut) && !v.getDate().isAfter(fin))
+            .collect(Collectors.toList());
+        Map<String, Double> caParPeriode = new HashMap<>();
+
+        // Calcul par mois
+        Map<String, Double> caParMois = ventes.stream()
+            .collect(Collectors.groupingBy(
+                v -> v.getDate().format(java.time.format.DateTimeFormatter.ofPattern("MM/yyyy")),
+                Collectors.summingDouble(Vente::getTotal)
+            ));
+
+        // Calcul des variations mensuelles
+        List<String> mois = new ArrayList<>(caParMois.keySet());
+        Collections.sort(mois);
+        for (int i = 1; i < mois.size(); i++) {
+            double moisPrecedent = caParMois.get(mois.get(i-1));
+            double moisActuel = caParMois.get(mois.get(i));
+            if (moisPrecedent > 0) {
+                double variation = ((moisActuel - moisPrecedent) / moisPrecedent) * 100;
+                caParPeriode.put("Variation " + mois.get(i), variation);
+            }
+        }
+
+        // Ajout des données mensuelles
+        caParPeriode.putAll(caParMois);
+
+        // Total sur la période
+        double total = caParMois.values().stream().mapToDouble(Double::doubleValue).sum();
+        caParPeriode.put("Total période", total);
+
+        // Moyenne mensuelle
+        double moyenneMensuelle = caParMois.values().stream()
+            .mapToDouble(Double::doubleValue)
+            .average()
+            .orElse(0.0);
+        caParPeriode.put("Moyenne mensuelle", moyenneMensuelle);
+
+        return caParPeriode;
+    }
+
+    public Map<String, Double> analyserRentabiliteParProduit(LocalDateTime debut, LocalDateTime fin) {
+        try {
+            List<Vente> ventes = venteController.getVentes().stream()
+                .filter(v -> !v.getDate().isBefore(debut) && !v.getDate().isAfter(fin))
+                .collect(Collectors.toList());
+
+            Map<String, Double> rentabilites = new HashMap<>();
+
+            // Calcul de la rentabilité détaillée par produit
+            Map<String, DoubleSummaryStatistics> statsVentes = ventes.stream()
+                .flatMap(v -> v.getLignes().stream())
+                .collect(Collectors.groupingBy(
+                    ligne -> ligne.getProduit().getNom(),
+                    Collectors.summarizingDouble(ligne -> {
+                        double prixVente = ligne.getPrixUnitaire() * ligne.getQuantite();
+                        double coutAchat = ligne.getProduit().getPrixAchat() * ligne.getQuantite();
+                        return ((prixVente - coutAchat) / prixVente) * 100;
+                    })
+                ));
+
+            // Ajout des statistiques détaillées
+            statsVentes.forEach((produit, stats) -> {
+                rentabilites.put(produit + " - Marge moyenne (%)", stats.getAverage());
+                rentabilites.put(produit + " - Marge min (%)", stats.getMin());
+                rentabilites.put(produit + " - Marge max (%)", stats.getMax());
+            });
+
+            return rentabilites;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'analyse de la rentabilité par produit", e);
+            return new HashMap<>();
+        }
+    }
+    public void genererRapportStocksPDF(List<Produit> produits, Map<String, Double> statistiques, ByteArrayOutputStream outputStream) {
+        try {
+            PDFGenerator.genererRapportStocks(produits, statistiques, outputStream);
+            LOGGER.info("Rapport des stocks PDF généré avec succès");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF des stocks", e);
+            throw new RuntimeException("Erreur lors de la génération du rapport PDF des stocks", e);
+        }
+    }
+
+    public void genererRapportCreancesExcel(String cheminFichier) {
+        try {
+            List<Client> clients = clientController.getClients().stream()
+                .filter(c -> c.getSolde() > 0)
+                .sorted((c1, c2) -> Double.compare(c2.getSolde(), c1.getSolde()))
+                .collect(Collectors.toList());
+
+            if (clients.isEmpty()) {
+                LOGGER.warning("Aucun client avec des créances n'a été trouvé");
+            }
+
+            ExcelGenerator.genererRapportCreances(clients, cheminFichier);
+            LOGGER.info("Rapport des créances Excel généré avec succès");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport Excel des créances", e);
+            throw new RuntimeException("Erreur lors de la génération du rapport Excel des créances: " + e.getMessage(), e);
+        }
+    }
+
+    public void genererRapportFournisseursExcel(String cheminFichier) {
+        try {
+            List<Fournisseur> fournisseurs = fournisseurController.getFournisseurs();
+            ExcelGenerator.genererRapportFournisseurs(fournisseurs, cheminFichier);
+            LOGGER.info("Rapport des fournisseurs Excel généré avec succès");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport Excel des fournisseurs", e);
+            throw new RuntimeException("Erreur lors de la génération du rapport Excel des fournisseurs", e);
+        }
+    }
+
+    public void genererRapportFinancierExcel(LocalDateTime debut, LocalDateTime fin, String cheminFichier) {
+        try {
+            Map<String, Double> chiffreAffaires = calculerChiffreAffaires(debut, fin);
+            Map<String, Double> couts = calculerCouts(debut, fin);
+            Map<String, Double> benefices = calculerBenefices(chiffreAffaires, couts);
+            Map<String, Double> marges = calculerMarges(chiffreAffaires, couts);
+
+            ExcelGenerator.genererRapportFinancier(
+                chiffreAffaires, couts, benefices, marges, cheminFichier);
+            LOGGER.info("Rapport financier généré avec succès");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport financier", e);
+            throw new RuntimeException("Erreur lors de la génération du rapport financier", e);
+        }
+    }
+
 
 
     private Map<String, Double> calculerStatistiquesStocks(List<Produit> produits) {
@@ -295,49 +383,8 @@ public class ReportController {
         // Pour l'instant, retourne une liste vide
         return new ArrayList<>();
     }
-    private Map<String, Double> calculerChiffreAffaires(LocalDateTime debut, LocalDateTime fin) {
-        List<Vente> ventes = venteController.getVentes().stream()
-            .filter(v -> !v.getDate().isBefore(debut) && !v.getDate().isAfter(fin))
-            .collect(Collectors.toList());
-        Map<String, Double> caParPeriode = new HashMap<>();
-
-        // Calcul par mois
-        Map<String, Double> caParMois = ventes.stream()
-            .collect(Collectors.groupingBy(
-                v -> v.getDate().format(java.time.format.DateTimeFormatter.ofPattern("MM/yyyy")),
-                Collectors.summingDouble(Vente::getTotal)
-            ));
-
-        // Calcul des variations mensuelles
-        List<String> mois = new ArrayList<>(caParMois.keySet());
-        Collections.sort(mois);
-        for (int i = 1; i < mois.size(); i++) {
-            double moisPrecedent = caParMois.get(mois.get(i-1));
-            double moisActuel = caParMois.get(mois.get(i));
-            if (moisPrecedent > 0) {
-                double variation = ((moisActuel - moisPrecedent) / moisPrecedent) * 100;
-                caParPeriode.put("Variation " + mois.get(i), variation);
-            }
-        }
-
-        // Ajout des données mensuelles
-        caParPeriode.putAll(caParMois);
-
-        // Total sur la période
-        double total = caParMois.values().stream().mapToDouble(Double::doubleValue).sum();
-        caParPeriode.put("Total période", total);
-
-        // Moyenne mensuelle
-        double moyenneMensuelle = caParMois.values().stream()
-            .mapToDouble(Double::doubleValue)
-            .average()
-            .orElse(0.0);
-        caParPeriode.put("Moyenne mensuelle", moyenneMensuelle);
-
-        return caParPeriode;
-    }
-
-    private Map<String, Double> calculerCouts(LocalDateTime debut, LocalDateTime fin) {
+    
+        private Map<String, Double> calculerCouts(LocalDateTime debut, LocalDateTime fin) {
         Map<String, Double> couts = new HashMap<>();
 
         // Achats (mouvements de caisse sortants)
@@ -463,40 +510,6 @@ public class ReportController {
             .sum();
 
         return valeurStockMoyen > 0 ? (coutVentesPeriode / valeurStockMoyen) * 365 : 0.0;
-    }
-
-    public Map<String, Double> analyserRentabiliteParProduit(LocalDateTime debut, LocalDateTime fin) {
-        try {
-            List<Vente> ventes = venteController.getVentes().stream()
-                .filter(v -> !v.getDate().isBefore(debut) && !v.getDate().isAfter(fin))
-                .collect(Collectors.toList());
-
-            Map<String, Double> rentabilites = new HashMap<>();
-
-            // Calcul de la rentabilité détaillée par produit
-            Map<String, DoubleSummaryStatistics> statsVentes = ventes.stream()
-                .flatMap(v -> v.getLignes().stream())
-                .collect(Collectors.groupingBy(
-                    ligne -> ligne.getProduit().getNom(),
-                    Collectors.summarizingDouble(ligne -> {
-                        double prixVente = ligne.getPrixUnitaire() * ligne.getQuantite();
-                        double coutAchat = ligne.getProduit().getPrixAchat() * ligne.getQuantite();
-                        return ((prixVente - coutAchat) / prixVente) * 100;
-                    })
-                ));
-
-            // Ajout des statistiques détaillées
-            statsVentes.forEach((produit, stats) -> {
-                rentabilites.put(produit + " - Marge moyenne (%)", stats.getAverage());
-                rentabilites.put(produit + " - Marge min (%)", stats.getMin());
-                rentabilites.put(produit + " - Marge max (%)", stats.getMax());
-            });
-
-            return rentabilites;
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de l'analyse de la rentabilité par produit", e);
-            return new HashMap<>();
-        }
     }
 
     public Map<String, List<Double>> analyserEvolutionVentes(LocalDateTime debut, LocalDateTime fin) {

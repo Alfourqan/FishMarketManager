@@ -70,7 +70,6 @@ import java.awt.print.Book;
 import java.awt.Graphics2D;
 
 
-
 public class ReportViewSwing {
     private static final Logger LOGGER = Logger.getLogger(ReportViewSwing.class.getName());
 
@@ -354,7 +353,6 @@ public class ReportViewSwing {
                         dateFin.atTime(23, 59, 59)
                     );
 
-                    // Ajout des analyses de rentabilité
                     Map<String, Double> rentabilites = reportController.analyserRentabiliteParProduit(
                         dateDebut.atStartOfDay(),
                         dateFin.atTime(23, 59, 59)
@@ -419,7 +417,7 @@ public class ReportViewSwing {
         panel.add(scrollPane, BorderLayout.CENTER);
 
         // Mise à jour initiale des graphiques
-        updateCharts();
+        updateStatistiques();
 
         mainPanel.add(panel, BorderLayout.CENTER);
     }
@@ -700,10 +698,12 @@ public class ReportViewSwing {
                 .collect(Collectors.toList());
 
             Map<String, Object> analyses = reportController.analyserVentes(ventes);
-            @SuppressWarnings("unchecked")
-            Map<String, Double> topProduits = (Map<String, Double>) analyses.get("Top 5 produits");
+            Object topProduitsObj = analyses.get("Top 5 produits");
 
-            if (topProduits != null) {
+            if (topProduitsObj instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Double> topProduits = (Map<String, Double>) topProduitsObj;
+
                 DefaultCategoryDataset dataset = new DefaultCategoryDataset();
                 topProduits.forEach((produit, montant) -> 
                     dataset.addValue(montant, "CA", produit));
@@ -873,50 +873,46 @@ public class ReportViewSwing {
         chartPanel.removeAll();
         chartPanel.setLayout(new GridLayout(2, 2, 15, 15));
 
-        addStatPanel("Ventes", String.format(
-            ""Aujourd'hui: %.2f €\nCette semaine: %.2f €\nCe mois: %.2f €",
+        addStatPanel("Ventes", "Aujourd'hui: %.2f €\nCette semaine: %.2f €\nCe mois: %.2f €",
             calculerVentesTotal(LocalDate.now(), LocalDate.now()),
             calculerVentesTotal(LocalDate.now().minusWeeks(1), LocalDate.now()),
             calculerVentesTotal(LocalDate.now().minusMonths(1), LocalDate.now())
-        ));
+        );
 
-        addStatPanel("Stock", String.format(
-            "Total produits: %d\nEn alerte: %d\nValeur totale: %.2f €",
+        addStatPanel("Stock", "Total produits: %d\nEn alerte: %d\nValeur totale: %.2f €",
             getNombreProduits(),
             getNombreProduitsEnAlerte(),
             getValeurTotaleStock()
-        ));
+        );
 
-        addStatPanel("Fournisseurs", String.format(
-            "Total: %d\nCommandes en cours: %d",
+        addStatPanel("Fournisseurs", "Total: %d\nCommandes en cours: %d",
             getNombreFournisseurs(),
             getCommandesEnCours()
-        ));
+        );
 
-        addStatPanel("Performance", String.format(
-            "Marge brute: %.2f %%\nRotation stock: %.1f jours",
+        addStatPanel("Performance", "Marge brute: %.2f %%\nRotation stock: %.1f jours",
             calculerMargeBrute(),
             calculerRotationStock()
-        ));
+        );
 
         chartPanel.revalidate();
         chartPanel.repaint();
     }
 
-    private void addStatPanel(String title, String content) {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BorderLayout(0, 10));
+    private void addStatPanel(String titre, String format, Object... args) {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(220, 220, 220)),
-            BorderFactory.createEmptyBorder(15, 15, 15, 15)
+            BorderFactory.createEmptyBorder(8, 12, 8, 12)
         ));
-        panel.setBackground(Color.WHITE);
 
-        JLabel titleLabel = new JLabel(title);
+        JLabel titleLabel = new JLabel(titre);
         titleLabel.setFont(SUBTITLE_FONT);
-        titleLabel.setForeground(new Color(33, 33, 33));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 8, 0));
 
-        JTextArea contentArea = new JTextArea(content);
+        String formattedContent = String.format(format, args);
+        JTextArea contentArea = new JTextArea(formattedContent);
         contentArea.setFont(REGULAR_FONT);
         contentArea.setEditable(false);
         contentArea.setBackground(panel.getBackground());
@@ -927,87 +923,120 @@ public class ReportViewSwing {
         panel.add(titleLabel, BorderLayout.NORTH);
         panel.add(contentArea, BorderLayout.CENTER);
 
-        chartPanel.add(panel);
+        statistiquesPanel.add(panel);
     }
 
-    // Méthodes utilitaires pour les statistiques
+    private void updateStatistiques() {
+        statistiquesPanel.removeAll();
+        statistiquesPanel.setLayout(new GridLayout(2, 2, 15, 15));
+
+        // Statistiques des ventes
+        addStatPanel("Ventes", 
+            "Aujourd'hui: %.2f €\nCette semaine: %.2f €\nCe mois: %.2f €",
+            calculerVentesTotal(LocalDate.now(), LocalDate.now()),
+            calculerVentesTotal(LocalDate.now().minusWeeks(1), LocalDate.now()),
+            calculerVentesTotal(LocalDate.now().minusMonths(1), LocalDate.now())
+        );
+
+        // Statistiques du stock
+        addStatPanel("Stock", 
+            "Total produits: %d\nEn alerte: %d\nValeur totale: %.2f €",
+            getNombreProduits(),
+            getNombreProduitsEnAlerte(),
+            getValeurTotaleStock()
+        );
+
+        // Statistiques des fournisseurs
+        addStatPanel("Fournisseurs", 
+            "Total: %d\nCommandes en cours: %d",
+            getNombreFournisseurs(),
+            getCommandesEnCours()
+        );
+
+        // Statistiques de performance
+        addStatPanel("Performance", 
+            "Marge brute: %.2f %%\nRotation stock: %.1f jours",
+            calculerMargeBrute(),
+            calculerRotationStock()
+        );
+
+        statistiquesPanel.revalidate();
+        statistiquesPanel.repaint();
+    }
+
     private double calculerVentesTotal(LocalDate debut, LocalDate fin) {
         try {
-            venteController.chargerVentes();
             return venteController.getVentes().stream()
-                .filter(v -> !v.getDate().toLocalDate().isBefore(debut) &&
+                .filter(v -> !v.getDate().toLocalDate().isBefore(debut) && 
                            !v.getDate().toLocalDate().isAfter(fin))
-                .mapToDouble(Vente::getMontantTotal)
+                .mapToDouble(Vente::getTotal)
                 .sum();
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du calcul du total des ventes", e);
+            LOGGER.log(Level.SEVERE, "Erreur lors du calcul des ventes", e);
             return 0.0;
         }
     }
 
     private int getNombreProduits() {
-        try {
-            produitController.chargerProduits();
-            return produitController.getProduits().size();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du chargement des produits", e);            return 0;
-        }
+        return produitController.getProduits().size();
     }
 
     private int getNombreProduitsEnAlerte() {
-        try {
-            produitController.chargerProduits();
-            return (int) produitController.getProduits().stream()
-                .filter(p -> p.getQuantite() <= p.getSeuilAlerte())
-                .count();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du calcul des produits en alerte", e);
-            return 0;
-        }
+        return (int) produitController.getProduits().stream()
+            .filter(p -> p.getQuantite() <= p.getSeuilAlerte())
+            .count();
     }
 
     private double getValeurTotaleStock() {
-        try {
-            produitController.chargerProduits();
-            return produitController.getProduits().stream()
-                .mapToDouble(p -> p.getPrixAchat() * p.getQuantite())
-                .sum();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du calcul de la valeur totale du stock", e);
-            return 0.0;
-        }
+        return produitController.getProduits().stream()
+            .mapToDouble(p -> p.getPrix() * p.getQuantite())
+            .sum();
     }
 
     private int getNombreFournisseurs() {
-        try {
-            fournisseurController.chargerFournisseurs();
-            return fournisseurController.getFournisseurs().size();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du chargement des fournisseurs", e);
-            return 0;
-        }
+        return fournisseurController.getFournisseurs().size();
     }
 
     private int getCommandesEnCours() {
-        // À implémenter selon la logique métier
+        // Pour l'instant, retourne une valeur fictive
         return 0;
     }
 
     private double calculerMargeBrute() {
-        // À implémenter selon la logique métier
-        return 25.5; // Exemple
+        try {
+            double totalVentes = venteController.getVentes().stream()
+                .mapToDouble(Vente::getTotal)
+                .sum();
+            double totalCouts = venteController.getVentes().stream()
+                .flatMap(v -> v.getLignes().stream())
+                .mapToDouble(l -> l.getProduit().getPrixAchat() * l.getQuantite())
+                .sum();
+
+            return totalVentes > 0 ? ((totalVentes - totalCouts) / totalVentes) * 100 : 0.0;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors du calcul de la marge brute", e);
+            return 0.0;
+        }
     }
 
     private double calculerRotationStock() {
         try {
-            Map<String, Double> performances = reportController.analyserPerformanceStock();
-            return performances.getOrDefault("Taux de rotation du stock", 0.0);
+            double valeurStockMoyen = produitController.getProduits().stream()
+                .mapToDouble(p -> p.getPrixAchat() * p.getQuantite())
+                .average()
+                .orElse(0.0);
+
+            double coutVentesPeriode = venteController.getVentes().stream()
+                .flatMap(v -> v.getLignes().stream())
+                .mapToDouble(l -> l.getProduit().getPrixAchat() * l.getQuantite())
+                .sum();
+
+            return valeurStockMoyen > 0 ? (coutVentesPeriode / valeurStockMoyen) * 365 : 0.0;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors du calcul de la rotation du stock", e);
             return 0.0;
         }
     }
-
 
     private void ouvrirFichierPDF(String nomFichier) {
         try {

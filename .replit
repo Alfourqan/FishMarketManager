@@ -31,6 +31,14 @@ args = "Database Init"
 task = "workflow.run"
 args = "Java Build"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Java Build Test"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Java Build Final"
+
 [[workflows.workflow]]
 name = "Java Application"
 author = "agent"
@@ -89,6 +97,34 @@ args = "mvn clean compile exec:java -Dexec.mainClass='com.poissonnerie.util.Data
 
 [[workflows.workflow]]
 name = "Java Build"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "mvn clean compile"
+
+[[workflows.workflow]]
+name = "Java Build Test"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "mvn clean compile"
+
+[[workflows.workflow]]
+name = "Java Build Final"
 author = "agent"
 
 [workflows.workflow.metadata]
