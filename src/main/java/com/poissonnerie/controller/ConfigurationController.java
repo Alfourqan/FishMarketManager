@@ -108,28 +108,36 @@ public class ConfigurationController {
         System.setProperty("SKIP_SIRET_VALIDATION", "true");
         try {
             String sql = "UPDATE configurations SET valeur = CASE " +
-                        "WHEN cle = 'TAUX_TVA' THEN '20.0' " +
-                        "WHEN cle = 'TVA_ENABLED' THEN 'true' " +
-                        "WHEN cle = 'FORMAT_RECU' THEN 'COMPACT' " +
-                        "WHEN cle = 'PIED_PAGE_RECU' THEN 'Merci de votre visite !' " +
-                        "WHEN cle = 'SIRET_ENTREPRISE' THEN '12345678901234' " +
+                        "WHEN cle = ? THEN '20.0' " +
+                        "WHEN cle = ? THEN 'true' " +
+                        "WHEN cle = ? THEN 'COMPACT' " +
+                        "WHEN cle = ? THEN 'Merci de votre visite !' " +
+                        "WHEN cle = ? THEN '12345678901234' " +
                         "ELSE valeur END " +
                         "WHERE cle IN (?, ?, ?, ?, ?)";
 
             try (Connection conn = DatabaseConnectionPool.getConnection();
                  PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-                stmt.setString(1, ConfigurationParam.CLE_TAUX_TVA);
-                stmt.setString(2, ConfigurationParam.CLE_TVA_ENABLED);
-                stmt.setString(3, ConfigurationParam.CLE_FORMAT_RECU);
-                stmt.setString(4, ConfigurationParam.CLE_PIED_PAGE_RECU);
-                stmt.setString(5, ConfigurationParam.CLE_SIRET_ENTREPRISE);
+                // Définir les paramètres deux fois car ils sont utilisés dans le CASE et le IN
+                String[] params = {
+                    ConfigurationParam.CLE_TAUX_TVA,
+                    ConfigurationParam.CLE_TVA_ENABLED,
+                    ConfigurationParam.CLE_FORMAT_RECU,
+                    ConfigurationParam.CLE_PIED_PAGE_RECU,
+                    ConfigurationParam.CLE_SIRET_ENTREPRISE
+                };
+
+                for (int i = 0; i < params.length; i++) {
+                    stmt.setString(i + 1, params[i]);        // Pour le CASE
+                    stmt.setString(i + 6, params[i]);        // Pour le IN
+                }
 
                 stmt.executeUpdate();
                 LOGGER.info("Configurations réinitialisées avec succès");
 
                 // Recharger les configurations après réinitialisation
-                SwingUtilities.invokeLater(this::chargerConfigurations);
+                chargerConfigurations();
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la réinitialisation des configurations", e);
