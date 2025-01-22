@@ -70,6 +70,7 @@ import java.awt.print.Book;
 import java.awt.Graphics2D;
 
 
+
 public class ReportViewSwing {
     private static final Logger LOGGER = Logger.getLogger(ReportViewSwing.class.getName());
 
@@ -347,6 +348,24 @@ public class ReportViewSwing {
                         nomFichier
                     );
                     break;
+                case "Chiffre d'affaires":
+                    Map<String, Double> chiffreAffaires = reportController.calculerChiffreAffaires(
+                        dateDebut.atStartOfDay(),
+                        dateFin.atTime(23, 59, 59)
+                    );
+
+                    // Ajout des analyses de rentabilité
+                    Map<String, Double> rentabilites = reportController.analyserRentabiliteParProduit(
+                        dateDebut.atStartOfDay(),
+                        dateFin.atTime(23, 59, 59)
+                    );
+
+                    reportController.genererRapportFinancierExcel(
+                        chiffreAffaires,
+                        rentabilites,
+                        nomFichier
+                    );
+                    break;
                 case "Stocks":
                     reportController.genererRapportStocksExcel(nomFichier);
                     break;
@@ -355,13 +374,6 @@ public class ReportViewSwing {
                     break;
                 case "Créances":
                     reportController.genererRapportCreancesExcel(nomFichier);
-                    break;
-                case "Chiffre d'affaires":
-                    reportController.genererRapportFinancierExcel(
-                        dateDebut.atStartOfDay(),
-                        dateFin.atTime(23, 59, 59),
-                        nomFichier
-                    );
                     break;
             }
 
@@ -417,20 +429,23 @@ public class ReportViewSwing {
     private void updateCharts() {
         statistiquesPanel.removeAll();
 
-        // Graphique des ventes
+        // Graphique des ventes avec tendances
         addVentesChart();
 
-        // Graphique de répartition des stocks
-        addStocksChart();
-
-        // Graphique des modes de paiement
+        // Graphique de répartition des ventes par mode de paiement
         addPaiementsChart();
 
-        // Graphique de performance du stock
-        addPerformanceChart();
+        // Graphique d'évolution du chiffre d'affaires
+        addEvolutionCAChart();
 
         // Graphique de rentabilité par produit
         addRentabiliteChart();
+
+        // Top 5 produits
+        addTopProduitsChart();
+
+        // Variations mensuelles
+        addVariationsMensuellesChart();
 
         // Rafraîchissement du panel
         statistiquesPanel.revalidate();
@@ -613,21 +628,20 @@ public class ReportViewSwing {
         }
     }
 
-    private void addEvolutionVentesChart() {
-        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-
+    private void addEvolutionCAChart() {
         try {
-            Map<String, List<Double>> evolution = reportController.analyserEvolutionVentes(
+            Map<String, Double> caData = reportController.calculerChiffreAffaires(
                 dateDebut.atStartOfDay(),
                 dateFin.atTime(23, 59, 59)
             );
 
-            List<Double> caJournalier = evolution.get("Chiffre d'affaires journalier");
-            if (caJournalier != null) {
-                for (int i = 0; i < caJournalier.size(); i++) {
-                    dataset.addValue(caJournalier.get(i), "CA", "Jour " + (i + 1));
+            DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+            caData.forEach((periode, montant) -> {
+                if (!periode.startsWith("Variation ") && !periode.equals("Total période") 
+                    && !periode.equals("Moyenne mensuelle")) {
+                    dataset.addValue(montant, "CA", periode);
                 }
-            }
+            });
 
             JFreeChart chart = ChartFactory.createLineChart(
                 "Évolution du chiffre d'affaires",
@@ -641,8 +655,74 @@ public class ReportViewSwing {
             addStyledChartPanel(chartPanel, "Évolution du CA");
 
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la création du graphique d'évolution", e);
-            showErrorMessage("Erreur", "Impossible de générer le graphique d'évolution");
+            LOGGER.log(Level.SEVERE, "Erreur lors de la création du graphique d'évolution du CA", e);
+            showErrorMessage("Erreur", "Impossible de générer le graphique d'évolution du CA");
+        }
+    }
+
+    private void addVariationsMensuellesChart() {
+        try {
+            Map<String, Double> caData = reportController.calculerChiffreAffaires(
+                dateDebut.atStartOfDay(),
+                dateFin.atTime(23, 59, 59)
+            );
+
+            DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+            caData.forEach((periode, valeur) -> {
+                if (periode.startsWith("Variation ")) {
+                    String mois = periode.replace("Variation ", "");
+                    dataset.addValue(valeur, "Variation (%)", mois);
+                }
+            });
+
+            JFreeChart chart = ChartFactory.createBarChart(
+                "Variations mensuelles du CA",
+                "Période",
+                "Variation (%)",
+                dataset
+            );
+
+            ChartPanel chartPanel = new ChartPanel(chart);
+            chartPanel.setPreferredSize(new Dimension(300, 200));
+            addStyledChartPanel(chartPanel, "Variations mensuelles");
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la création du graphique des variations", e);
+            showErrorMessage("Erreur", "Impossible de générer le graphique des variations");
+        }
+    }
+
+    private void addTopProduitsChart() {
+        try {
+            List<Vente> ventes = venteController.getVentes().stream()
+                .filter(v -> !v.getDate().isBefore(dateDebut.atStartOfDay()) 
+                         && !v.getDate().isAfter(dateFin.atTime(23, 59, 59)))
+                .collect(Collectors.toList());
+
+            Map<String, Object> analyses = reportController.analyserVentes(ventes);
+            @SuppressWarnings("unchecked")
+            Map<String, Double> topProduits = (Map<String, Double>) analyses.get("Top 5 produits");
+
+            if (topProduits != null) {
+                DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+                topProduits.forEach((produit, montant) -> 
+                    dataset.addValue(montant, "CA", produit));
+
+                JFreeChart chart = ChartFactory.createBarChart(
+                    "Top 5 des produits",
+                    "Produit",
+                    "Chiffre d'affaires (€)",
+                    dataset
+                );
+
+                ChartPanel chartPanel = new ChartPanel(chart);
+                chartPanel.setPreferredSize(new Dimension(300, 200));
+                addStyledChartPanel(chartPanel, "Top 5 produits");
+            }
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la création du graphique des top produits", e);
+            showErrorMessage("Erreur", "Impossible de générer le graphique des top produits");
         }
     }
 
@@ -794,7 +874,7 @@ public class ReportViewSwing {
         chartPanel.setLayout(new GridLayout(2, 2, 15, 15));
 
         addStatPanel("Ventes", String.format(
-            "Aujourd'hui: %.2f €\nCette semaine: %.2f €\nCe mois: %.2f €",
+            ""Aujourd'hui: %.2f €\nCette semaine: %.2f €\nCe mois: %.2f €",
             calculerVentesTotal(LocalDate.now(), LocalDate.now()),
             calculerVentesTotal(LocalDate.now().minusWeeks(1), LocalDate.now()),
             calculerVentesTotal(LocalDate.now().minusMonths(1), LocalDate.now())

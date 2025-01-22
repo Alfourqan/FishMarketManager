@@ -83,7 +83,7 @@ public class ReportController {
             List<Vente> ventes = venteController.getVentes().stream()
                 .filter(v -> !v.getDate().isBefore(debut) && !v.getDate().isAfter(fin))
                 .collect(Collectors.toList());
-            Map<String, Double> analyses = analyserVentes(ventes);
+            Map<String, Object> analyses = analyserVentes(ventes);
             ExcelGenerator.genererRapportVentes(ventes, analyses, cheminFichier);
             LOGGER.info("Rapport des ventes Excel généré avec succès");
         } catch (Exception e) {
@@ -108,8 +108,8 @@ public class ReportController {
         }
     }
 
-    private Map<String, Double> analyserVentes(List<Vente> ventes) {
-        Map<String, Double> analyses = new HashMap<>();
+    private Map<String, Object> analyserVentes(List<Vente> ventes) {
+        Map<String, Object> analyses = new HashMap<>();
 
         // Chiffre d'affaires total
         double caTotal = ventes.stream().mapToDouble(Vente::getTotal).sum();
@@ -122,6 +122,31 @@ public class ReportController {
             .orElse(0.0);
         analyses.put("Moyenne des ventes", moyenneVentes);
 
+        // Nombre de ventes
+        analyses.put("Nombre total de ventes", (double) ventes.size());
+
+        // Panier moyen
+        analyses.put("Panier moyen", caTotal / (ventes.size() > 0 ? ventes.size() : 1));
+
+        // Top produits vendus
+        Map<String, DoubleSummaryStatistics> statsParProduit = ventes.stream()
+            .flatMap(v -> v.getLignes().stream())
+            .collect(Collectors.groupingBy(
+                ligne -> ligne.getProduit().getNom(),
+                Collectors.summarizingDouble(ligne -> ligne.getQuantite() * ligne.getPrixUnitaire())
+            ));
+
+        Map<String, Double> topProduits = statsParProduit.entrySet().stream()
+            .sorted((e1, e2) -> Double.compare(e2.getValue().getSum(), e1.getValue().getSum()))
+            .limit(5)
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                e -> e.getValue().getSum(),
+                (v1, v2) -> v1,
+                LinkedHashMap::new
+            ));
+        analyses.put("Top 5 produits", topProduits);
+
         // Répartition par mode de paiement
         Map<Vente.ModePaiement, Double> ventesParMode = ventes.stream()
             .collect(Collectors.groupingBy(
@@ -132,6 +157,20 @@ public class ReportController {
         ventesParMode.forEach((mode, total) ->
             analyses.put("Ventes " + mode.getLibelle(), total)
         );
+
+        // Calcul des tendances
+        if (!ventes.isEmpty()) {
+            LocalDateTime premierJour = ventes.stream()
+                .min(Comparator.comparing(Vente::getDate))
+                .get().getDate();
+            LocalDateTime dernierJour = ventes.stream()
+                .max(Comparator.comparing(Vente::getDate))
+                .get().getDate();
+
+            long joursTotal = ChronoUnit.DAYS.between(premierJour, dernierJour) + 1;
+            double moyenneJournaliere = caTotal / joursTotal;
+            analyses.put("Moyenne journalière", moyenneJournaliere);
+        }
 
         return analyses;
     }
@@ -269,11 +308,31 @@ public class ReportController {
                 Collectors.summingDouble(Vente::getTotal)
             ));
 
+        // Calcul des variations mensuelles
+        List<String> mois = new ArrayList<>(caParMois.keySet());
+        Collections.sort(mois);
+        for (int i = 1; i < mois.size(); i++) {
+            double moisPrecedent = caParMois.get(mois.get(i-1));
+            double moisActuel = caParMois.get(mois.get(i));
+            if (moisPrecedent > 0) {
+                double variation = ((moisActuel - moisPrecedent) / moisPrecedent) * 100;
+                caParPeriode.put("Variation " + mois.get(i), variation);
+            }
+        }
+
+        // Ajout des données mensuelles
         caParPeriode.putAll(caParMois);
 
         // Total sur la période
         double total = caParMois.values().stream().mapToDouble(Double::doubleValue).sum();
         caParPeriode.put("Total période", total);
+
+        // Moyenne mensuelle
+        double moyenneMensuelle = caParMois.values().stream()
+            .mapToDouble(Double::doubleValue)
+            .average()
+            .orElse(0.0);
+        caParPeriode.put("Moyenne mensuelle", moyenneMensuelle);
 
         return caParPeriode;
     }
@@ -414,25 +473,24 @@ public class ReportController {
 
             Map<String, Double> rentabilites = new HashMap<>();
 
-            // Calcul de la rentabilité par produit
-            ventes.stream()
+            // Calcul de la rentabilité détaillée par produit
+            Map<String, DoubleSummaryStatistics> statsVentes = ventes.stream()
                 .flatMap(v -> v.getLignes().stream())
                 .collect(Collectors.groupingBy(
                     ligne -> ligne.getProduit().getNom(),
-                    Collectors.collectingAndThen(
-                        Collectors.toList(),
-                        lignes -> {
-                            double chiffreAffaires = lignes.stream()
-                                .mapToDouble(l -> l.getPrixUnitaire() * l.getQuantite())
-                                .sum();
-                            double coutAchat = lignes.stream()
-                                .mapToDouble(l -> l.getProduit().getPrixAchat() * l.getQuantite())
-                                .sum();
-                            return (chiffreAffaires - coutAchat) / chiffreAffaires * 100;
-                        }
-                    )
-                ))
-                .forEach(rentabilites::put);
+                    Collectors.summarizingDouble(ligne -> {
+                        double prixVente = ligne.getPrixUnitaire() * ligne.getQuantite();
+                        double coutAchat = ligne.getProduit().getPrixAchat() * ligne.getQuantite();
+                        return ((prixVente - coutAchat) / prixVente) * 100;
+                    })
+                ));
+
+            // Ajout des statistiques détaillées
+            statsVentes.forEach((produit, stats) -> {
+                rentabilites.put(produit + " - Marge moyenne (%)", stats.getAverage());
+                rentabilites.put(produit + " - Marge min (%)", stats.getMin());
+                rentabilites.put(produit + " - Marge max (%)", stats.getMax());
+            });
 
             return rentabilites;
         } catch (Exception e) {
