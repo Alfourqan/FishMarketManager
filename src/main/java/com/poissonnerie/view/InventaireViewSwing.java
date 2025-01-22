@@ -4,10 +4,12 @@ import com.poissonnerie.controller.ProduitController;
 import com.poissonnerie.model.Produit;
 import com.poissonnerie.model.InventaireManager;
 import com.poissonnerie.model.InventaireManager.InventaireObserver;
+import com.poissonnerie.model.InventaireManager.AjustementStock;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableRowSorter;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -16,6 +18,11 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Map;
 
 public class InventaireViewSwing {
     private static final Logger LOGGER = Logger.getLogger(InventaireViewSwing.class.getName());
@@ -25,6 +32,10 @@ public class InventaireViewSwing {
     private final JTable tableInventaire;
     private final DefaultTableModel tableModel;
     private JLabel statusLabel;
+    private JTextField searchField;
+    private JComboBox<String> categoryFilter;
+    private TableRowSorter<DefaultTableModel> sorter;
+    private JPanel statsPanel;
 
     public InventaireViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -42,6 +53,20 @@ public class InventaireViewSwing {
         };
 
         tableInventaire = new JTable(tableModel);
+        configureTable();
+
+        // Ajout du système de tri et filtrage
+        sorter = new TableRowSorter<>(tableModel);
+        tableInventaire.setRowSorter(sorter);
+
+        // Observer pour les alertes de stock
+        setupStockObserver();
+
+        initializeComponents();
+        loadData();
+    }
+
+    private void configureTable() {
         tableInventaire.setRowHeight(45);
         tableInventaire.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         tableInventaire.setShowGrid(true);
@@ -61,6 +86,20 @@ public class InventaireViewSwing {
                 if (!isSelected) {
                     c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(248, 250, 252));
                 }
+
+                // Coloration des lignes selon le niveau de stock
+                if (!isSelected && column == 2) {
+                    int stock = Integer.parseInt(value.toString());
+                    int seuilAlerte = Integer.parseInt(table.getValueAt(row, 3).toString());
+                    if (stock == 0) {
+                        c.setBackground(new Color(254, 226, 226));
+                        c.setForeground(new Color(185, 28, 28));
+                    } else if (stock <= seuilAlerte) {
+                        c.setBackground(new Color(254, 243, 199));
+                        c.setForeground(new Color(161, 98, 7));
+                    }
+                }
+
                 // Ajouter un padding aux cellules
                 ((JLabel) c).setBorder(BorderFactory.createEmptyBorder(0, 12, 0, 12));
                 return c;
@@ -76,7 +115,6 @@ public class InventaireViewSwing {
                 JLabel label = (JLabel) super.getTableCellRendererComponent(table, value,
                         isSelected, hasFocus, row, column);
 
-                // Configuration du style amélioré
                 label.setHorizontalAlignment(JLabel.LEFT);
                 label.setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(51, 65, 85)),
@@ -92,14 +130,16 @@ public class InventaireViewSwing {
         });
 
         header.setPreferredSize(new Dimension(header.getPreferredSize().width, 56));
+    }
 
-        // Observer pour les alertes de stock
+    private void setupStockObserver() {
         inventaireManager.ajouterObserver(new InventaireObserver() {
             @Override
             public void onStockBas(Produit produit) {
                 SwingUtilities.invokeLater(() -> {
                     updateStatus("⚠️ Stock bas pour " + produit.getNom());
                     refreshTable();
+                    updateStatistiques();
                 });
             }
 
@@ -108,6 +148,7 @@ public class InventaireViewSwing {
                 SwingUtilities.invokeLater(() -> {
                     updateStatus("⛔ Rupture de stock pour " + produit.getNom());
                     refreshTable();
+                    updateStatistiques();
                 });
             }
 
@@ -118,48 +159,195 @@ public class InventaireViewSwing {
                         produit.getNom(), ancienStock, nouveauStock);
                     updateStatus(message);
                     refreshTable();
+                    updateStatistiques();
                 });
             }
         });
-
-        initializeComponents();
-        loadData();
     }
 
     private void initializeComponents() {
         mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
         mainPanel.setBackground(new Color(236, 239, 241));
 
-        // Panel du haut avec titre et boutons
-        JPanel topPanel = new JPanel(new BorderLayout());
+        // Panel du haut avec recherche et filtres
+        JPanel topPanel = new JPanel(new BorderLayout(10, 10));
         topPanel.setBackground(new Color(236, 239, 241));
+
+        // Panel de recherche
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        searchPanel.setOpaque(false);
+
+        searchField = new JTextField(20);
+        searchField.setPreferredSize(new Dimension(200, 35));
+        searchField.putClientProperty("JTextField.placeholderText", "Rechercher un produit...");
+
+        categoryFilter = new JComboBox<>(new String[]{"Toutes les catégories"});
+        categoryFilter.setPreferredSize(new Dimension(150, 35));
 
         // Panel des boutons aligné à droite
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonPanel.setOpaque(false);
 
-        // Création des boutons
         JButton refreshBtn = createStyledButton("Actualiser", new Color(156, 39, 176));
+        JButton historiqueBtn = createStyledButton("Historique", new Color(3, 169, 244));
+
+        buttonPanel.add(historiqueBtn);
         buttonPanel.add(refreshBtn);
+
+        searchPanel.add(searchField);
+        searchPanel.add(categoryFilter);
 
         // Label de statut
         statusLabel = new JLabel("Prêt");
         statusLabel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
-        topPanel.add(statusLabel, BorderLayout.WEST);
+        // Panel des statistiques
+        statsPanel = createStatsPanel();
+
+        topPanel.add(searchPanel, BorderLayout.WEST);
         topPanel.add(buttonPanel, BorderLayout.EAST);
+        topPanel.add(statusLabel, BorderLayout.SOUTH);
 
         // Configuration de la table
         JScrollPane scrollPane = new JScrollPane(tableInventaire);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         scrollPane.getViewport().setBackground(Color.WHITE);
-        tableInventaire.getColumnModel().getColumn(4).setMaxWidth(150); // Colonne actions
+        tableInventaire.getColumnModel().getColumn(4).setMaxWidth(150);
 
         // Événements
-        refreshBtn.addActionListener(e -> loadData());
+        setupEventListeners(refreshBtn, historiqueBtn);
 
         mainPanel.add(topPanel, BorderLayout.NORTH);
+        mainPanel.add(statsPanel, BorderLayout.EAST);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
+    }
+
+    private JPanel createStatsPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createEmptyBorder(0, 15, 0, 0));
+        panel.setPreferredSize(new Dimension(250, 0));
+        panel.setBackground(new Color(236, 239, 241));
+        return panel;
+    }
+
+    private void updateStatistiques() {
+        statsPanel.removeAll();
+        List<Produit> produits = produitController.getProduits();
+        Map<String, Double> stats = inventaireManager.calculerStatistiquesInventaire(produits);
+
+        // Création des labels de statistiques avec style
+        addStatLabel("Valeur totale du stock:", 
+            String.format("%.2f €", stats.get("valeur_totale")));
+        addStatLabel("Taux de rotation moyen:", 
+            String.format("%.2f", stats.get("taux_rotation_moyen")));
+        addStatLabel("Produits en alerte:", 
+            String.format("%.1f%%", stats.get("pourcentage_alerte")));
+
+        statsPanel.revalidate();
+        statsPanel.repaint();
+    }
+
+    private void addStatLabel(String title, String value) {
+        JPanel statPanel = new JPanel(new BorderLayout(5, 2));
+        statPanel.setOpaque(false);
+        statPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        titleLabel.setForeground(new Color(51, 65, 85));
+
+        JLabel valueLabel = new JLabel(value);
+        valueLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        valueLabel.setForeground(new Color(15, 23, 42));
+
+        statPanel.add(titleLabel, BorderLayout.NORTH);
+        statPanel.add(valueLabel, BorderLayout.CENTER);
+
+        statsPanel.add(statPanel);
+        statsPanel.add(Box.createVerticalStrut(10));
+    }
+
+    private void setupEventListeners(JButton refreshBtn, JButton historiqueBtn) {
+        refreshBtn.addActionListener(e -> loadData());
+
+        historiqueBtn.addActionListener(e -> showHistoriqueDialog());
+
+        searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            public void changedUpdate(javax.swing.event.DocumentEvent e) { filter(); }
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { filter(); }
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { filter(); }
+        });
+
+        categoryFilter.addActionListener(e -> filter());
+    }
+
+    private void filter() {
+        RowFilter<DefaultTableModel, Object> rf = null;
+        List<RowFilter<DefaultTableModel, Object>> filters = new ArrayList<>();
+
+        // Filtre de recherche
+        String searchText = searchField.getText();
+        if (searchText.length() > 0) {
+            filters.add(RowFilter.regexFilter("(?i)" + searchText));
+        }
+
+        // Filtre de catégorie
+        String selectedCategory = (String) categoryFilter.getSelectedItem();
+        if (selectedCategory != null && !selectedCategory.equals("Toutes les catégories")) {
+            filters.add(RowFilter.regexFilter("^" + selectedCategory + "$", 1));
+        }
+
+        // Combiner les filtres
+        if (!filters.isEmpty()) {
+            rf = RowFilter.andFilter(filters);
+        }
+
+        sorter.setRowFilter(rf);
+    }
+
+    private void showHistoriqueDialog() {
+        JDialog dialog = new JDialog((Frame)SwingUtilities.getWindowAncestor(mainPanel),
+            "Historique des ajustements", true);
+        dialog.setLayout(new BorderLayout(10, 10));
+
+        // Modèle de table pour l'historique
+        String[] columns = {"Date", "Produit", "Ancien stock", "Nouveau stock", "Raison"};
+        DefaultTableModel historiqueModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        JTable historiqueTable = new JTable(historiqueModel);
+        historiqueTable.setRowHeight(30);
+
+        // Remplir la table avec l'historique
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        for (AjustementStock ajustement : inventaireManager.getHistorique()) {
+            historiqueModel.addRow(new Object[]{
+                ajustement.getDate().format(formatter),
+                ajustement.getProduit().getNom(),
+                ajustement.getAncienStock(),
+                ajustement.getNouveauStock(),
+                ajustement.getRaison()
+            });
+        }
+
+        JScrollPane scrollPane = new JScrollPane(historiqueTable);
+        dialog.add(scrollPane, BorderLayout.CENTER);
+
+        JButton closeButton = createStyledButton("Fermer", new Color(244, 67, 54));
+        closeButton.addActionListener(e -> dialog.dispose());
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(closeButton);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        dialog.setSize(800, 400);
+        dialog.setLocationRelativeTo(mainPanel);
+        dialog.setVisible(true);
     }
 
     private void showAjustementDialog(Produit produit) {
@@ -178,9 +366,12 @@ public class InventaireViewSwing {
             JLabel stockActuelLabel = new JLabel("Stock actuel: " + produit.getStock());
             JLabel seuilLabel = new JLabel("Seuil d'alerte: " + produit.getSeuilAlerte());
 
-            // Champ de saisie
+            // Champs de saisie
             JTextField quantiteField = new JTextField(10);
             JLabel quantiteLabel = new JLabel("Quantité à ajouter/retirer:");
+
+            JTextField raisonField = new JTextField(20);
+            JLabel raisonLabel = new JLabel("Raison de l'ajustement:");
 
             // Layout
             gbc.gridx = 0; gbc.gridy = 0;
@@ -191,6 +382,10 @@ public class InventaireViewSwing {
             formPanel.add(quantiteLabel, gbc);
             gbc.gridy = 3;
             formPanel.add(quantiteField, gbc);
+            gbc.gridy = 4;
+            formPanel.add(raisonLabel, gbc);
+            gbc.gridy = 5;
+            formPanel.add(raisonField, gbc);
 
             // Boutons avec style moderne
             JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -204,9 +399,13 @@ public class InventaireViewSwing {
                         throw new IllegalArgumentException("Veuillez entrer une quantité");
                     }
                     int quantite = Integer.parseInt(input);
-                    LOGGER.info("Tentative d'ajustement du stock de " + produit.getNom() + " de " + quantite);
+                    String raison = raisonField.getText().trim();
+                    if (raison.isEmpty()) {
+                        raison = "Ajustement manuel";
+                    }
 
-                    inventaireManager.ajusterStock(produit, quantite);
+                    LOGGER.info("Tentative d'ajustement du stock de " + produit.getNom() + " de " + quantite);
+                    inventaireManager.ajusterStock(produit, quantite, raison);
                     produitController.mettreAJourProduit(produit);
                     LOGGER.info("Ajustement réussi pour " + produit.getNom());
 
@@ -260,7 +459,6 @@ public class InventaireViewSwing {
         button.setMargin(new Insets(8, 16, 8, 16));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // Effet de survol
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(color.darker());
@@ -304,6 +502,9 @@ public class InventaireViewSwing {
                 tableInventaire.getColumn("Actions").setCellRenderer(new ButtonRenderer());
                 tableInventaire.getColumn("Actions").setCellEditor(new ButtonEditor());
 
+                // Mettre à jour le filtre de catégorie
+                updateCategoryFilter();
+
                 // Forcer la mise à jour de l'affichage
                 tableInventaire.repaint();
                 LOGGER.info("Table rafraîchie avec succès");
@@ -319,11 +520,30 @@ public class InventaireViewSwing {
         });
     }
 
+    private void updateCategoryFilter() {
+        Set<String> categories = new HashSet<>();
+        categories.add("Toutes les catégories");
+
+        for (int i = 0; i < tableModel.getRowCount(); i++) {
+            categories.add((String) tableModel.getValueAt(i, 1));
+        }
+
+        String currentSelection = (String) categoryFilter.getSelectedItem();
+        categoryFilter.setModel(new DefaultComboBoxModel<>(categories.toArray(new String[0])));
+
+        if (categories.contains(currentSelection)) {
+            categoryFilter.setSelectedItem(currentSelection);
+        } else {
+            categoryFilter.setSelectedItem("Toutes les catégories");
+        }
+    }
+
     private void loadData() {
         try {
             updateStatus("Chargement des données...");
             produitController.chargerProduits();
             refreshTable();
+            updateStatistiques();
             updateStatus("Données chargées avec succès");
         } catch (Exception e) {
             updateStatus("Erreur: " + e.getMessage());
@@ -346,8 +566,8 @@ public class InventaireViewSwing {
 
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
-                                                     boolean isSelected, boolean hasFocus,
-                                                     int row, int column) {
+                                                    boolean isSelected, boolean hasFocus,
+                                                    int row, int column) {
             if (value instanceof JButton) {
                 JButton btn = (JButton) value;
                 setText(btn.getText());
@@ -378,7 +598,7 @@ public class InventaireViewSwing {
 
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value,
-                                                   boolean isSelected, int row, int column) {
+                                                  boolean isSelected, int row, int column) {
             if (value instanceof JButton) {
                 JButton btn = (JButton) value;
                 button.setText(btn.getText());
@@ -404,7 +624,6 @@ public class InventaireViewSwing {
         @Override
         public Object getCellEditorValue() {
             if (isPushed) {
-                // Exécuter l'action après que l'édition soit terminée
                 if (actionListener != null) {
                     actionListener.actionPerformed(new ActionEvent(button, ActionEvent.ACTION_PERFORMED, ""));
                 }

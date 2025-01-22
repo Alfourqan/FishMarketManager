@@ -1,19 +1,41 @@
 package com.poissonnerie.model;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Collections;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.time.LocalDateTime;
 
 public class InventaireManager {
     private static final Logger LOGGER = Logger.getLogger(InventaireManager.class.getName());
     private final List<InventaireObserver> observers;
+    private final List<AjustementStock> historique;
 
     public InventaireManager() {
-        // Utilisation de CopyOnWriteArrayList pour la thread-safety
         this.observers = new CopyOnWriteArrayList<>();
+        this.historique = new CopyOnWriteArrayList<>();
+    }
+
+    public static class AjustementStock {
+        private final Produit produit;
+        private final int ancienStock;
+        private final int nouveauStock;
+        private final LocalDateTime date;
+        private final String raison;
+
+        public AjustementStock(Produit produit, int ancienStock, int nouveauStock, String raison) {
+            this.produit = produit;
+            this.ancienStock = ancienStock;
+            this.nouveauStock = nouveauStock;
+            this.date = LocalDateTime.now();
+            this.raison = raison;
+        }
+
+        public Produit getProduit() { return produit; }
+        public int getAncienStock() { return ancienStock; }
+        public int getNouveauStock() { return nouveauStock; }
+        public LocalDateTime getDate() { return date; }
+        public String getRaison() { return raison; }
     }
 
     public interface InventaireObserver {
@@ -40,19 +62,27 @@ public class InventaireManager {
         LOGGER.info("Observer retiré. Total observers: " + observers.size());
     }
 
-    public void ajusterStock(Produit produit, int quantite) {
+    public void ajusterStock(Produit produit, int quantite, String raison) {
         if (produit == null) {
             LOGGER.severe("Tentative d'ajustement de stock avec un produit null");
             throw new IllegalArgumentException("Le produit ne peut pas être null");
         }
 
-        LOGGER.info(String.format("Ajustement du stock pour %s: %d → %d",
-            produit.getNom(), produit.getStock(), produit.getStock() + quantite));
+        if (raison == null || raison.trim().isEmpty()) {
+            LOGGER.warning("Raison non spécifiée pour l'ajustement de stock");
+            raison = "Ajustement manuel";
+        }
+
+        LOGGER.info(String.format("Ajustement du stock pour %s: %d → %d, Raison: %s",
+            produit.getNom(), produit.getStock(), produit.getStock() + quantite, raison));
 
         int ancienStock = produit.getStock();
         try {
             produit.ajusterStock(quantite);
             int nouveauStock = produit.getStock();
+
+            // Enregistrer l'ajustement dans l'historique
+            historique.add(new AjustementStock(produit, ancienStock, nouveauStock, raison));
 
             // Notifier les observateurs du changement de stock
             for (InventaireObserver observer : observers) {
@@ -69,13 +99,28 @@ public class InventaireManager {
                     }
                 } catch (Exception e) {
                     LOGGER.log(Level.SEVERE, "Erreur lors de la notification de l'observer", e);
-                    // Continue avec les autres observers même si un échoue
                 }
             }
         } catch (IllegalArgumentException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de l'ajustement du stock", e);
             throw new IllegalArgumentException("Impossible d'ajuster le stock: " + e.getMessage());
         }
+    }
+
+    public void ajusterStock(Produit produit, int quantite) {
+        ajusterStock(produit, quantite, "Ajustement manuel");
+    }
+
+    public List<AjustementStock> getHistorique() {
+        return Collections.unmodifiableList(historique);
+    }
+
+    public List<AjustementStock> getHistoriqueProduit(Produit produit) {
+        if (produit == null) return Collections.emptyList();
+
+        return historique.stream()
+            .filter(ajustement -> ajustement.getProduit().equals(produit))
+            .toList();
     }
 
     public List<Produit> getProduitsBas(List<Produit> produits) {
@@ -86,7 +131,6 @@ public class InventaireManager {
 
         List<Produit> produitsBas = new ArrayList<>();
         for (Produit produit : produits) {
-            // Inclure les produits avec stock bas ou en rupture
             if (produit != null && (produit.estStockBas() || produit.estEnRupture())) {
                 produitsBas.add(produit);
                 LOGGER.info("Produit en stock bas ou en rupture détecté: " + produit.getNom());
@@ -109,5 +153,35 @@ public class InventaireManager {
             }
         }
         return Collections.unmodifiableList(produitsRupture);
+    }
+
+    public Map<String, Double> calculerStatistiquesInventaire(List<Produit> produits) {
+        if (produits == null || produits.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, Double> stats = new HashMap<>();
+
+        // Valeur totale du stock
+        double valeurTotale = produits.stream()
+            .mapToDouble(p -> p.getPrix() * p.getStock())
+            .sum();
+        stats.put("valeur_totale", valeurTotale);
+
+        // Taux de rotation moyen
+        double tauxRotationMoyen = historique.stream()
+            .mapToDouble(a -> Math.abs(a.getNouveauStock() - a.getAncienStock()))
+            .average()
+            .orElse(0.0);
+        stats.put("taux_rotation_moyen", tauxRotationMoyen);
+
+        // Pourcentage de produits en alerte
+        long produitsEnAlerte = produits.stream()
+            .filter(Produit::estStockBas)
+            .count();
+        double pourcentageAlerte = (double) produitsEnAlerte / produits.size() * 100;
+        stats.put("pourcentage_alerte", pourcentageAlerte);
+
+        return stats;
     }
 }
