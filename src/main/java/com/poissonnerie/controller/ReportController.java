@@ -425,6 +425,7 @@ public class ReportController {
             return new HashMap<>();
         }
     }
+
     public Map<String, Double> analyserAchatsFournisseurs(LocalDateTime debut, LocalDateTime fin) {
         try {
             // Pour l'instant, retourne des données fictives
@@ -469,4 +470,219 @@ public class ReportController {
             throw new RuntimeException("Erreur lors de la génération du rapport Excel des fournisseurs", e);
         }
     }
+
+    public Map<String, Double> analyserTendancesVentes(LocalDateTime debut, LocalDateTime fin) {
+        Map<String, Double> tendances = new HashMap<>();
+
+        try {
+            List<Vente> ventes = venteController.getVentes().stream()
+                .filter(v -> !v.getDate().isBefore(debut) && !v.getDate().isAfter(fin))
+                .collect(Collectors.toList());
+
+            // Évolution journalière
+            Map<String, Double> ventesParJour = ventes.stream()
+                .collect(Collectors.groupingBy(
+                    v -> v.getDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                    Collectors.summingDouble(Vente::getTotal)
+                ));
+
+            // Calcul du taux de croissance journalier
+            List<String> jours = new ArrayList<>(ventesParJour.keySet());
+            Collections.sort(jours);
+
+            for (int i = 1; i < jours.size(); i++) {
+                double ventesJourPrecedent = ventesParJour.get(jours.get(i-1));
+                double ventesJourActuel = ventesParJour.get(jours.get(i));
+                if (ventesJourPrecedent > 0) {
+                    double tauxCroissance = ((ventesJourActuel - ventesJourPrecedent) / ventesJourPrecedent) * 100;
+                    tendances.put("Croissance " + jours.get(i), tauxCroissance);
+                }
+            }
+
+            // Analyse hebdomadaire
+            Map<String, Double> ventesParSemaine = ventes.stream()
+                .collect(Collectors.groupingBy(
+                    v -> "S" + v.getDate().get(java.time.temporal.WeekFields.ISO.weekOfWeekBasedYear()),
+                    Collectors.summingDouble(Vente::getTotal)
+                ));
+
+            ventesParSemaine.forEach((semaine, total) -> 
+                tendances.put("Ventes " + semaine, total));
+
+            // Calcul des moyennes
+            double moyenneJournaliere = ventesParJour.values().stream()
+                .mapToDouble(Double::doubleValue)
+                .average()
+                .orElse(0.0);
+            tendances.put("Moyenne journalière", moyenneJournaliere);
+
+            double moyenneHebdomadaire = ventesParSemaine.values().stream()
+                .mapToDouble(Double::doubleValue)
+                .average()
+                .orElse(0.0);
+            tendances.put("Moyenne hebdomadaire", moyenneHebdomadaire);
+
+            // Analyse de la rentabilité par produit
+            Map<String, Double> rentabiliteParProduit = ventes.stream()
+                .flatMap(v -> v.getLignes().stream())
+                .collect(Collectors.groupingBy(
+                    ligne -> ligne.getProduit().getNom(),
+                    Collectors.collectingAndThen(
+                        Collectors.toList(),
+                        lignes -> {
+                            double totalVentes = lignes.stream()
+                                .mapToDouble(l -> l.getPrixUnitaire() * l.getQuantite())
+                                .sum();
+                            double totalCouts = lignes.stream()
+                                .mapToDouble(l -> l.getProduit().getPrixAchat() * l.getQuantite())
+                                .sum();
+                            return ((totalVentes - totalCouts) / totalVentes) * 100;
+                        }
+                    )
+                ));
+
+            // Ajout des produits les plus rentables
+            rentabiliteParProduit.entrySet().stream()
+                .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
+                .limit(5)
+                .forEach(entry -> tendances.put("Rentabilité " + entry.getKey(), entry.getValue()));
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'analyse des tendances de ventes", e);
+        }
+
+        return tendances;
+    }
+
+
+    public Map<String, Double> analyserComparaisonPeriodes(LocalDateTime debutPeriode1, LocalDateTime finPeriode1,
+            LocalDateTime debutPeriode2, LocalDateTime finPeriode2) {
+        Map<String, Double> comparaisons = new HashMap<>();
+        try {
+            // Analyse période 1
+            Map<String, Double> ventesP1 = calculerChiffreAffaires(debutPeriode1, finPeriode1);
+            Map<String, Double> coutsP1 = calculerCouts(debutPeriode1, finPeriode1);
+            double caP1 = ventesP1.getOrDefault("Total période", 0.0);
+            double margeBruteP1 = caP1 - coutsP1.getOrDefault("Total achats", 0.0);
+
+            // Analyse période 2
+            Map<String, Double> ventesP2 = calculerChiffreAffaires(debutPeriode2, finPeriode2);
+            Map<String, Double> coutsP2 = calculerCouts(debutPeriode2, finPeriode2);
+            double caP2 = ventesP2.getOrDefault("Total période", 0.0);
+            double margeBruteP2 = caP2 - coutsP2.getOrDefault("Total achats", 0.0);
+
+            // Calcul des variations
+            double variationCA = ((caP2 - caP1) / caP1) * 100;
+            double variationMarge = ((margeBruteP2 - margeBruteP1) / margeBruteP1) * 100;
+
+            // Enregistrement des résultats
+            comparaisons.put("CA Période 1", caP1);
+            comparaisons.put("CA Période 2", caP2);
+            comparaisons.put("Variation CA (%)", variationCA);
+            comparaisons.put("Marge Période 1", margeBruteP1);
+            comparaisons.put("Marge Période 2", margeBruteP2);
+            comparaisons.put("Variation Marge (%)", variationMarge);
+
+            // Analyse par catégorie
+            Map<String, Double> ventesParCategorieP1 = analyserVentesParCategorie(debutPeriode1, finPeriode1);
+            Map<String, Double> ventesParCategorieP2 = analyserVentesParCategorie(debutPeriode2, finPeriode2);
+
+            for (String categorie : ventesParCategorieP1.keySet()) {
+                double ventesCatP1 = ventesParCategorieP1.getOrDefault(categorie, 0.0);
+                double ventesCatP2 = ventesParCategorieP2.getOrDefault(categorie, 0.0);
+                if (ventesCatP1 > 0) {
+                    double variation = ((ventesCatP2 - ventesCatP1) / ventesCatP1) * 100;
+                    comparaisons.put("Variation " + categorie + " (%)", variation);
+                }
+            }
+
+            return comparaisons;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'analyse comparative des périodes", e);
+            return comparaisons;
+        }
+    }
+
+    private Map<String, Double> analyserVentesParCategorie(LocalDateTime debut, LocalDateTime fin) {
+        try {
+            List<Vente> ventes = venteController.getVentes().stream()
+                .filter(v -> !v.getDate().isBefore(debut) && !v.getDate().isAfter(fin))
+                .collect(Collectors.toList());
+
+            return ventes.stream()
+                .flatMap(v -> v.getLignes().stream())
+                .collect(Collectors.groupingBy(
+                    ligne -> ligne.getProduit().getCategorie(),
+                    Collectors.summingDouble(ligne -> ligne.getPrixUnitaire() * ligne.getQuantite())
+                ));
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'analyse des ventes par catégorie", e);
+            return new HashMap<>();
+        }
+    }
+
+    public Map<String, Double> calculerKPIs(LocalDateTime debut, LocalDateTime fin) {
+        Map<String, Double> kpis = new HashMap<>();
+        try {
+            List<Vente> ventes = venteController.getVentes().stream()
+                .filter(v -> !v.getDate().isBefore(debut) && !v.getDate().isAfter(fin))
+                .collect(Collectors.toList());
+
+            // Chiffre d'affaires
+            double ca = ventes.stream().mapToDouble(Vente::getTotal).sum();
+            kpis.put("Chiffre d'affaires", ca);
+
+            // Nombre de ventes
+            kpis.put("Nombre de ventes", (double) ventes.size());
+
+            // Panier moyen
+            double panierMoyen = ventes.isEmpty() ? 0 : ca / ventes.size();
+            kpis.put("Panier moyen", panierMoyen);
+
+            // Taux de marge moyen
+            double margeMoyenne = ventes.stream()
+                .flatMap(v -> v.getLignes().stream())
+                .mapToDouble(ligne -> {
+                    double prixVente = ligne.getPrixUnitaire() * ligne.getQuantite();
+                    double coutAchat = ligne.getProduit().getPrixAchat() * ligne.getQuantite();
+                    return ((prixVente - coutAchat) / prixVente) * 100;
+                })
+                .average()
+                .orElse(0.0);
+            kpis.put("Taux de marge moyen (%)", margeMoyenne);
+
+            // Top produits
+            Map<String, Long> ventesParProduit = ventes.stream()
+                .flatMap(v -> v.getLignes().stream())
+                .collect(Collectors.groupingBy(
+                    ligne -> ligne.getProduit().getNom(),
+                    Collectors.summingLong(Vente.LigneVente::getQuantite)
+                ));
+
+            ventesParProduit.entrySet().stream()
+                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+                .limit(5)
+                .forEach(entry -> kpis.put("Ventes " + entry.getKey(), entry.getValue().doubleValue()));
+
+            // Rotation du stock
+            Map<String, Double> performanceStock = analyserPerformanceStock();
+            kpis.putAll(performanceStock);
+
+            return kpis;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors du calcul des KPIs", e);
+            return kpis;
+        }
+    }
+    public void genererRapportAchatsFournisseursExcel(LocalDateTime debut, LocalDateTime fin, String cheminFichier) {
+        try {
+            Map<String, Double> achatsFournisseurs = analyserAchatsFournisseurs(debut, fin);
+            ExcelGenerator.genererRapportAchatsFournisseurs(achatsFournisseurs, cheminFichier);
+            LOGGER.info("Rapport des achats fournisseurs Excel généré avec succès");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport des achats fournisseurs Excel", e);
+            throw new RuntimeException("Erreur lors de la génération du rapport des achats fournisseurs Excel", e);
+        }
+    }
+
 }

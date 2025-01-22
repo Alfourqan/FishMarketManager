@@ -275,7 +275,7 @@ public class ExcelGenerator {
                 venteSheet.setColumnWidth(i, 256 * 15);
             }
 
-            // Données et calculs
+            // Données détaillées des ventes
             int rowNum = 1;
             Map<String, Double> ventesParJour = new TreeMap<>();
             Map<ModePaiement, Double> ventesParMode = new EnumMap<>(ModePaiement.class);
@@ -303,18 +303,7 @@ public class ExcelGenerator {
                 row.createCell(6).setCellValue(v.getModePaiement().getLibelle());
 
                 // Calcul de la marge
-                double margeVente = 0.0;
-                for (Vente.LigneVente ligne : v.getLignes()) {
-                    Produit produit = ligne.getProduit();
-                    double marge = (ligne.getPrixUnitaire() - produit.getPrixAchat()) * ligne.getQuantite();
-                    margeVente += marge;
-
-                    // Agrégation par catégorie
-                    ventesParCategorie.merge(produit.getCategorie(),
-                        ligne.getPrixUnitaire() * ligne.getQuantite(),
-                        Double::sum);
-                }
-
+                double margeVente = calculerMargeVente(v);
                 Cell margeCell = row.createCell(7);
                 margeCell.setCellValue(margeVente);
                 applyCurrencyStyle(workbook, (XSSFCell)margeCell);
@@ -325,77 +314,18 @@ public class ExcelGenerator {
                 String dateKey = v.getDate().format(DATE_FORMATTER);
                 ventesParJour.merge(dateKey, v.getTotal(), Double::sum);
                 ventesParMode.merge(v.getModePaiement(), v.getTotal(), Double::sum);
-            }
 
-            // Feuille d'analyses
-            XSSFSheet analyseSheet = workbook.createSheet("Analyses");
-            rowNum = 0;
-
-            // Section 1: Ventes par jour
-            Row titleRow = analyseSheet.createRow(rowNum++);
-            Cell titleCell = titleRow.createCell(0);
-            titleCell.setCellValue("Ventes par jour");
-            applyHeaderStyle(workbook, (XSSFCell)titleCell);
-
-            for (Map.Entry<String, Double> entry : ventesParJour.entrySet()) {
-                Row row = analyseSheet.createRow(rowNum++);
-                row.createCell(0).setCellValue(entry.getKey());
-                Cell valueCell = row.createCell(1);
-                valueCell.setCellValue(entry.getValue());
-                applyCurrencyStyle(workbook, (XSSFCell)valueCell);
-            }
-
-            // Section 2: Ventes par mode de paiement
-            rowNum += 2;
-            Row modeTitle = analyseSheet.createRow(rowNum++);
-            modeTitle.createCell(0).setCellValue("Ventes par mode de paiement");
-            applyHeaderStyle(workbook, (XSSFCell)modeTitle.getCell(0));
-
-            for (Map.Entry<ModePaiement, Double> entry : ventesParMode.entrySet()) {
-                Row row = analyseSheet.createRow(rowNum++);
-                row.createCell(0).setCellValue(entry.getKey().getLibelle());
-                Cell valueCell = row.createCell(1);
-                valueCell.setCellValue(entry.getValue());
-                applyCurrencyStyle(workbook, (XSSFCell)valueCell);
-            }
-
-            // Section 3: Ventes par catégorie
-            rowNum += 2;
-            Row catTitle = analyseSheet.createRow(rowNum++);
-            catTitle.createCell(0).setCellValue("Ventes par catégorie");
-            applyHeaderStyle(workbook, (XSSFCell)catTitle.getCell(0));
-
-            for (Map.Entry<String, Double> entry : ventesParCategorie.entrySet()) {
-                Row row = analyseSheet.createRow(rowNum++);
-                row.createCell(0).setCellValue(entry.getKey());
-                Cell valueCell = row.createCell(1);
-                valueCell.setCellValue(entry.getValue());
-                applyCurrencyStyle(workbook, (XSSFCell)valueCell);
-            }
-
-            // Section 4: Marge totale
-            rowNum += 2;
-            Row margeTitle = analyseSheet.createRow(rowNum++);
-            margeTitle.createCell(0).setCellValue("Marge totale");
-            Cell margeTotaleCell = margeTitle.createCell(1);
-            margeTotaleCell.setCellValue(totalMarge);
-            applyCurrencyStyle(workbook, (XSSFCell)margeTotaleCell);
-
-            // Analyses supplémentaires si fournies
-            if (analyses != null && !analyses.isEmpty()) {
-                rowNum += 2;
-                Row analysesTitle = analyseSheet.createRow(rowNum++);
-                analysesTitle.createCell(0).setCellValue("Analyses supplémentaires");
-                applyHeaderStyle(workbook, (XSSFCell)analysesTitle.getCell(0));
-
-                for (Map.Entry<String, Double> analyse : analyses.entrySet()) {
-                    Row row = analyseSheet.createRow(rowNum++);
-                    row.createCell(0).setCellValue(analyse.getKey());
-                    Cell valueCell = row.createCell(1);
-                    valueCell.setCellValue(analyse.getValue());
-                    applyCurrencyStyle(workbook, (XSSFCell)valueCell);
+                // Agrégation par catégorie de produit
+                for (Vente.LigneVente ligne : v.getLignes()) {
+                    ventesParCategorie.merge(ligne.getProduit().getCategorie(),
+                        ligne.getPrixUnitaire() * ligne.getQuantite(),
+                        Double::sum);
                 }
             }
+
+            // Création des feuilles d'analyse
+            creerFeuilleAnalysesVentes(workbook, ventesParJour, ventesParMode, ventesParCategorie, totalMarge);
+            creerFeuilleAnalysesTendances(workbook, analyses);
 
             try (FileOutputStream fileOut = new FileOutputStream(cheminFichier)) {
                 workbook.write(fileOut);
@@ -405,6 +335,124 @@ public class ExcelGenerator {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport Excel des ventes", e);
             throw new RuntimeException("Erreur lors de la génération du rapport Excel", e);
+        }
+    }
+
+    private static double calculerMargeVente(Vente vente) {
+        return vente.getLignes().stream()
+            .mapToDouble(ligne -> {
+                double prixVente = ligne.getPrixUnitaire() * ligne.getQuantite();
+                double coutAchat = ligne.getProduit().getPrixAchat() * ligne.getQuantite();
+                return prixVente - coutAchat;
+            })
+            .sum();
+    }
+
+    private static void creerFeuilleAnalysesVentes(
+            XSSFWorkbook workbook,
+            Map<String, Double> ventesParJour,
+            Map<ModePaiement, Double> ventesParMode,
+            Map<String, Double> ventesParCategorie,
+            double totalMarge) {
+
+        XSSFSheet analyseSheet = workbook.createSheet("Analyses");
+        int rowNum = 0;
+
+        // Section 1: Ventes par jour
+        Row titleRow = analyseSheet.createRow(rowNum++);
+        Cell titleCell = titleRow.createCell(0);
+        titleCell.setCellValue("Ventes par jour");
+        applyHeaderStyle(workbook, (XSSFCell)titleCell);
+
+        for (Map.Entry<String, Double> entry : ventesParJour.entrySet()) {
+            Row row = analyseSheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(entry.getKey());
+            Cell valueCell = row.createCell(1);
+            valueCell.setCellValue(entry.getValue());
+            applyCurrencyStyle(workbook, (XSSFCell)valueCell);
+        }
+
+        // Section 2: Ventes par mode de paiement
+        rowNum += 2;
+        Row modeTitle = analyseSheet.createRow(rowNum++);
+        modeTitle.createCell(0).setCellValue("Ventes par mode de paiement");
+        applyHeaderStyle(workbook, (XSSFCell)modeTitle.getCell(0));
+
+        for (Map.Entry<ModePaiement, Double> entry : ventesParMode.entrySet()) {
+            Row row = analyseSheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(entry.getKey().getLibelle());
+            Cell valueCell = row.createCell(1);
+            valueCell.setCellValue(entry.getValue());
+            applyCurrencyStyle(workbook, (XSSFCell)valueCell);
+        }
+
+        // Section 3: Ventes par catégorie
+        rowNum += 2;
+        Row catTitle = analyseSheet.createRow(rowNum++);
+        catTitle.createCell(0).setCellValue("Ventes par catégorie");
+        applyHeaderStyle(workbook, (XSSFCell)catTitle.getCell(0));
+
+        for (Map.Entry<String, Double> entry : ventesParCategorie.entrySet()) {
+            Row row = analyseSheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(entry.getKey());
+            Cell valueCell = row.createCell(1);
+            valueCell.setCellValue(entry.getValue());
+            applyCurrencyStyle(workbook, (XSSFCell)valueCell);
+        }
+
+        // Section 4: Marge totale
+        rowNum += 2;
+        Row margeTitle = analyseSheet.createRow(rowNum++);
+        margeTitle.createCell(0).setCellValue("Marge totale");
+        Cell margeTotaleCell = margeTitle.createCell(1);
+        margeTotaleCell.setCellValue(totalMarge);
+        applyCurrencyStyle(workbook, (XSSFCell)margeTotaleCell);
+    }
+
+    private static void creerFeuilleAnalysesTendances(
+            XSSFWorkbook workbook,
+            Map<String, Double> analyses) {
+        if (analyses == null || analyses.isEmpty()) return;
+
+        XSSFSheet tendanceSheet = workbook.createSheet("Tendances");
+        int rowNum = 0;
+
+        // Titre principal
+        Row titleRow = tendanceSheet.createRow(rowNum++);
+        Cell titleCell = titleRow.createCell(0);
+        titleCell.setCellValue("Analyse des Tendances");
+        applyHeaderStyle(workbook, (XSSFCell)titleCell);
+
+        // En-têtes
+        Row headerRow = tendanceSheet.createRow(rowNum++);
+        String[] headers = {"Indicateur", "Valeur"};
+        for (int i = 0; i < headers.length; i++) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(headers[i]);
+            applyHeaderStyle(workbook, (XSSFCell)cell);
+        }
+
+        // Données de tendance
+        for (Map.Entry<String, Double> entry : analyses.entrySet()) {
+            Row row = tendanceSheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(entry.getKey());
+            Cell valueCell = row.createCell(1);
+
+            // Appliquer le style monétaire ou pourcentage selon le type d'indicateur
+            if (entry.getKey().startsWith("Croissance") || entry.getKey().startsWith("Rentabilité")) {
+                XSSFCellStyle percentStyle = workbook.createCellStyle();
+                percentStyle.setDataFormat(workbook.createDataFormat().getFormat("0.00%"));
+                valueCell.setCellStyle(percentStyle);
+                valueCell.setCellValue(entry.getValue() / 100);
+            } else {
+                applyCurrencyStyle(workbook, (XSSFCell)valueCell);
+                valueCell.setCellValue(entry.getValue());
+            }
+        }
+
+        // Ajuster la largeur des colonnes
+        for (int i = 0; i < headers.length; i++) {
+            tendanceSheet.autoSizeColumn(i);
         }
     }
 

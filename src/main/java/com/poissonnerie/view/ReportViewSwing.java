@@ -160,11 +160,17 @@ public class ReportViewSwing {
             addChartFromData(paiementsData, "Modes de paiement", null, null, ChartType.PIE);
 
             // Rentabilité par produit
-            Map<String, Double> rentabiliteData = reportController.analyserRentabiliteParProduit(
+            Map<String, Double> rentabiliteData = reportController.analyserTendancesVentes(
                 dateDebut.atStartOfDay(),
                 dateFin.atTime(23, 59, 59)
             );
-            addChartFromData(rentabiliteData, "Rentabilité par produit", "Produit", "Rentabilité (%)", ChartType.BAR);
+            Map<String, Double> rentabiliteParProduit = rentabiliteData.entrySet().stream()
+                .filter(e -> e.getKey().startsWith("Rentabilité "))
+                .collect(Collectors.toMap(
+                    e -> e.getKey().replace("Rentabilité ", ""),
+                    Map.Entry::getValue
+                ));
+            addChartFromData(rentabiliteParProduit, "Rentabilité par produit", "Produit", "Rentabilité (%)", ChartType.BAR);
 
             // Stocks par catégorie
             Map<String, Integer> stocksData = reportController.analyserStocksParCategorie();
@@ -328,6 +334,7 @@ public class ReportViewSwing {
             if (e.getStateChange() == ItemEvent.SELECTED) {
                 updateDateRange();
                 updateCharts();
+                updateKPIs(); // Update KPIs when period changes
             }
         });
 
@@ -479,7 +486,39 @@ public class ReportViewSwing {
         panel.setBackground(Color.WHITE);
         panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        // En-tête avec titre
+        // En-tête avec titre et période sélectionnée
+        JPanel headerPanel = createHeaderPanel();
+
+        // Panel des KPIs
+        JPanel kpiPanel = createKPIPanel();
+
+        // Panel des graphiques
+        statistiquesPanel = new JPanel(new GridLayout(2, 2, 15, 15));
+        statistiquesPanel.setBackground(Color.WHITE);
+        statistiquesPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 0, 0));
+
+        // Conteneur principal avec défilement
+        JPanel mainContent = new JPanel(new BorderLayout());
+        mainContent.setBackground(Color.WHITE);
+        mainContent.add(kpiPanel, BorderLayout.NORTH);
+        mainContent.add(statistiquesPanel, BorderLayout.CENTER);
+
+        JScrollPane scrollPane = new JScrollPane(mainContent);
+        scrollPane.setBorder(null);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
+        panel.add(headerPanel, BorderLayout.NORTH);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        // Mise à jour initiale des données
+        updateKPIs();
+        updateCharts();
+
+        mainPanel.add(panel, BorderLayout.CENTER);
+    }
+
+    private JPanel createHeaderPanel() {
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(Color.WHITE);
         headerPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(220, 220, 220)));
@@ -489,29 +528,105 @@ public class ReportViewSwing {
         titleLabel.setForeground(new Color(33, 33, 33));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
-        headerPanel.add(titleLabel, BorderLayout.CENTER);
+        JLabel periodLabel = new JLabel("Période : " + formatPeriod(), SwingConstants.RIGHT);
+        periodLabel.setFont(REGULAR_FONT);
+        periodLabel.setForeground(new Color(100, 100, 100));
 
-        // Panel des statistiques et graphiques avec GridLayout optimisé
-        statistiquesPanel = new JPanel(new GridLayout(3, 2, 15, 15));
-        statistiquesPanel.setBackground(Color.WHITE);
-        statistiquesPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 0, 0));
+        headerPanel.add(titleLabel, BorderLayout.WEST);
+        headerPanel.add(periodLabel, BorderLayout.EAST);
 
-        // ScrollPane pour gérer le défilement
-        JScrollPane scrollPane = new JScrollPane(statistiquesPanel);
-        scrollPane.setBorder(null);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-
-        // Ajout des composants
-        panel.add(headerPanel, BorderLayout.NORTH);
-        panel.add(scrollPane, BorderLayout.CENTER);
-
-        // Mise à jour initiale des graphiques
-        updateCharts();
-
-        mainPanel.add(panel, BorderLayout.CENTER);
+        return headerPanel;
     }
 
+    private String formatPeriod() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        return dateDebut.format(formatter) + " - " + dateFin.format(formatter);
+    }
+
+    private JPanel createKPIPanel() {
+        JPanel kpiPanel = new JPanel(new GridLayout(1, 4, 10, 0));
+        kpiPanel.setBackground(Color.WHITE);
+        kpiPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
+
+        // Les KPIs seront mis à jour par updateKPIs()
+        return kpiPanel;
+    }
+
+    private void updateKPIs() {
+        try {
+            Map<String, Double> kpis = reportController.calculerKPIs(
+                dateDebut.atStartOfDay(),
+                dateFin.atTime(23, 59, 59)
+            );
+
+            // Mise à jour du panel des KPIs avec les nouvelles données
+            updateKPIDisplay(kpis);
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la mise à jour des KPIs", e);
+            showErrorMessage("Erreur", "Impossible de mettre à jour les KPIs : " + e.getMessage());
+        }
+    }
+
+    private void updateKPIDisplay(Map<String, Double> kpis) {
+        JPanel kpiPanel = createKPIPanel();
+        kpiPanel.removeAll();
+
+        // Création des cartes KPI
+        addKPICard(kpiPanel, "Chiffre d'affaires", 
+            String.format("%.2f €", kpis.getOrDefault("Chiffre d'affaires", 0.0)),
+            MaterialDesign.MDI_CURRENCY_EUR);
+
+        addKPICard(kpiPanel, "Panier moyen",
+            String.format("%.2f €", kpis.getOrDefault("Panier moyen", 0.0)),
+            MaterialDesign.MDI_CART);
+
+        addKPICard(kpiPanel, "Marge moyenne",
+            String.format("%.1f%%", kpis.getOrDefault("Taux de marge moyen (%)", 0.0)),
+            MaterialDesign.MDI_CHART_LINE);
+
+        addKPICard(kpiPanel, "Rotation stock",
+            String.format("%.1f", kpis.getOrDefault("Taux de rotation du stock", 0.0)),
+            MaterialDesign.MDI_REFRESH);
+
+        kpiPanel.revalidate();
+        kpiPanel.repaint();
+    }
+
+    private void addKPICard(JPanel container, String title, String value, MaterialDesign iconCode) {
+        JPanel card = new JPanel(new BorderLayout(5, 5));
+        card.setBackground(Color.WHITE);
+        card.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(220, 220, 220)),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+
+        // Icône
+        FontIcon icon = FontIcon.of(iconCode);
+        icon.setIconSize(24);
+        icon.setIconColor(PRIMARY_COLOR);
+
+        // Titre
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        titleLabel.setForeground(new Color(100, 100, 100));
+
+        // Valeur
+        JLabel valueLabel = new JLabel(value);
+        valueLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        valueLabel.setForeground(new Color(33, 33, 33));
+
+        // Layout
+        JPanel textPanel = new JPanel(new GridLayout(2, 1));
+        textPanel.setBackground(Color.WHITE);
+        textPanel.add(titleLabel);
+        textPanel.add(valueLabel);
+
+        card.add(new JLabel(icon), BorderLayout.WEST);
+        card.add(textPanel, BorderLayout.CENTER);
+
+        container.add(card);
+    }
 
     private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
         FontIcon icon = FontIcon.of(iconCode);
