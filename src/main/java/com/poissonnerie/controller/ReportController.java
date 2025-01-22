@@ -44,20 +44,9 @@ public class ReportController {
                 .filter(v -> !v.getDate().isBefore(debut) && !v.getDate().isAfter(fin))
                 .collect(Collectors.toList());
 
-            Map<String, Double> analyses = new HashMap<>();
-            Map<String, Object> rawAnalyses = analyserVentes(ventes);
-
-            rawAnalyses.forEach((key, value) -> {
-                if (value instanceof Number) {
-                    analyses.put(key, ((Number) value).doubleValue());
-                } else if (value instanceof Map) {
-                    @SuppressWarnings("unchecked")
-                    Map<String, Double> nestedMap = (Map<String, Double>) value;
-                    nestedMap.forEach((k, v) -> analyses.put(key + " - " + k, v));
-                }
-            });
-
+            Map<String, Double> analyses = analyserVentesPourRapport(ventes);
             ExcelGenerator.genererRapportVentes(ventes, analyses, cheminFichier);
+
             LOGGER.info("Rapport des ventes Excel généré avec succès");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport Excel des ventes", e);
@@ -65,48 +54,60 @@ public class ReportController {
         }
     }
 
-    public Map<String, Object> analyserVentes(List<Vente> ventes) {
-        Map<String, Object> analyses = new HashMap<>();
+    private Map<String, Double> analyserVentesPourRapport(List<Vente> ventes) {
+        Map<String, Double> analyses = new HashMap<>();
 
         // Chiffre d'affaires total
         double caTotal = ventes.stream().mapToDouble(Vente::getTotal).sum();
         analyses.put("Chiffre d'affaires total", caTotal);
 
         // Moyenne des ventes
-        double moyenneVentes = ventes.stream()
+        OptionalDouble moyenneVentes = ventes.stream()
             .mapToDouble(Vente::getTotal)
-            .average()
-            .orElse(0.0);
-        analyses.put("Moyenne des ventes", moyenneVentes);
+            .average();
+        analyses.put("Moyenne des ventes", moyenneVentes.orElse(0.0));
 
         // Nombre de ventes
         analyses.put("Nombre total de ventes", (double) ventes.size());
 
         // Panier moyen
-        analyses.put("Panier moyen", caTotal / (ventes.size() > 0 ? ventes.size() : 1));
+        double panierMoyen = ventes.isEmpty() ? 0.0 : caTotal / ventes.size();
+        analyses.put("Panier moyen", panierMoyen);
 
-        // Top produits vendus
-        Map<String, Double> topProduits = ventes.stream()
+        // Top produits vendus par chiffre d'affaires
+        Map<String, Double> ventesParProduit = ventes.stream()
             .flatMap(v -> v.getLignes().stream())
             .collect(Collectors.groupingBy(
                 ligne -> ligne.getProduit().getNom(),
                 Collectors.summingDouble(ligne -> ligne.getQuantite() * ligne.getPrixUnitaire())
             ));
 
-        analyses.put("Top 5 produits", topProduits);
+        // Ajout des top produits individuellement dans les analyses
+        ventesParProduit.entrySet().stream()
+            .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
+            .limit(5)
+            .forEach(entry -> analyses.put("Top produit - " + entry.getKey(), entry.getValue()));
 
         return analyses;
     }
 
     public void genererRapportFinancierExcel(LocalDateTime debut, LocalDateTime fin, String cheminFichier) {
         try {
+            // Préparation des données financières
             Map<String, Double> chiffreAffaires = calculerChiffreAffaires(debut, fin);
             Map<String, Double> couts = calculerCouts(debut, fin);
             Map<String, Double> benefices = calculerBenefices(chiffreAffaires, couts);
             Map<String, Double> marges = calculerMarges(chiffreAffaires, couts);
 
+            // Génération du rapport avec les 4 maps requises
             ExcelGenerator.genererRapportFinancier(
-                chiffreAffaires, couts, benefices, marges, cheminFichier);
+                chiffreAffaires,
+                couts,
+                benefices,
+                marges,
+                cheminFichier
+            );
+
             LOGGER.info("Rapport financier généré avec succès");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport financier", e);
@@ -156,26 +157,10 @@ public class ReportController {
         return caParPeriode;
     }
 
-    public Map<String, Double> analyserRentabiliteParProduit(LocalDateTime debut, LocalDateTime fin) {
-        List<Vente> ventes = venteController.getVentes().stream()
-            .filter(v -> !v.getDate().isBefore(debut) && !v.getDate().isAfter(fin))
-            .collect(Collectors.toList());
-
-        return ventes.stream()
-            .flatMap(v -> v.getLignes().stream())
-            .collect(Collectors.groupingBy(
-                ligne -> ligne.getProduit().getNom(),
-                Collectors.averagingDouble(ligne -> {
-                    double prixVente = ligne.getPrixUnitaire() * ligne.getQuantite();
-                    double coutAchat = ligne.getProduit().getPrixAchat() * ligne.getQuantite();
-                    return ((prixVente - coutAchat) / prixVente) * 100;
-                })
-            ));
-    }
-
     private Map<String, Double> calculerCouts(LocalDateTime debut, LocalDateTime fin) {
         Map<String, Double> couts = new HashMap<>();
 
+        // Calcul des coûts d'achats pour la période
         double totalAchats = caisseController.getMouvements().stream()
             .filter(m -> m.getType() == MouvementCaisse.TypeMouvement.SORTIE)
             .filter(m -> !m.getDate().isBefore(debut) && !m.getDate().isAfter(fin))
