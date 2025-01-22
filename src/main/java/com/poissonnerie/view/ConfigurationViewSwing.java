@@ -34,6 +34,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.io.IOException;
+import java.util.HashMap;
+
 
 public class ConfigurationViewSwing {
     private static final Logger LOGGER = Logger.getLogger(ConfigurationViewSwing.class.getName());
@@ -731,11 +734,16 @@ public class ConfigurationViewSwing {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonPanel.setOpaque(false);
 
+        // Création des boutons principaux
         JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH, couleurPrincipale);
         JButton reinitialiserBtn = createStyledButton("Réinitialiser", MaterialDesign.MDI_RESTORE, new Color(244, 67, 54));
         JButton sauvegarderBtn = createStyledButton("Sauvegarder", MaterialDesign.MDI_CONTENT_SAVE, new Color(76, 175, 80));
 
-        // Configuration des boutons avec gestion d'erreur et retour visuel
+        // Création des boutons d'import/export
+        JButton exporterBtn = createStyledButton("Exporter", MaterialDesign.MDI_EXPORT, new Color(33, 150, 243));
+        JButton importerBtn = createStyledButton("Importer", MaterialDesign.MDI_IMPORT, new Color(33, 150, 243));
+
+        // Configuration des actions des boutons
         actualiserBtn.addActionListener(e -> {
             try {
                 setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -755,18 +763,82 @@ public class ConfigurationViewSwing {
         });
 
         sauvegarderBtn.addActionListener(e -> {
-            try {
-                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                sauvegarderConfigurations();
+            try {                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+                if (validerChamps()) {
+                    sauvegarderConfigurations();
+                }
             } finally {
                 setCursor(Cursor.getDefaultCursor());
             }
         });
 
-        buttonPanel.add(actualiserBtn);        buttonPanel.add(reinitialiserBtn);
-        buttonPanel.add(sauvegarderBtn);
+        exporterBtn.addActionListener(e -> exporterConfigurations());
+        importerBtn.addActionListener(e -> importerConfigurations());
+
+        // Ajout des boutons au panel avec séparateur
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        leftPanel.setOpaque(false);
+        leftPanel.add(exporterBtn);
+        leftPanel.add(importerBtn);
+
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        rightPanel.setOpaque(false);
+        rightPanel.add(actualiserBtn);
+        rightPanel.add(reinitialiserBtn);
+        rightPanel.add(sauvegarderBtn);
+
+        buttonPanel.setLayout(new BorderLayout());
+        buttonPanel.add(leftPanel, BorderLayout.WEST);
+        buttonPanel.add(rightPanel, BorderLayout.EAST);
 
         return buttonPanel;
+    }
+
+    private void exporterConfigurations() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Exporter les configurations");
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Fichiers JSON (*.json)", "json"));
+
+        if (fileChooser.showSaveDialog(mainPanel) == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            String filePath = selectedFile.getPath();
+            if (!filePath.toLowerCase().endsWith(".json")) {
+                filePath += ".json";
+                selectedFile = new File(filePath);
+            }
+
+            try {
+                controller.exporterConfigurations(selectedFile);
+                showSuccessMessage("Configurations exportées avec succès vers " + selectedFile.getName());
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Erreur lors de l'exportation des configurations", e);
+                showErrorMessage("Erreur lors de l'exportation : " + e.getMessage());
+            }
+        }
+    }
+
+    private void importerConfigurations() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Importer les configurations");
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Fichiers JSON (*.json)", "json"));
+
+        if (fileChooser.showOpenDialog(mainPanel) == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+
+            if (showConfirmDialog("Cette action remplacera les configurations existantes. Continuer ?")) {
+                try {
+                    controller.importerConfigurations(selectedFile);
+                    loadData();
+                    updatePreview();
+                    showSuccessMessage("Configurations importées avec succès depuis " + selectedFile.getName());
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors de l'importation des configurations", e);
+                    showErrorMessage("Erreur lors de l'importation : " + e.getMessage());
+                }
+            }
+        }
     }
 
     private void actualiserConfigurations() {
@@ -833,219 +905,104 @@ public class ConfigurationViewSwing {
     }
 
     private void sauvegarderConfigurations() {
-        SwingWorker<Void, String> worker = new SwingWorker<>() {
-            @Override
-            protected Void doInBackground() throws Exception {
-                // Collecte et validation des valeurs
-                Map<String, String> erreurs = new HashMap<>();
-                List<ConfigurationParam> configsAMettreAJour = new ArrayList<>();
+        try {
+            // Collecte et validation des valeurs
+            List<ConfigurationParam> configsAMettreAJour = new ArrayList<>();
 
-                for (Map.Entry<String, JComponent> entry : champsSaisie.entrySet()) {
-                    String cle = entry.getKey();
-                    JComponent composant = entry.getValue();
-                    String valeur = extraireValeurComposant(composant);
+            for (Map.Entry<String, JComponent> entry : champsSaisie.entrySet()) {
+                String cle = entry.getKey();
+                JComponent composant = entry.getValue();
+                String valeur = "";
 
-                    try {
-                        String valeurValidee = ConfigurationParam.validateValeur(valeur, cle);
-                        configsAMettreAJour.add(new ConfigurationParam(0, cle, valeurValidee, ""));
-                    } catch (IllegalArgumentException e) {
-                        erreurs.put(cle, e.getMessage());
+                if (composant instanceof JTextField) {
+                    valeur = ((JTextField) composant).getText();
+                } else if (composant instanceof JTextArea) {
+                    valeur = ((JTextArea) composant).getText();
+                } else if (composant instanceof JSpinner) {
+                    valeur = String.valueOf(((JSpinner) composant).getValue());
+                } else if (composant instanceof JCheckBox) {
+                    valeur = String.valueOf(((JCheckBox) composant).isSelected());
+                } else if (composant instanceof JComboBox) {
+                    Object selectedItem = ((JComboBox<?>) composant).getSelectedItem();
+                    valeur = selectedItem != null ? selectedItem.toString() : "";
+                }
+
+                // Sanitize input before saving
+                if (valeur != null) {
+                    valeur = sanitizeInput(valeur);
+                    if (contientCodeMalveillant(valeur)) {
+                        throw new IllegalArgumentException("Le champ " + cle + " contient des caractères non autorisés");
                     }
                 }
 
-                if (!erreurs.isEmpty()) {
-                    StringBuilder messageErreur = new StringBuilder("Erreurs de validation :\n");
-                    erreurs.forEach((cle, message) -> messageErreur.append(cle).append(" : ").append(message).append("\n"));
-                    throw new IllegalArgumentException(messageErreur.toString());
-                }
-
-                // Mise à jour des configurations
-                for (ConfigurationParam config : configsAMettreAJour) {
-                    controller.mettreAJourConfiguration(config);
-                }
-
-                return null;
+                // Valider la valeur selon le type de configuration
+                valeur = ConfigurationParam.validateValeur(valeur, cle);
+                ConfigurationParam config = new ConfigurationParam(0, cle, valeur, "");
+                configsAMettreAJour.add(config);
             }
 
-            @Override
-            protected void done() {
-                try {
-                    get();
-                    updatePreview();
-                    JOptionPane.showMessageDialog(mainPanel,
-                        "Les configurations ont été sauvegardées avec succès",
-                        "Succès",
-                        JOptionPane.INFORMATION_MESSAGE);
-                } catch (Exception e) {
-                    LOGGER.log(Level.SEVERE, "Erreur lors de la sauvegarde", e);
-                    String message = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
-                    showErrorMessage("Erreur lors de la sauvegarde : " + message);
-                }
-            }
-        };
-        worker.execute();
-    }
+            // Mise à jour des configurations via le contrôleur
+            controller.sauvegarderConfigurations(configsAMettreAJour);
+            updatePreview();
+            showSuccessMessage("Les configurations ont été sauvegardées avec succès");
 
-    private String extraireValeurComposant(JComponent composant) {
-        if (composant instanceof JTextField) {
-            return ((JTextField) composant).getText().trim();
-        } else if (composant instanceof JTextArea) {
-            return ((JTextArea) composant).getText().trim();
-        } else if (composant instanceof JSpinner) {
-            return String.valueOf(((JSpinner) composant).getValue());
-        } else if (composant instanceof JCheckBox) {
-            return String.valueOf(((JCheckBox) composant).isSelected());
-        } else if (composant instanceof JComboBox) {
-            Object selectedItem = ((JComboBox<?>) composant).getSelectedItem();
-            return selectedItem != null ? selectedItem.toString() : "";
-        }
-        return "";
-    }
-
-    private void choisirLogo(JTextField logoPathField) {
-        LOGGER.info("Ouverture du sélecteur de logo");
-        JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Sélectionner un logo");
-        fileChooser.setFileFilter(new FileNameExtensionFilter(            "Images (*.jpg, *.jpeg, *.png, *.gif)", "jpg", "jpeg", "png", "gif"));
-
-        if (fileChooser.showOpenDialog(mainPanel) == JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
-            try {
-                validateImageFile(file);
-                String pathSecurise = securiserCheminFichier(file.getAbsolutePath());
-                logoPathField.setText(pathSecurise);
-                LOGGER.info("Logo sélectionné et validé: " + pathSecurise);
-                updatePreview();
-            } catch (Exception e) {
-                LOGGER.log(Level.WARNING, "Erreur lors de la validation du logo", e);
-                showErrorMessage(e.getMessage());
-            }
-        }
-    }
-
-    private String securiserCheminFichier(String chemin) {
-        try {
-            Path path = Paths.get(chemin).normalize();
-            if (!Files.exists(path)) {
-                throw new IllegalArgumentException("Le fichier n'existe pas");
-            }
-            // Vérifier qu'on ne sort pas du répertoire de l'application
-            Path appDir = Paths.get(System.getProperty("user.dir")).normalize();
-            if (!path.startsWith(appDir)) {
-                throw new IllegalArgumentException("Accès non autorisé à ce répertoire");
-            }
-            return path.toString();
+        } catch (IllegalArgumentException e) {
+            LOGGER.log(Level.WARNING, "Erreur de validation lors de la sauvegarde des configurations", e);
+            showErrorMessage("Erreur de validation : " + e.getMessage());
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Erreur lors de la sécurisation du chemin de fichier", e);
-            throw new IllegalArgumentException("Chemin de fichier invalide");
+            LOGGER.log(Level.SEVERE, "Erreur lors de la sauvegarde des configurations", e);
+            showErrorMessage("Erreur lors de la sauvegarde : " + e.getMessage());
         }
-    }
-
-    private void validateImageFile(File file) throws Exception {
-        if (!file.exists() || !file.isFile()) {
-            throw new IllegalArgumentException("Le fichier spécifié n'existe pas");
-        }
-
-        if (file.length() > TAILLE_MAX_LOGO) {
-            throw new IllegalArgumentException("Le fichier est trop volumineux. Taille maximum : 1MB");
-        }
-
-        String extension = getFileExtension(file.getName()).toLowerCase();
-        if (!FORMATS_IMAGE_AUTORISES.contains(extension)) {
-            throw new IllegalArgumentException("Format de fichier non autorisé. Formats acceptés : JPG, PNG, GIF");
-        }
-
-        // Vérification du contenu du fichier image
-        try {
-            BufferedImage image = ImageIO.read(file);
-            if (image == null) {
-                throw new IllegalArgumentException("Le fichier n'est pas une image valide");
-            }
-            // Vérification des dimensions
-            if (image.getWidth() > 1000 || image.getHeight() > 1000) {
-                throw new IllegalArgumentException("Les dimensions de l'image sont trop grandes (max 1000x1000)");
-            }
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Erreur lors de la lecture de l'image: " + e.getMessage());
-        }
-    }
-
-    private String getFileExtension(String filename) {
-        return Optional.ofNullable(filename)
-            .filter(f -> f.contains("."))
-            .map(f -> f.substring(filename.lastIndexOf(".") + 1))
-            .orElse("");
-    }
-
-    private void styleTextField(JTextField textField) {
-        textField.setFont(texteNormalFont);
-        textField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200)),
-            BorderFactory.createEmptyBorder(5, 5, 5, 5)
-        ));
     }
 
     private void loadData() {
         try {
-            List<ConfigurationParam> configurations = controller.getConfigurations();
+            Map<String, String> configurations = controller.chargerConfigurations();
 
-            for (ConfigurationParam config : configurations) {
-                JComponent composant = champsSaisie.get(config.getCle());
-                if (composant == null) continue;
+            for (Map.Entry<String, String> entry : configurations.entrySet()) {
+                String cle = entry.getKey();
+                String valeur = entry.getValue();
+                JComponent composant = champsSaisie.get(cle);
 
-                if (composant instanceof JTextField) {
-                    ((JTextField) composant).setText(config.getValeur());
-                } else if (composant instanceof JTextArea) {
-                    ((JTextArea) composant).setText(config.getValeur());
-                } else if (composant instanceof JSpinner) {
-                    try {
-                        ((JSpinner) composant).setValue(
-                            config.getCle().equals(ConfigurationParam.CLE_TAUX_TVA) ?
-                            Double.parseDouble(config.getValeur()) :
-                            Integer.parseInt(config.getValeur())
-                        );
-                    } catch (NumberFormatException e) {
-                        LOGGER.warning("Erreur de conversion pour " + config.getCle() + ": " + e.getMessage());
+                if (composant != null) {
+                    if (composant instanceof JTextField) {
+                        ((JTextField) composant).setText(valeur);
+                    } else if (composant instanceof JTextArea) {
+                        ((JTextArea) composant).setText(valeur);
+                    } else if (composant instanceof JSpinner) {
+                        try {
+                            if (cle.equals(ConfigurationParam.CLE_TAUX_TVA)) {
+                                ((JSpinner) composant).setValue(Double.parseDouble(valeur));
+                            } else {
+                                ((JSpinner) composant).setValue(Integer.parseInt(valeur));
+                            }
+                        } catch (NumberFormatException e) {
+                            LOGGER.log(Level.WARNING, "Erreur de conversion numérique pour " + cle, e);
+                        }
+                    } else if (composant instanceof JCheckBox) {
+                        ((JCheckBox) composant).setSelected(Boolean.parseBoolean(valeur));
+                    } else if (composant instanceof JComboBox) {
+                        ((JComboBox<?>) composant).setSelectedItem(valeur);
                     }
-                } else if (composant instanceof JCheckBox) {
-                    ((JCheckBox) composant).setSelected(Boolean.parseBoolean(config.getValeur()));
-                } else if (composant instanceof JComboBox) {
-                    ((JComboBox<?>) composant).setSelectedItem(config.getValeur());
                 }
             }
 
-            // Mise à jour de la prévisualisation après le chargement
             updatePreview();
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du chargement des données", e);
-            showErrorMessage("Erreur lors du chargement : " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Erreur lors du chargement des configurations", e);
+            showErrorMessage("Erreur lors du chargement des configurations : " + e.getMessage());
         }
-    }
-
-    private void showErrorMessage(String message) {
-        SwingUtilities.invokeLater(() -> {
-            JOptionPane.showMessageDialog(mainPanel,
-                message,
-                "Erreur",
-                JOptionPane.ERROR_MESSAGE);
-        });
-    }
-
-    public JPanel getMainPanel() {
-        return mainPanel;
     }
 
     private JButton createStyledButton(String text, MaterialDesign icon, Color color) {
         JButton button = new JButton(text);
         button.setFont(texteNormalFont);
 
-        // Configuration de l'icône
         FontIcon fontIcon = FontIcon.of(icon);
         fontIcon.setIconSize(16);
         fontIcon.setIconColor(Color.WHITE);
         button.setIcon(fontIcon);
 
-        // Style du bouton
         button.setForeground(Color.WHITE);
         button.setBackground(color);
         button.setFocusPainted(false);
@@ -1053,7 +1010,6 @@ public class ConfigurationViewSwing {
         button.setOpaque(true);
         button.setMargin(new Insets(8, 15, 8, 15));
 
-        // Effet de survol
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(color.darker());
@@ -1065,7 +1021,200 @@ public class ConfigurationViewSwing {
 
         return button;
     }
+
+    private void styleTextField(JTextField textField) {
+        textField.setFont(texteNormalFont);
+        textField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+    }
+
+    private void showErrorMessage(String message) {
+        SwingUtilities.invokeLater(() -> {
+            JOptionPane.showMessageDialog(mainPanel,
+                message,
+                "Erreur",
+                JOptionPane.ERROR_MESSAGE);
+        });
+    }
+
+    private void validateImageFile(File file) throws Exception {
+        if (!file.exists()) {
+            throw new Exception("Le fichier image n'existe pas");
+        }
+
+        String extension = Optional.of(file.getName())
+            .filter(f -> f.contains("."))
+            .map(f -> f.substring(f.lastIndexOf('.') + 1).toLowerCase())
+            .orElse("");
+
+        if (!FORMATS_IMAGE_AUTORISES.contains(extension)) {
+            throw new Exception("Format d'image non supporté. Formats acceptés : " +
+                String.join(", ", FORMATS_IMAGE_AUTORISES));
+        }
+
+        if (file.length() > TAILLE_MAX_LOGO) {
+            throw new Exception("L'image est trop volumineuse (max 1MB)");
+        }
+
+        try {
+            BufferedImage image = ImageIO.read(file);
+            if (image == null) {
+                throw new Exception("Le fichier n'est pas une image valide");
+            }
+        } catch (IOException e) {
+            throw new Exception("Erreur lors de la lecture de l'image : " + e.getMessage());
+        }
+    }
+
+    public JPanel getMainPanel() {
+        return mainPanel;
+    }
+
     private void setCursor(Cursor cursor) {
         SwingUtilities.invokeLater(() -> mainPanel.setCursor(cursor));
+    }
+    private boolean validerChamps() {
+        List<String> erreurs = new ArrayList<>();
+
+        // Validation du taux de TVA
+        JSpinner tauxTVASpinner = (JSpinner) champsSaisie.get(ConfigurationParam.CLE_TAUX_TVA);
+        double tauxTVA = (double) tauxTVASpinner.getValue();
+        if (tauxTVA < 0 || tauxTVA > 100) {
+            erreurs.add("Le taux de TVA doit être compris entre 0 et 100");
+        }
+
+        // Validation du téléphone
+        JTextField telephoneField = (JTextField) champsSaisie.get(ConfigurationParam.CLE_TELEPHONE_ENTREPRISE);
+        String telephone = telephoneField.getText().trim();
+        if (!telephone.isEmpty() && !telephone.matches("^[+]?[(]?[0-9]{1,4}[)]?[-\\s./0-9]*$")) {
+            erreurs.add("Le numéro de téléphone contient des caractères invalides");
+        }
+
+        // Validation du SIRET
+        JTextField siretField = (JTextField) champsSaisie.get(ConfigurationParam.CLE_SIRET_ENTREPRISE);
+        String siret = siretField.getText().trim();
+        if (!siret.isEmpty()) {
+            if (!siret.matches("^[0-9]{14}$")) {
+                erreurs.add("Le numéro SIRET doit contenir exactement 14 chiffres");
+            } else if (!validerCleSIRET(siret)) {
+                erreurs.add("Le numéro SIRET est invalide (erreur de clé de contrôle)");
+            }
+        }
+
+        // Validation du logo
+        JTextField logoPathField = (JTextField) champsSaisie.get(ConfigurationParam.CLE_LOGO_PATH);
+        String logoPath = logoPathField.getText().trim();
+        if (!logoPath.isEmpty()) {
+            try {
+                validateImageFile(new File(logoPath));
+            } catch (Exception e) {
+                erreurs.add(e.getMessage());
+            }
+        }
+
+        if (!erreurs.isEmpty()) {
+            showErrorMessage(String.join("\n", erreurs));
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean validerCleSIRET(String siret) {
+        try {
+            int[] chiffres = siret.chars()
+                .map(Character::getNumericValue)
+                .toArray();
+
+            int somme = 0;
+            for (int i = 0; i < 14; i++) {
+                int chiffre = chiffres[i];
+                if (i % 2 == 0) {
+                    chiffre *= 2;
+                    if (chiffre > 9) {
+                        chiffre -= 9;
+                    }
+                }
+                somme += chiffre;
+            }
+
+            return somme % 10 == 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private void validateImageFile(File file) throws Exception {
+        if (!file.exists()) {
+            throw new Exception("Le fichier image n'existe pas");
+        }
+
+        String extension = Optional.of(file.getName())
+            .filter(f -> f.contains("."))
+            .map(f -> f.substring(f.lastIndexOf('.') + 1).toLowerCase())
+            .orElse("");
+
+        if (!FORMATS_IMAGE_AUTORISES.contains(extension)) {
+            throw new Exception("Format d'image non supporté. Formats acceptés : " +
+                String.join(", ", FORMATS_IMAGE_AUTORISES));
+        }
+
+        if (file.length() > TAILLE_MAX_LOGO) {
+            throw new Exception("L'image est trop volumineuse (max 1MB)");
+        }
+
+        try {
+            BufferedImage image = ImageIO.read(file);
+            if (image == null) {
+                throw new Exception("Le fichier n'est pas une image valide");
+            }
+        } catch (IOException e) {
+            throw new Exception("Erreur lors de la lecture de l'image : " + e.getMessage());
+        }
+    }
+
+    private void showSuccessMessage(String message) {
+        SwingUtilities.invokeLater(() -> {
+            JOptionPane.showMessageDialog(mainPanel,
+                message,
+                "Succès",
+                JOptionPane.INFORMATION_MESSAGE);
+        });
+    }
+
+    private boolean showConfirmDialog(String message) {
+        return JOptionPane.showConfirmDialog(mainPanel,
+            message,
+            "Confirmation",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION;
+    }
+
+    private String sanitizeInput(String input) {
+        if (input == null) return "";
+
+        return input.replaceAll("[<>\"'%;)(&+\\x\\u]", "")
+            .replaceAll("(?i)javascript:", "")
+            .replaceAll("(?i)data:", "")
+            .replaceAll("&#", "&amp;#")
+            .trim()
+            .replaceAll("\\s+", " ");
+    }
+
+    private boolean contientCodeMalveillant(String input) {
+        if (input == null) return false;
+
+        String[] motifsSuspects = {
+            "<script", "javascript:", "onerror=", "onload=", "onclick=",
+            "data:text/html", "data:text/javascript", "&#", "\\x", "\\u",
+            "expression(", "document.cookie", "eval(", "fromCharCode",
+            "parseInt", "String.fromCharCode"
+        };
+
+        String inputLower = input.toLowerCase();
+        return Arrays.stream(motifsSuspects)
+            .anyMatch(motif -> inputLower.contains(motif.toLowerCase()));
     }
 }

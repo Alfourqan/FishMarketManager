@@ -114,6 +114,12 @@
       <version>1.5.5</version>
       <type>jar</type>
     </dependency>
+    <!-- Ajout de la dépendance Gson pour la sérialisation/désérialisation JSON -->
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.10.1</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

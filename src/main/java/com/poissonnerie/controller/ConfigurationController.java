@@ -12,6 +12,12 @@ import java.util.logging.Level;
 import java.security.SecureRandom;
 import java.util.regex.Pattern;
 import javax.swing.SwingUtilities;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
 
 public class ConfigurationController {
     private static final Logger LOGGER = Logger.getLogger(ConfigurationController.class.getName());
@@ -21,6 +27,13 @@ public class ConfigurationController {
     private static final Pattern SAFE_KEY_PATTERN = Pattern.compile("^[A-Z_]{1,50}$");
     private static final SecureRandom secureRandom = new SecureRandom();
     private boolean isLoading = false;
+    private final Gson gson;
+
+    public ConfigurationController() {
+        this.gson = new GsonBuilder()
+            .setPrettyPrinting()
+            .create();
+    }
 
     public void chargerConfigurations() {
         if (isLoading) {
@@ -119,7 +132,6 @@ public class ConfigurationController {
             try (Connection conn = DatabaseConnectionPool.getConnection();
                  PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-                // Définir les paramètres deux fois car ils sont utilisés dans le CASE et le IN
                 String[] params = {
                     ConfigurationParam.CLE_TAUX_TVA,
                     ConfigurationParam.CLE_TVA_ENABLED,
@@ -129,14 +141,13 @@ public class ConfigurationController {
                 };
 
                 for (int i = 0; i < params.length; i++) {
-                    stmt.setString(i + 1, params[i]);        // Pour le CASE
-                    stmt.setString(i + 6, params[i]);        // Pour le IN
+                    stmt.setString(i + 1, params[i]);
+                    stmt.setString(i + 6, params[i]);
                 }
 
                 stmt.executeUpdate();
                 LOGGER.info("Configurations réinitialisées avec succès");
 
-                // Recharger les configurations après réinitialisation
                 chargerConfigurations();
             }
         } catch (SQLException e) {
@@ -144,6 +155,117 @@ public class ConfigurationController {
             throw new RuntimeException("Erreur lors de la réinitialisation des configurations", e);
         } finally {
             System.clearProperty("SKIP_SIRET_VALIDATION");
+        }
+    }
+
+    public void sauvegarderConfigurations(List<ConfigurationParam> configs) {
+        if (configs == null || configs.isEmpty()) {
+            throw new IllegalArgumentException("La liste des configurations ne peut pas être vide");
+        }
+
+        Connection conn = null;
+        try {
+            conn = DatabaseConnectionPool.getConnection();
+            conn.setAutoCommit(false);
+
+            String sql = "UPDATE configurations SET valeur = ? WHERE cle = ?";
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                for (ConfigurationParam config : configs) {
+                    validateConfiguration(config);
+                    pstmt.setString(1, sanitizeInput(config.getValeur()));
+                    pstmt.setString(2, sanitizeInput(config.getCle()));
+                    pstmt.addBatch();
+                }
+                pstmt.executeBatch();
+            }
+
+            conn.commit();
+            chargerConfigurations();
+            LOGGER.info("Configurations sauvegardées avec succès");
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors du rollback", ex);
+                }
+            }
+            LOGGER.log(Level.SEVERE, "Erreur lors de la sauvegarde des configurations", e);
+            throw new RuntimeException("Erreur lors de la sauvegarde des configurations", e);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException e) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors de la fermeture de la connexion", e);
+                }
+            }
+        }
+    }
+
+    public Map<String, String> chargerConfigurations() {
+        chargerConfigurations();
+        return new HashMap<>(configCache);
+    }
+
+    public void exporterConfigurations(File file) throws IOException {
+        if (!configurations.isEmpty()) {
+            chargerConfigurations();
+        }
+
+        try (Writer writer = new BufferedWriter(new OutputStreamWriter(
+                new FileOutputStream(file), StandardCharsets.UTF_8))) {
+            Map<String, String> configMap = configurations.stream()
+                .collect(Collectors.toMap(
+                    ConfigurationParam::getCle,
+                    ConfigurationParam::getValeur
+                ));
+            gson.toJson(configMap, writer);
+            LOGGER.info("Configurations exportées vers: " + file.getAbsolutePath());
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'exportation des configurations", e);
+            throw new IOException("Erreur lors de l'exportation des configurations : " + e.getMessage(), e);
+        }
+    }
+
+    public void importerConfigurations(File file) throws IOException {
+        try (Reader reader = new BufferedReader(new InputStreamReader(
+                new FileInputStream(file), StandardCharsets.UTF_8))) {
+            Map<String, String> importedConfigs = gson.fromJson(reader,
+                new TypeToken<Map<String, String>>(){}.getType());
+
+            if (importedConfigs == null || importedConfigs.isEmpty()) {
+                throw new IllegalArgumentException("Le fichier d'import est vide ou mal formaté");
+            }
+
+            List<ConfigurationParam> configsToUpdate = new ArrayList<>();
+            for (Map.Entry<String, String> entry : importedConfigs.entrySet()) {
+                String cle = entry.getKey();
+                String valeur = entry.getValue();
+
+                if (!SAFE_KEY_PATTERN.matcher(cle).matches()) {
+                    LOGGER.warning("Clé invalide ignorée: " + cle);
+                    continue;
+                }
+
+                try {
+                    valeur = ConfigurationParam.validateValeur(valeur, cle);
+                    configsToUpdate.add(new ConfigurationParam(0, cle, valeur, ""));
+                } catch (IllegalArgumentException e) {
+                    LOGGER.warning("Valeur invalide pour la clé " + cle + ": " + e.getMessage());
+                }
+            }
+
+            if (!configsToUpdate.isEmpty()) {
+                sauvegarderConfigurations(configsToUpdate);
+                LOGGER.info("Configurations importées avec succès depuis: " + file.getAbsolutePath());
+            } else {
+                throw new IllegalArgumentException("Aucune configuration valide trouvée dans le fichier");
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'importation des configurations", e);
+            throw new IOException("Erreur lors de l'importation des configurations : " + e.getMessage(), e);
         }
     }
 
