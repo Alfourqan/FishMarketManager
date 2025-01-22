@@ -20,7 +20,6 @@ com/poissonnerie/util/TextBillPrinter.class
 com/poissonnerie/view/InventaireViewSwing$ButtonEditor.class
 com/poissonnerie/view/InventaireViewSwing$ButtonRenderer.class
 com/poissonnerie/controller/CaisseController.class
-com/poissonnerie/view/InventaireViewSwing$ButtonEditor$1.class
 com/poissonnerie/model/Produit.class
 com/poissonnerie/util/DatabaseManager.class
 com/poissonnerie/model/InventaireManager.class
@@ -34,6 +33,7 @@ com/poissonnerie/view/AccueilViewSwing$2.class
 com/poissonnerie/view/AccueilViewSwing.class
 com/poissonnerie/view/MainViewSwing.class
 com/poissonnerie/view/ConfigurationViewSwing$2.class
+schema.sql
 com/poissonnerie/controller/VenteController.class
 com/poissonnerie/util/TextBillPrinter$1.class
 com/poissonnerie/view/ProduitViewSwing$5.class

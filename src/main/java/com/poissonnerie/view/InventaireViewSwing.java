@@ -12,6 +12,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -485,24 +486,21 @@ public class InventaireViewSwing {
         SwingUtilities.invokeLater(() -> {
             try {
                 tableModel.setRowCount(0);
-                for (Produit produit : produitController.getProduits()) {
-                    // Stocker le produit pour l'utiliser dans l'action du bouton
-                    final Produit produitFinal = produit;
-                    JButton ajusterBtn = createStyledButton("Ajuster", new Color(255, 165, 0));
-                    ajusterBtn.addActionListener(e -> showAjustementDialog(produitFinal));
-
+                List<Produit> produits = produitController.getProduits();
+                for (Produit produit : produits) {
                     tableModel.addRow(new Object[]{
                         produit.getNom(),
                         produit.getCategorie(),
                         produit.getStock(),
                         produit.getSeuilAlerte(),
-                        ajusterBtn
+                        "Ajuster" // Le bouton sera géré par le renderer/editor
                     });
                 }
 
                 // Configurer les renderers et editors pour la colonne des boutons
-                tableInventaire.getColumn("Actions").setCellRenderer(new ButtonRenderer());
-                tableInventaire.getColumn("Actions").setCellEditor(new ButtonEditor(new JCheckBox()));
+                TableColumn colonneAction = tableInventaire.getColumn("Actions");
+                colonneAction.setCellRenderer(new ButtonRenderer());
+                colonneAction.setCellEditor(new ButtonEditor(new JCheckBox()));
 
                 // Mettre à jour le filtre de catégorie
                 updateCategoryFilter();
@@ -522,7 +520,7 @@ public class InventaireViewSwing {
         });
     }
 
-    // Classes internes pour le rendu des boutons dans la table
+
     private class ButtonRenderer extends JButton implements TableCellRenderer {
         public ButtonRenderer() {
             setOpaque(true);
@@ -531,20 +529,15 @@ public class InventaireViewSwing {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
                 boolean isSelected, boolean hasFocus, int row, int column) {
-            if (value instanceof JButton) {
-                JButton btn = (JButton) value;
-                setText(btn.getText());
-                setBackground(btn.getBackground());
-                setForeground(btn.getForeground());
-            }
+            setText("Ajuster");
+            setBackground(new Color(255, 165, 0));
+            setForeground(Color.WHITE);
             return this;
         }
     }
 
     private class ButtonEditor extends DefaultCellEditor {
-        protected JButton button;
-        private String label;
-        private boolean isPushed;
+        private JButton button;
 
         public ButtonEditor(JCheckBox checkBox) {
             super(checkBox);
@@ -556,31 +549,23 @@ public class InventaireViewSwing {
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value,
                 boolean isSelected, int row, int column) {
-            if (value instanceof JButton) {
-                JButton btn = (JButton) value;
-                label = btn.getText();
-                button.setText(label);
-                button.setBackground(btn.getBackground());
-                button.setForeground(btn.getForeground());
+            button.setText("Ajuster");
+            button.setBackground(new Color(255, 165, 0));
+            button.setForeground(Color.WHITE);
 
-                // Récupérer le produit associé à cette ligne
-                Produit produit = produitController.getProduits().get(row);
+            // Récupérer le produit directement de la liste
+            List<Produit> produits = produitController.getProduits();
+            if (row >= 0 && row < produits.size()) {
+                final Produit produit = produits.get(row);
                 button.addActionListener(e -> showAjustementDialog(produit));
             }
-            isPushed = true;
+
             return button;
         }
 
         @Override
         public Object getCellEditorValue() {
-            isPushed = false;
-            return new JButton(label);
-        }
-
-        @Override
-        public boolean stopCellEditing() {
-            isPushed = false;
-            return super.stopCellEditing();
+            return "Ajuster";
         }
     }
 
