@@ -41,33 +41,10 @@ import org.apache.pdfbox.rendering.PDFRenderer;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import javax.swing.ImageIcon;
-import javax.print.attribute.HashPrintRequestAttributeSet;
-import javax.print.attribute.standard.MediaSizeName;
-import javax.print.attribute.standard.OrientationRequested;
-import javax.print.attribute.standard.Copies;
-import javax.print.attribute.standard.JobName;
-import javax.print.attribute.standard.Sides;
-import javax.print.attribute.standard.PrintQuality;
-import javax.print.attribute.standard.PrinterResolution;
-
-import javax.print.PrintService;
-import javax.print.PrintServiceLookup;
-import javax.print.attribute.PrintRequestAttributeSet;
-import javax.print.attribute.standard.Copies;
-import javax.print.attribute.standard.MediaSizeName;
-import javax.print.attribute.standard.OrientationRequested;
-import javax.print.attribute.standard.PageRanges;
-import javax.print.attribute.standard.PrinterName;
-import javax.print.event.PrintJobAdapter;
-import javax.print.event.PrintJobEvent;
-import java.awt.print.PageFormat;
-import java.awt.print.Printable;
-import java.awt.print.PrinterException;
-import java.awt.print.PrinterJob;
+import javax.print.attribute.*;
+import javax.print.*;
+import java.awt.print.*;
 import java.io.IOException;
-import java.awt.print.Book;
-import java.awt.Graphics2D;
 
 
 public class ReportViewSwing {
@@ -76,16 +53,11 @@ public class ReportViewSwing {
     // Constantes UI
     private static final Color PRIMARY_COLOR = new Color(0, 135, 136);
     private static final Color SUCCESS_COLOR = new Color(76, 175, 80);
-    private static final Color WARNING_COLOR = new Color(255, 152, 0);
-    private static final Color ERROR_COLOR = new Color(244, 67, 54);
-    private static final Color INFO_COLOR = new Color(33, 150, 243);
     private static final Font TITLE_FONT = new Font("Segoe UI", Font.BOLD, 20);
     private static final Font SUBTITLE_FONT = new Font("Segoe UI", Font.BOLD, 16);
     private static final Font REGULAR_FONT = new Font("Segoe UI", Font.PLAIN, 14);
 
-    // Messages d'erreur et succès
     private static final String MSG_ERREUR_GENERATION = "Erreur lors de la génération du rapport : ";
-    private static final String MSG_ERREUR_CHARGEMENT = "Erreur lors du chargement des données : ";
     private static final String MSG_SUCCES_GENERATION = "Le rapport a été généré dans le fichier : ";
 
     private final JPanel mainPanel;
@@ -93,20 +65,12 @@ public class ReportViewSwing {
     private final VenteController venteController;
     private final ProduitController produitController;
     private final FournisseurController fournisseurController;
-    private JPanel chartPanel;
+    private JPanel statistiquesPanel;
     private LocalDate dateDebut;
     private LocalDate dateFin;
     private JComboBox<String> categorieCombo;
     private JComboBox<String> periodeCombo;
     private JComboBox<String> modePaiementCombo;
-    private JPanel statistiquesPanel;
-
-    private JDialog previewDialog;
-    private JLabel previewLabel;
-    private int currentPage = 0;
-    private PDDocument currentDocument;
-    private PDFRenderer pdfRenderer;
-
 
     public ReportViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -121,40 +85,176 @@ public class ReportViewSwing {
         dateFin = LocalDate.now();
 
         initializeComponents();
-        LOGGER.info("ReportViewSwing initialisé avec succès");
     }
 
-    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
-        FontIcon icon = FontIcon.of(iconCode);
-        icon.setIconSize(18);
-        icon.setIconColor(Color.WHITE);
-
-        JButton button = new JButton(text);
-        button.setIcon(icon);
-        button.setFont(REGULAR_FONT);
-        button.setBackground(color);
-        button.setForeground(Color.WHITE);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setMargin(new Insets(8, 16, 8, 16));
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(color.darker());
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(color);
-            }
-        });
-
-        return button;
-    }
-
-    // Added missing method required by MainViewSwing
     public JPanel getMainPanel() {
         return mainPanel;
     }
+
+    private void genererRapport(String type, List<?> donnees, String nomFichier) {
+        try {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            switch (type.toLowerCase()) {
+                case "ventes":
+                    reportController.genererRapportVentesPDF(
+                        dateDebut.atStartOfDay(),
+                        dateFin.atTime(23, 59, 59),
+                        outputStream
+                    );
+                    break;
+                case "stocks":
+                    Map<String, Double> statsStocks = reportController.calculerStatistiquesStocks(
+                        (List<Produit>) donnees
+                    );
+                    reportController.genererRapportStocksPDF(
+                        (List<Produit>) donnees,
+                        statsStocks,
+                        outputStream
+                    );
+                    break;
+                case "fournisseurs":
+                    reportController.genererRapportFournisseursPDF(outputStream);
+                    break;
+                case "creances":
+                    reportController.genererRapportCreancesPDF(outputStream);
+                    break;
+                case "chiffre_affaires":
+                    reportController.genererRapportFinancierPDF(
+                        dateDebut.atStartOfDay(),
+                        dateFin.atTime(23, 59, 59),
+                        outputStream
+                    );
+                    break;
+            }
+
+            // Sauvegarde du PDF
+            try (PDDocument document = PDDocument.load(outputStream.toByteArray())) {
+                document.save(nomFichier);
+            }
+
+            showSuccessMessage("Succès", MSG_SUCCES_GENERATION + nomFichier);
+            ouvrirFichier(nomFichier);
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport", e);
+            showErrorMessage("Erreur", MSG_ERREUR_GENERATION + e.getMessage());
+        }
+    }
+
+    private void updateCharts() {
+        statistiquesPanel.removeAll();
+
+        try {
+            // Évolution des ventes
+            Map<String, Double> ventesData = reportController.analyserVentesParPeriode(
+                dateDebut.atStartOfDay(),
+                dateFin.atTime(23, 59, 59)
+            );
+            addChartFromData(ventesData, "Évolution des ventes", "Période", "Montant (€)", ChartType.LINE);
+
+            // Répartition des paiements
+            Map<String, Double> paiementsData = reportController.analyserModePaiement(
+                dateDebut.atStartOfDay(),
+                dateFin.atTime(23, 59, 59)
+            );
+            addChartFromData(paiementsData, "Modes de paiement", null, null, ChartType.PIE);
+
+            // Rentabilité par produit
+            Map<String, Double> rentabiliteData = reportController.analyserRentabiliteParProduit(
+                dateDebut.atStartOfDay(),
+                dateFin.atTime(23, 59, 59)
+            );
+            addChartFromData(rentabiliteData, "Rentabilité par produit", "Produit", "Rentabilité (%)", ChartType.BAR);
+
+            // Stocks par catégorie
+            Map<String, Integer> stocksData = reportController.analyserStocksParCategorie();
+            Map<String, Double> stocksDoubleData = stocksData.entrySet().stream()
+                .collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    e -> (double) e.getValue()
+                ));
+            addChartFromData(stocksDoubleData, "Répartition des stocks", "Catégorie", "Quantité", ChartType.PIE);
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la mise à jour des graphiques", e);
+            showErrorMessage("Erreur", "Impossible de mettre à jour les graphiques : " + e.getMessage());
+        }
+
+        statistiquesPanel.revalidate();
+        statistiquesPanel.repaint();
+    }
+
+    private enum ChartType {
+        LINE, BAR, PIE
+    }
+
+    private void addChartFromData(Map<String, Double> data, String title, String xLabel, String yLabel, ChartType type) {
+        if (data == null || data.isEmpty()) return;
+
+        JFreeChart chart;
+        switch (type) {
+            case LINE:
+                DefaultCategoryDataset lineDataset = new DefaultCategoryDataset();
+                data.forEach((key, value) -> lineDataset.addValue(value, "Série", key));
+                chart = ChartFactory.createLineChart(title, xLabel, yLabel, lineDataset);
+                break;
+            case BAR:
+                DefaultCategoryDataset barDataset = new DefaultCategoryDataset();
+                data.forEach((key, value) -> barDataset.addValue(value, "Série", key));
+                chart = ChartFactory.createBarChart(title, xLabel, yLabel, barDataset);
+                break;
+            case PIE:
+                DefaultPieDataset pieDataset = new DefaultPieDataset();
+                data.forEach((key, value) -> pieDataset.setValue(key, value));
+                chart = ChartFactory.createPieChart(title, pieDataset, true, true, false);
+                break;
+            default:
+                return;
+        }
+
+        ChartPanel chartPanel = new ChartPanel(chart);
+        chartPanel.setPreferredSize(new Dimension(300, 200));
+        addStyledChartPanel(chartPanel, title);
+    }
+
+    private void addStyledChartPanel(ChartPanel chartPanel, String title) {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(220, 220, 220)),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(SUBTITLE_FONT);
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+
+        panel.add(titleLabel, BorderLayout.NORTH);
+        panel.add(chartPanel, BorderLayout.CENTER);
+
+        statistiquesPanel.add(panel);
+    }
+
+    private void showSuccessMessage(String titre, String message) {
+        JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void showErrorMessage(String titre, String message) {
+        JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.ERROR_MESSAGE);
+    }
+
+    private void ouvrirFichier(String nomFichier) {
+        try {
+            File file = new File(nomFichier);
+            if (file.exists() && Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().open(file);
+            }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Impossible d'ouvrir le fichier", e);
+            System.err.println("Impossible d'ouvrir le fichier : " + e.getMessage());
+        }
+    }
+
 
     private void initializeComponents() {
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -348,19 +448,9 @@ public class ReportViewSwing {
                     );
                     break;
                 case "Chiffre d'affaires":
-                    Map<String, Double> chiffreAffaires = reportController.calculerChiffreAffaires(
-                        dateDebut.atStartOfDay(),
-                        dateFin.atTime(23, 59, 59)
-                    );
-
-                    Map<String, Double> rentabilites = reportController.analyserRentabiliteParProduit(
-                        dateDebut.atStartOfDay(),
-                        dateFin.atTime(23, 59, 59)
-                    );
-
                     reportController.genererRapportFinancierExcel(
-                        chiffreAffaires,
-                        rentabilites,
+                        dateDebut.atStartOfDay(),
+                        dateFin.atTime(23, 59, 59),
                         nomFichier
                     );
                     break;
@@ -417,356 +507,39 @@ public class ReportViewSwing {
         panel.add(scrollPane, BorderLayout.CENTER);
 
         // Mise à jour initiale des graphiques
-        updateStatistiques();
+        updateCharts();
 
         mainPanel.add(panel, BorderLayout.CENTER);
     }
 
 
+    private JButton createStyledButton(String text, MaterialDesign iconCode, Color color) {
+        FontIcon icon = FontIcon.of(iconCode);
+        icon.setIconSize(18);
+        icon.setIconColor(Color.WHITE);
 
-    private void updateCharts() {
-        statistiquesPanel.removeAll();
+        JButton button = new JButton(text);
+        button.setIcon(icon);
+        button.setFont(REGULAR_FONT);
+        button.setBackground(color);
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setMargin(new Insets(8, 16, 8, 16));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // Graphique des ventes avec tendances
-        addVentesChart();
-
-        // Graphique de répartition des ventes par mode de paiement
-        addPaiementsChart();
-
-        // Graphique d'évolution du chiffre d'affaires
-        addEvolutionCAChart();
-
-        // Graphique de rentabilité par produit
-        addRentabiliteChart();
-
-        // Top 5 produits
-        addTopProduitsChart();
-
-        // Variations mensuelles
-        addVariationsMensuellesChart();
-
-        // Rafraîchissement du panel
-        statistiquesPanel.revalidate();
-        statistiquesPanel.repaint();
-    }
-
-    private void addPerformanceChart() {
-        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-
-        try {
-            Map<String, Double> performances = reportController.analyserPerformanceStock();
-
-            for (Map.Entry<String, Double> entry : performances.entrySet()) {
-                dataset.addValue(entry.getValue(), "Performance", entry.getKey());
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(color.darker());
             }
-
-            JFreeChart chart = ChartFactory.createBarChart(
-                "Performance du stock",
-                "Indicateur",
-                "Valeur",
-                dataset
-            );
-
-            ChartPanel chartPanel = new ChartPanel(chart);
-            chartPanel.setPreferredSize(new Dimension(300, 200));
-            addStyledChartPanel(chartPanel, "Performance du stock");
-
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la création du graphique de performance", e);
-            showErrorMessage("Erreur", "Impossible de générer le graphique de performance");
-        }
-    }
-
-    private void addVentesChart() {
-        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-
-        try {
-            Map<String, Double> ventesData = reportController.analyserVentesParPeriode(
-                dateDebut.atStartOfDay(),
-                dateFin.atTime(23, 59, 59)
-            );
-
-            for (Map.Entry<String, Double> entry : ventesData.entrySet()) {
-                dataset.addValue(entry.getValue(), "Ventes", entry.getKey());
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(color);
             }
+        });
 
-            JFreeChart chart = ChartFactory.createLineChart(
-                "Évolution des ventes",
-                "Période",
-                "Montant (€)",
-                dataset
-            );
-
-            ChartPanel chartPanel = new ChartPanel(chart);
-            chartPanel.setPreferredSize(new Dimension(300, 200));
-            addStyledChartPanel(chartPanel, "Évolution des ventes");
-
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la création du graphique des ventes", e);
-            showErrorMessage("Erreur", "Impossible de générer le graphique des ventes");
-        }
+        return button;
     }
 
-    private void addStocksChart() {
-        DefaultPieDataset dataset = new DefaultPieDataset();
-
-        try {
-            Map<String, Integer> stocksData = reportController.analyserStocksParCategorie();
-
-            for (Map.Entry<String, Integer> entry : stocksData.entrySet()) {
-                dataset.setValue(entry.getKey(), entry.getValue());
-            }
-
-            JFreeChart chart = ChartFactory.createPieChart(
-                "Répartition des stocks",
-                dataset,
-                true,
-                true,
-                false
-            );
-
-            ChartPanel chartPanel = new ChartPanel(chart);
-            chartPanel.setPreferredSize(new Dimension(300, 200));
-            addStyledChartPanel(chartPanel, "Répartition des stocks");
-
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la création du graphique des stocks", e);
-            showErrorMessage("Erreur", "Impossible de générer le graphique des stocks");
-        }
-    }
-
-    private void addPaiementsChart() {
-        DefaultPieDataset dataset = new DefaultPieDataset();
-
-        try {
-            Map<String, Double> paiementsData = reportController.analyserModePaiement(
-                dateDebut.atStartOfDay(),
-                dateFin.atTime(23, 59, 59)
-            );
-
-            for (Map.Entry<String, Double> entry : paiementsData.entrySet()) {
-                dataset.setValue(entry.getKey(), entry.getValue());
-            }
-
-            JFreeChart chart = ChartFactory.createPieChart(
-                "Modes de paiement",
-                dataset,
-                true,
-                true,
-                false
-            );
-
-            ChartPanel chartPanel = new ChartPanel(chart);
-            chartPanel.setPreferredSize(new Dimension(300, 200));
-            addStyledChartPanel(chartPanel, "Modes de paiement");
-
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la création du graphique des paiements", e);
-            showErrorMessage("Erreur", "Impossible de générer le graphique des modes de paiement");
-        }
-    }
-
-    private void addFournisseursChart() {
-        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-
-        try {
-            Map<String, Double> fournisseursData = reportController.analyserAchatsFournisseurs(
-                dateDebut.atStartOfDay(),
-                dateFin.atTime(23, 59, 59)
-            );
-
-            for (Map.Entry<String, Double> entry : fournisseursData.entrySet()) {
-                dataset.addValue(entry.getValue(), "Achats", entry.getKey());
-            }
-
-            JFreeChart chart = ChartFactory.createBarChart(
-                "Achats par fournisseur",
-                "Fournisseur",
-                "Montant (€)",
-                dataset
-            );
-
-            ChartPanel chartPanel = new ChartPanel(chart);
-            chartPanel.setPreferredSize(new Dimension(300, 200));
-            addStyledChartPanel(chartPanel, "Achats par fournisseur");
-
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la création du graphique des fournisseurs", e);
-            showErrorMessage("Erreur", "Impossible de générer le graphique des fournisseurs");
-        }
-    }
-
-    private void addRentabiliteChart() {
-        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-
-        try {
-            Map<String, Double> rentabilites = reportController.analyserRentabiliteParProduit(
-                dateDebut.atStartOfDay(),
-                dateFin.atTime(23, 59, 59)
-            );
-
-            for (Map.Entry<String, Double> entry : rentabilites.entrySet()) {
-                dataset.addValue(entry.getValue(), "Rentabilité (%)", entry.getKey());
-            }
-
-            JFreeChart chart = ChartFactory.createBarChart(
-                "Rentabilité par produit",
-                "Produit",
-                "Rentabilité (%)",
-                dataset
-            );
-
-            ChartPanel chartPanel = new ChartPanel(chart);
-            chartPanel.setPreferredSize(new Dimension(300, 200));
-            addStyledChartPanel(chartPanel, "Rentabilité par produit");
-
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la création du graphique de rentabilité", e);
-            showErrorMessage("Erreur", "Impossible de générer le graphique de rentabilité");
-        }
-    }
-
-    private void addEvolutionCAChart() {
-        try {
-            Map<String, Double> caData = reportController.calculerChiffreAffaires(
-                dateDebut.atStartOfDay(),
-                dateFin.atTime(23, 59, 59)
-            );
-
-            DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-            caData.forEach((periode, montant) -> {
-                if (!periode.startsWith("Variation ") && !periode.equals("Total période") 
-                    && !periode.equals("Moyenne mensuelle")) {
-                    dataset.addValue(montant, "CA", periode);
-                }
-            });
-
-            JFreeChart chart = ChartFactory.createLineChart(
-                "Évolution du chiffre d'affaires",
-                "Période",
-                "Montant (€)",
-                dataset
-            );
-
-            ChartPanel chartPanel = new ChartPanel(chart);
-            chartPanel.setPreferredSize(new Dimension(300, 200));
-            addStyledChartPanel(chartPanel, "Évolution du CA");
-
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la création du graphique d'évolution du CA", e);
-            showErrorMessage("Erreur", "Impossible de générer le graphique d'évolution du CA");
-        }
-    }
-
-    private void addVariationsMensuellesChart() {
-        try {
-            Map<String, Double> caData = reportController.calculerChiffreAffaires(
-                dateDebut.atStartOfDay(),
-                dateFin.atTime(23, 59, 59)
-            );
-
-            DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-            caData.forEach((periode, valeur) -> {
-                if (periode.startsWith("Variation ")) {
-                    String mois = periode.replace("Variation ", "");
-                    dataset.addValue(valeur, "Variation (%)", mois);
-                }
-            });
-
-            JFreeChart chart = ChartFactory.createBarChart(
-                "Variations mensuelles du CA",
-                "Période",
-                "Variation (%)",
-                dataset
-            );
-
-            ChartPanel chartPanel = new ChartPanel(chart);
-            chartPanel.setPreferredSize(new Dimension(300, 200));
-            addStyledChartPanel(chartPanel, "Variations mensuelles");
-
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la création du graphique des variations", e);
-            showErrorMessage("Erreur", "Impossible de générer le graphique des variations");
-        }
-    }
-
-    private void addTopProduitsChart() {
-        try {
-            List<Vente> ventes = venteController.getVentes().stream()
-                .filter(v -> !v.getDate().isBefore(dateDebut.atStartOfDay()) 
-                         && !v.getDate().isAfter(dateFin.atTime(23, 59, 59)))
-                .collect(Collectors.toList());
-
-            Map<String, Object> analyses = reportController.analyserVentes(ventes);
-            Object topProduitsObj = analyses.get("Top 5 produits");
-
-            if (topProduitsObj instanceof Map) {
-                @SuppressWarnings("unchecked")
-                Map<String, Double> topProduits = (Map<String, Double>) topProduitsObj;
-
-                DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-                topProduits.forEach((produit, montant) -> 
-                    dataset.addValue(montant, "CA", produit));
-
-                JFreeChart chart = ChartFactory.createBarChart(
-                    "Top 5 des produits",
-                    "Produit",
-                    "Chiffre d'affaires (€)",
-                    dataset
-                );
-
-                ChartPanel chartPanel = new ChartPanel(chart);
-                chartPanel.setPreferredSize(new Dimension(300, 200));
-                addStyledChartPanel(chartPanel, "Top 5 produits");
-            }
-
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la création du graphique des top produits", e);
-            showErrorMessage("Erreur", "Impossible de générer le graphique des top produits");
-        }
-    }
-
-    private void addStyledChartPanel(ChartPanel chartPanel, String title) {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(220, 220, 220)),
-            BorderFactory.createEmptyBorder(10, 10, 10, 10)
-        ));
-
-        JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(SUBTITLE_FONT);
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
-
-        panel.add(titleLabel, BorderLayout.NORTH);
-        panel.add(chartPanel, BorderLayout.CENTER);
-
-        statistiquesPanel.add(panel);
-    }
-
-    private void ouvrirFichier(String nomFichier) {
-        try {
-            File file = new File(nomFichier);
-            if (file.exists() && Desktop.isDesktopSupported()) {
-                Desktop.getDesktop().open(file);
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Impossible d'ouvrir le fichier", e);
-            System.err.println("Impossible d'ouvrir le fichier : " + e.getMessage());
-        }
-    }
-
-    private void showSuccessMessage(String titre, String message) {
-        JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private void showErrorMessage(String titre, String message) {
-        JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.ERROR_MESSAGE);
-    }
-
-    private void showInfoMessage(String titre, String message) {
-        JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.INFORMATION_MESSAGE);
-    }
 
     private JButton createReportButton(String text, MaterialDesign iconCode) {
         return createStyledButton(text, iconCode, PRIMARY_COLOR);
@@ -798,264 +571,8 @@ public class ReportViewSwing {
         return button;
     }
 
-    private void genererRapport(String type, List<?> donnees, String nomFichier) {
-        if (donnees == null) {
-            LOGGER.severe("Les données ne peuvent pas être null");
-            showErrorMessage("Erreur", "Données invalides pour la génération du rapport");
-            return;
-        }
-
-        try {
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            String typeLowerCase = type.toLowerCase().replace("é", "e");
-
-            switch (typeLowerCase) {
-                case "ventes":
-                    if (!(donnees.stream().allMatch(d -> d instanceof Vente))) {
-                        throw new IllegalArgumentException("Type de données incorrect pour le rapport des ventes");
-                    }
-                    reportController.genererRapportVentesPDF(
-                        dateDebut.atStartOfDay(),
-                        dateFin.atTime(23, 59, 59),
-                        outputStream
-                    );
-                    break;
-                case "stocks":
-                    if (!(donnees.stream().allMatch(d -> d instanceof Produit))) {
-                        throw new IllegalArgumentException("Type de données incorrect pour le rapport des stocks");
-                    }
-                    List<Produit> produits = (List<Produit>) donnees;
-                    Map<String, Double> statistiques = new HashMap<>();
-                    double valeurTotale = produits.stream()
-                        .mapToDouble(p -> p.getPrixAchat() * p.getQuantite())
-                        .sum();
-                    statistiques.put("Valeur totale du stock", valeurTotale);
-
-                    double moyenneQuantites = produits.stream()
-                        .mapToDouble(Produit::getQuantite)
-                        .average()
-                        .orElse(0.0);
-                    statistiques.put("Moyenne des quantités", moyenneQuantites);
-
-                    reportController.genererRapportStocksPDF(produits, statistiques, outputStream);
-                    break;
-                case "fournisseurs":
-                    if (!(donnees.stream().allMatch(d -> d instanceof Fournisseur))) {
-                        throw new IllegalArgumentException("Type de données incorrect pour le rapport des fournisseurs");
-                    }
-                    reportController.genererRapportFournisseursPDF(outputStream);
-                    break;
-                case "creances":
-                    if (!(donnees.stream().allMatch(d -> d instanceof Client))) {
-                        throw new IllegalArgumentException("Type de données incorrect pour le rapport des créances");
-                    }
-                    reportController.genererRapportCreancesPDF(outputStream);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Type de rapport inconnu: " + type);
-            }
-
-            // Afficher la prévisualisation
-            byte[] pdfData = PDFGenerator.getBytes(outputStream);
-            afficherPrevisualisation(pdfData);
-
-            // Sauvegarder le fichier
-            PDFGenerator.sauvegarderPDF(pdfData, nomFichier);
-            showSuccessMessage("Succès", MSG_SUCCES_GENERATION + nomFichier);
-
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport", e);
-            showErrorMessage("Erreur", MSG_ERREUR_GENERATION + e.getMessage());
-        }
-    }
-
-    private void afficherStatistiques() {
-        chartPanel.removeAll();
-        chartPanel.setLayout(new GridLayout(2, 2, 15, 15));
-
-        addStatPanel("Ventes", "Aujourd'hui: %.2f €\nCette semaine: %.2f €\nCe mois: %.2f €",
-            calculerVentesTotal(LocalDate.now(), LocalDate.now()),
-            calculerVentesTotal(LocalDate.now().minusWeeks(1), LocalDate.now()),
-            calculerVentesTotal(LocalDate.now().minusMonths(1), LocalDate.now())
-        );
-
-        addStatPanel("Stock", "Total produits: %d\nEn alerte: %d\nValeur totale: %.2f €",
-            getNombreProduits(),
-            getNombreProduitsEnAlerte(),
-            getValeurTotaleStock()
-        );
-
-        addStatPanel("Fournisseurs", "Total: %d\nCommandes en cours: %d",
-            getNombreFournisseurs(),
-            getCommandesEnCours()
-        );
-
-        addStatPanel("Performance", "Marge brute: %.2f %%\nRotation stock: %.1f jours",
-            calculerMargeBrute(),
-            calculerRotationStock()
-        );
-
-        chartPanel.revalidate();
-        chartPanel.repaint();
-    }
-
-    private void addStatPanel(String titre, String format, Object... args) {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(220, 220, 220)),
-            BorderFactory.createEmptyBorder(8, 12, 8, 12)
-        ));
-
-        JLabel titleLabel = new JLabel(titre);
-        titleLabel.setFont(SUBTITLE_FONT);
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 8, 0));
-
-        String formattedContent = String.format(format, args);
-        JTextArea contentArea = new JTextArea(formattedContent);
-        contentArea.setFont(REGULAR_FONT);
-        contentArea.setEditable(false);
-        contentArea.setBackground(panel.getBackground());
-        contentArea.setBorder(null);
-        contentArea.setLineWrap(true);
-        contentArea.setWrapStyleWord(true);
-
-        panel.add(titleLabel, BorderLayout.NORTH);
-        panel.add(contentArea, BorderLayout.CENTER);
-
-        statistiquesPanel.add(panel);
-    }
-
-    private void updateStatistiques() {
-        statistiquesPanel.removeAll();
-        statistiquesPanel.setLayout(new GridLayout(2, 2, 15, 15));
-
-        // Statistiques des ventes
-        addStatPanel("Ventes", 
-            "Aujourd'hui: %.2f €\nCette semaine: %.2f €\nCe mois: %.2f €",
-            calculerVentesTotal(LocalDate.now(), LocalDate.now()),
-            calculerVentesTotal(LocalDate.now().minusWeeks(1), LocalDate.now()),
-            calculerVentesTotal(LocalDate.now().minusMonths(1), LocalDate.now())
-        );
-
-        // Statistiques du stock
-        addStatPanel("Stock", 
-            "Total produits: %d\nEn alerte: %d\nValeur totale: %.2f €",
-            getNombreProduits(),
-            getNombreProduitsEnAlerte(),
-            getValeurTotaleStock()
-        );
-
-        // Statistiques des fournisseurs
-        addStatPanel("Fournisseurs", 
-            "Total: %d\nCommandes en cours: %d",
-            getNombreFournisseurs(),
-            getCommandesEnCours()
-        );
-
-        // Statistiques de performance
-        addStatPanel("Performance", 
-            "Marge brute: %.2f %%\nRotation stock: %.1f jours",
-            calculerMargeBrute(),
-            calculerRotationStock()
-        );
-
-        statistiquesPanel.revalidate();
-        statistiquesPanel.repaint();
-    }
-
-    private double calculerVentesTotal(LocalDate debut, LocalDate fin) {
-        try {
-            return venteController.getVentes().stream()
-                .filter(v -> !v.getDate().toLocalDate().isBefore(debut) && 
-                           !v.getDate().toLocalDate().isAfter(fin))
-                .mapToDouble(Vente::getTotal)
-                .sum();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du calcul des ventes", e);
-            return 0.0;
-        }
-    }
-
-    private int getNombreProduits() {
-        return produitController.getProduits().size();
-    }
-
-    private int getNombreProduitsEnAlerte() {
-        return (int) produitController.getProduits().stream()
-            .filter(p -> p.getQuantite() <= p.getSeuilAlerte())
-            .count();
-    }
-
-    private double getValeurTotaleStock() {
-        return produitController.getProduits().stream()
-            .mapToDouble(p -> p.getPrix() * p.getQuantite())
-            .sum();
-    }
-
-    private int getNombreFournisseurs() {
-        return fournisseurController.getFournisseurs().size();
-    }
-
-    private int getCommandesEnCours() {
-        // Pour l'instant, retourne une valeur fictive
-        return 0;
-    }
-
-    private double calculerMargeBrute() {
-        try {
-            double totalVentes = venteController.getVentes().stream()
-                .mapToDouble(Vente::getTotal)
-                .sum();
-            double totalCouts = venteController.getVentes().stream()
-                .flatMap(v -> v.getLignes().stream())
-                .mapToDouble(l -> l.getProduit().getPrixAchat() * l.getQuantite())
-                .sum();
-
-            return totalVentes > 0 ? ((totalVentes - totalCouts) / totalVentes) * 100 : 0.0;
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du calcul de la marge brute", e);
-            return 0.0;
-        }
-    }
-
-    private double calculerRotationStock() {
-        try {
-            double valeurStockMoyen = produitController.getProduits().stream()
-                .mapToDouble(p -> p.getPrixAchat() * p.getQuantite())
-                .average()
-                .orElse(0.0);
-
-            double coutVentesPeriode = venteController.getVentes().stream()
-                .flatMap(v -> v.getLignes().stream())
-                .mapToDouble(l -> l.getProduit().getPrixAchat() * l.getQuantite())
-                .sum();
-
-            return valeurStockMoyen > 0 ? (coutVentesPeriode / valeurStockMoyen) * 365 : 0.0;
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du calcul de la rotation du stock", e);
-            return 0.0;
-        }
-    }
-
-    private void ouvrirFichierPDF(String nomFichier) {
-        try {
-            File file = new File(nomFichier);
-            if (file.exists() && Desktop.isDesktopSupported()) {
-                Desktop.getDesktop().open(file);
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Impossible d'ouvrir le fichier PDF", e);
-            System.err.println("Impossible d'ouvrir le fichier : " + e.getMessage());
-        }
-    }
-
-    private void afficherMessageSuccess(String titre, String message) {
+    private void showInfoMessage(String titre, String message) {
         JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private void afficherMessageErreur(String titre, String message) {
-        JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.ERROR_MESSAGE);
     }
 
     private void afficherEtatCreances() {
@@ -1144,7 +661,7 @@ public class ReportViewSwing {
 
         table.getColumnModel().getColumn(3).setCellRenderer((TableCellRenderer) (table1, value, isSelected, hasFocus, row, column) -> {
             JButton button = new JButton("Détails");
-            button.setBackground(INFO_COLOR);
+            button.setBackground(PRIMARY_COLOR);
             button.setForeground(Color.WHITE);
             button.setFocusPainted(false);
             button.setBorderPainted(false);
@@ -1156,7 +673,7 @@ public class ReportViewSwing {
             public Component getTableCellEditorComponent(JTable table, Object value,
                     boolean isSelected, int row, int col) {
                 JButton button = new JButton("Détails");
-                button.setBackground(INFO_COLOR);
+                button.setBackground(PRIMARY_COLOR);
                 button.setForeground(Color.WHITE);
                 button.setFocusPainted(false);
                 button.setBorderPainted(false);
@@ -1179,7 +696,7 @@ public class ReportViewSwing {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 10, 10));
         JButton rapportGlobalBtn = createStyledButton("Rapport global des créances",
-            MaterialDesign.MDI_FILE_DOCUMENT, INFO_COLOR);
+            MaterialDesign.MDI_FILE_DOCUMENT, PRIMARY_COLOR);
         rapportGlobalBtn.addActionListener(e -> {
             genererRapport("creances", clientsAvecCreances,
                 "rapport_creances_global_" + LocalDate.now() + ".pdf");
@@ -1222,6 +739,7 @@ public class ReportViewSwing {
             handleError("génération du rapport global de créances", e);
         }
     }
+
 
 
     private void handleError(String operation, Exception e) {
@@ -1271,6 +789,12 @@ public class ReportViewSwing {
 
         return dialog;
     }
+    private JDialog previewDialog;
+    private JLabel previewLabel;
+    private PDDocument currentDocument;
+    private PDFRenderer pdfRenderer;
+    private int currentPage;
+
     private void afficherPrevisualisation(byte[] pdfData) {
         try {
             if (previewDialog == null) {
@@ -1279,7 +803,7 @@ public class ReportViewSwing {
                 previewDialog.setSize(800, 1000);
                 previewDialog.setLocationRelativeTo(null);
 
-                // Panel de navigation
+                                // Panel de navigation
                 JPanel navigationPanel = new JPanel(new FlowLayout());
                 JButton previousButton = createStyledButton("Précédent", MaterialDesign.MDI_CHEVRON_LEFT, PRIMARY_COLOR);
                 JButton nextButton = createStyledButton("Suivant", MaterialDesign.MDI_CHEVRON_RIGHT, PRIMARY_COLOR);

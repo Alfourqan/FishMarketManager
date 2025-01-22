@@ -1,0 +1,60 @@
+[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ gestion-poissonnerie ---
+[INFO] Changes detected - recompiling the module! :source
+[WARNING] File encoding has not been set, using platform encoding UTF-8, i.e. build is platform dependent!
+[INFO] Compiling 33 source files with javac [debug target 17] to target/classes
+[INFO] Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+[INFO] -------------------------------------------------------------
+[WARNING] COMPILATION WARNING : 
+[INFO] -------------------------------------------------------------
+[WARNING] system modules path not set in conjunction with -source 17
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[561,77] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[574,78] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[616,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[619,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[517,33] unchecked call to setValue(K,java.lang.Number) as a member of the raw type org.jfree.data.general.DefaultPieDataset
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[548,33] unchecked call to setValue(K,java.lang.Number) as a member of the raw type org.jfree.data.general.DefaultPieDataset
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[827,62] unchecked cast
+  required: java.util.List<com.poissonnerie.model.Produit>
+  found:    java.util.List<capture#1 of ?>
+[INFO] 8 warnings 
+[INFO] -------------------------------------------------------------
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[47,57] incompatible types: java.util.Map<java.lang.String,java.lang.Object> cannot be converted to java.util.Map<java.lang.String,java.lang.Double>
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[126,27] method genererRapportFinancier in class com.poissonnerie.util.ExcelGenerator cannot be applied to given types;
+  required: java.util.Map<java.lang.String,java.lang.Double>,java.util.Map<java.lang.String,java.lang.Double>,java.util.Map<java.lang.String,java.lang.Double>,java.util.Map<java.lang.String,java.lang.Double>,java.lang.String
+  found:    java.util.Map<java.lang.String,java.lang.Double>,java.util.Map<java.lang.String,java.lang.Double>,java.lang.String
+  reason: actual and formal argument lists differ in length
+[INFO] 2 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  6.867 s
+[INFO] Finished at: 2025-01-22T21:21:07Z
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project gestion-poissonnerie: Compilation failure: Compilation failure: 
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[47,57] incompatible types: java.util.Map<java.lang.String,java.lang.Object> cannot be converted to java.util.Map<java.lang.String,java.lang.Double>
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[126,27] method genererRapportFinancier in class com.poissonnerie.util.ExcelGenerator cannot be applied to given types;
+[ERROR]   required: java.util.Map<java.lang.String,java.lang.Double>,java.util.Map<java.lang.String,java.lang.Double>,java.util.Map<java.lang.String,java.lang.Double>,java.util.Map<java.lang.String,java.lang.Double>,java.lang.String
+[ERROR]   found:    java.util.Map<java.lang.String,java.lang.Double>,java.util.Map<java.lang.String,java.lang.Double>,java.lang.String
+[ERROR]   reason: actual and formal argument lists differ in length
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
