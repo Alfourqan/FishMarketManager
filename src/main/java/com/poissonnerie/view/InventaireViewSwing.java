@@ -82,7 +82,7 @@ public class InventaireViewSwing {
         tableInventaire.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value,
-                    boolean isSelected, boolean hasFocus, int row, int column) {
+                                                           boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value,
                         isSelected, hasFocus, row, column);
                 if (!isSelected) {
@@ -113,14 +113,14 @@ public class InventaireViewSwing {
         header.setDefaultRenderer(new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value,
-                    boolean isSelected, boolean hasFocus, int row, int column) {
+                                                           boolean isSelected, boolean hasFocus, int row, int column) {
                 JLabel label = (JLabel) super.getTableCellRendererComponent(table, value,
                         isSelected, hasFocus, row, column);
 
                 label.setHorizontalAlignment(JLabel.LEFT);
                 label.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(51, 65, 85)),
-                    BorderFactory.createEmptyBorder(12, 16, 12, 16)
+                        BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(51, 65, 85)),
+                        BorderFactory.createEmptyBorder(12, 16, 12, 16)
                 ));
                 label.setFont(new Font("Segoe UI", Font.BOLD, 14));
                 label.setBackground(new Color(31, 41, 55));
@@ -158,7 +158,7 @@ public class InventaireViewSwing {
             public void onStockAjuste(Produit produit, int ancienStock, int nouveauStock) {
                 SwingUtilities.invokeLater(() -> {
                     String message = String.format("Stock ajusté pour %s : %d → %d",
-                        produit.getNom(), ancienStock, nouveauStock);
+                            produit.getNom(), ancienStock, nouveauStock);
                     updateStatus(message);
                     refreshTable();
                     updateStatistiques();
@@ -240,11 +240,11 @@ public class InventaireViewSwing {
 
         // Création des labels de statistiques avec style
         addStatLabel("Valeur totale du stock:",
-            String.format("%.2f €", stats.get("valeur_totale")));
+                String.format("%.2f €", stats.get("valeur_totale")));
         addStatLabel("Taux de rotation moyen:",
-            String.format("%.2f", stats.get("taux_rotation_moyen")));
+                String.format("%.2f", stats.get("taux_rotation_moyen")));
         addStatLabel("Produits en alerte:",
-            String.format("%.1f%%", stats.get("pourcentage_alerte")));
+                String.format("%.1f%%", stats.get("pourcentage_alerte")));
 
         statsPanel.revalidate();
         statsPanel.repaint();
@@ -276,9 +276,17 @@ public class InventaireViewSwing {
         historiqueBtn.addActionListener(e -> showHistoriqueDialog());
 
         searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void changedUpdate(javax.swing.event.DocumentEvent e) { filter(); }
-            public void removeUpdate(javax.swing.event.DocumentEvent e) { filter(); }
-            public void insertUpdate(javax.swing.event.DocumentEvent e) { filter(); }
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                filter();
+            }
+
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                filter();
+            }
+
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                filter();
+            }
         });
 
         categoryFilter.addActionListener(e -> filter());
@@ -309,8 +317,8 @@ public class InventaireViewSwing {
     }
 
     private void showHistoriqueDialog() {
-        JDialog dialog = new JDialog((Frame)SwingUtilities.getWindowAncestor(mainPanel),
-            "Historique des ajustements", true);
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel),
+                "Historique des ajustements", true);
         dialog.setLayout(new BorderLayout(10, 10));
 
         // Modèle de table pour l'historique
@@ -329,11 +337,11 @@ public class InventaireViewSwing {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
         for (AjustementStock ajustement : inventaireManager.getHistorique()) {
             historiqueModel.addRow(new Object[]{
-                ajustement.getDate().format(formatter),
-                ajustement.getProduit().getNom(),
-                ajustement.getAncienStock(),
-                ajustement.getNouveauStock(),
-                ajustement.getRaison()
+                    ajustement.getDate().format(formatter),
+                    ajustement.getProduit().getNom(),
+                    ajustement.getAncienStock(),
+                    ajustement.getNouveauStock(),
+                    ajustement.getRaison()
             });
         }
 
@@ -355,8 +363,8 @@ public class InventaireViewSwing {
     private void showAjustementDialog(Produit produit) {
         try {
             LOGGER.info("Ouverture du dialogue d'ajustement pour " + produit.getNom());
-            JDialog dialog = new JDialog((Frame)SwingUtilities.getWindowAncestor(mainPanel),
-                "Ajuster le stock", true);
+            JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel),
+                    "Ajuster le stock", true);
             dialog.setLayout(new BorderLayout(10, 10));
 
             JPanel formPanel = new JPanel(new GridBagLayout());
@@ -376,7 +384,8 @@ public class InventaireViewSwing {
             JLabel raisonLabel = new JLabel("Raison de l'ajustement:");
 
             // Layout
-            gbc.gridx = 0; gbc.gridy = 0;
+            gbc.gridx = 0;
+            gbc.gridy = 0;
             formPanel.add(stockActuelLabel, gbc);
             gbc.gridy = 1;
             formPanel.add(seuilLabel, gbc);
@@ -406,25 +415,63 @@ public class InventaireViewSwing {
                         raison = "Ajustement manuel";
                     }
 
-                    LOGGER.info("Tentative d'ajustement du stock de " + produit.getNom() + " de " + quantite);
-                    inventaireManager.ajusterStock(produit, quantite, raison);
-                    produitController.mettreAJourProduit(produit);
-                    LOGGER.info("Ajustement réussi pour " + produit.getNom());
+                    // Message de confirmation avec détails de l'ajustement
+                    String message = String.format(
+                            "Voulez-vous confirmer l'ajustement suivant ?\n\n" +
+                                    "Produit: %s\n" +
+                                    "Stock actuel: %d\n" +
+                                    "Ajustement: %s%d\n" +
+                                    "Nouveau stock prévu: %d\n" +
+                                    "Raison: %s",
+                            produit.getNom(),
+                            produit.getStock(),
+                            quantite >= 0 ? "+" : "",
+                            quantite,
+                            produit.getStock() + quantite,
+                            raison
+                    );
 
-                    dialog.dispose();
-                    refreshTable();
+                    int confirmation = JOptionPane.showConfirmDialog(
+                            dialog,
+                            message,
+                            "Confirmation d'ajustement",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.QUESTION_MESSAGE
+                    );
+
+                    if (confirmation == JOptionPane.YES_OPTION) {
+                        LOGGER.info("Tentative d'ajustement du stock de " + produit.getNom() + " de " + quantite);
+                        inventaireManager.ajusterStock(produit, quantite, raison);
+                        produitController.mettreAJourProduit(produit);
+                        LOGGER.info("Ajustement réussi pour " + produit.getNom());
+
+                        dialog.dispose();
+                        refreshTable();
+
+                        // Message de succès
+                        JOptionPane.showMessageDialog(
+                                mainPanel,
+                                String.format(
+                                        "Ajustement effectué avec succès\n" +
+                                                "Nouveau stock: %d",
+                                        produit.getStock()
+                                ),
+                                "Succès",
+                                JOptionPane.INFORMATION_MESSAGE
+                        );
+                    }
                 } catch (NumberFormatException ex) {
                     LOGGER.warning("Erreur de format de nombre: " + ex.getMessage());
                     JOptionPane.showMessageDialog(dialog,
-                        "Veuillez entrer un nombre valide",
-                        "Erreur",
-                        JOptionPane.ERROR_MESSAGE);
+                            "Veuillez entrer un nombre valide",
+                            "Erreur",
+                            JOptionPane.ERROR_MESSAGE);
                 } catch (Exception ex) {
                     LOGGER.log(Level.SEVERE, "Erreur lors de l'ajustement", ex);
                     JOptionPane.showMessageDialog(dialog,
-                        "Erreur lors de l'ajustement : " + ex.getMessage(),
-                        "Erreur",
-                        JOptionPane.ERROR_MESSAGE);
+                            "Erreur lors de l'ajustement : " + ex.getMessage(),
+                            "Erreur",
+                            JOptionPane.ERROR_MESSAGE);
                 }
             });
 
@@ -445,9 +492,9 @@ public class InventaireViewSwing {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de l'affichage du dialogue d'ajustement", e);
             JOptionPane.showMessageDialog(mainPanel,
-                "Erreur lors de l'ouverture du dialogue d'ajustement : " + e.getMessage(),
-                "Erreur",
-                JOptionPane.ERROR_MESSAGE);
+                    "Erreur lors de l'ouverture du dialogue d'ajustement : " + e.getMessage(),
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -465,6 +512,7 @@ public class InventaireViewSwing {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(color.darker());
             }
+
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 button.setBackground(color);
             }
@@ -489,11 +537,11 @@ public class InventaireViewSwing {
                 List<Produit> produits = produitController.getProduits();
                 for (Produit produit : produits) {
                     tableModel.addRow(new Object[]{
-                        produit.getNom(),
-                        produit.getCategorie(),
-                        produit.getStock(),
-                        produit.getSeuilAlerte(),
-                        "Ajuster" // Le bouton sera géré par le renderer/editor
+                            produit.getNom(),
+                            produit.getCategorie(),
+                            produit.getStock(),
+                            produit.getSeuilAlerte(),
+                            "Ajuster" // Le bouton sera géré par le renderer/editor
                     });
                 }
 
@@ -512,9 +560,9 @@ public class InventaireViewSwing {
                 LOGGER.log(Level.SEVERE, "Erreur lors du rafraîchissement de la table", e);
                 SwingUtilities.invokeLater(() -> {
                     JOptionPane.showMessageDialog(mainPanel,
-                        "Erreur lors du rafraîchissement de la table : " + e.getMessage(),
-                        "Erreur",
-                        JOptionPane.ERROR_MESSAGE);
+                            "Erreur lors du rafraîchissement de la table : " + e.getMessage(),
+                            "Erreur",
+                            JOptionPane.ERROR_MESSAGE);
                 });
             }
         });
@@ -528,7 +576,7 @@ public class InventaireViewSwing {
 
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
-                boolean isSelected, boolean hasFocus, int row, int column) {
+                                                      boolean isSelected, boolean hasFocus, int row, int column) {
             setText("Ajuster");
             setBackground(new Color(255, 165, 0));
             setForeground(Color.WHITE);
@@ -552,7 +600,7 @@ public class InventaireViewSwing {
 
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value,
-                boolean isSelected, int row, int column) {
+                                                    boolean isSelected, int row, int column) {
             button.setText("Ajuster");
             button.setBackground(new Color(255, 165, 0));
             button.setForeground(Color.WHITE);
@@ -613,9 +661,9 @@ public class InventaireViewSwing {
         } catch (Exception e) {
             updateStatus("Erreur: " + e.getMessage());
             JOptionPane.showMessageDialog(mainPanel,
-                "Erreur lors du chargement des données : " + e.getMessage(),
-                "Erreur",
-                JOptionPane.ERROR_MESSAGE);
+                    "Erreur lors du chargement des données : " + e.getMessage(),
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
