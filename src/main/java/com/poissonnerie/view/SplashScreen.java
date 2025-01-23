@@ -30,10 +30,11 @@ public class SplashScreen extends JWindow {
         buffer = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_ARGB);
 
         // Créer et configurer le panel principal
-        mainPanel = new JPanel(new BorderLayout()) {
+        mainPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
-                Graphics2D g2d = buffer.createGraphics();
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g.create();
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
@@ -49,25 +50,39 @@ public class SplashScreen extends JWindow {
                 drawWaterEffect(g2d);
 
                 // Titre principal avec effet de lueur amélioré
-                drawGlowingText(g2d, "Gestion Poissonnerie", 
-                              new Font("Segoe UI", Font.BOLD, 36),
-                              getWidth()/2, 80);
+                drawGlowingText(g2d, "Gestion Poissonnerie",
+                    new Font("Segoe UI", Font.BOLD, 36),
+                    getWidth()/2, 80);
 
                 // Sous-titre avec animation de fade
                 float alpha = (float)(Math.sin(rippleAnimation * 0.5) * 0.2 + 0.8);
                 g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
                 drawGlowingText(g2d, "Application de gestion commerciale",
-                              new Font("Segoe UI", Font.PLAIN, 18),
-                              getWidth()/2, 120);
+                    new Font("Segoe UI", Font.PLAIN, 18),
+                    getWidth()/2, 120);
                 g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.0f));
 
                 // Logo animé amélioré
                 drawAnimatedFishLogo(g2d, getWidth()/2, 180);
 
-                g2d.dispose();
+                // Création du panneau de progression personnalisé
+                int barWidth = getWidth() - 60;
+                int barHeight = 8;
+                int x = 30;
+                int y = getHeight() - barHeight - 30; // Positionnement de la barre en bas
 
-                // Dessiner le buffer sur le composant
-                g.drawImage(buffer, 0, 0, this);
+                // Fond de la barre
+                g2d.setColor(new Color(255, 255, 255, 30));
+                g2d.fillRoundRect(x, y, barWidth, barHeight, barHeight, barHeight);
+
+                // Barre de progression
+                if (progressBar != null && progressBar.getValue() > 0) {
+                    int fillWidth = (int)(barWidth * (progressBar.getValue() / 100.0));
+                    g2d.setColor(new Color(255, 255, 255, 220));
+                    g2d.fillRoundRect(x, y, fillWidth, barHeight, barHeight, barHeight);
+                }
+
+                g2d.dispose();
             }
 
             private void drawWaterEffect(Graphics2D g2d) {
@@ -193,38 +208,11 @@ public class SplashScreen extends JWindow {
         mainPanel.setOpaque(false);
         add(mainPanel);
 
-        // Configuration de la barre de progression améliorée
-        progressBar = new JProgressBar();
-        progressBar.setPreferredSize(new Dimension(WIDTH - 60, 8));
-        progressBar.setBackground(new Color(255, 255, 255, 30));
-        progressBar.setForeground(new Color(255, 255, 255, 220));
-        progressBar.setBorderPainted(false);
-        progressBar.setStringPainted(false);
+        // Initialisation de la barre de progression
+        progressBar = new JProgressBar(0, 100);
+        progressBar.setVisible(false); // On cache la barre native, on utilise uniquement sa valeur
 
-        // Style moderne pour la barre de progression
-        progressBar.setUI(new BasicProgressBarUI() {
-            @Override
-            protected void paintDeterminate(Graphics g, JComponent c) {
-                Graphics2D g2d = (Graphics2D) g;
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-                int w = progressBar.getWidth();
-                int h = progressBar.getHeight();
-                int filled = (int)((w - 2) * progressBar.getPercentComplete());
-
-                // Fond
-                g2d.setColor(progressBar.getBackground());
-                g2d.fillRoundRect(0, 0, w, h, h, h);
-
-                // Barre de progression
-                if (filled > 0) {
-                    g2d.setColor(progressBar.getForeground());
-                    g2d.fillRoundRect(0, 0, filled, h, h, h);
-                }
-            }
-        });
-
-        // Configuration du label de statut amélioré
+        // Configuration du label de statut
         statusLabel = new JLabel("Démarrage...", SwingConstants.CENTER);
         statusLabel.setForeground(new Color(255, 255, 255, 220));
         statusLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
@@ -234,11 +222,11 @@ public class SplashScreen extends JWindow {
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 30, 30, 30));
         bottomPanel.setOpaque(false);
         bottomPanel.add(statusLabel, BorderLayout.NORTH);
-        bottomPanel.add(progressBar, BorderLayout.SOUTH);
+        bottomPanel.add(new JPanel(), BorderLayout.SOUTH); // Placeholder to maintain layout
 
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
 
-        // Configuration de l'animation améliorée
+        // Configuration de l'animation
         animationTimer = new Timer(16, e -> {
             fishAnimation += 0.1f;
             rippleAnimation += 0.05f;
@@ -257,6 +245,7 @@ public class SplashScreen extends JWindow {
         SwingUtilities.invokeLater(() -> {
             progressBar.setValue(progress);
             statusLabel.setText(status);
+            mainPanel.repaint();
         });
     }
 
