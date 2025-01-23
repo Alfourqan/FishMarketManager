@@ -22,13 +22,31 @@ public class Main {
         System.setProperty("java.awt.headless", "false");
         System.setProperty("sun.java2d.opengl", "true");
 
+        // Configuration du logging
+        LOGGER.setLevel(Level.ALL);
         LOGGER.info("Démarrage de l'application...");
 
         try {
+            // Installation du thème avant toute création de composant Swing
+            SwingUtilities.invokeAndWait(() -> {
+                try {
+                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                    FlatMaterialLighterIJTheme.setup();
+                    LOGGER.info("Thème installé avec succès");
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors de l'installation du thème", e);
+                }
+            });
+
             // Affichage du splash screen
             SwingUtilities.invokeAndWait(() -> {
-                splash = new SplashScreen();
-                splash.setVisible(true);
+                try {
+                    splash = new SplashScreen();
+                    splash.setVisible(true);
+                    LOGGER.info("Splash screen affiché");
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors de l'affichage du splash screen", e);
+                }
             });
 
             // Initialisation de la base de données
@@ -43,8 +61,6 @@ public class Main {
             // Configuration de l'interface graphique
             SwingUtilities.invokeAndWait(() -> {
                 try {
-                    // Installation du thème
-                    FlatMaterialLighterIJTheme.setup();
                     configureUI();
                     updateSplashProgress(60, "Interface configurée");
 
