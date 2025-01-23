@@ -28,37 +28,62 @@ public class Main {
         LOGGER.setLevel(Level.ALL);
         LOGGER.info("Démarrage de l'application...");
 
-        try {
-            // S'assurer que le SplashScreen est créé et affiché immédiatement
-            splash = new SplashScreen();
-            splash.setVisible(true);
-            updateSplashProgress(5, "Initialisation de l'application...");
+        SwingUtilities.invokeLater(() -> {
+            try {
+                // Créer et afficher le SplashScreen immédiatement
+                splash = new SplashScreen();
+                splash.setVisible(true);
+                splash.toFront();
+                splash.requestFocus();
+                updateSplashProgress(0, "Démarrage de l'application...");
 
-            // Thread séparé pour les initialisations lourdes
-            SwingWorker<Void, Integer> worker = new SwingWorker<Void, Integer>() {
-                @Override
-                protected Void doInBackground() throws Exception {
-                    try {
-                        // Installation du thème
-                        publish(15);
-                        SwingUtilities.invokeAndWait(() -> {
-                            try {
-                                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                                FlatMaterialLighterIJTheme.setup();
-                                updateSplashProgress(15, "Thème installé");
-                                LOGGER.info("Thème installé avec succès");
-                            } catch (Exception e) {
-                                LOGGER.log(Level.SEVERE, "Erreur lors de l'installation du thème", e);
-                            }
-                        });
+                // Utiliser un SwingWorker pour les initialisations lourdes
+                SwingWorker<Void, Integer> worker = new SwingWorker<Void, Integer>() {
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        try {
+                            // Installation du thème
+                            publish(20);
+                            updateSplashProgress(20, "Installation du thème...");
+                            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                            FlatMaterialLighterIJTheme.setup();
+                            LOGGER.info("Thème installé avec succès");
 
-                        // Configuration de l'interface
-                        publish(25);
-                        SwingUtilities.invokeAndWait(() -> {
-                            try {
-                                configureUI();
-                                updateSplashProgress(25, "Interface configurée");
+                            // Configuration de l'interface
+                            publish(40);
+                            updateSplashProgress(40, "Configuration de l'interface...");
+                            configureUI();
+                            LOGGER.info("Interface configurée avec succès");
 
+                            // Initialisation de la base de données
+                            publish(60);
+                            updateSplashProgress(60, "Initialisation de la base de données...");
+                            DatabaseManager.initDatabase();
+                            LOGGER.info("Base de données initialisée avec succès");
+
+                            // Chargement des données de test
+                            publish(80);
+                            updateSplashProgress(80, "Chargement des données...");
+                            ClientController clientController = new ClientController();
+                            clientController.ajouterClientTest();
+                            LOGGER.info("Données de test chargées avec succès");
+
+                            return null;
+                        } catch (Exception e) {
+                            LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation", e);
+                            throw e;
+                        }
+                    }
+
+                    @Override
+                    protected void done() {
+                        try {
+                            get(); // Vérifier les exceptions
+                            updateSplashProgress(100, "Application prête !");
+
+                            // Créer l'écran de login
+                            loginView = new LoginView();
+                            loginView.addLoginSuccessListener(() -> {
                                 // Création de la fenêtre principale
                                 mainFrame = new JFrame("Gestion Poissonnerie");
                                 mainFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -89,102 +114,46 @@ public class Main {
                                     }
                                 });
 
-                                updateSplashProgress(35, "Interface principale préparée");
-                            } catch (Exception e) {
-                                LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de l'interface", e);
-                                showError("Erreur d'initialisation", e);
-                            }
-                        });
+                                mainFrame.setVisible(true);
+                                mainFrame.toFront();
+                                mainFrame.requestFocus();
+                                LOGGER.info("Interface principale affichée après authentification réussie");
+                            });
 
-                        // Initialisation de la base de données
-                        publish(45);
-                        updateSplashProgress(45, "Initialisation de la base de données...");
-                        DatabaseManager.initDatabase();
-                        updateSplashProgress(60, "Base de données initialisée");
-
-                        // Chargement des données de test
-                        publish(70);
-                        updateSplashProgress(70, "Chargement des données de test...");
-                        ClientController clientController = new ClientController();
-                        clientController.ajouterClientTest();
-                        updateSplashProgress(80, "Données de test chargées");
-
-                        // Préparation de l'authentification
-                        publish(90);
-                        updateSplashProgress(90, "Préparation de l'authentification...");
-                        SwingUtilities.invokeAndWait(() -> {
-                            try {
-                                // Création de l'écran de login
-                                loginView = new LoginView();
-                                loginView.addLoginSuccessListener(() -> {
-                                    mainFrame.setVisible(true);
-                                    mainFrame.toFront();
-                                    mainFrame.requestFocus();
-                                    LOGGER.info("Interface principale affichée après authentification réussie");
-                                });
-                            } catch (Exception e) {
-                                LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation du login", e);
-                                showError("Erreur d'initialisation", e);
-                            }
-                        });
-
-                        return null;
-                    } catch (Exception e) {
-                        LOGGER.log(Level.SEVERE, "Erreur fatale", e);
-                        showError("Erreur fatale", e);
-                        return null;
-                    }
-                }
-
-                @Override
-                protected void process(java.util.List<Integer> chunks) {
-                    // Mise à jour de la progression pendant l'exécution
-                    if (!chunks.isEmpty()) {
-                        int progress = chunks.get(chunks.size() - 1);
-                        updateSplashProgress(progress, "Chargement en cours...");
-                    }
-                }
-
-                @Override
-                protected void done() {
-                    try {
-                        get(); // Vérifier les exceptions
-                        updateSplashProgress(100, "Application prête !");
-
-                        // Attendre un peu avant de fermer le splash screen
-                        Timer timer = new Timer(2000, e -> {
-                            if (splash != null) {
-                                splash.dispose();
-                                splash = null;
-                            }
-                            if (loginView != null) {
+                            // Attendre un moment avant de fermer le splash et afficher le login
+                            Timer timer = new Timer(1500, e -> {
+                                if (splash != null) {
+                                    splash.dispose();
+                                    splash = null;
+                                }
                                 loginView.setVisible(true);
+                                loginView.toFront();
+                                loginView.requestFocus();
                                 LOGGER.info("Écran de login affiché avec succès");
-                            }
-                        });
-                        timer.setRepeats(false);
-                        timer.start();
-                    } catch (Exception e) {
-                        LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation", e);
-                        showError("Erreur d'initialisation", e);
+                            });
+                            timer.setRepeats(false);
+                            timer.start();
+
+                        } catch (Exception e) {
+                            LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation", e);
+                            showError("Erreur d'initialisation", e);
+                        }
                     }
-                }
-            };
+                };
 
-            worker.execute();
+                worker.execute();
 
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur fatale", e);
-            showError("Erreur fatale", e);
-        }
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Erreur fatale", e);
+                showError("Erreur fatale", e);
+            }
+        });
     }
 
     private static void updateSplashProgress(int progress, String message) {
-        SwingUtilities.invokeLater(() -> {
-            if (splash != null) {
-                splash.setProgress(progress, message);
-            }
-        });
+        if (splash != null) {
+            splash.setProgress(progress, message);
+        }
     }
 
     private static void showError(String title, Exception e) {
