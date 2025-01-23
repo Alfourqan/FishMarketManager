@@ -768,7 +768,7 @@ public class ConfigurationViewSwing {
         JButton sauvegarderBtn = createStyledButton("Sauvegarder", MaterialDesign.MDI_CONTENT_SAVE, new Color(76, 175, 80));
 
         // Création des boutons d'import/export
-        JButton importerBtn = createStyledButton("Importer", MaterialDesign.MDI_IMPORT, new Color(33, 150, 243));
+        JButton importerBtn = createStyledButton("Importer", MaterialDesign.MDI_IMPORT, new Color(33, 150,243));
         JButton exporterBtn = createStyledButton("Exporter", MaterialDesign.MDI_EXPORT, new Color(33, 150, 243));
 
         // Configuration des actions des boutons
@@ -1165,4 +1165,34 @@ public class ConfigurationViewSwing {
         return Arrays.stream(motifsSuspects)
             .anyMatch(motif -> inputLower.contains(motif.toLowerCase()));
     }
+    private void validateImageFile(File file) throws IOException {
+        if (!file.exists()) {
+            throw new IOException("Le fichier image n'existe pas");
+        }
+
+        String extension = Optional.of(file.getName())
+            .filter(f -> f.contains("."))
+            .map(f -> f.substring(f.lastIndexOf('.') + 1).toLowerCase())
+            .orElse("");
+
+        if (!FORMATS_IMAGE_AUTORISES.contains(extension)) {
+            throw new IOException("Format d'image non supporté. Formats acceptés : " +
+                String.join(", ", FORMATS_IMAGE_AUTORISES));
+        }
+
+        if (file.length() > TAILLE_MAX_LOGO) {
+            throw new IOException("L'image est trop volumineuse (max 1MB)");
+        }
+
+        BufferedImage image = ImageIO.read(file);
+        if (image == null) {
+            throw new IOException("Le fichier n'est pas une image valide");
+        }
+
+        // Vérification des dimensions
+        if (image.getWidth() > 1000 || image.getHeight() > 1000) {
+            throw new IOException("Les dimensions de l'image sont trop grandes (max 1000x1000)");
+        }
+    }
+
 }
