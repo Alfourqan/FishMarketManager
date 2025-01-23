@@ -773,46 +773,16 @@ public class ConfigurationViewSwing {
 
         // Configuration des actions des boutons
         actualiserBtn.addActionListener(e -> {
-            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             try {
+                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                 actualiserConfigurations();
             } finally {
                 setCursor(Cursor.getDefaultCursor());
             }
         });
 
-        reinitialiserBtn.addActionListener(e -> {
-            if (JOptionPane.showConfirmDialog(mainPanel,
-                "Êtes-vous sûr de vouloir réinitialiser toutes les configurations ?",
-                "Confirmation de réinitialisation",
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
-
-                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                try {
-                    controller.reinitialiserConfigurations();
-                    loadData();
-                    showSuccessMessage("Les configurations ont été réinitialisées avec succès");
-                    updatePreview();
-                } catch (Exception ex) {
-                    LOGGER.log(Level.SEVERE, "Erreur lors de la réinitialisation", ex);
-                    showErrorMessage("Erreur lors de la réinitialisation : " + ex.getMessage());
-                } finally {
-                    setCursor(Cursor.getDefaultCursor());
-                }
-            }
-        });
-
-        sauvegarderBtn.addActionListener(e -> {
-            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-            try {
-                sauvegarderConfigurations();
-                updatePreview();
-            } finally {
-                setCursor(Cursor.getDefaultCursor());
-            }
-        });
-
+        reinitialiserBtn.addActionListener(e -> reinitialiserConfigurations());
+        sauvegarderBtn.addActionListener(e -> sauvegarderConfigurations());
         importerBtn.addActionListener(e -> importerConfigurations());
         exporterBtn.addActionListener(e -> exporterConfigurations());
 
@@ -824,7 +794,6 @@ public class ConfigurationViewSwing {
         rightPanel.add(reinitialiserBtn);
         rightPanel.add(sauvegarderBtn);
 
-        // Assemblage final
         buttonPanel.add(leftPanel, BorderLayout.WEST);
         buttonPanel.add(rightPanel, BorderLayout.EAST);
 
@@ -835,8 +804,11 @@ public class ConfigurationViewSwing {
         try {
             controller.chargerConfigurations();
             loadData();
-            showSuccessMessage("Les configurations ont été actualisées avec succès");
             updatePreview();
+            JOptionPane.showMessageDialog(mainPanel,
+                "Configurations actualisées avec succès",
+                "Succès",
+                JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de l'actualisation des configurations", e);
             showErrorMessage("Erreur lors de l'actualisation : " + e.getMessage());
@@ -946,59 +918,74 @@ public class ConfigurationViewSwing {
 
     private void sauvegarderConfigurations() {
         try {
+            if (!validerChamps()) {
+                return;
+            }
+
             List<ConfigurationParam> configsToUpdate = new ArrayList<>();
             for (Map.Entry<String, JComponent> entry : champsSaisie.entrySet()) {
                 String cle = entry.getKey();
                 JComponent composant = entry.getValue();
-                String valeur = null;
+                String valeur = "";
 
                 if (composant instanceof JTextField) {
                     valeur = ((JTextField) composant).getText();
                 } else if (composant instanceof JTextArea) {
                     valeur = ((JTextArea) composant).getText();
-                } else if (composant instanceof JSpinner) {
-                    valeur = composant == champsSaisie.get(ConfigurationParam.CLE_TAUX_TVA) ?
-                            String.format("%.2f", ((JSpinner) composant).getValue()) :
-                            String.valueOf(((JSpinner) composant).getValue());
+                } else if (composant instanceof JComboBox) {
+                    valeur = ((JComboBox<?>) composant).getSelectedItem().toString();
                 } else if (composant instanceof JCheckBox) {
-                    valeur = String.valueOf(((JCheckBox) composant).isSelected());
-                } else if (composant instanceof JComboBox<?>) {
-                    @SuppressWarnings("unchecked")
-                    JComboBox<String> comboBox = (JComboBox<String>) composant;
-                    Object selectedItem = comboBox.getSelectedItem();
-                    valeur = selectedItem != null ? selectedItem.toString() : "";
+                    valeur = Boolean.toString(((JCheckBox) composant).isSelected());
+                } else if (composant instanceof JSpinner) {
+                    valeur = ((JSpinner) composant).getValue().toString();
                 }
 
-                if (valeur != null && !valeur.trim().isEmpty()) {
-                    try {
-                        valeur = ConfigurationParam.validateValeur(valeur, cle);
-                        configsToUpdate.add(new ConfigurationParam(0, cle, valeur, ""));
-                    } catch (IllegalArgumentException e) {
-                        throw new IllegalArgumentException("Erreur pour " + cle + ": " + e.getMessage());
-                    }
-                }
+                configsToUpdate.add(new ConfigurationParam(0, cle, valeur, ""));
             }
 
             controller.sauvegarderConfigurations(configsToUpdate);
-            showSuccessMessage("Les configurations ont été sauvegardées avec succès");
-            updatePreview();
+            JOptionPane.showMessageDialog(mainPanel,
+                "Configurations sauvegardées avec succès",
+                "Succès",
+                JOptionPane.INFORMATION_MESSAGE);
+
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la sauvegarde", e);
+            LOGGER.log(Level.SEVERE, "Erreur lors de la sauvegarde des configurations", e);
             showErrorMessage("Erreur lors de la sauvegarde : " + e.getMessage());
         }
     }
 
+    private void actualiserConfigurations() {
+        try {
+            controller.chargerConfigurations();
+            loadData();
+            updatePreview();
+            JOptionPane.showMessageDialog(mainPanel,
+                "Configurations actualisées avec succès",
+                "Succès",
+                JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'actualisation des configurations", e);
+            showErrorMessage("Erreur lors de l'actualisation : " + e.getMessage());
+        }
+    }
+
     private void reinitialiserConfigurations() {
-        if (JOptionPane.showConfirmDialog(mainPanel,
-            "Êtes-vous sûr de vouloir réinitialiser toutes les configurations ?",
+        int confirmation = JOptionPane.showConfirmDialog(mainPanel,
+            "Cette action réinitialisera toutes les configurations aux valeurs par défaut. Continuer ?",
             "Confirmation de réinitialisation",
             JOptionPane.YES_NO_OPTION,
-            JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+            JOptionPane.WARNING_MESSAGE);
 
+        if (confirmation == JOptionPane.YES_OPTION) {
             try {
                 controller.reinitialiserConfigurations();
                 loadData();
-                showSuccessMessage("Les configurations ont été réinitialisées avec succès");
+                updatePreview();
+                JOptionPane.showMessageDialog(mainPanel,
+                    "Configurations réinitialisées avec succès",
+                    "Succès",
+                    JOptionPane.INFORMATION_MESSAGE);
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Erreur lors de la réinitialisation des configurations", e);
                 showErrorMessage("Erreur lors de la réinitialisation : " + e.getMessage());
@@ -1075,51 +1062,6 @@ public class ConfigurationViewSwing {
             JOptionPane.ERROR_MESSAGE);
     }
 
-    private JButton createStyledButton(String text, MaterialDesign icon, Color color) {
-        JButton button = new JButton(text);
-        button.setFont(texteNormalFont);
-
-        FontIcon fontIcon = FontIcon.of(icon);
-        fontIcon.setIconSize(16);
-        fontIcon.setIconColor(color);
-        button.setIcon(fontIcon);
-
-        button.setBackground(Color.WHITE);
-        button.setForeground(color);
-        button.setFocusPainted(false);
-        button.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(color),
-            BorderFactory.createEmptyBorder(5, 10, 5, 10)
-        ));
-
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(color);
-                button.setForeground(Color.WHITE);
-                fontIcon.setIconColor(Color.WHITE);
-                button.setIcon(fontIcon);
-            }
-
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(Color.WHITE);
-                button.setForeground(color);
-                fontIcon.setIconColor(color);
-                button.setIcon(fontIcon);
-            }
-        });
-
-        return button;
-    }
-
-    private void styleTextField(JTextField textField) {
-        textField.setFont(texteNormalFont);
-        textField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200)),
-            BorderFactory.createEmptyBorder(5, 5, 5, 5)
-        ));
-    }
-
-
     private void validateImageFile(File file) throws IOException {
         if (!file.exists()) {
             throw new IOException("Le fichier image n'existe pas");
@@ -1144,7 +1086,6 @@ public class ConfigurationViewSwing {
             throw new IOException("Le fichier n'est pas une image valide");
         }
 
-        // Vérification des dimensions
         if (image.getWidth() > 1000 || image.getHeight() > 1000) {
             throw new IOException("Les dimensions de l'image sont trop grandes (max 1000x1000)");
         }
@@ -1157,103 +1098,56 @@ public class ConfigurationViewSwing {
     private boolean validerChamps() {
         List<String> erreurs = new ArrayList<>();
 
-        // Validation du taux de TVA
-        JSpinner tauxTVASpinner = (JSpinner) champsSaisie.get(ConfigurationParam.CLE_TAUX_TVA);
-        double tauxTVA = (double) tauxTVASpinner.getValue();
-        if (tauxTVA < 0 || tauxTVA > 100) {
-            erreurs.add("Le taux de TVA doit être compris entre 0 et 100");
-        }
-
-        // Validation du téléphone
-        JTextField telephoneField = (JTextField) champsSaisie.get(ConfigurationParam.CLE_TELEPHONE_ENTREPRISE);
-        String telephone = telephoneField.getText().trim();
-        if (!telephone.isEmpty() && !telephone.matches("^[+]?[(]?[0-9]{1,4}[)]?[-\\s./0-9]*$")) {
-            erreurs.add("Le numéro de téléphone contient des caractères invalides");
-        }
-
         // Validation du SIRET
-        JTextField siretField = (JTextField) champsSaisie.get(ConfigurationParam.CLE_SIRET_ENTREPRISE);
-        String siret = siretField.getText().trim();
-        if (!siret.isEmpty()) {
-            if (!siret.matches("^[0-9]{14}$")) {
-                erreurs.add("Le numéro SIRET doit contenir exactement 14 chiffres");
-            } else if (!validerCleSIRET(siret)) {
-                erreurs.add("Le numéro SIRET est invalide (erreur de clé de contrôle)");
+        String siret = ((JTextField) champsSaisie.get(ConfigurationParam.CLE_SIRET_ENTREPRISE)).getText();
+        if (!siret.isEmpty() && !siret.matches("\\d{14}")) {
+            erreurs.add("Le numéro SIRET doit contenir exactement 14 chiffres");
+        }
+
+        // Validation du numéro de téléphone
+        String telephone = ((JTextField) champsSaisie.get(ConfigurationParam.CLE_TELEPHONE_ENTREPRISE)).getText();
+        if (!telephone.isEmpty() && !telephone.matches("^[+]?\\d{10,15}$")) {
+            erreurs.add("Le numéro de téléphone doit contenir entre 10 et 15 chiffres");
+        }
+
+        // Validation de la TVA
+        if (((JCheckBox) champsSaisie.get(ConfigurationParam.CLE_TVA_ENABLED)).isSelected()) {
+            double tva = (double) ((JSpinner) champsSaisie.get(ConfigurationParam.CLE_TAUX_TVA)).getValue();
+            if (tva < 0 || tva > 100) {
+                erreurs.add("Le taux de TVA doit être compris entre 0 et 100");
             }
         }
 
-        // Validation du logo
-        JTextField logoPathField = (JTextField) champsSaisie.get(ConfigurationParam.CLE_LOGO_PATH);
-        String logoPath = logoPathField.getText().trim();
-        if (!logoPath.isEmpty()) {
-            try {
-                validateImageFile(new File(logoPath));
-            } catch (Exception e) {
-                erreurs.add(e.getMessage());
+        // Validation des champs texte pour les caractères spéciaux
+        for (Map.Entry<String, JComponent> entry : champsSaisie.entrySet()) {
+            JComponent composant = entry.getValue();
+            if (composant instanceof JTextField || composant instanceof JTextArea) {
+                String texte = composant instanceof JTextField ?
+                    ((JTextField) composant).getText() :
+                    ((JTextArea) composant).getText();
+
+                if (contientCaracteresSpeciaux(texte)) {
+                    erreurs.add("Les caractères spéciaux ne sont pas autorisés dans les champs de texte");
+                    break;
+                }
             }
         }
 
         if (!erreurs.isEmpty()) {
-            showErrorMessage(String.join("\n", erreurs));
+            showErrorMessage("Erreurs de validation :\n- " + String.join("\n- ", erreurs));
             return false;
         }
 
         return true;
     }
 
-    private boolean validerCleSIRET(String siret) {
-        try {
-            int[] chiffres = siret.chars()
-                .map(Character::getNumericValue)
-                .toArray();
-
-            int somme = 0;
-            for (int i = 0; i < 14; i++) {
-                int chiffre = chiffres[i];
-                if (i % 2 == 0) {
-                    chiffre *= 2;
-                    if (chiffre > 9) {
-                        chiffre -= 9;
-                    }
-                }
-                somme += chiffre;
-            }
-
-            return somme % 10 == 0;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    private boolean showConfirmDialog(String message) {
-        return JOptionPane.showConfirmDialog(mainPanel,
-            message,
-            "Confirmation",
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION;
-    }
-
-    private String sanitizeInput(String input) {
-        if (input == null) return "";
-
-        return input.replaceAll("[<>\"'%;)(&+\\x\\u]", "")
-            .replaceAll("(?i)javascript:", "")
-            .replaceAll("(?i)data:", "")
-            .replaceAll("&#", "&amp;#")
-            .trim()
-            .replaceAll("\\s+", " ");
-    }
-
-    private boolean contientCodeMalveillant(String input) {
-        if (input == null) return false;
-
+    private boolean contientCaracteresSpeciaux(String input) {
         String[] motifsSuspects = {
-            "<script", "javascript:", "onerror=", "onload=", "onclick=",
-            "data:text/html", "data:text/javascript", "&#", "\\x", "\\u",
-            "expression(", "document.cookie", "eval(", "fromCharCode",
-            "parseInt", "String.fromCharCode"
+            "<script>", "javascript:", "vbscript:",
+            "onload=", "onerror=", "onclick=",
+            "data:", "file:", "ftp:", "http:", "https:",
+            "%00", "\\x00", "\\u0000"
         };
-
         String inputLower = input.toLowerCase();
         return Arrays.stream(motifsSuspects)
             .anyMatch(motif -> inputLower.contains(motif.toLowerCase()));
