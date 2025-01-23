@@ -45,10 +45,12 @@ public class AuthenticationController {
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(
                  "INSERT INTO users (username, password, role) VALUES (?, ?, 'ADMIN')")) {
+            String hashedPassword = hashPassword("admin"); // Hash le mot de passe par défaut
+            LOGGER.info("Création de l'utilisateur admin avec mot de passe hashé");
             stmt.setString(1, "admin");
-            stmt.setString(2, hashPassword("admin"));
+            stmt.setString(2, hashedPassword);
             stmt.executeUpdate();
-            LOGGER.info("Utilisateur administrateur par défaut créé");
+            LOGGER.info("Utilisateur administrateur par défaut créé avec succès");
         } catch (SQLException | NoSuchAlgorithmException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la création de l'admin par défaut", e);
             throw new RuntimeException("Erreur de création de l'admin par défaut", e);
@@ -65,6 +67,7 @@ public class AuthenticationController {
              PreparedStatement stmt = conn.prepareStatement(
                  "SELECT password, active FROM users WHERE username = ?")) {
             stmt.setString(1, username.trim());
+            LOGGER.info("Tentative d'authentification pour l'utilisateur: " + username);
 
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
@@ -74,26 +77,30 @@ public class AuthenticationController {
                     return false;
                 }
 
-                String hashedPassword = rs.getString("password");
-                boolean authenticated = hashedPassword.equals(hashPassword(password));
+                String storedHashedPassword = rs.getString("password");
+                String providedHashedPassword = hashPassword(password);
+                boolean authenticated = storedHashedPassword.equals(providedHashedPassword);
 
-                // Mettre à jour la date de dernière connexion si authentifié
+                LOGGER.info("Comparaison des mots de passe pour " + username + 
+                          "\nStored hash: " + storedHashedPassword.substring(0, 10) + "..." +
+                          "\nProvided hash: " + providedHashedPassword.substring(0, 10) + "...");
+
                 if (authenticated) {
                     updateLastLogin(conn, username);
                     LOGGER.info("Authentification réussie pour l'utilisateur: " + username);
                 } else {
-                    LOGGER.warning("Échec d'authentification pour l'utilisateur: " + username);
+                    LOGGER.warning("Échec d'authentification pour l'utilisateur: " + username + " (mot de passe incorrect)");
                 }
 
                 return authenticated;
+            } else {
+                LOGGER.warning("Utilisateur non trouvé: " + username);
+                return false;
             }
         } catch (SQLException | NoSuchAlgorithmException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de l'authentification", e);
             return false;
         }
-
-        LOGGER.warning("Utilisateur non trouvé: " + username);
-        return false;
     }
 
     private void updateLastLogin(Connection conn, String username) throws SQLException {
@@ -102,6 +109,7 @@ public class AuthenticationController {
             stmt.setLong(1, Instant.now().toEpochMilli());
             stmt.setString(2, username);
             stmt.executeUpdate();
+            LOGGER.info("Mise à jour de la dernière connexion pour: " + username);
         }
     }
 

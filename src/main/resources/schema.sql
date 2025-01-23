@@ -103,6 +103,7 @@ INSERT OR IGNORE INTO configurations (cle, valeur, description) VALUES
 ('INFO_SUPPLEMENTAIRE_RECU', '', 'Informations supplémentaires sur le reçu');
 
 -- Ajout de la table pour la gestion des utilisateurs
+DROP TABLE IF EXISTS users;
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
@@ -116,7 +117,3 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Index pour optimiser les recherches sur le nom d'utilisateur
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
-
--- Insertion d'un utilisateur administrateur par défaut si la table est vide
-INSERT OR IGNORE INTO users (username, password, role) 
-VALUES ('admin', 'admin', 'ADMIN');
