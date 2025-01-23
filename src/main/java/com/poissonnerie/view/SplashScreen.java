@@ -35,10 +35,8 @@ public class SplashScreen extends JWindow {
 
                 // Fond avec dégradé dynamique
                 GradientPaint gradient = new GradientPaint(
-                    0, 0, new Color(primaryColor.getRed(), primaryColor.getGreen(), 
-                                  primaryColor.getBlue(), 255),
-                    getWidth(), getHeight(), new Color(secondaryColor.getRed(), 
-                                  secondaryColor.getGreen(), secondaryColor.getBlue(), 255)
+                    0, 0, primaryColor,
+                    getWidth(), getHeight(), secondaryColor
                 );
                 g2d.setPaint(gradient);
                 g2d.fill(new RoundRectangle2D.Double(0, 0, getWidth(), getHeight(), 20, 20));
@@ -150,13 +148,12 @@ public class SplashScreen extends JWindow {
                 double offset = Math.sin(x/100.0 + rippleAnimation) * 
                               Math.cos(y/100.0 + rippleAnimation) * 5;
 
-                Color rippleColor = new Color(
-                    Math.min(255, primaryColor.getRed() + (int)(offset * 3)),
-                    Math.min(255, primaryColor.getGreen() + (int)(offset * 3)),
-                    Math.min(255, primaryColor.getBlue() + (int)(offset * 3)),
-                    50
-                );
+                // Calcul sécurisé des composantes de couleur
+                int red = Math.min(255, Math.max(0, primaryColor.getRed() + (int)(offset * 3)));
+                int green = Math.min(255, Math.max(0, primaryColor.getGreen() + (int)(offset * 3)));
+                int blue = Math.min(255, Math.max(0, primaryColor.getBlue() + (int)(offset * 3)));
 
+                Color rippleColor = new Color(red, green, blue, 50);
                 g2d.setColor(rippleColor);
                 g2d.fillRect((int)x, (int)y, cellWidth + 1, cellHeight + 1);
             }
