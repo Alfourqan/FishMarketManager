@@ -12,6 +12,7 @@ import java.util.logging.Level;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import com.poissonnerie.controller.ClientController;
+import javax.swing.Timer;
 
 public class Main {
     private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
@@ -29,42 +30,30 @@ public class Main {
         LOGGER.info("Démarrage de l'application...");
 
         try {
-            // Installation du thème avant toute création de composant Swing
+            // Affichage du splash screen en premier
+            SwingUtilities.invokeLater(() -> {
+                splash = new SplashScreen();
+                splash.setVisible(true);
+                updateSplashProgress(5, "Initialisation de l'application...");
+            });
+
+            // Installation du thème
             SwingUtilities.invokeAndWait(() -> {
                 try {
                     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
                     FlatMaterialLighterIJTheme.setup();
+                    updateSplashProgress(15, "Thème installé");
                     LOGGER.info("Thème installé avec succès");
                 } catch (Exception e) {
                     LOGGER.log(Level.SEVERE, "Erreur lors de l'installation du thème", e);
                 }
             });
 
-            // Affichage du splash screen
-            SwingUtilities.invokeAndWait(() -> {
-                try {
-                    splash = new SplashScreen();
-                    splash.setVisible(true);
-                    LOGGER.info("Splash screen affiché");
-                } catch (Exception e) {
-                    LOGGER.log(Level.SEVERE, "Erreur lors de l'affichage du splash screen", e);
-                }
-            });
-
-            // Initialisation de la base de données
-            DatabaseManager.initDatabase();
-            updateSplashProgress(30, "Base de données initialisée");
-
-            // Ajout d'un client test avec créance pour le développement
-            ClientController clientController = new ClientController();
-            clientController.ajouterClientTest();
-            updateSplashProgress(40, "Données de test ajoutées");
-
             // Configuration de l'interface graphique
             SwingUtilities.invokeAndWait(() -> {
                 try {
                     configureUI();
-                    updateSplashProgress(60, "Interface configurée");
+                    updateSplashProgress(25, "Interface configurée");
 
                     // Création de la fenêtre principale (mais pas encore affichée)
                     mainFrame = new JFrame("Gestion Poissonnerie");
@@ -80,6 +69,7 @@ public class Main {
                     // Ajout du contenu
                     MainViewSwing mainView = new MainViewSwing();
                     mainFrame.setContentPane(mainView.getMainPanel());
+                    updateSplashProgress(35, "Interface principale préparée");
 
                     // Gestion de la fermeture
                     mainFrame.addWindowListener(new WindowAdapter() {
@@ -95,17 +85,29 @@ public class Main {
                             }
                         }
                     });
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de l'interface", e);
+                    showError("Erreur d'initialisation", e);
+                }
+            });
 
-                    updateSplashProgress(90, "Interface principale créée");
+            // Initialisation de la base de données
+            updateSplashProgress(45, "Initialisation de la base de données...");
+            DatabaseManager.initDatabase();
+            updateSplashProgress(60, "Base de données initialisée");
 
-                    // Fermeture du splash screen et affichage de l'écran de login
-                    if (splash != null) {
-                        splash.dispose();
-                    }
+            // Ajout d'un client test avec créance pour le développement
+            updateSplashProgress(70, "Chargement des données de test...");
+            ClientController clientController = new ClientController();
+            clientController.ajouterClientTest();
+            updateSplashProgress(80, "Données de test chargées");
 
-                    // Création et affichage de l'écran de login
+            // Préparation de l'authentification
+            updateSplashProgress(90, "Préparation de l'authentification...");
+            SwingUtilities.invokeLater(() -> {
+                try {
+                    // Création de l'écran de login (mais pas encore affiché)
                     loginView = new LoginView();
-                    loginView.setVisible(true);
                     loginView.addLoginSuccessListener(() -> {
                         // Quand le login réussit, on affiche la fenêtre principale
                         mainFrame.setVisible(true);
@@ -114,8 +116,19 @@ public class Main {
                         LOGGER.info("Interface principale affichée après authentification réussie");
                     });
 
-                    LOGGER.info("Écran de login affiché avec succès");
+                    updateSplashProgress(100, "Application prête !");
 
+                    // Attendre un peu pour montrer le 100%
+                    Timer timer = new Timer(500, e -> {
+                        // Fermer le splash screen et afficher le login
+                        if (splash != null) {
+                            splash.dispose();
+                        }
+                        loginView.setVisible(true);
+                        LOGGER.info("Écran de login affiché avec succès");
+                    });
+                    timer.setRepeats(false);
+                    timer.start();
                 } catch (Exception e) {
                     LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de l'interface", e);
                     showError("Erreur d'initialisation", e);
