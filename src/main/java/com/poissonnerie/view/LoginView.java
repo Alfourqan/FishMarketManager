@@ -9,6 +9,13 @@ import java.awt.event.KeyAdapter;
 import org.kordamp.ikonli.materialdesign.MaterialDesign;
 import org.kordamp.ikonli.swing.FontIcon;
 import com.poissonnerie.controller.AuthenticationController;
+import java.util.ArrayList;
+import java.util.List;
+
+@FunctionalInterface
+public interface LoginSuccessListener {
+    void onLoginSuccess();
+}
 
 public class LoginView extends JFrame {
     private JTextField usernameField;
@@ -16,15 +23,33 @@ public class LoginView extends JFrame {
     private JButton loginButton;
     private JLabel statusLabel;
     private final AuthenticationController authController;
+    private final List<LoginSuccessListener> loginSuccessListeners;
 
     public LoginView() {
         authController = AuthenticationController.getInstance();
+        loginSuccessListeners = new ArrayList<>();
         setTitle("Connexion - Application Poissonnerie");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
         initializeComponents();
         pack();
         setLocationRelativeTo(null);
+    }
+
+    public void addLoginSuccessListener(LoginSuccessListener listener) {
+        if (listener != null) {
+            loginSuccessListeners.add(listener);
+        }
+    }
+
+    public void removeLoginSuccessListener(LoginSuccessListener listener) {
+        loginSuccessListeners.remove(listener);
+    }
+
+    private void fireLoginSuccess() {
+        for (LoginSuccessListener listener : loginSuccessListeners) {
+            listener.onLoginSuccess();
+        }
     }
 
     private void initializeComponents() {
@@ -166,13 +191,7 @@ public class LoginView extends JFrame {
             // Ouvrir la fenêtre principale après un court délai
             Timer timer = new Timer(1000, e -> {
                 dispose(); // Ferme la fenêtre de login
-                MainViewSwing mainView = new MainViewSwing();
-                JFrame frame = new JFrame("Gestion Poissonnerie");
-                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                frame.setContentPane(mainView.getMainPanel());
-                frame.setSize(1200, 800);
-                frame.setLocationRelativeTo(null);
-                frame.setVisible(true);
+                fireLoginSuccess(); // Notifie les listeners
             });
             timer.setRepeats(false);
             timer.start();

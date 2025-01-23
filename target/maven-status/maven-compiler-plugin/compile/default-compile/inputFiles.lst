@@ -1,13 +1,16 @@
 /home/runner/workspace/src/main/java/com/poissonnerie/view/ClientViewSwing.java
 /home/runner/workspace/src/main/java/com/poissonnerie/model/Fournisseur.java
+/home/runner/workspace/src/main/java/com/poissonnerie/controller/AuthenticationController.java
 /home/runner/workspace/src/main/java/com/poissonnerie/view/ProduitViewSwing.java
 /home/runner/workspace/src/main/java/com/poissonnerie/controller/model/Vente.java
+/home/runner/workspace/src/main/java/com/poissonnerie/view/LoginView.java
 /home/runner/workspace/src/main/java/com/poissonnerie/model/Produit.java
 /home/runner/workspace/src/main/java/com/poissonnerie/view/InventaireViewSwing.java
 /home/runner/workspace/src/main/java/com/poissonnerie/model/InventaireManager.java
 /home/runner/workspace/src/main/java/com/poissonnerie/view/FournisseurViewSwing.java
 /home/runner/workspace/src/main/java/com/poissonnerie/view/MainViewSwing.java
 /home/runner/workspace/src/main/java/com/poissonnerie/model/Client.java
+/home/runner/workspace/src/main/java/com/poissonnerie/model/Utilisateur.java
 /home/runner/workspace/src/main/java/com/poissonnerie/view/AccueilViewSwing.java
 /home/runner/workspace/src/main/java/com/poissonnerie/controller/ProduitController.java
 /home/runner/workspace/src/main/java/com/poissonnerie/controller/CaisseController.java
