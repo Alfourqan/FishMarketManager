@@ -92,6 +92,25 @@ public class ConfigurationViewSwing {
         worker.execute();
     }
 
+    // Méthodes d'initialisation des composants ComboBox
+    private JComboBox<String> createFormatRecuComboBox() {
+        JComboBox<String> comboBox = new JComboBox<>(new String[]{"COMPACT", "DETAILLE"});
+        champsSaisie.put(ConfigurationParam.CLE_FORMAT_RECU, comboBox);
+        return comboBox;
+    }
+
+    private JComboBox<String> createBordureRecuComboBox() {
+        JComboBox<String> comboBox = new JComboBox<>(new String[]{"SIMPLE", "DOUBLE", "POINTILLES"});
+        champsSaisie.put(ConfigurationParam.CLE_STYLE_BORDURE_RECU, comboBox);
+        return comboBox;
+    }
+
+    private JComboBox<String> createAlignementComboBox(String key) {
+        JComboBox<String> comboBox = new JComboBox<>(new String[]{"GAUCHE", "CENTRE", "DROITE"});
+        champsSaisie.put(key, comboBox);
+        return comboBox;
+    }
+
     private void initializeFields() {
         // Initialisation des champs de base
         champsSaisie.put(ConfigurationParam.CLE_NOM_ENTREPRISE, new JTextField());
@@ -111,10 +130,11 @@ public class ConfigurationViewSwing {
         champsSaisie.put(ConfigurationParam.CLE_TAUX_TVA, tauxTvaSpinner);
 
         // Options de mise en page
-        champsSaisie.put(ConfigurationParam.CLE_FORMAT_RECU, new JComboBox<>(new String[]{"COMPACT", "DETAILLE"}));
-        champsSaisie.put(ConfigurationParam.CLE_STYLE_BORDURE_RECU, new JComboBox<>(new String[]{"SIMPLE", "DOUBLE", "POINTILLES"}));
-        champsSaisie.put(ConfigurationParam.CLE_ALIGNEMENT_TITRE_RECU, new JComboBox<>(new String[]{"GAUCHE", "CENTRE", "DROITE"}));
-        champsSaisie.put(ConfigurationParam.CLE_ALIGNEMENT_TEXTE_RECU, new JComboBox<>(new String[]{"GAUCHE", "CENTRE", "DROITE"}));
+        createFormatRecuComboBox();
+        createBordureRecuComboBox();
+        createAlignementComboBox(ConfigurationParam.CLE_ALIGNEMENT_TITRE_RECU);
+        createAlignementComboBox(ConfigurationParam.CLE_ALIGNEMENT_TEXTE_RECU);
+
         champsSaisie.put(ConfigurationParam.CLE_POLICE_TITRE_RECU, new JSpinner(new SpinnerNumberModel(14, 8, 24, 1)));
         champsSaisie.put(ConfigurationParam.CLE_POLICE_TEXTE_RECU, new JSpinner(new SpinnerNumberModel(12, 8, 20, 1)));
         champsSaisie.put(ConfigurationParam.CLE_AFFICHER_TVA_DETAILS, new JCheckBox("Afficher les détails de TVA"));
@@ -731,22 +751,30 @@ public class ConfigurationViewSwing {
     }
 
     private JPanel createButtonPanel() {
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        JPanel buttonPanel = new JPanel(new BorderLayout());
         buttonPanel.setOpaque(false);
 
-        // Création des boutons principaux
+        // Panel gauche pour les boutons d'import/export
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        leftPanel.setOpaque(false);
+
+        // Panel droit pour les boutons principaux
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        rightPanel.setOpaque(false);
+
+        // Création des boutons principaux avec leurs icônes et couleurs
         JButton actualiserBtn = createStyledButton("Actualiser", MaterialDesign.MDI_REFRESH, couleurPrincipale);
         JButton reinitialiserBtn = createStyledButton("Réinitialiser", MaterialDesign.MDI_RESTORE, new Color(244, 67, 54));
         JButton sauvegarderBtn = createStyledButton("Sauvegarder", MaterialDesign.MDI_CONTENT_SAVE, new Color(76, 175, 80));
 
         // Création des boutons d'import/export
-        JButton exporterBtn = createStyledButton("Exporter", MaterialDesign.MDI_EXPORT, new Color(33, 150, 243));
         JButton importerBtn = createStyledButton("Importer", MaterialDesign.MDI_IMPORT, new Color(33, 150, 243));
+        JButton exporterBtn = createStyledButton("Exporter", MaterialDesign.MDI_EXPORT, new Color(33, 150, 243));
 
         // Configuration des actions des boutons
         actualiserBtn.addActionListener(e -> {
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
             try {
-                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
                 actualiserConfigurations();
             } finally {
                 setCursor(Cursor.getDefaultCursor());
@@ -754,44 +782,229 @@ public class ConfigurationViewSwing {
         });
 
         reinitialiserBtn.addActionListener(e -> {
-            try {
+            if (JOptionPane.showConfirmDialog(mainPanel,
+                "Êtes-vous sûr de vouloir réinitialiser toutes les configurations ?",
+                "Confirmation de réinitialisation",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+
                 setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                reinitialiserConfigurations();
-            } finally {
-                setCursor(Cursor.getDefaultCursor());
+                try {
+                    controller.reinitialiserConfigurations();
+                    loadData();
+                    showSuccessMessage("Les configurations ont été réinitialisées avec succès");
+                    updatePreview();
+                } catch (Exception ex) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors de la réinitialisation", ex);
+                    showErrorMessage("Erreur lors de la réinitialisation : " + ex.getMessage());
+                } finally {
+                    setCursor(Cursor.getDefaultCursor());
+                }
             }
         });
 
         sauvegarderBtn.addActionListener(e -> {
-            try {                setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-                if (validerChamps()) {
-                    sauvegarderConfigurations();
-                }
+            setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+            try {
+                sauvegarderConfigurations();
+                updatePreview();
             } finally {
                 setCursor(Cursor.getDefaultCursor());
             }
         });
 
-        exporterBtn.addActionListener(e -> exporterConfigurations());
         importerBtn.addActionListener(e -> importerConfigurations());
+        exporterBtn.addActionListener(e -> exporterConfigurations());
 
-        // Ajout des boutons au panel avec séparateur
-        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        leftPanel.setOpaque(false);
-        leftPanel.add(exporterBtn);
+        // Ajout des boutons aux panels
         leftPanel.add(importerBtn);
+        leftPanel.add(exporterBtn);
 
-        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        rightPanel.setOpaque(false);
         rightPanel.add(actualiserBtn);
         rightPanel.add(reinitialiserBtn);
         rightPanel.add(sauvegarderBtn);
 
-        buttonPanel.setLayout(new BorderLayout());
+        // Assemblage final
         buttonPanel.add(leftPanel, BorderLayout.WEST);
         buttonPanel.add(rightPanel, BorderLayout.EAST);
 
         return buttonPanel;
+    }
+
+    private void actualiserConfigurations() {
+        try {
+            controller.chargerConfigurations();
+            loadData();
+            showSuccessMessage("Les configurations ont été actualisées avec succès");
+            updatePreview();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'actualisation des configurations", e);
+            showErrorMessage("Erreur lors de l'actualisation : " + e.getMessage());
+        }
+    }
+
+    private void showSuccessMessage(String message) {
+        SwingUtilities.invokeLater(() -> {
+            JOptionPane.showMessageDialog(mainPanel,
+                message,
+                "Succès",
+                JOptionPane.INFORMATION_MESSAGE);
+        });
+    }
+
+    private void showErrorMessage(String message) {
+        SwingUtilities.invokeLater(() -> {
+            JOptionPane.showMessageDialog(mainPanel,
+                message,
+                "Erreur",
+                JOptionPane.ERROR_MESSAGE);
+        });
+    }
+
+    private void loadData() {
+        try {
+            Map<String, String> configurations = controller.getConfigurations();
+
+            for (Map.Entry<String, String> entry : configurations.entrySet()) {
+                String cle = entry.getKey();
+                String valeur = entry.getValue();
+                JComponent composant = champsSaisie.get(cle);
+
+                if (composant != null) {
+                    if (composant instanceof JTextField) {
+                        ((JTextField) composant).setText(valeur);
+                    } else if (composant instanceof JTextArea) {
+                        ((JTextArea) composant).setText(valeur);
+                    } else if (composant instanceof JSpinner) {
+                        try {
+                            if (cle.equals(ConfigurationParam.CLE_TAUX_TVA)) {
+                                ((JSpinner) composant).setValue(Double.parseDouble(valeur));
+                            } else {
+                                ((JSpinner) composant).setValue(Integer.parseInt(valeur));
+                            }
+                        } catch (NumberFormatException e) {
+                            LOGGER.warning("Valeur invalide pour le spinner " + cle + ": " + valeur);
+                            // Utiliser une valeur par défaut selon le type
+                            if (cle.equals(ConfigurationParam.CLE_TAUX_TVA)) {
+                                ((JSpinner) composant).setValue(20.0);
+                            } else {
+                                ((JSpinner) composant).setValue(12);
+                            }
+                        }
+                    } else if (composant instanceof JCheckBox) {
+                        ((JCheckBox) composant).setSelected(Boolean.parseBoolean(valeur));
+                    } else if (composant instanceof JComboBox<?>) {
+                        @SuppressWarnings("unchecked")
+                        JComboBox<String> comboBox = (JComboBox<String>) composant;
+                        comboBox.setSelectedItem(valeur != null ? valeur : comboBox.getItemAt(0));
+                    }
+                }
+            }
+
+            updatePreview();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors du chargement des données", e);
+            showErrorMessage("Erreur lors du chargement des données: " + e.getMessage());
+        }
+    }
+
+    private JButton createStyledButton(String text, MaterialDesign icon, Color color) {
+        JButton button = new JButton(text);
+        button.setFont(texteNormalFont);
+
+        FontIcon fontIcon = FontIcon.of(icon);
+        fontIcon.setIconSize(16);
+        fontIcon.setIconColor(Color.WHITE);
+        button.setIcon(fontIcon);
+
+        button.setForeground(Color.WHITE);
+        button.setBackground(color);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setOpaque(true);
+        button.setMargin(new Insets(8, 15, 8, 15));
+
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(color.darker());
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(color);
+            }
+        });
+
+        return button;
+    }
+
+    private void styleTextField(JTextField textField) {
+        textField.setFont(texteNormalFont);
+        textField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+    }
+
+
+    private void sauvegarderConfigurations() {
+        try {
+            List<ConfigurationParam> configsToUpdate = new ArrayList<>();
+            for (Map.Entry<String, JComponent> entry : champsSaisie.entrySet()) {
+                String cle = entry.getKey();
+                JComponent composant = entry.getValue();
+                String valeur = null;
+
+                if (composant instanceof JTextField) {
+                    valeur = ((JTextField) composant).getText();
+                } else if (composant instanceof JTextArea) {
+                    valeur = ((JTextArea) composant).getText();
+                } else if (composant instanceof JSpinner) {
+                    valeur = composant == champsSaisie.get(ConfigurationParam.CLE_TAUX_TVA) ?
+                            String.format("%.2f", ((JSpinner) composant).getValue()) :
+                            String.valueOf(((JSpinner) composant).getValue());
+                } else if (composant instanceof JCheckBox) {
+                    valeur = String.valueOf(((JCheckBox) composant).isSelected());
+                } else if (composant instanceof JComboBox<?>) {
+                    @SuppressWarnings("unchecked")
+                    JComboBox<String> comboBox = (JComboBox<String>) composant;
+                    Object selectedItem = comboBox.getSelectedItem();
+                    valeur = selectedItem != null ? selectedItem.toString() : "";
+                }
+
+                if (valeur != null && !valeur.trim().isEmpty()) {
+                    try {
+                        valeur = ConfigurationParam.validateValeur(valeur, cle);
+                        configsToUpdate.add(new ConfigurationParam(0, cle, valeur, ""));
+                    } catch (IllegalArgumentException e) {
+                        throw new IllegalArgumentException("Erreur pour " + cle + ": " + e.getMessage());
+                    }
+                }
+            }
+
+            controller.sauvegarderConfigurations(configsToUpdate);
+            showSuccessMessage("Les configurations ont été sauvegardées avec succès");
+            updatePreview();
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la sauvegarde", e);
+            showErrorMessage("Erreur lors de la sauvegarde : " + e.getMessage());
+        }
+    }
+
+    private void reinitialiserConfigurations() {
+        if (JOptionPane.showConfirmDialog(mainPanel,
+            "Êtes-vous sûr de vouloir réinitialiser toutes les configurations ?",
+            "Confirmation de réinitialisation",
+            JOptionPane.YES_NO_OPTION,
+            JOptionPane.WARNING_MESSAGE) == JOptionPane.YES_OPTION) {
+
+            try {
+                controller.reinitialiserConfigurations();
+                loadData();
+                showSuccessMessage("Les configurations ont été réinitialisées avec succès");
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Erreur lors de la réinitialisation des configurations", e);
+                showErrorMessage("Erreur lors de la réinitialisation : " + e.getMessage());
+            }
+        }
     }
 
     private void exporterConfigurations() {
@@ -838,233 +1051,6 @@ public class ConfigurationViewSwing {
                     showErrorMessage("Erreur lors de l'importation : " + e.getMessage());
                 }
             }
-        }
-    }
-
-    private void actualiserConfigurations() {
-        SwingWorker<Void, Void> worker = new SwingWorker<>() {
-            @Override
-            protected Void doInBackground() throws Exception {
-                controller.chargerConfigurations();
-                return null;
-            }
-
-            @Override
-            protected void done() {
-                try {
-                    get();
-                    loadData();
-                    updatePreview();
-                    JOptionPane.showMessageDialog(mainPanel,
-                        "Les configurations ont été actualisées avec succès",
-                        "Succès",
-                        JOptionPane.INFORMATION_MESSAGE);
-                } catch (Exception e) {
-                    LOGGER.log(Level.SEVERE, "Erreur lors de l'actualisation des configurations", e);
-                    showErrorMessage("Erreur lors de l'actualisation : " + e.getMessage());
-                }
-            }
-        };
-        worker.execute();
-    }
-
-    private void reinitialiserConfigurations() {
-        int confirmation = JOptionPane.showConfirmDialog(mainPanel,
-            "Êtes-vous sûr de vouloir réinitialiser toutes les configurations ?\n" +
-            "Cette action ne peut pas être annulée.",
-            "Confirmation de réinitialisation",
-            JOptionPane.YES_NO_OPTION,
-            JOptionPane.WARNING_MESSAGE);
-
-        if (confirmation == JOptionPane.YES_OPTION) {
-            SwingWorker<Void, Void> worker = new SwingWorker<>() {
-                @Override
-                protected Void doInBackground() throws Exception {
-                    controller.reinitialiserConfigurations();
-                    return null;
-                }
-
-                @Override
-                protected void done() {
-                    try {
-                        get();
-                        loadData();
-                        updatePreview();
-                        JOptionPane.showMessageDialog(mainPanel,
-                            "Les configurations ont été réinitialisées avec succès",
-                            "Succès",
-                            JOptionPane.INFORMATION_MESSAGE);
-                    } catch (Exception e) {
-                        LOGGER.log(Level.SEVERE, "Erreur lors de la réinitialisation", e);
-                        showErrorMessage("Erreur lors de la réinitialisation : " + e.getMessage());
-                    }
-                }
-            };
-            worker.execute();
-        }
-    }
-
-    private void sauvegarderConfigurations() {
-        try {
-            // Collecte et validation des valeurs
-            List<ConfigurationParam> configsAMettreAJour = new ArrayList<>();
-
-            for (Map.Entry<String, JComponent> entry : champsSaisie.entrySet()) {
-                String cle = entry.getKey();
-                JComponent composant = entry.getValue();
-                String valeur = "";
-
-                if (composant instanceof JTextField) {
-                    valeur = ((JTextField) composant).getText();
-                } else if (composant instanceof JTextArea) {
-                    valeur = ((JTextArea) composant).getText();
-                } else if (composant instanceof JSpinner) {
-                    valeur = String.valueOf(((JSpinner) composant).getValue());
-                } else if (composant instanceof JCheckBox) {
-                    valeur = String.valueOf(((JCheckBox) composant).isSelected());
-                } else if (composant instanceof JComboBox) {
-                    Object selectedItem = ((JComboBox<?>) composant).getSelectedItem();
-                    valeur = selectedItem != null ? selectedItem.toString() : "";
-                }
-
-                // Sanitize input before saving
-                if (valeur != null) {
-                    valeur = sanitizeInput(valeur);
-                    if (contientCodeMalveillant(valeur)) {
-                        throw new IllegalArgumentException("Le champ " + cle + " contient des caractères non autorisés");
-                    }
-                }
-
-                // Valider la valeur selon le type de configuration
-                valeur = ConfigurationParam.validateValeur(valeur, cle);
-                ConfigurationParam config = new ConfigurationParam(0, cle, valeur, "");
-                configsAMettreAJour.add(config);
-            }
-
-            // Mise à jour des configurations via le contrôleur
-            controller.sauvegarderConfigurations(configsAMettreAJour);
-            updatePreview();
-            showSuccessMessage("Les configurations ont été sauvegardées avec succès");
-
-        } catch (IllegalArgumentException e) {
-            LOGGER.log(Level.WARNING, "Erreur de validation lors de la sauvegarde des configurations", e);
-            showErrorMessage("Erreur de validation : " + e.getMessage());
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la sauvegarde des configurations", e);
-            showErrorMessage("Erreur lors de la sauvegarde : " + e.getMessage());
-        }
-    }
-
-    private void loadData() {
-        try {
-            Map<String, String> configurations = controller.chargerConfigurations();
-
-            for (Map.Entry<String, String> entry : configurations.entrySet()) {
-                String cle = entry.getKey();
-                String valeur = entry.getValue();
-                JComponent composant = champsSaisie.get(cle);
-
-                if (composant != null) {
-                    if (composant instanceof JTextField) {
-                        ((JTextField) composant).setText(valeur);
-                    } else if (composant instanceof JTextArea) {
-                        ((JTextArea) composant).setText(valeur);
-                    } else if (composant instanceof JSpinner) {
-                        try {
-                            if (cle.equals(ConfigurationParam.CLE_TAUX_TVA)) {
-                                ((JSpinner) composant).setValue(Double.parseDouble(valeur));
-                            } else {
-                                ((JSpinner) composant).setValue(Integer.parseInt(valeur));
-                            }
-                        } catch (NumberFormatException e) {
-                            LOGGER.log(Level.WARNING, "Erreur de conversion numérique pour " + cle, e);
-                        }
-                    } else if (composant instanceof JCheckBox) {
-                        ((JCheckBox) composant).setSelected(Boolean.parseBoolean(valeur));
-                    } else if (composant instanceof JComboBox) {
-                        ((JComboBox<?>) composant).setSelectedItem(valeur);
-                    }
-                }
-            }
-
-            updatePreview();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du chargement des configurations", e);
-            showErrorMessage("Erreur lors du chargement des configurations : " + e.getMessage());
-        }
-    }
-
-    private JButton createStyledButton(String text, MaterialDesign icon, Color color) {
-        JButton button = new JButton(text);
-        button.setFont(texteNormalFont);
-
-        FontIcon fontIcon = FontIcon.of(icon);
-        fontIcon.setIconSize(16);
-        fontIcon.setIconColor(Color.WHITE);
-        button.setIcon(fontIcon);
-
-        button.setForeground(Color.WHITE);
-        button.setBackground(color);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setOpaque(true);
-        button.setMargin(new Insets(8, 15, 8, 15));
-
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(color.darker());
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(color);
-            }
-        });
-
-        return button;
-    }
-
-    private void styleTextField(JTextField textField) {
-        textField.setFont(texteNormalFont);
-        textField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200)),
-            BorderFactory.createEmptyBorder(5, 5, 5, 5)
-        ));
-    }
-
-    private void showErrorMessage(String message) {
-        SwingUtilities.invokeLater(() -> {
-            JOptionPane.showMessageDialog(mainPanel,
-                message,
-                "Erreur",
-                JOptionPane.ERROR_MESSAGE);
-        });
-    }
-
-    private void validateImageFile(File file) throws Exception {
-        if (!file.exists()) {
-            throw new Exception("Le fichier image n'existe pas");
-        }
-
-        String extension = Optional.of(file.getName())
-            .filter(f -> f.contains("."))
-            .map(f -> f.substring(f.lastIndexOf('.') + 1).toLowerCase())
-            .orElse("");
-
-        if (!FORMATS_IMAGE_AUTORISES.contains(extension)) {
-            throw new Exception("Format d'image non supporté. Formats acceptés : " +
-                String.join(", ", FORMATS_IMAGE_AUTORISES));
-        }
-
-        if (file.length() > TAILLE_MAX_LOGO) {
-            throw new Exception("L'image est trop volumineuse (max 1MB)");
-        }
-
-        try {
-            BufferedImage image = ImageIO.read(file);
-            if (image == null) {
-                throw new Exception("Le fichier n'est pas une image valide");
-            }
-        } catch (IOException e) {
-            throw new Exception("Erreur lors de la lecture de l'image : " + e.getMessage());
         }
     }
 
@@ -1144,44 +1130,6 @@ public class ConfigurationViewSwing {
         } catch (Exception e) {
             return false;
         }
-    }
-
-    private void validateImageFile(File file) throws Exception {
-        if (!file.exists()) {
-            throw new Exception("Le fichier image n'existe pas");
-        }
-
-        String extension = Optional.of(file.getName())
-            .filter(f -> f.contains("."))
-            .map(f -> f.substring(f.lastIndexOf('.') + 1).toLowerCase())
-            .orElse("");
-
-        if (!FORMATS_IMAGE_AUTORISES.contains(extension)) {
-            throw new Exception("Format d'image non supporté. Formats acceptés : " +
-                String.join(", ", FORMATS_IMAGE_AUTORISES));
-        }
-
-        if (file.length() > TAILLE_MAX_LOGO) {
-            throw new Exception("L'image est trop volumineuse (max 1MB)");
-        }
-
-        try {
-            BufferedImage image = ImageIO.read(file);
-            if (image == null) {
-                throw new Exception("Le fichier n'est pas une image valide");
-            }
-        } catch (IOException e) {
-            throw new Exception("Erreur lors de la lecture de l'image : " + e.getMessage());
-        }
-    }
-
-    private void showSuccessMessage(String message) {
-        SwingUtilities.invokeLater(() -> {
-            JOptionPane.showMessageDialog(mainPanel,
-                message,
-                "Succès",
-                JOptionPane.INFORMATION_MESSAGE);
-        });
     }
 
     private boolean showConfirmDialog(String message) {

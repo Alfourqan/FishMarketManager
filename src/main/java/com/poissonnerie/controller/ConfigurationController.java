@@ -35,6 +35,13 @@ public class ConfigurationController {
             .create();
     }
 
+    public Map<String, String> getConfigurations() {
+        if (configCache.isEmpty()) {
+            chargerConfigurations();
+        }
+        return new HashMap<>(configCache);
+    }
+
     public void chargerConfigurations() {
         if (isLoading) {
             LOGGER.info("Chargement déjà en cours, ignoré");
@@ -44,10 +51,9 @@ public class ConfigurationController {
         isLoading = true;
         configurations.clear();
         configCache.clear();
-        String sql = "SELECT * FROM configurations ORDER BY cle";
 
         try (Connection conn = DatabaseConnectionPool.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement("SELECT * FROM configurations ORDER BY cle")) {
 
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
@@ -204,13 +210,8 @@ public class ConfigurationController {
         }
     }
 
-    public Map<String, String> chargerConfigurations() {
-        chargerConfigurations();
-        return new HashMap<>(configCache);
-    }
-
     public void exporterConfigurations(File file) throws IOException {
-        if (!configurations.isEmpty()) {
+        if (configCache.isEmpty()) {
             chargerConfigurations();
         }
 
@@ -277,7 +278,7 @@ public class ConfigurationController {
         return configCache.getOrDefault(cle, "");
     }
 
-    public List<ConfigurationParam> getConfigurations() {
+    public List<ConfigurationParam> getConfigurationsList() {
         return new ArrayList<>(configurations);
     }
 
