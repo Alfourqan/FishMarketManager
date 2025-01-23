@@ -914,36 +914,35 @@ public class ConfigurationViewSwing {
 
         FontIcon fontIcon = FontIcon.of(icon);
         fontIcon.setIconSize(16);
-        fontIcon.setIconColor(Color.WHITE);
+        fontIcon.setIconColor(color);
         button.setIcon(fontIcon);
 
-        button.setForeground(Color.WHITE);
-        button.setBackground(color);
+        button.setBackground(Color.WHITE);
+        button.setForeground(color);
         button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setOpaque(true);
-        button.setMargin(new Insets(8, 15, 8, 15));
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(color),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
 
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                button.setBackground(color.darker());
-            }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
                 button.setBackground(color);
+                button.setForeground(Color.WHITE);
+                fontIcon.setIconColor(Color.WHITE);
+                button.setIcon(fontIcon);
+            }
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(Color.WHITE);
+                button.setForeground(color);
+                fontIcon.setIconColor(color);
+                button.setIcon(fontIcon);
             }
         });
 
         return button;
     }
-
-    private void styleTextField(JTextField textField) {
-        textField.setFont(texteNormalFont);
-        textField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200)),
-            BorderFactory.createEmptyBorder(5, 5, 5, 5)
-        ));
-    }
-
 
     private void sauvegarderConfigurations() {
         try {
@@ -1010,21 +1009,21 @@ public class ConfigurationViewSwing {
     private void exporterConfigurations() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Exporter les configurations");
-        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         fileChooser.setFileFilter(new FileNameExtensionFilter("Fichiers JSON (*.json)", "json"));
 
         if (fileChooser.showSaveDialog(mainPanel) == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
-            String filePath = selectedFile.getPath();
-            if (!filePath.toLowerCase().endsWith(".json")) {
-                filePath += ".json";
-                selectedFile = new File(filePath);
+            if (!selectedFile.getName().toLowerCase().endsWith(".json")) {
+                selectedFile = new File(selectedFile.getParentFile(), selectedFile.getName() + ".json");
             }
 
             try {
                 controller.exporterConfigurations(selectedFile);
-                showSuccessMessage("Configurations exportées avec succès vers " + selectedFile.getName());
-            } catch (Exception e) {
+                JOptionPane.showMessageDialog(mainPanel,
+                    "Configurations exportées avec succès vers : " + selectedFile.getName(),
+                    "Export réussi",
+                    JOptionPane.INFORMATION_MESSAGE);
+            } catch (IOException e) {
                 LOGGER.log(Level.SEVERE, "Erreur lors de l'exportation des configurations", e);
                 showErrorMessage("Erreur lors de l'exportation : " + e.getMessage());
             }
@@ -1033,20 +1032,28 @@ public class ConfigurationViewSwing {
 
     private void importerConfigurations() {
         JFileChooser fileChooser = new JFileChooser();
-        fileChooser.setDialogTitle("Importer les configurations");
-        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setDialogTitle("Importer des configurations");
         fileChooser.setFileFilter(new FileNameExtensionFilter("Fichiers JSON (*.json)", "json"));
 
         if (fileChooser.showOpenDialog(mainPanel) == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
 
-            if (showConfirmDialog("Cette action remplacera les configurations existantes. Continuer ?")) {
+            int confirmation = JOptionPane.showConfirmDialog(mainPanel,
+                "L'importation va remplacer les configurations existantes. Voulez-vous continuer ?",
+                "Confirmation d'importation",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
+
+            if (confirmation == JOptionPane.YES_OPTION) {
                 try {
                     controller.importerConfigurations(selectedFile);
                     loadData();
                     updatePreview();
-                    showSuccessMessage("Configurations importées avec succès depuis " + selectedFile.getName());
-                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(mainPanel,
+                        "Configurations importées avec succès depuis : " + selectedFile.getName(),
+                        "Import réussi",
+                        JOptionPane.INFORMATION_MESSAGE);
+                } catch (IOException e) {
                     LOGGER.log(Level.SEVERE, "Erreur lors de l'importation des configurations", e);
                     showErrorMessage("Erreur lors de l'importation : " + e.getMessage());
                 }
@@ -1054,13 +1061,99 @@ public class ConfigurationViewSwing {
         }
     }
 
+    private void setCursor(Cursor cursor) {
+        mainPanel.setCursor(cursor);
+        if (previewPanel != null) {
+            previewPanel.setCursor(cursor);
+        }
+    }
+
+    private void showErrorMessage(String message) {
+        JOptionPane.showMessageDialog(mainPanel,
+            message,
+            "Erreur",
+            JOptionPane.ERROR_MESSAGE);
+    }
+
+    private JButton createStyledButton(String text, MaterialDesign icon, Color color) {
+        JButton button = new JButton(text);
+        button.setFont(texteNormalFont);
+
+        FontIcon fontIcon = FontIcon.of(icon);
+        fontIcon.setIconSize(16);
+        fontIcon.setIconColor(color);
+        button.setIcon(fontIcon);
+
+        button.setBackground(Color.WHITE);
+        button.setForeground(color);
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(color),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
+
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                button.setBackground(color);
+                button.setForeground(Color.WHITE);
+                fontIcon.setIconColor(Color.WHITE);
+                button.setIcon(fontIcon);
+            }
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(Color.WHITE);
+                button.setForeground(color);
+                fontIcon.setIconColor(color);
+                button.setIcon(fontIcon);
+            }
+        });
+
+        return button;
+    }
+
+    private void styleTextField(JTextField textField) {
+        textField.setFont(texteNormalFont);
+        textField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(5, 5, 5, 5)
+        ));
+    }
+
+
+    private void validateImageFile(File file) throws IOException {
+        if (!file.exists()) {
+            throw new IOException("Le fichier image n'existe pas");
+        }
+
+        String extension = Optional.of(file.getName())
+            .filter(f -> f.contains("."))
+            .map(f -> f.substring(f.lastIndexOf('.') + 1).toLowerCase())
+            .orElse("");
+
+        if (!FORMATS_IMAGE_AUTORISES.contains(extension)) {
+            throw new IOException("Format d'image non supporté. Formats acceptés : " +
+                String.join(", ", FORMATS_IMAGE_AUTORISES));
+        }
+
+        if (file.length() > TAILLE_MAX_LOGO) {
+            throw new IOException("L'image est trop volumineuse (max 1MB)");
+        }
+
+        BufferedImage image = ImageIO.read(file);
+        if (image == null) {
+            throw new IOException("Le fichier n'est pas une image valide");
+        }
+
+        // Vérification des dimensions
+        if (image.getWidth() > 1000 || image.getHeight() > 1000) {
+            throw new IOException("Les dimensions de l'image sont trop grandes (max 1000x1000)");
+        }
+    }
+
     public JPanel getMainPanel() {
         return mainPanel;
     }
 
-    private void setCursor(Cursor cursor) {
-        SwingUtilities.invokeLater(() -> mainPanel.setCursor(cursor));
-    }
     private boolean validerChamps() {
         List<String> erreurs = new ArrayList<>();
 
@@ -1165,34 +1258,4 @@ public class ConfigurationViewSwing {
         return Arrays.stream(motifsSuspects)
             .anyMatch(motif -> inputLower.contains(motif.toLowerCase()));
     }
-    private void validateImageFile(File file) throws IOException {
-        if (!file.exists()) {
-            throw new IOException("Le fichier image n'existe pas");
-        }
-
-        String extension = Optional.of(file.getName())
-            .filter(f -> f.contains("."))
-            .map(f -> f.substring(f.lastIndexOf('.') + 1).toLowerCase())
-            .orElse("");
-
-        if (!FORMATS_IMAGE_AUTORISES.contains(extension)) {
-            throw new IOException("Format d'image non supporté. Formats acceptés : " +
-                String.join(", ", FORMATS_IMAGE_AUTORISES));
-        }
-
-        if (file.length() > TAILLE_MAX_LOGO) {
-            throw new IOException("L'image est trop volumineuse (max 1MB)");
-        }
-
-        BufferedImage image = ImageIO.read(file);
-        if (image == null) {
-            throw new IOException("Le fichier n'est pas une image valide");
-        }
-
-        // Vérification des dimensions
-        if (image.getWidth() > 1000 || image.getHeight() > 1000) {
-            throw new IOException("Les dimensions de l'image sont trop grandes (max 1000x1000)");
-        }
-    }
-
 }
