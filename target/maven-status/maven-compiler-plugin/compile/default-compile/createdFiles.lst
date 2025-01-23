@@ -32,6 +32,7 @@ com/poissonnerie/view/InventaireViewSwing$7.class
 com/poissonnerie/controller/ConfigurationController$1.class
 com/poissonnerie/view/ReportViewSwing$2.class
 com/poissonnerie/view/ProduitViewSwing.class
+com/poissonnerie/view/SplashScreen$2.class
 com/poissonnerie/view/ConfigurationViewSwing.class
 com/poissonnerie/view/FournisseurViewSwing.class
 com/poissonnerie/view/VenteViewSwing$2.class
@@ -88,6 +89,7 @@ com/poissonnerie/view/ReportViewSwing$4.class
 com/poissonnerie/view/ReportViewSwing.class
 com/poissonnerie/view/ConfigurationViewSwing$1.class
 com/poissonnerie/view/InventaireViewSwing$4.class
+com/poissonnerie/Main$1$1.class
 com/poissonnerie/view/VenteViewSwing$5.class
 com/poissonnerie/Main$1.class
 com/poissonnerie/view/AccueilViewSwing$3.class
