@@ -5,6 +5,7 @@ import java.awt.*;
 import com.poissonnerie.util.DatabaseManager;
 import com.poissonnerie.view.MainViewSwing;
 import com.poissonnerie.view.SplashScreen;
+import com.poissonnerie.view.LoginView;
 import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialLighterIJTheme;
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -16,6 +17,7 @@ public class Main {
     private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
     private static JFrame mainFrame;
     private static SplashScreen splash;
+    private static LoginView loginView;
 
     public static void main(String[] args) {
         // Configuration système
@@ -64,7 +66,7 @@ public class Main {
                     configureUI();
                     updateSplashProgress(60, "Interface configurée");
 
-                    // Création de la fenêtre principale
+                    // Création de la fenêtre principale (mais pas encore affichée)
                     mainFrame = new JFrame("Gestion Poissonnerie");
                     mainFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
@@ -96,15 +98,23 @@ public class Main {
 
                     updateSplashProgress(90, "Interface principale créée");
 
-                    // Fermeture du splash screen et affichage de la fenêtre principale
+                    // Fermeture du splash screen et affichage de l'écran de login
                     if (splash != null) {
                         splash.dispose();
                     }
-                    mainFrame.setVisible(true);
-                    mainFrame.toFront();
-                    mainFrame.requestFocus();
 
-                    LOGGER.info("Interface affichée avec succès");
+                    // Création et affichage de l'écran de login
+                    loginView = new LoginView();
+                    loginView.setVisible(true);
+                    loginView.addLoginSuccessListener(() -> {
+                        // Quand le login réussit, on affiche la fenêtre principale
+                        mainFrame.setVisible(true);
+                        mainFrame.toFront();
+                        mainFrame.requestFocus();
+                        LOGGER.info("Interface principale affichée après authentification réussie");
+                    });
+
+                    LOGGER.info("Écran de login affiché avec succès");
 
                 } catch (Exception e) {
                     LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de l'interface", e);
