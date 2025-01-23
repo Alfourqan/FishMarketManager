@@ -11,11 +11,7 @@ import org.kordamp.ikonli.swing.FontIcon;
 import com.poissonnerie.controller.AuthenticationController;
 import java.util.ArrayList;
 import java.util.List;
-
-@FunctionalInterface
-public interface LoginSuccessListener {
-    void onLoginSuccess();
-}
+import com.poissonnerie.view.LoginSuccessListener;
 
 public class LoginView extends JFrame {
     private JTextField usernameField;

@@ -101,3 +101,22 @@ INSERT OR IGNORE INTO configurations (cle, valeur, description) VALUES
 ('MESSAGE_COMMERCIAL_RECU', '', 'Message commercial ou promotionnel sur le reçu'),
 ('AFFICHER_TVA_DETAILS', 'true', 'Afficher les détails de TVA sur le reçu'),
 ('INFO_SUPPLEMENTAIRE_RECU', '', 'Informations supplémentaires sur le reçu');
+
+-- Ajout de la table pour la gestion des utilisateurs
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'USER',
+    created_at INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000),
+    last_login INTEGER,
+    active BOOLEAN DEFAULT true,
+    CONSTRAINT username_min_length CHECK (length(username) >= 3)
+);
+
+-- Index pour optimiser les recherches sur le nom d'utilisateur
+CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+
+-- Insertion d'un utilisateur administrateur par défaut si la table est vide
+INSERT OR IGNORE INTO users (username, password, role) 
+VALUES ('admin', 'admin', 'ADMIN');
