@@ -333,30 +333,68 @@ public class VenteController {
     }
 
 
+
     private Client creerClientDepuisResultSet(ResultSet rs) throws SQLException {
         try {
             int clientId = rs.getInt("client_id");
-            String nom = sanitizeInput(rs.getString("nom"));
-            String telephone = sanitizeInput(rs.getString("telephone"));
-            String adresse = sanitizeInput(rs.getString("adresse"));
+            String nom = rs.getString("nom");
+            String telephone = rs.getString("telephone");
+            String adresse = rs.getString("adresse");
             double solde = rs.getDouble("solde");
 
-            // Validation supplémentaire des données
+            // Validation de l'ID
             if (clientId <= 0) {
+                LOGGER.warning("ID client invalide trouvé: " + clientId);
                 throw new SQLException("ID client invalide: " + clientId);
             }
-            if (nom == null || nom.trim().isEmpty()) {
-                throw new SQLException("Nom client invalide");
-            }
-            if (solde < 0 || solde > LIMITE_CREDIT_MAX) {
-                throw new SQLException("Solde client invalide: " + solde);
+
+            // Nettoyage et validation du nom
+            nom = (nom != null) ? sanitizeInput(nom).trim() : "";
+            if (nom.isEmpty()) {
+                nom = "Client " + clientId;
+                LOGGER.info("Nom par défaut généré pour le client ID " + clientId + ": " + nom);
             }
 
-            return new Client(clientId, nom, telephone, adresse, solde);
+            // Validation du solde
+            if (solde < 0) {
+                LOGGER.warning("Solde négatif détecté pour le client " + clientId + ": " + solde);
+                solde = 0.0;
+            } else if (solde > LIMITE_CREDIT_MAX) {
+                LOGGER.warning("Solde supérieur à la limite pour le client " + clientId + ": " + solde);
+                solde = LIMITE_CREDIT_MAX;
+            }
+
+            // Nettoyage des autres champs
+            telephone = sanitizeInput(telephone);
+            adresse = sanitizeInput(adresse);
+
+            Client client = new Client(clientId, nom, telephone, adresse, solde);
+            LOGGER.info("Client créé avec succès - ID: " + clientId + ", Nom: " + nom);
+            return client;
+
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la création d'un client depuis le ResultSet", e);
+            LOGGER.log(Level.SEVERE, "Erreur lors de la création du client depuis ResultSet - " + e.getMessage(), e);
             throw e;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur inattendue lors de la création du client - " + e.getMessage(), e);
+            throw new SQLException("Erreur lors de la création du client: " + e.getMessage(), e);
         }
+    }
+
+    private String sanitizeInput(String input) {
+        if (input == null) {
+            return "";
+        }
+
+        // Nettoyage des caractères spéciaux et normalisation
+        String cleaned = input
+            .replaceAll("[\\p{Cntrl}]", "") // Supprime les caractères de contrôle
+            .replaceAll("[<>\"';)(&+\\[\\]]", "") // Supprime les caractères potentiellement dangereux
+            .trim()
+            .replaceAll("\\s+", " "); // Normalise les espaces
+
+        // Limite la longueur en gardant le début
+        return cleaned.length() > 255 ? cleaned.substring(0, 255) : cleaned;
     }
 
     private void validateProduit(Produit produit) {
@@ -408,19 +446,6 @@ public class VenteController {
         }
     }
 
-    private String sanitizeInput(String input) {
-        if (input == null) {
-            return "";
-        }
-        // Nettoyer les caractères spéciaux et les caractères de contrôle
-        String cleaned = input.replaceAll("[\\p{Cntrl}\\p{Zl}\\p{Zp}]", "")
-                            .replaceAll("[<>\"'%;)(&+\\[\\]{}]", "")
-                            .trim()
-                            .replaceAll("\\s+", " ");
-
-        // Limiter la longueur
-        return cleaned.length() > 255 ? cleaned.substring(0, 255) : cleaned;
-    }
 
     private void validateStock(Connection conn, Vente.LigneVente ligne) throws SQLException {
         String sql = "SELECT stock FROM produits WHERE id = ? AND supprime = false AND stock >= ?";
