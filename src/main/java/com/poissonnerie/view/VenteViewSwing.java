@@ -135,7 +135,7 @@ public class VenteViewSwing {
         // Panneau de recherche par date
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel searchLabel = new JLabel("Rechercher par date:");
-        FontIcon searchIcon = FontIcon.of(MaterialDesign.MDI_CALENDAR_SEARCH);
+        FontIcon searchIcon = FontIcon.of(MaterialDesign.MDI_CALENDAR);  // Changé de MDI_CALENDAR_SEARCH à MDI_CALENDAR
         searchIcon.setIconSize(16);
         searchLabel.setIcon(searchIcon);
 
@@ -890,7 +890,7 @@ public class VenteViewSwing {
                     if (montant <= 0) {
                         throw new IllegalArgumentException("Le montant doit être positif");
                     }
-                    if (montant > client.getSolde()) {
+                    if (montant> client.getSolde()) {
                         throw new IllegalArgumentException("Le montant ne peut pas dépasser le solde");
                     }
                     validerReglement(client, montant);
@@ -899,7 +899,7 @@ public class VenteViewSwing {
                             "Veuillez entrer un montant valide",
                             "Erreur",
                             JOptionPane.ERROR_MESSAGE);
-                                } catch (IllegalArgumentException ex) {
+                } catch (IllegalArgumentException ex) {
                     JOptionPane.showMessageDialog(mainPanel,
                             ex.getMessage(),
                             "Erreur",
