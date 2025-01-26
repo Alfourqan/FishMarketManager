@@ -19,6 +19,10 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 import org.kordamp.ikonli.materialdesign.MaterialDesign;
 import org.kordamp.ikonli.swing.FontIcon;
+import net.sourceforge.jdatepicker.impl.*;
+import java.time.ZoneId;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.DocumentEvent;
 
 public class VenteViewSwing {
     private static final Logger LOGGER = Logger.getLogger(VenteViewSwing.class.getName());
@@ -38,6 +42,8 @@ public class VenteViewSwing {
     private static final int MAX_QUANTITE = 9999;
     private static final double MAX_PRIX_UNITAIRE = 99999.99;
     private volatile boolean isProcessingOperation = false;
+    private JDatePickerImpl datePicker; // Nouveau : sélecteur de date
+    private List<Vente> allVentes; // Nouveau : stockage de toutes les ventes
 
     public VenteViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -45,6 +51,7 @@ public class VenteViewSwing {
         produitController = new ProduitController();
         clientController = new ClientController();
         panier = Collections.synchronizedList(new ArrayList<>());
+        allVentes = new ArrayList<>(); // Initialisation de la liste des ventes
 
         String[] panierColumns = {"Produit", "Quantité", "Prix unitaire", "Total"};
         panierModel = new DefaultTableModel(panierColumns, 0) {
@@ -84,7 +91,8 @@ public class VenteViewSwing {
                 LOGGER.info("Clients chargés");
 
                 venteController.chargerVentes();
-                LOGGER.info("Ventes chargées: " + venteController.getVentes().size() + " ventes");
+                allVentes = new ArrayList<>(venteController.getVentes()); // Stockage des ventes
+                LOGGER.info("Ventes chargées: " + allVentes.size() + " ventes");
 
                 refreshComboBoxes();
                 refreshVentesTable();
@@ -106,6 +114,144 @@ public class VenteViewSwing {
                             "Erreur lors du chargement des données : " + e.getMessage(),
                             "Erreur",
                             JOptionPane.ERROR_MESSAGE));
+        }
+    }
+
+    private JPanel createHistoriquePanel() {
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+
+        // Panneau titre et recherche
+        JPanel topPanel = new JPanel(new BorderLayout());
+        JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        FontIcon historyIcon = FontIcon.of(MaterialDesign.MDI_HISTORY);
+        historyIcon.setIconSize(18);
+        historyIcon.setIconColor(new Color(33, 150, 243));
+
+        JLabel titleLabel = new JLabel("Historique des Ventes");
+        titleLabel.setIcon(historyIcon);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        titlePanel.add(titleLabel);
+
+        // Panneau de recherche par date
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JLabel searchLabel = new JLabel("Rechercher par date:");
+        FontIcon searchIcon = FontIcon.of(MaterialDesign.MDI_CALENDAR_SEARCH);
+        searchIcon.setIconSize(16);
+        searchLabel.setIcon(searchIcon);
+
+        UtilDateModel model = new UtilDateModel();
+        Properties p = new Properties();
+        p.put("text.today", "Aujourd'hui");
+        p.put("text.month", "Mois");
+        p.put("text.year", "Année");
+        JDatePanelImpl datePanel = new JDatePanelImpl(model, p);
+        datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
+
+        JButton searchButton = createStyledButton("Rechercher", MaterialDesign.MDI_MAGNIFY, new Color(33, 150, 243));
+        JButton resetButton = createStyledButton("Réinitialiser", MaterialDesign.MDI_REFRESH, new Color(156, 39, 176));
+
+        searchButton.addActionListener(e -> filterVentesByDate());
+        resetButton.addActionListener(e -> {
+            datePicker.getModel().setValue(null);
+            refreshVentesTable(); // Réinitialise la table avec toutes les ventes
+        });
+
+        searchPanel.add(searchLabel);
+        searchPanel.add(datePicker);
+        searchPanel.add(searchButton);
+        searchPanel.add(resetButton);
+
+        topPanel.add(titlePanel, BorderLayout.WEST);
+        topPanel.add(searchPanel, BorderLayout.EAST);
+
+        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+        JScrollPane scrollPane = new JScrollPane(tableVentes);
+        tableVentes.setFillsViewportHeight(true);
+
+        panel.add(topPanel, BorderLayout.NORTH);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        return panel;
+    }
+
+    private void filterVentesByDate() {
+        Date selectedDate = (Date) datePicker.getModel().getValue();
+        if (selectedDate == null) {
+            JOptionPane.showMessageDialog(mainPanel,
+                    "Veuillez sélectionner une date",
+                    "Information",
+                    JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        LocalDateTime selectedDateTime = selectedDate.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime();
+
+        // Filtrer les ventes pour la date sélectionnée
+        List<Vente> filteredVentes = allVentes.stream()
+                .filter(vente -> {
+                    LocalDateTime venteDate = vente.getDate();
+                    return venteDate.getYear() == selectedDateTime.getYear() &&
+                           venteDate.getMonthValue() == selectedDateTime.getMonthValue() &&
+                           venteDate.getDayOfMonth() == selectedDateTime.getDayOfMonth();
+                })
+                .collect(Collectors.toList());
+
+        // Mettre à jour la table avec les ventes filtrées
+        updateVentesTable(filteredVentes);
+
+        LOGGER.info(String.format("Filtrage des ventes pour la date %s: %d ventes trouvées",
+                selectedDateTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                filteredVentes.size()));
+    }
+
+    private void updateVentesTable(List<Vente> ventes) {
+        SwingUtilities.invokeLater(() -> {
+            ventesModel.setRowCount(0);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+            for (Vente vente : ventes) {
+                ventesModel.addRow(new Object[]{
+                        vente.getDate().format(formatter),
+                        vente.getClient() != null ? sanitizeInput(vente.getClient().getNom()) : "Vente comptant",
+                        vente.isCredit() ? "Crédit" : "Comptant",
+                        String.format("%.2f €", vente.getTotal())
+                });
+            }
+        });
+    }
+
+    // Formateur de date personnalisé pour JDatePicker
+    private class DateLabelFormatter extends JFormattedTextField.AbstractFormatter {
+        private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        @Override
+        public Object stringToValue(String text) throws java.text.ParseException {
+            if (text == null || text.trim().isEmpty()) {
+                return null;
+            }
+            try {
+                return Date.from(LocalDateTime.parse(text, dateFormatter)
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant());
+            } catch (Exception e) {
+                return null;
+            }
+        }
+
+        @Override
+        public String valueToString(Object value) {
+            if (value == null) {
+                return "";
+            }
+            if (value instanceof Date) {
+                return dateFormatter.format(((Date) value).toInstant()
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDateTime());
+            }
+            return value.toString();
         }
     }
 
@@ -380,24 +526,8 @@ public class VenteViewSwing {
     }
 
     private synchronized void refreshVentesTable() {
-        SwingUtilities.invokeLater(() -> {
-            ventesModel.setRowCount(0);
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-
-            List<Vente> ventesTriees = new ArrayList<>(venteController.getVentes());
-            ventesTriees.sort((v1, v2) -> v2.getDate().compareTo(v1.getDate()));
-
-            for (Vente vente : ventesTriees) {
-                ventesModel.addRow(new Object[]{
-                        vente.getDate().format(formatter),
-                        vente.getClient() != null ? sanitizeInput(vente.getClient().getNom()) : "Vente comptant",
-                        vente.isCredit() ? "Crédit" : "Comptant",
-                        String.format("%.2f €", vente.getTotal())
-                });
-            }
-
-            LOGGER.info("Table des ventes mise à jour avec " + ventesTriees.size() + " ventes");
-        });
+        updateVentesTable(allVentes); // Use the stored allVentes list
+        LOGGER.info("Table des ventes mise à jour avec " + allVentes.size() + " ventes");
     }
 
     private synchronized double calculateTotal() {
@@ -700,76 +830,6 @@ public class VenteViewSwing {
         return panel;
     }
 
-    private JPanel createHistoriquePanel() {
-        JPanel panel = new JPanel(new BorderLayout(10, 10));
-
-        JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        FontIcon historyIcon = FontIcon.of(MaterialDesign.MDI_HISTORY);
-        historyIcon.setIconSize(18);
-        historyIcon.setIconColor(new Color(33, 150, 243));
-
-        JLabel titleLabel = new JLabel("Historique des Ventes");
-        titleLabel.setIcon(historyIcon);
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-
-        // Ajout du bouton de règlement pour les clients avec crédit
-        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        if (tableVentes.getSelectedRow() != -1) {
-            int row = tableVentes.getSelectedRow();
-            String clientName = (String) tableVentes.getValueAt(row, 1);
-            String type = (String) tableVentes.getValueAt(row, 2);
-
-            if ("Crédit".equals(type)) {
-                Client client = clientController.getClients().stream()
-                        .filter(c -> clientName.equals(c.getNom()))
-                        .findFirst()
-                        .orElse(null);
-
-                if (client != null && client.getSolde() > 0) {
-                    actionPanel.add(createReglerButton(client));
-                }
-            }
-        }
-
-        titlePanel.add(titleLabel);
-        titlePanel.add(actionPanel);
-
-        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-
-        JScrollPane scrollPane = new JScrollPane(tableVentes);
-        tableVentes.setFillsViewportHeight(true);
-
-        // Ajouter un listener pour mettre à jour le bouton de règlement
-        tableVentes.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                actionPanel.removeAll();
-                if (tableVentes.getSelectedRow() != -1) {
-                    int row = tableVentes.getSelectedRow();
-                    String clientName = (String) tableVentes.getValueAt(row, 1);
-                    String type = (String) tableVentes.getValueAt(row, 2);
-
-                    if ("Crédit".equals(type)) {
-                        Client client = clientController.getClients().stream()
-                                .filter(c -> clientName.equals(c.getNom()))
-                                .findFirst()
-                                .orElse(null);
-
-                        if (client != null && client.getSolde() > 0) {
-                            actionPanel.add(createReglerButton(client));
-                        }
-                    }
-                }
-                actionPanel.revalidate();
-                actionPanel.repaint();
-            }
-        });
-
-        panel.add(titlePanel, BorderLayout.NORTH);
-        panel.add(scrollPane, BorderLayout.CENTER);
-
-        return panel;
-    }
-
     private void validerReglement(Client client, double montantRegle) {
         if (!checkAndSetProcessing()) {
             JOptionPane.showMessageDialog(mainPanel,
@@ -839,7 +899,7 @@ public class VenteViewSwing {
                             "Veuillez entrer un montant valide",
                             "Erreur",
                             JOptionPane.ERROR_MESSAGE);
-                } catch (IllegalArgumentException ex) {
+                                } catch (IllegalArgumentException ex) {
                     JOptionPane.showMessageDialog(mainPanel,
                             ex.getMessage(),
                             "Erreur",
