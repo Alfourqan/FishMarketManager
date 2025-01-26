@@ -6,6 +6,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+import java.util.Arrays;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.time.LocalDateTime;
@@ -23,7 +24,7 @@ public class NotificationStockView extends JDialog {
         super(owner, "Alertes de Stock", false);
         setSize(400, 300);
         setLocationRelativeTo(owner);
-        
+
         // Panel principal
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -45,7 +46,7 @@ public class NotificationStockView extends JDialog {
         // Boutons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.setBackground(Color.WHITE);
-        
+
         JButton clearButton = new JButton("Effacer tout");
         styleButton(clearButton, new Color(244, 67, 54));
         clearButton.addActionListener(e -> clearNotifications());
@@ -72,7 +73,7 @@ public class NotificationStockView extends JDialog {
         button.setBorderPainted(false);
         button.setFont(new Font("Segoe UI", Font.BOLD, 12));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
+
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(color.darker());
@@ -95,7 +96,7 @@ public class NotificationStockView extends JDialog {
         SwingUtilities.invokeLater(() -> {
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
             String message;
-            
+
             if (produit.getStock() == 0) {
                 message = String.format("[%s] ⛔ RUPTURE: %s (Stock: 0)", 
                     timestamp, produit.getNom());
@@ -107,7 +108,7 @@ public class NotificationStockView extends JDialog {
             listModel.add(0, message);
             notificationCount++;
             updateTitle();
-            
+
             // Afficher une notification système
             displaySystemNotification(produit);
         });
@@ -118,16 +119,16 @@ public class NotificationStockView extends JDialog {
             String message = produit.getStock() == 0 ? 
                 "Rupture de stock pour " + produit.getNom() :
                 "Stock bas pour " + produit.getNom() + " (" + produit.getStock() + " restants)";
-                
+
             java.awt.SystemTray tray = java.awt.SystemTray.getSystemTray();
             java.awt.Image image = Toolkit.getDefaultToolkit().createImage(getClass().getResource("/icons/warning.png"));
             TrayIcon trayIcon = new TrayIcon(image, "Alerte Stock");
             trayIcon.setImageAutoSize(true);
-            
+
             if (!Arrays.asList(tray.getTrayIcons()).contains(trayIcon)) {
                 tray.add(trayIcon);
             }
-            
+
             trayIcon.displayMessage(
                 "Alerte Stock",
                 message,
@@ -153,20 +154,20 @@ public class NotificationStockView extends JDialog {
         public Component getListCellRendererComponent(
                 JList<?> list, Object value, int index,
                 boolean isSelected, boolean cellHasFocus) {
-            
+
             JLabel label = (JLabel) super.getListCellRendererComponent(
                 list, value, index, isSelected, cellHasFocus);
-            
+
             // Style
             label.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
             label.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-            
+
             if (!isSelected) {
                 label.setBackground(index % 2 == 0 ? 
                     new Color(250, 250, 250) : Color.WHITE);
                 label.setForeground(new Color(33, 33, 33));
             }
-            
+
             return label;
         }
     }
