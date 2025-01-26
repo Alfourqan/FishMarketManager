@@ -3,14 +3,10 @@ package com.poissonnerie.view;
 import com.poissonnerie.model.Produit;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.List;
-import java.util.Arrays;
-import java.util.logging.Logger;
-import java.util.logging.Level;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class NotificationStockView extends JDialog {
     private static final Logger LOGGER = Logger.getLogger(NotificationStockView.class.getName());
@@ -108,35 +104,7 @@ public class NotificationStockView extends JDialog {
             listModel.add(0, message);
             notificationCount++;
             updateTitle();
-
-            // Afficher une notification système
-            displaySystemNotification(produit);
         });
-    }
-
-    private void displaySystemNotification(Produit produit) {
-        try {
-            String message = produit.getStock() == 0 ? 
-                "Rupture de stock pour " + produit.getNom() :
-                "Stock bas pour " + produit.getNom() + " (" + produit.getStock() + " restants)";
-
-            java.awt.SystemTray tray = java.awt.SystemTray.getSystemTray();
-            java.awt.Image image = Toolkit.getDefaultToolkit().createImage(getClass().getResource("/icons/warning.png"));
-            TrayIcon trayIcon = new TrayIcon(image, "Alerte Stock");
-            trayIcon.setImageAutoSize(true);
-
-            if (!Arrays.asList(tray.getTrayIcons()).contains(trayIcon)) {
-                tray.add(trayIcon);
-            }
-
-            trayIcon.displayMessage(
-                "Alerte Stock",
-                message,
-                TrayIcon.MessageType.WARNING
-            );
-        } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Impossible d'afficher la notification système", e);
-        }
     }
 
     private void clearNotifications() {
