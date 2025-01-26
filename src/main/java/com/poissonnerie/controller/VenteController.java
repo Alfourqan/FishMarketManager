@@ -17,6 +17,7 @@ public class VenteController {
     private static final double LIMITE_CREDIT_MAX = 5000.0;
     private static final int TRANSACTION_TIMEOUT_SECONDS = 30;
     private static final int BATCH_SIZE = 100;
+    private final CaisseController caisseController;
 
     // Motifs de validation
     private static final Pattern NUMERIC_PATTERN = Pattern.compile("^[0-9]+$");
@@ -35,6 +36,7 @@ public class VenteController {
 
     public VenteController() {
         this.ventes = new ArrayList<>();
+        this.caisseController = new CaisseController();
         initializeDatabase();
     }
 
@@ -468,6 +470,12 @@ public class VenteController {
     private void validateVente(Vente vente) {
         LOGGER.info("Début de la validation de la vente...");
         List<String> erreurs = new ArrayList<>();
+
+        // Vérifier si la caisse est ouverte
+        if (!caisseController.isCaisseOuverte()) {
+            LOGGER.severe("Tentative de vente avec caisse fermée");
+            throw new IllegalStateException("La caisse doit être ouverte pour effectuer une vente");
+        }
 
         if (vente == null) {
             LOGGER.severe("Tentative de validation d'une vente null");

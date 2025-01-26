@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CaisseController {
     private final List<MouvementCaisse> mouvements = new ArrayList<>();
@@ -23,7 +24,12 @@ public class CaisseController {
     }
 
     public boolean isCaisseOuverte() {
-        return caisseOuverte;
+        // Vérifier si le dernier mouvement est une ouverture
+        if (!mouvements.isEmpty()) {
+            MouvementCaisse dernierMouvement = mouvements.get(0);
+            return dernierMouvement.getType() != MouvementCaisse.TypeMouvement.CLOTURE;
+        }
+        return false;
     }
 
     public void chargerMouvements() {
@@ -80,7 +86,7 @@ public class CaisseController {
     }
 
     public void ajouterMouvement(MouvementCaisse mouvement) {
-        System.out.println("Ajout d'un nouveau mouvement: Type=" + mouvement.getType() + 
+        System.out.println("Ajout d'un nouveau mouvement: Type=" + mouvement.getType() +
                           ", Montant=" + mouvement.getMontant() + "€");
 
         String sql = "INSERT INTO mouvements_caisse (date, type, montant, description) VALUES (datetime('now', 'localtime'), ?, ?, ?)";
@@ -135,5 +141,16 @@ public class CaisseController {
             )));
 
         return csv.toString();
+    }
+
+    /**
+     * Filtre et retourne les mouvements du jour spécifié
+     * @param date la date pour laquelle filtrer les mouvements
+     * @return la liste des mouvements du jour
+     */
+    public List<MouvementCaisse> getMouvementsDuJour(LocalDateTime date) {
+        return mouvements.stream()
+            .filter(m -> m.getDate().toLocalDate().equals(date.toLocalDate()))
+            .collect(Collectors.toList());
     }
 }

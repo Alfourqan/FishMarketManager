@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -495,6 +496,7 @@ public class CaisseViewSwing {
         try {
             controller.chargerMouvements();
             refreshTable();
+            updateCurrentDayInfo();
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors du chargement des mouvements", e);
             JOptionPane.showMessageDialog(mainPanel,
@@ -504,15 +506,53 @@ public class CaisseViewSwing {
         }
     }
 
+    private void updateCurrentDayInfo() {
+        LocalDateTime now = LocalDateTime.now();
+        List<MouvementCaisse> mouvementsDuJour = controller.getMouvementsDuJour(now);
+
+        // Calcul des totaux du jour
+        double totalEntrees = mouvementsDuJour.stream()
+            .filter(m -> m.getType() == MouvementCaisse.TypeMouvement.ENTREE)
+            .mapToDouble(MouvementCaisse::getMontant)
+            .sum();
+
+        double totalSorties = mouvementsDuJour.stream()
+            .filter(m -> m.getType() == MouvementCaisse.TypeMouvement.SORTIE)
+            .mapToDouble(MouvementCaisse::getMontant)
+            .sum();
+
+        // Mise à jour du titre pour inclure les informations du jour
+        String date = now.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        String infoJour = String.format("Caisse du %s - Entrées: %.2f € - Sorties: %.2f €", 
+            date, totalEntrees, totalSorties);
+
+        // Mise à jour du label de titre avec les informations du jour
+        JLabel titleLabel = (JLabel) SwingUtilities.getDeepestComponentAt(
+            mainPanel, 10, 10); // Récupérer le label de titre
+        if (titleLabel != null) {
+            titleLabel.setText(infoJour);
+        }
+    }
+
     private void refreshTable() {
         tableModel.setRowCount(0);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        LocalDateTime now = LocalDateTime.now();
 
-        for (MouvementCaisse mouvement : controller.getMouvements()) {
+        // Filtrer pour n'afficher que les mouvements du jour
+        List<MouvementCaisse> mouvementsDuJour = controller.getMouvementsDuJour(now);
+
+        for (MouvementCaisse mouvement : mouvementsDuJour) {
+            // Style conditionnel selon le type de mouvement
+            String montantFormate = String.format("%,.2f €", mouvement.getMontant());
+            if (mouvement.getType() == MouvementCaisse.TypeMouvement.SORTIE) {
+                montantFormate = "-" + montantFormate;
+            }
+
             tableModel.addRow(new Object[]{
                 mouvement.getDate().format(formatter),
                 mouvement.getType().toString(),
-                String.format("%,.2f €", mouvement.getMontant()), // Format monétaire amélioré
+                montantFormate,
                 mouvement.getDescription()
             });
         }
