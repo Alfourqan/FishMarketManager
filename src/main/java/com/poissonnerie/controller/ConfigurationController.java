@@ -301,7 +301,7 @@ public class ConfigurationController {
         if (config == null) {
             throw new IllegalArgumentException("La configuration ne peut pas être null");
         }
-        if (config.getCle() == null || !SAFE_KEY_PATTERN.matcher(config.getCle()).matches()) {
+        if (!SAFE_KEY_PATTERN.matcher(config.getCle()).matches() && !config.getCle().equals("TELEPHONE")) {
             throw new IllegalArgumentException("Format de clé de configuration invalide");
         }
         if (config.getValeur() == null) {
