@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 public class CaisseController {
     private final List<MouvementCaisse> mouvements = new ArrayList<>();
     private double soldeCaisse = 0.0;
-    private boolean caisseOuverte = false;
 
     public List<MouvementCaisse> getMouvements() {
         return new ArrayList<>(mouvements);
@@ -24,12 +23,16 @@ public class CaisseController {
     }
 
     public boolean isCaisseOuverte() {
-        // Vérifier si le dernier mouvement est une ouverture
-        if (!mouvements.isEmpty()) {
-            MouvementCaisse dernierMouvement = mouvements.get(0);
-            return dernierMouvement.getType() != MouvementCaisse.TypeMouvement.CLOTURE;
+        if (mouvements.isEmpty()) {
+            return false;
         }
-        return false;
+        // Trouver le dernier mouvement d'ouverture ou de clôture
+        return mouvements.stream()
+            .filter(m -> m.getType() == MouvementCaisse.TypeMouvement.OUVERTURE || 
+                        m.getType() == MouvementCaisse.TypeMouvement.CLOTURE)
+            .findFirst()
+            .map(m -> m.getType() == MouvementCaisse.TypeMouvement.OUVERTURE)
+            .orElse(false);
     }
 
     public void chargerMouvements() {
@@ -59,7 +62,7 @@ public class CaisseController {
                 updateSoldeAndState(mouvement);
             }
             System.out.println("Mouvements de caisse chargés avec succès: " + mouvements.size() + " mouvements");
-            System.out.println("État actuel de la caisse - Solde: " + soldeCaisse + "€, Ouverte: " + caisseOuverte);
+            System.out.println("État actuel de la caisse - Solde: " + soldeCaisse + "€, Ouverte: " + isCaisseOuverte());
         } catch (SQLException e) {
             System.err.println("Erreur lors du chargement des mouvements: " + e.getMessage());
             throw new RuntimeException("Erreur lors du chargement des mouvements", e);
@@ -69,11 +72,9 @@ public class CaisseController {
     private void updateSoldeAndState(MouvementCaisse mouvement) {
         switch (mouvement.getType()) {
             case OUVERTURE:
-                caisseOuverte = true;
                 soldeCaisse = mouvement.getMontant();
                 break;
             case CLOTURE:
-                caisseOuverte = false;
                 soldeCaisse = 0.0;
                 break;
             case ENTREE:
@@ -111,7 +112,7 @@ public class CaisseController {
                 }
                 conn.commit();
                 System.out.println("Mouvement de caisse ajouté avec succès: " + mouvement);
-                System.out.println("Nouvel état de la caisse - Solde: " + soldeCaisse + "€, Ouverte: " + caisseOuverte);
+                System.out.println("Nouvel état de la caisse - Solde: " + soldeCaisse + "€, Ouverte: " + isCaisseOuverte());
             } catch (SQLException e) {
                 conn.rollback();
                 System.err.println("Erreur lors de l'ajout du mouvement: " + e.getMessage());
@@ -143,11 +144,6 @@ public class CaisseController {
         return csv.toString();
     }
 
-    /**
-     * Filtre et retourne les mouvements du jour spécifié
-     * @param date la date pour laquelle filtrer les mouvements
-     * @return la liste des mouvements du jour
-     */
     public List<MouvementCaisse> getMouvementsDuJour(LocalDateTime date) {
         return mouvements.stream()
             .filter(m -> m.getDate().toLocalDate().equals(date.toLocalDate()))

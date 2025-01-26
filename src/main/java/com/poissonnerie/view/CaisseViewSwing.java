@@ -79,7 +79,7 @@ public class CaisseViewSwing {
         DefaultTableCellRenderer cellRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value,
-                    boolean isSelected, boolean hasFocus, int row, int column) {
+                                                           boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value,
                         isSelected, hasFocus, row, column);
                 if (!isSelected) {
@@ -113,7 +113,7 @@ public class CaisseViewSwing {
         DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value,
-                    boolean isSelected, boolean hasFocus, int row, int column) {
+                                                           boolean isSelected, boolean hasFocus, int row, int column) {
                 JLabel label = (JLabel) super.getTableCellRendererComponent(table, value,
                         isSelected, hasFocus, row, column);
                 label.setBackground(new Color(33, 33, 33));
@@ -223,40 +223,45 @@ public class CaisseViewSwing {
     }
 
     private void ouvrirCaisse() {
-        if (!caisseOuverte.get()) {
-            try {
-                double montantInitial = getMontantInitial();
-                if (montantInitial > 0 && montantInitial <= MONTANT_MAX) {
-                    MouvementCaisse mouvement = new MouvementCaisse(
-                        0,
-                        LocalDateTime.now(),
-                        MouvementCaisse.TypeMouvement.OUVERTURE,
-                        montantInitial,
-                        "Ouverture de caisse"
-                    );
-                    controller.ajouterMouvement(mouvement);
-                    caisseOuverte.set(true);
-                    LOGGER.log(Level.INFO, "Ouverture de caisse avec montant initial: {0}", montantInitial);
-                    updateCaisseState();
-                    refreshTable();
-                    JOptionPane.showMessageDialog(mainPanel,
-                        "La caisse a été ouverte avec succès",
-                        "Succès",
-                        JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    LOGGER.log(Level.WARNING, "Tentative d'ouverture avec montant invalide: {0}", montantInitial);
-                    JOptionPane.showMessageDialog(mainPanel,
-                        "Le montant initial doit être compris entre 0 et " + MONTANT_MAX,
-                        "Erreur",
-                        JOptionPane.ERROR_MESSAGE);
-                }
-            } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Erreur lors de l'ouverture de la caisse", e);
+        if (controller.isCaisseOuverte()) {
+            JOptionPane.showMessageDialog(mainPanel,
+                "La caisse est déjà ouverte",
+                "Information",
+                JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        try {
+            double montantInitial = getMontantInitial();
+            if (montantInitial > 0 && montantInitial <= MONTANT_MAX) {
+                MouvementCaisse mouvement = new MouvementCaisse(
+                    0,
+                    LocalDateTime.now(),
+                    MouvementCaisse.TypeMouvement.OUVERTURE,
+                    montantInitial,
+                    "Ouverture de caisse"
+                );
+                controller.ajouterMouvement(mouvement);
+                LOGGER.log(Level.INFO, "Ouverture de caisse avec montant initial: {0}", montantInitial);
+                updateCaisseState();
+                refreshTable();
                 JOptionPane.showMessageDialog(mainPanel,
-                    "Erreur lors de l'ouverture de la caisse : " + e.getMessage(),
+                    "La caisse a été ouverte avec succès",
+                    "Succès",
+                    JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                LOGGER.log(Level.WARNING, "Tentative d'ouverture avec montant invalide: {0}", montantInitial);
+                JOptionPane.showMessageDialog(mainPanel,
+                    "Le montant initial doit être compris entre 0 et " + MONTANT_MAX,
                     "Erreur",
                     JOptionPane.ERROR_MESSAGE);
             }
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'ouverture de la caisse", e);
+            JOptionPane.showMessageDialog(mainPanel,
+                "Erreur lors de l'ouverture de la caisse : " + e.getMessage(),
+                "Erreur",
+                JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -327,16 +332,14 @@ public class CaisseViewSwing {
 
     private synchronized void updateCaisseState() {
         boolean etatPrecedent = caisseOuverte.get();
-        if (controller.getMouvements().size() > 0) {
-            MouvementCaisse dernierMouvement = controller.getMouvements().get(controller.getMouvements().size() - 1);
-            caisseOuverte.set(dernierMouvement.getType() != MouvementCaisse.TypeMouvement.CLOTURE);
-        }
+        caisseOuverte.set(controller.isCaisseOuverte());
 
         // Mettre à jour l'état des boutons de manière thread-safe
         SwingUtilities.invokeLater(() -> {
             ouvrirBtn.setEnabled(!caisseOuverte.get());
             cloturerBtn.setEnabled(caisseOuverte.get());
             ajouterBtn.setEnabled(caisseOuverte.get());
+            exporterBtn.setEnabled(true); // Toujours actif pour permettre l'export historique
         });
 
         if (etatPrecedent != caisseOuverte.get()) {
@@ -523,7 +526,7 @@ public class CaisseViewSwing {
 
         // Mise à jour du titre pour inclure les informations du jour
         String date = now.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-        String infoJour = String.format("Caisse du %s - Entrées: %.2f € - Sorties: %.2f €", 
+        String infoJour = String.format("Caisse du %s - Entrées: %.2f € - Sorties: %.2f €",
             date, totalEntrees, totalSorties);
 
         // Mise à jour du label de titre avec les informations du jour
