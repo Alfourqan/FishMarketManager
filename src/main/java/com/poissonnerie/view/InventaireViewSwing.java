@@ -5,6 +5,7 @@ import com.poissonnerie.model.Produit;
 import com.poissonnerie.model.InventaireManager;
 import com.poissonnerie.model.InventaireManager.InventaireObserver;
 import com.poissonnerie.model.InventaireManager.AjustementStock;
+import com.poissonnerie.view.NotificationStockView;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -38,6 +39,8 @@ public class InventaireViewSwing {
     private JComboBox<String> categoryFilter;
     private TableRowSorter<DefaultTableModel> sorter;
     private JPanel statsPanel;
+    private NotificationStockView notificationView;
+    private JButton notificationButton;
 
     public InventaireViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -60,6 +63,10 @@ public class InventaireViewSwing {
         // Ajout du système de tri et filtrage
         sorter = new TableRowSorter<>(tableModel);
         tableInventaire.setRowSorter(sorter);
+
+        // Initialisation de la vue des notifications
+        notificationView = NotificationStockView.getInstance(
+                (Frame) SwingUtilities.getWindowAncestor(mainPanel));
 
         // Observer pour les alertes de stock
         setupStockObserver();
@@ -140,6 +147,8 @@ public class InventaireViewSwing {
             public void onStockBas(Produit produit) {
                 SwingUtilities.invokeLater(() -> {
                     updateStatus("⚠️ Stock bas pour " + produit.getNom());
+                    notificationView.addNotification(produit);
+                    updateNotificationButton();
                     refreshTable();
                     updateStatistiques();
                 });
@@ -149,6 +158,8 @@ public class InventaireViewSwing {
             public void onRuptureStock(Produit produit) {
                 SwingUtilities.invokeLater(() -> {
                     updateStatus("⛔ Rupture de stock pour " + produit.getNom());
+                    notificationView.addNotification(produit);
+                    updateNotificationButton();
                     refreshTable();
                     updateStatistiques();
                 });
@@ -190,9 +201,13 @@ public class InventaireViewSwing {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonPanel.setOpaque(false);
 
+        notificationButton = createStyledButton("🔔 Alertes", new Color(255, 152, 0));
+        notificationButton.addActionListener(e -> notificationView.setVisible(true));
+
         JButton refreshBtn = createStyledButton("Actualiser", new Color(156, 39, 176));
         JButton historiqueBtn = createStyledButton("Historique", new Color(3, 169, 244));
 
+        buttonPanel.add(notificationButton);
         buttonPanel.add(historiqueBtn);
         buttonPanel.add(refreshBtn);
 
@@ -685,5 +700,18 @@ public class InventaireViewSwing {
 
     public JPanel getMainPanel() {
         return mainPanel;
+    }
+
+    private void updateNotificationButton() {
+        SwingUtilities.invokeLater(() -> {
+            List<Produit> produitsBas = inventaireManager.getProduitsBas(produitController.getProduits());
+            if (!produitsBas.isEmpty()) {
+                notificationButton.setText("🔔 Alertes (" + produitsBas.size() + ")");
+                notificationButton.setBackground(new Color(244, 67, 54));
+            } else {
+                notificationButton.setText("🔔 Alertes");
+                notificationButton.setBackground(new Color(255, 152, 0));
+            }
+        });
     }
 }
