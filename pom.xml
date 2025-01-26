@@ -56,16 +56,19 @@
       <groupId>com.zaxxer</groupId>
       <artifactId>HikariCP</artifactId>
       <version>5.1.0</version>
+      <type></type>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>2.0.9</version>
+      <type></type>
     </dependency>
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
       <version>1.4.14</version>
+      <type></type>
     </dependency>
     <dependency>
       <groupId>com.itextpdf</groupId>
@@ -77,6 +80,7 @@
       <groupId>org.apache.pdfbox</groupId>
       <artifactId>pdfbox</artifactId>
       <version>2.0.30</version>
+      <type></type>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -114,11 +118,17 @@
       <version>1.5.5</version>
       <type>jar</type>
     </dependency>
-    <!-- Ajout de la dépendance Gson pour la sérialisation/désérialisation JSON -->
     <dependency>
       <groupId>com.google.code.gson</groupId>
       <artifactId>gson</artifactId>
       <version>2.10.1</version>
+      <type></type>
+    </dependency>
+    <dependency>
+      <groupId>org.swinglabs.swingx</groupId>
+      <artifactId>swingx-core</artifactId>
+      <version>1.6.5-1</version>
+      <type>jar</type>
     </dependency>
   </dependencies>
   <build>
@@ -128,25 +138,23 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.11.0</version>
         <configuration>
-          <source>17</source>
-          <target>17</target>
-          <compilerArgs>
-            <arg>-Xlint:unchecked</arg>
-            <arg>-Xlint:deprecation</arg>
-          </compilerArgs>
+          <dynamicDependencies></dynamicDependencies>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.0.0</version>
+        <configuration>
+          <dynamicDependencies></dynamicDependencies>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <version>3.1.0</version>
         <configuration>
-          <mainClass>com.poissonnerie.Main</mainClass>
+          <dynamicDependencies></dynamicDependencies>
         </configuration>
       </plugin>
     </plugins>

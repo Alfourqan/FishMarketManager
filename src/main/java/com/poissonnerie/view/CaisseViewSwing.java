@@ -2,6 +2,7 @@ package com.poissonnerie.view;
 
 import com.poissonnerie.controller.CaisseController;
 import com.poissonnerie.model.MouvementCaisse;
+import org.jdesktop.swingx.JXDatePicker;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
@@ -13,11 +14,13 @@ import org.kordamp.ikonli.swing.FontIcon;
 import java.io.File;
 import java.io.FileWriter;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CaisseViewSwing {
     private static final Logger LOGGER = Logger.getLogger(CaisseViewSwing.class.getName());
@@ -181,12 +184,59 @@ public class CaisseViewSwing {
         headerPanel.setOpaque(false);
         headerPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
 
+        // Panel gauche pour le titre
+        JPanel leftPanel = new JPanel(new BorderLayout(10, 0));
+        leftPanel.setOpaque(false);
+
         JLabel titleLabel = new JLabel("Gestion de la Caisse");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
         titleLabel.setForeground(new Color(33, 33, 33));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 10));
 
-        headerPanel.add(titleLabel, BorderLayout.WEST);
+        // Panel de recherche par date
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        searchPanel.setOpaque(false);
+
+        // Création des composants de recherche
+        JXDatePicker dateDebutPicker = new JXDatePicker();
+        JXDatePicker dateFinPicker = new JXDatePicker();
+        dateDebutPicker.setDate(new Date());
+        dateFinPicker.setDate(new Date());
+
+        // Personnalisation des date pickers
+        dateDebutPicker.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+        dateFinPicker.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+
+        JButton searchButton = createStyledButton("Rechercher", MaterialDesign.MDI_MAGNIFY, new Color(33, 150, 243));
+        searchButton.addActionListener(e -> {
+            LocalDateTime dateDebut = dateDebutPicker.getDate().toInstant()
+                .atZone(ZoneId.systemDefault()).toLocalDateTime();
+            LocalDateTime dateFin = dateFinPicker.getDate().toInstant()
+                .atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+            List<MouvementCaisse> mouvementsFiltres = controller.rechercherMouvementsParDate(dateDebut, dateFin);
+            refreshTableWithMovements(mouvementsFiltres);
+            updateTotalInfo(mouvementsFiltres);
+        });
+
+        JButton resetButton = createStyledButton("Réinitialiser", MaterialDesign.MDI_REFRESH, new Color(158, 158, 158));
+        resetButton.addActionListener(e -> {
+            dateDebutPicker.setDate(new Date());
+            dateFinPicker.setDate(new Date());
+            refreshTable(); // Recharge les mouvements du jour
+        });
+
+        // Ajout des composants au panel de recherche
+        searchPanel.add(new JLabel("Du:"));
+        searchPanel.add(dateDebutPicker);
+        searchPanel.add(new JLabel("Au:"));
+        searchPanel.add(dateFinPicker);
+        searchPanel.add(searchButton);
+        searchPanel.add(resetButton);
+
+        leftPanel.add(titleLabel, BorderLayout.NORTH);
+        leftPanel.add(searchPanel, BorderLayout.SOUTH);
+
+        headerPanel.add(leftPanel, BorderLayout.WEST);
         headerPanel.add(soldeLabel, BorderLayout.EAST);
 
         return headerPanel;
@@ -564,6 +614,47 @@ public class CaisseViewSwing {
         soldeLabel.setText(String.format("Solde: %,.2f €", controller.getSoldeCaisse()));
         updateCaisseState();
     }
+    private void refreshTableWithMovements(List<MouvementCaisse> mouvements) {
+        tableModel.setRowCount(0);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+        for (MouvementCaisse mouvement : mouvements) {
+            String montantFormate = String.format("%,.2f €", mouvement.getMontant());
+            if (mouvement.getType() == MouvementCaisse.TypeMouvement.SORTIE) {
+                montantFormate = "-" + montantFormate;
+            }
+
+            tableModel.addRow(new Object[]{
+                mouvement.getDate().format(formatter),
+                mouvement.getType().toString(),
+                montantFormate,
+                mouvement.getDescription()
+            });
+        }
+    }
+
+    private void updateTotalInfo(List<MouvementCaisse> mouvements) {
+        double totalEntrees = mouvements.stream()
+            .filter(m -> m.getType() == MouvementCaisse.TypeMouvement.ENTREE)
+            .mapToDouble(MouvementCaisse::getMontant)
+            .sum();
+
+        double totalSorties = mouvements.stream()
+            .filter(m -> m.getType() == MouvementCaisse.TypeMouvement.SORTIE)
+            .mapToDouble(MouvementCaisse::getMontant)
+            .sum();
+
+        String periode = "Période sélectionnée";
+        String infoTotal = String.format("%s - Entrées: %.2f € - Sorties: %.2f €",
+            periode, totalEntrees, totalSorties);
+
+        // Met à jour le label de titre avec les informations de la période
+        JLabel titleLabel = (JLabel) SwingUtilities.getDeepestComponentAt(mainPanel, 10, 10);
+        if (titleLabel != null) {
+            titleLabel.setText(infoTotal);
+        }
+    }
+
 
     public JPanel getMainPanel() {
         return mainPanel;

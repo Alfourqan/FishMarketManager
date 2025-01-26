@@ -26,7 +26,6 @@ public class CaisseController {
         if (mouvements.isEmpty()) {
             return false;
         }
-        // Trouver le dernier mouvement d'ouverture ou de clôture
         return mouvements.stream()
             .filter(m -> m.getType() == MouvementCaisse.TypeMouvement.OUVERTURE || 
                         m.getType() == MouvementCaisse.TypeMouvement.CLOTURE)
@@ -58,7 +57,6 @@ public class CaisseController {
                 );
                 mouvements.add(mouvement);
 
-                // Mettre à jour le solde et l'état de la caisse
                 updateSoldeAndState(mouvement);
             }
             System.out.println("Mouvements de caisse chargés avec succès: " + mouvements.size() + " mouvements");
@@ -147,6 +145,14 @@ public class CaisseController {
     public List<MouvementCaisse> getMouvementsDuJour(LocalDateTime date) {
         return mouvements.stream()
             .filter(m -> m.getDate().toLocalDate().equals(date.toLocalDate()))
+            .collect(Collectors.toList());
+    }
+
+    public List<MouvementCaisse> rechercherMouvementsParDate(LocalDateTime dateDebut, LocalDateTime dateFin) {
+        return mouvements.stream()
+            .filter(m -> !m.getDate().isBefore(dateDebut.toLocalDate().atStartOfDay()) &&
+                        !m.getDate().isAfter(dateFin.toLocalDate().atTime(23, 59, 59)))
+            .sorted((m1, m2) -> m2.getDate().compareTo(m1.getDate())) // Tri décroissant par date
             .collect(Collectors.toList());
     }
 }
