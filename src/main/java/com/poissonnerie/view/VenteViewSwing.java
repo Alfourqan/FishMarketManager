@@ -19,6 +19,10 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 import org.kordamp.ikonli.materialdesign.MaterialDesign;
 import org.kordamp.ikonli.swing.FontIcon;
+import org.jdesktop.swingx.JXDatePicker;
+import java.util.Date;
+import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 
 public class VenteViewSwing {
     private static final Logger LOGGER = Logger.getLogger(VenteViewSwing.class.getName());
@@ -38,6 +42,8 @@ public class VenteViewSwing {
     private static final int MAX_QUANTITE = 9999;
     private static final double MAX_PRIX_UNITAIRE = 99999.99;
     private volatile boolean isProcessingOperation = false;
+    private JXDatePicker dateDebut;
+    private JXDatePicker dateFin;
 
     public VenteViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -703,7 +709,42 @@ public class VenteViewSwing {
     private JPanel createHistoriquePanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
 
-        JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        // Search panel for date filtering
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        searchPanel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+        FontIcon searchIcon = FontIcon.of(MaterialDesign.MDI_CALENDAR);
+        searchIcon.setIconSize(18);
+        searchIcon.setIconColor(new Color(33, 150, 243));
+
+        JLabel dateDebutLabel = new JLabel("Du:");
+        dateDebutLabel.setIcon(searchIcon);
+        dateDebut = new JXDatePicker();
+        dateDebut.setDate(new Date());
+        dateDebut.setFormats(new SimpleDateFormat("dd/MM/yyyy"));
+
+        JLabel dateFinLabel = new JLabel("Au:");
+        FontIcon searchIcon2 = FontIcon.of(MaterialDesign.MDI_CALENDAR);
+        searchIcon2.setIconSize(18);
+        searchIcon2.setIconColor(new Color(33, 150, 243));
+        dateFinLabel.setIcon(searchIcon2);
+        dateFin = new JXDatePicker();
+        dateFin.setDate(new Date());
+        dateFin.setFormats(new SimpleDateFormat("dd/MM/yyyy"));
+
+        JButton searchButton = createStyledButton("Rechercher", MaterialDesign.MDI_MAGNIFY, new Color(33, 150, 243));
+        JButton resetButton = createStyledButton("Réinitialiser", MaterialDesign.MDI_REFRESH, new Color(244, 67, 54));
+
+        searchPanel.add(dateDebutLabel);
+        searchPanel.add(dateDebut);
+        searchPanel.add(dateFinLabel);
+        searchPanel.add(dateFin);
+        searchPanel.add(searchButton);
+        searchPanel.add(resetButton);
+
+        // Title panel with search
+        JPanel titlePanel = new JPanel(new BorderLayout());
+        JPanel labelPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         FontIcon historyIcon = FontIcon.of(MaterialDesign.MDI_HISTORY);
         historyIcon.setIconSize(18);
         historyIcon.setIconColor(new Color(33, 150, 243));
@@ -711,63 +752,82 @@ public class VenteViewSwing {
         JLabel titleLabel = new JLabel("Historique des Ventes");
         titleLabel.setIcon(historyIcon);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        labelPanel.add(titleLabel);
 
-        // Ajout du bouton de règlement pour les clients avec crédit
-        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        if (tableVentes.getSelectedRow() != -1) {
-            int row = tableVentes.getSelectedRow();
-            String clientName = (String) tableVentes.getValueAt(row, 1);
-            String type = (String) tableVentes.getValueAt(row, 2);
+        titlePanel.add(labelPanel, BorderLayout.WEST);
+        titlePanel.add(searchPanel, BorderLayout.CENTER);
 
-            if ("Crédit".equals(type)) {
-                Client client = clientController.getClients().stream()
-                        .filter(c -> clientName.equals(c.getNom()))
-                        .findFirst()
-                        .orElse(null);
-
-                if (client != null && client.getSolde() > 0) {
-                    actionPanel.add(createReglerButton(client));
-                }
-            }
-        }
-
-        titlePanel.add(titleLabel);
-        titlePanel.add(actionPanel);
-
+        // Rest of the panel setup
         panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-
         JScrollPane scrollPane = new JScrollPane(tableVentes);
         tableVentes.setFillsViewportHeight(true);
 
-        // Ajouter un listener pour mettre à jour le bouton de règlement
-        tableVentes.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                actionPanel.removeAll();
-                if (tableVentes.getSelectedRow() != -1) {
-                    int row = tableVentes.getSelectedRow();
-                    String clientName = (String) tableVentes.getValueAt(row, 1);
-                    String type = (String) tableVentes.getValueAt(row, 2);
-
-                    if ("Crédit".equals(type)) {
-                        Client client = clientController.getClients().stream()
-                                .filter(c -> clientName.equals(c.getNom()))
-                                .findFirst()
-                                .orElse(null);
-
-                        if (client != null && client.getSolde() > 0) {
-                            actionPanel.add(createReglerButton(client));
-                        }
-                    }
-                }
-                actionPanel.revalidate();
-                actionPanel.repaint();
-            }
+        // Add action listeners for search
+        searchButton.addActionListener(e -> rechercherVentesParDates());
+        resetButton.addActionListener(e -> {
+            dateDebut.setDate(new Date());
+            dateFin.setDate(new Date());
+            refreshVentesTable(); // Reset to show all sales
         });
 
         panel.add(titlePanel, BorderLayout.NORTH);
         panel.add(scrollPane, BorderLayout.CENTER);
 
         return panel;
+    }
+
+    private void rechercherVentesParDates() {
+        if (dateDebut.getDate() == null || dateFin.getDate() == null) {
+            JOptionPane.showMessageDialog(mainPanel,
+                    "Veuillez sélectionner une date de début et de fin",
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        LocalDateTime dateDebutLD = dateDebut.getDate().toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime()
+                .withHour(0).withMinute(0).withSecond(0);
+
+        LocalDateTime dateFinLD = dateFin.getDate().toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDateTime()
+                .withHour(23).withMinute(59).withSecond(59);
+
+        if (dateDebutLD.isAfter(dateFinLD)) {
+            JOptionPane.showMessageDialog(mainPanel,
+                    "La date de début doit être antérieure à la date de fin",
+                    "Erreur",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        SwingUtilities.invokeLater(() -> {
+            ventesModel.setRowCount(0);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+
+            List<Vente> ventesTriees = venteController.getVentes().stream()
+                    .filter(vente -> !vente.getDate().isBefore(dateDebutLD) && !vente.getDate().isAfter(dateFinLD))
+                    .sorted((v1, v2) -> v2.getDate().compareTo(v1.getDate()))
+                    .collect(Collectors.toList());
+
+            for (Vente vente : ventesTriees) {
+                ventesModel.addRow(new Object[]{
+                        vente.getDate().format(formatter),
+                        vente.getClient() != null ? sanitizeInput(vente.getClient().getNom()) : "Vente comptant",
+                        vente.isCredit() ? "Crédit" : "Comptant",
+                        String.format("%.2f €", vente.getTotal())
+                });
+            }
+
+            if (ventesTriees.isEmpty()) {
+                JOptionPane.showMessageDialog(mainPanel,
+                        "Aucune vente trouvée pour cette période",
+                        "Information",
+                        JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
     }
 
     private void validerReglement(Client client, double montantRegle) {
@@ -825,8 +885,7 @@ public class VenteViewSwing {
                     String.format("Solde actuel: %.2f€\nMontant à régler:", client.getSolde()));
 
             if (montantStr != null && !montantStr.trim().isEmpty()) {
-                try {
-                    double montant = Double.parseDouble(montantStr.replace(",", ".").trim());
+                try {                    double montant = Double.parseDouble(montantStr.replace(",", ".").trim());
                     if (montant <= 0) {
                         throw new IllegalArgumentException("Le montant doit être positif");
                     }
