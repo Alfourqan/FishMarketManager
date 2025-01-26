@@ -24,6 +24,7 @@ com/poissonnerie/view/ProduitViewSwing$2.class
 com/poissonnerie/view/InventaireViewSwing$6.class
 com/poissonnerie/view/ClientViewSwing$3.class
 com/poissonnerie/view/FournisseurViewSwing$1.class
+com/poissonnerie/util/CacheManager$Cache$1.class
 com/poissonnerie/view/VenteViewSwing$1.class
 com/poissonnerie/view/AccueilViewSwing$1.class
 com/poissonnerie/controller/ProduitController.class
@@ -35,6 +36,7 @@ com/poissonnerie/view/ReportViewSwing$2.class
 com/poissonnerie/view/ProduitViewSwing.class
 com/poissonnerie/view/SplashScreen$2.class
 com/poissonnerie/view/ConfigurationViewSwing.class
+com/poissonnerie/util/CacheManager$Cache$CacheEntry.class
 com/poissonnerie/view/FournisseurViewSwing.class
 com/poissonnerie/view/VenteViewSwing$2.class
 com/poissonnerie/model/Fournisseur.class
@@ -43,6 +45,7 @@ com/poissonnerie/controller/ReportController.class
 com/poissonnerie/view/ProduitViewSwing$3.class
 com/poissonnerie/view/ReportViewSwing$1.class
 com/poissonnerie/model/Vente$ModePaiement.class
+com/poissonnerie/util/CacheManager.class
 com/poissonnerie/view/InventaireViewSwing$1.class
 com/poissonnerie/model/Vente$LigneVente.class
 com/poissonnerie/view/SplashScreen$1.class
@@ -74,6 +77,7 @@ com/poissonnerie/Main.class
 com/poissonnerie/view/AccueilViewSwing.class
 com/poissonnerie/view/MainViewSwing.class
 com/poissonnerie/controller/VenteController.class
+com/poissonnerie/util/CacheManager$Cache.class
 com/poissonnerie/view/ReportViewSwing$3.class
 com/poissonnerie/model/InventaireManager$InventaireObserver.class
 com/poissonnerie/view/ReportViewSwing$5.class
