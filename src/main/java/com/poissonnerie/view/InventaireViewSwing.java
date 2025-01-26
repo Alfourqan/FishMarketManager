@@ -42,6 +42,10 @@ public class InventaireViewSwing {
     private NotificationStockView notificationView;
     private JButton notificationButton;
 
+    // Constants are already at the class level in the original code.
+    private static final Color BUTTON_COLOR = new Color(14, 165, 233);
+    private static final Color HOVER_COLOR = new Color(2, 132, 199);
+
     public InventaireViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
         produitController = new ProduitController();
@@ -585,9 +589,6 @@ public class InventaireViewSwing {
 
 
     private class ButtonRenderer extends JButton implements TableCellRenderer {
-        private static final Color BUTTON_COLOR = new Color(14, 165, 233);
-        private static final Color HOVER_COLOR = new Color(2, 132, 199);
-
         public ButtonRenderer() {
             setOpaque(true);
             setFocusPainted(false);
@@ -599,7 +600,7 @@ public class InventaireViewSwing {
 
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value,
-                                                      boolean isSelected, boolean hasFocus, int row, int column) {
+                                                       boolean isSelected, boolean hasFocus, int row, int column) {
             setText("Ajuster Stock");
             setBackground(BUTTON_COLOR);
             setForeground(Color.WHITE);
@@ -609,9 +610,8 @@ public class InventaireViewSwing {
     }
 
     private class ButtonEditor extends DefaultCellEditor {
-        private final JButton button;
-        private boolean isPushed;
-        private static final Color BUTTON_COLOR = new Color(14, 165, 233);
+        protected final JButton button;
+        protected boolean isPushed;
 
         public ButtonEditor(JCheckBox checkBox) {
             super(checkBox);
@@ -631,7 +631,7 @@ public class InventaireViewSwing {
 
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value,
-                                                    boolean isSelected, int row, int column) {
+                                                     boolean isSelected, int row, int column) {
             button.setText("Ajuster Stock");
             button.setBackground(BUTTON_COLOR);
             button.setForeground(Color.WHITE);
