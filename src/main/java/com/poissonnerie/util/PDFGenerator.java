@@ -97,15 +97,11 @@ public class PDFGenerator {
 
             // Lignes verticales
             float currentX = xPosition;
-            contentStream.moveTo(currentX, yPosition + rowHeight);
-            contentStream.lineTo(currentX, yPosition - rowHeight);
-            contentStream.stroke();
-
             for (float width : columnWidths) {
-                currentX += width;
                 contentStream.moveTo(currentX, yPosition + rowHeight);
                 contentStream.lineTo(currentX, yPosition - rowHeight);
                 contentStream.stroke();
+                currentX += width;
             }
 
             // Restaurer la couleur noire par défaut
@@ -187,6 +183,9 @@ public class PDFGenerator {
         contentStream.newLineAtOffset(MARGIN, MARGIN - 15);
         contentStream.showText("© 2025 Ma Poissonnerie - Tous droits réservés");
         contentStream.endText();
+
+        // Restaurer la couleur par défaut
+        contentStream.setStrokingColor(Color.BLACK);
     }
 
     public static void genererRapportFournisseurs(List<Fournisseur> fournisseurs, ByteArrayOutputStream outputStream) {
@@ -303,25 +302,37 @@ public class PDFGenerator {
 
     public static void genererRapportCreances(List<Client> clients, ByteArrayOutputStream outputStream) {
         try (PDDocument document = new PDDocument()) {
-            PDPage page = new PDPage();
-            document.addPage(page);
-            try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
+            int totalPages = (int) Math.ceil(clients.size() / 20.0) + 1;
+            PDPage firstPage = new PDPage(PDRectangle.A4);
+            document.addPage(firstPage);
+
+            try (PDPageContentStream contentStream = new PDPageContentStream(document, firstPage)) {
+                // Ajouter l'en-tête
+                addHeader(contentStream, firstPage);
+
+                // Titre du rapport
                 contentStream.beginText();
+                contentStream.setNonStrokingColor(PRIMARY_COLOR);
                 contentStream.setFont(PDType1Font.HELVETICA_BOLD, 18);
-                contentStream.newLineAtOffset(50, page.getMediaBox().getHeight() - 50);
+                contentStream.newLineAtOffset(MARGIN, firstPage.getMediaBox().getHeight() - HEADER_HEIGHT - 30);
                 contentStream.showText("État des Créances");
                 contentStream.endText();
 
+                // Ajouter le pied de page
+                addFooter(contentStream, firstPage, 1, totalPages);
+
                 float[] columnWidths = {150, 100, 100, 100};
-                PDFTable table = new PDFTable(document, page, contentStream, page.getMediaBox().getHeight() - 100, columnWidths,1);
+                float startY = firstPage.getMediaBox().getHeight() - HEADER_HEIGHT - 60;
+                PDFTable table = new PDFTable(document, firstPage, contentStream, startY, columnWidths, totalPages);
 
                 String[] headers = {"Client", "Téléphone", "Solde", "Dernière Échéance"};
                 for (int i = 0; i < headers.length; i++) {
-                    table.addCell(headers[i], i, true);
+                    table.addHeaderCell(headers[i], i);
                 }
                 table.drawRowLines();
                 table.nextRow();
 
+                contentStream.setNonStrokingColor(Color.BLACK);
                 for (Client client : clients) {
                     if (client.getSolde() > 0) {
                         table.addCell(client.getNom(), 0, false);
@@ -334,12 +345,12 @@ public class PDFGenerator {
                 }
             }
             document.save(outputStream);
+            LOGGER.info("Rapport des créances généré avec succès");
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport des créances", e);
             throw new RuntimeException("Erreur lors de la génération du rapport", e);
         }
     }
-
 
     public static void genererRapportStocks(List<Produit> produits, Map<String, Double> statistiques,
                                           ByteArrayOutputStream outputStream) {
@@ -453,6 +464,7 @@ public class PDFGenerator {
             throw new RuntimeException("Erreur lors de la génération du rapport", e);
         }
     }
+
 
 
     public static void genererReglementCreance(Client client, double montantPaye, double nouveauSolde, String cheminFichier) {
