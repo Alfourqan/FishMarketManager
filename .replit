@@ -39,6 +39,14 @@ args = "Java Build Test"
 task = "workflow.run"
 args = "Java Build Final"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Java VNC Application"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Java VNC App"
+
 [[workflows.workflow]]
 name = "Java Application"
 author = "agent"
@@ -52,6 +60,7 @@ task = "packager.installForAll"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "mvn clean compile exec:java -Dexec.mainClass='com.poissonnerie.Main' -Dexec.systemProperties.SKIP_SIRET_VALIDATION=true -Djava.awt.headless=false -Dexec.cleanupDaemonThreads=false"
+waitForPort = 3000
 
 [[workflows.workflow]]
 name = "Application Poissonnerie"
@@ -136,6 +145,36 @@ task = "packager.installForAll"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "mvn clean compile && mvn exec:java -Dexec.mainClass=\"com.poissonnerie.Main\" -Dexec.systemProperties.SKIP_SIRET_VALIDATION=true -Djava.awt.headless=false -Dexec.cleanupDaemonThreads=false"
+
+[[workflows.workflow]]
+name = "Java VNC Application"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "mvn clean compile exec:java -Dexec.mainClass='com.poissonnerie.Main' -Dexec.systemProperties.SKIP_SIRET_VALIDATION=true -Djava.awt.headless=false -Dexec.cleanupDaemonThreads=false"
+waitForPort = 5900
+
+[[workflows.workflow]]
+name = "Java VNC App"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "DISPLAY=:0 mvn clean compile exec:java -Dexec.mainClass='com.poissonnerie.Main' -Dexec.systemProperties.SKIP_SIRET_VALIDATION=true -Djava.awt.headless=false -Dexec.cleanupDaemonThreads=false"
+waitForPort = 5900
 
 [deployment]
 run = ["sh", "-c", "mvn clean compile && mvn exec:java -Dexec.mainClass=\"com.poissonnerie.Main\" -Dexec.systemProperties.SKIP_SIRET_VALIDATION=true -Djava.awt.headless=false -Dexec.cleanupDaemonThreads=false"]
