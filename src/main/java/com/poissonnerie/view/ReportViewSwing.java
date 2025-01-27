@@ -26,10 +26,8 @@ import org.jfree.chart.*;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
 import java.awt.event.ItemEvent;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.pdf.PdfReader;
-import com.itextpdf.text.pdf.parser.PdfReaderContentParser;
-import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.rendering.PDFRenderer;
 import javax.imageio.ImageIO;
 
 
@@ -608,9 +606,9 @@ public class ReportViewSwing {
             this.currentPage = 1;
 
             // Calculer le nombre total de pages
-            PdfReader reader = new PdfReader(pdfData);
-            this.totalPages = reader.getNumberOfPages();
-            reader.close();
+            PDDocument document = PDDocument.load(new ByteArrayInputStream(pdfData));
+            this.totalPages = document.getNumberOfPages();
+            document.close();
 
             // Afficher la première page
             afficherPage(1);
@@ -657,9 +655,10 @@ public class ReportViewSwing {
         try {
             if (currentPdfData != null && pageNumber > 0 && pageNumber <= totalPages) {
                 // Créer une image à partir de la page PDF
-                PdfReader reader = new PdfReader(currentPdfData);
-                BufferedImage image = generateImageFromPDF(reader, pageNumber);
-                reader.close();
+                PDDocument document = PDDocument.load(new ByteArrayInputStream(currentPdfData));
+                PDFRenderer pdfRenderer = new PDFRenderer(document);
+                BufferedImage image = pdfRenderer.renderImageWithDPI(pageNumber - 1, 300);
+                document.close();
 
                 if (image != null) {
                     ImageIcon icon = new ImageIcon(image);
@@ -675,40 +674,6 @@ public class ReportViewSwing {
         }
     }
 
-    private BufferedImage generateImageFromPDF(PdfReader reader, int pageNumber) {
-        try {
-            // Créer une image avec une résolution suffisante
-            BufferedImage image = new BufferedImage(2000, 2800, BufferedImage.TYPE_INT_RGB);
-            Graphics2D g2d = image.createGraphics();
-            g2d.setColor(Color.WHITE);
-            g2d.fillRect(0, 0, image.getWidth(), image.getHeight());
-
-            // Extraire le texte de la page
-            PdfReaderContentParser parser = new PdfReaderContentParser(reader);
-            SimpleTextExtractionStrategy strategy = parser.processContent(
-                pageNumber, new SimpleTextExtractionStrategy());
-            String text = strategy.getResultantText();
-
-            // Dessiner le texte sur l'image
-            g2d.setColor(Color.BLACK);
-            g2d.setFont(new Font("Serif", Font.PLAIN, 12));
-            drawPDFContent(g2d, text);
-            g2d.dispose();
-
-            return image;
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération de l'image", e);
-            return null;
-        }
-    }
-
-    private void drawPDFContent(Graphics2D g2d, String text) {
-        int y = 50;
-        for (String line : text.split("\n")) {
-            g2d.drawString(line, 50, y);
-            y += 15;
-        }
-    }
 
     private void afficherPageSuivante() {
         if (currentPage < totalPages) {
@@ -738,9 +703,10 @@ public class ReportViewSwing {
                         g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
 
                         // Générer l'image de la page
-                        PdfReader reader = new PdfReader(currentPdfData);
-                        BufferedImage image = generateImageFromPDF(reader, pageIndex + 1);
-                        reader.close();
+                        PDDocument document = PDDocument.load(new ByteArrayInputStream(currentPdfData));
+                        PDFRenderer pdfRenderer = new PDFRenderer(document);
+                        BufferedImage image = pdfRenderer.renderImageWithDPI(pageIndex, 300);
+                        document.close();
 
                         if (image != null) {
                             double scale = Math.min(
