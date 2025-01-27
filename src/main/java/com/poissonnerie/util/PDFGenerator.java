@@ -18,33 +18,36 @@ public class PDFGenerator {
     private static final Logger LOGGER = Logger.getLogger(PDFGenerator.class.getName());
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-    // Constantes de mise en page améliorées
-    private static final float MARGIN = 40;
-    private static final float HEADER_HEIGHT = 120;
-    private static final float FOOTER_HEIGHT = 40;
+    // Constantes de mise en page optimisées
+    private static final float MARGIN = 50;
+    private static final float HEADER_HEIGHT = 140;
+    private static final float FOOTER_HEIGHT = 50;
+    private static final float CONTENT_PADDING = 20;
 
-    // Nouvelle palette de couleurs moderne
-    private static final Color PRIMARY_COLOR = new Color(0, 102, 204);    // Bleu professionnel
-    private static final Color SECONDARY_COLOR = new Color(64, 64, 64);   // Gris foncé
-    private static final Color ACCENT_COLOR = new Color(245, 166, 35);    // Orange accent
-    private static final Color BACKGROUND_COLOR = new Color(249, 249, 249); // Gris très clair
-    private static final Color TABLE_HEADER_BG = new Color(240, 240, 240);
-    private static final Color TABLE_BORDER = new Color(200, 200, 200);
+    // Palette de couleurs sophistiquée
+    private static final Color PRIMARY_COLOR = new Color(41, 128, 185);      // Bleu élégant
+    private static final Color ACCENT_COLOR = new Color(230, 126, 34);       // Orange vif
+    private static final Color TEXT_COLOR = new Color(52, 73, 94);           // Gris foncé
+    private static final Color LIGHT_TEXT = new Color(236, 240, 241);        // Gris très clair
+    private static final Color BACKGROUND_LIGHT = new Color(245, 247, 250);  // Fond clair
+    private static final Color TABLE_HEADER = new Color(52, 152, 219);       // Bleu header
+    private static final Color TABLE_BORDER = new Color(189, 195, 199);      // Gris bordure
 
     private static class PDFTable {
         private float yPosition;
         private float[] columnWidths;
-        private float rowHeight = 30; // Augmenté pour plus d'espace
+        private float rowHeight = 35;  // Plus d'espace pour le contenu
         private PDPageContentStream contentStream;
         private PDPage page;
         private PDDocument document;
         private float tableWidth;
-        private float cellMargin = 8f; // Augmenté pour plus d'espace
+        private float cellMargin = 12f;  // Marge intérieure plus large
         private int currentPage = 1;
         private int totalPages;
+        private float cornerRadius = 3f;  // Rayon des coins arrondis
 
         public PDFTable(PDDocument document, PDPage page, PDPageContentStream contentStream,
-                        float yPosition, float[] columnWidths, int totalPages) {
+                       float yPosition, float[] columnWidths, int totalPages) {
             this.document = document;
             this.page = page;
             this.contentStream = contentStream;
@@ -59,83 +62,88 @@ public class PDFGenerator {
 
         public void addHeaderCell(String text, int column) throws IOException {
             try {
-                float xPosition = MARGIN;
+                float xPosition = MARGIN + CONTENT_PADDING;
                 for (int i = 0; i < column; i++) {
                     xPosition += columnWidths[i];
                 }
 
-                // Fond de l'en-tête avec dégradé
-                contentStream.setNonStrokingColor(PRIMARY_COLOR);
-                contentStream.addRect(xPosition, yPosition - 5, columnWidths[column], rowHeight);
+                // Fond du header avec dégradé et coins arrondis
+                contentStream.setNonStrokingColor(TABLE_HEADER);
+                drawRoundedRect(contentStream, xPosition, yPosition - rowHeight + 5, 
+                              columnWidths[column], rowHeight, cornerRadius);
                 contentStream.fill();
 
-                // Texte en blanc pour meilleur contraste
-                contentStream.setNonStrokingColor(Color.WHITE);
+                // Texte en blanc
+                contentStream.setNonStrokingColor(LIGHT_TEXT);
                 contentStream.beginText();
                 contentStream.setFont(PDType1Font.HELVETICA_BOLD, 11);
-                contentStream.newLineAtOffset(xPosition + cellMargin, yPosition + 7);
+                contentStream.newLineAtOffset(xPosition + cellMargin, yPosition - rowHeight/2 + 5);
                 contentStream.showText(text != null ? text : "");
                 contentStream.endText();
 
             } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "Erreur lors de l'ajout d'une cellule d'en-tête: " + e.getMessage(), e);
+                LOGGER.log(Level.SEVERE, "Erreur lors de l'ajout d'une cellule d'en-tête", e);
                 throw e;
             }
         }
 
+        private void drawRoundedRect(PDPageContentStream contentStream, float x, float y, 
+                                   float width, float height, float radius) throws IOException {
+            // Coins arrondis
+            contentStream.moveTo(x + radius, y);
+            contentStream.lineTo(x + width - radius, y);
+            contentStream.curveTo(x + width, y, x + width, y, x + width, y + radius);
+            contentStream.lineTo(x + width, y + height - radius);
+            contentStream.curveTo(x + width, y + height, x + width, y + height, x + width - radius, y + height);
+            contentStream.lineTo(x + radius, y + height);
+            contentStream.curveTo(x, y + height, x, y + height, x, y + height - radius);
+            contentStream.lineTo(x, y + radius);
+            contentStream.curveTo(x, y, x, y, x + radius, y);
+            contentStream.closePath();
+        }
+
         public void addCell(String text, int column, boolean highlight) throws IOException {
             try {
-                float xPosition = MARGIN;
+                float xPosition = MARGIN + CONTENT_PADDING;
                 for (int i = 0; i < column; i++) {
                     xPosition += columnWidths[i];
                 }
 
-                // Effet de surbrillance pour les lignes alternées
                 if (highlight) {
-                    contentStream.setNonStrokingColor(BACKGROUND_COLOR);
-                    contentStream.addRect(xPosition, yPosition - 5, columnWidths[column], rowHeight);
+                    contentStream.setNonStrokingColor(BACKGROUND_LIGHT);
+                    drawRoundedRect(contentStream, xPosition, yPosition - rowHeight + 5,
+                                  columnWidths[column], rowHeight, cornerRadius);
                     contentStream.fill();
                 }
 
-                contentStream.setNonStrokingColor(SECONDARY_COLOR);
+                contentStream.setNonStrokingColor(TEXT_COLOR);
                 contentStream.beginText();
                 contentStream.setFont(PDType1Font.HELVETICA, 10);
-                contentStream.newLineAtOffset(xPosition + cellMargin, yPosition + 7);
+                contentStream.newLineAtOffset(xPosition + cellMargin, yPosition - rowHeight/2 + 5);
                 contentStream.showText(text != null ? text : "");
                 contentStream.endText();
 
             } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "Erreur lors de l'ajout d'une cellule: " + e.getMessage(), e);
+                LOGGER.log(Level.SEVERE, "Erreur lors de l'ajout d'une cellule", e);
                 throw e;
             }
         }
 
         public void drawRowLines() throws IOException {
             try {
-                float xPosition = MARGIN;
-
-                // Lignes de tableau plus fines et élégantes
+                float xPosition = MARGIN + CONTENT_PADDING;
                 contentStream.setStrokingColor(TABLE_BORDER);
                 contentStream.setLineWidth(0.5f);
 
-                // Ligne horizontale
-                contentStream.moveTo(xPosition, yPosition - 5);
-                contentStream.lineTo(xPosition + tableWidth, yPosition - 5);
+                // Ligne horizontale subtile
+                contentStream.moveTo(xPosition, yPosition - rowHeight + 4);
+                contentStream.lineTo(xPosition + tableWidth, yPosition - rowHeight + 4);
                 contentStream.stroke();
 
-                // Lignes verticales
-                float currentX = xPosition;
-                for (float width : columnWidths) {
-                    contentStream.moveTo(currentX, yPosition + rowHeight);
-                    contentStream.lineTo(currentX, yPosition - 5);
-                    contentStream.stroke();
-                    currentX += width;
-                }
-
                 contentStream.setLineWidth(1.0f);
-                contentStream.setStrokingColor(Color.BLACK);
+                contentStream.setStrokingColor(TEXT_COLOR);
             } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "Erreur lors du dessin des lignes: " + e.getMessage(), e);
+                LOGGER.log(Level.SEVERE, "Erreur lors du dessin des lignes", e);
                 throw e;
             }
         }
@@ -144,7 +152,7 @@ public class PDFGenerator {
             yPosition -= rowHeight;
             if (yPosition < (MARGIN + FOOTER_HEIGHT + rowHeight)) {
                 try {
-                    LOGGER.info("Création d'une nouvelle page dans le rapport");
+                    LOGGER.info("Création d'une nouvelle page");
                     PDPageContentStream oldContentStream = this.contentStream;
                     oldContentStream.close();
 
@@ -160,9 +168,9 @@ public class PDFGenerator {
                     this.page = newPage;
                     this.yPosition = newPage.getMediaBox().getHeight() - HEADER_HEIGHT - 40;
 
-                    LOGGER.info("Nouvelle page créée avec succès - Page " + currentPage);
+                    LOGGER.info("Nouvelle page créée - Page " + currentPage);
                 } catch (IOException e) {
-                    LOGGER.log(Level.SEVERE, "Erreur lors de la création d'une nouvelle page: " + e.getMessage(), e);
+                    LOGGER.log(Level.SEVERE, "Erreur lors de la création d'une nouvelle page", e);
                     throw e;
                 }
             }
@@ -173,63 +181,65 @@ public class PDFGenerator {
         float pageHeight = page.getMediaBox().getHeight();
         float pageWidth = page.getMediaBox().getWidth();
 
-        // Bande supérieure élégante
+        // En-tête moderne avec dégradé
         contentStream.setNonStrokingColor(PRIMARY_COLOR);
         contentStream.addRect(0, pageHeight - HEADER_HEIGHT, pageWidth, HEADER_HEIGHT);
         contentStream.fill();
 
-        // Logo et titre
-        contentStream.setNonStrokingColor(Color.WHITE);
+        // Bande décorative
+        contentStream.setNonStrokingColor(ACCENT_COLOR);
+        contentStream.addRect(0, pageHeight - HEADER_HEIGHT, pageWidth, 8);
+        contentStream.fill();
+
+        // Logo et titre élégant
+        contentStream.setNonStrokingColor(LIGHT_TEXT);
         contentStream.beginText();
-        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 28);
-        contentStream.newLineAtOffset(MARGIN, pageHeight - 70);
+        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 32);
+        contentStream.newLineAtOffset(MARGIN, pageHeight - 80);
         contentStream.showText("MA POISSONNERIE");
         contentStream.endText();
 
-        // Sous-titre
+        // Sous-titre stylisé
         contentStream.beginText();
-        contentStream.setFont(PDType1Font.HELVETICA, 14);
-        contentStream.newLineAtOffset(MARGIN, pageHeight - 95);
+        contentStream.setFont(PDType1Font.HELVETICA, 16);
+        contentStream.newLineAtOffset(MARGIN, pageHeight - 110);
         contentStream.showText("La fraîcheur au quotidien");
         contentStream.endText();
 
-        // Date de génération
+        // Information de génération
         contentStream.beginText();
         contentStream.setFont(PDType1Font.HELVETICA, 10);
-        contentStream.newLineAtOffset(pageWidth - 200, pageHeight - 70);
+        contentStream.newLineAtOffset(pageWidth - 200, pageHeight - 80);
         contentStream.showText("Généré le: " + DATE_FORMATTER.format(LocalDateTime.now()));
         contentStream.endText();
-
-        contentStream.setNonStrokingColor(Color.BLACK);
     }
 
-    private static void addFooter(PDPageContentStream contentStream, PDPage page, int pageNumber, int totalPages) throws IOException {
+    private static void addFooter(PDPageContentStream contentStream, PDPage page, 
+                                int pageNumber, int totalPages) throws IOException {
         float pageHeight = page.getMediaBox().getHeight();
         float pageWidth = page.getMediaBox().getWidth();
 
-        // Ligne de séparation élégante
-        contentStream.setStrokingColor(PRIMARY_COLOR);
-        contentStream.setLineWidth(2f);
-        contentStream.moveTo(MARGIN, MARGIN + 25);
-        contentStream.lineTo(pageWidth - MARGIN, MARGIN + 25);
-        contentStream.stroke();
-        contentStream.setLineWidth(1.0f);
+        // Barre décorative du bas
+        contentStream.setNonStrokingColor(PRIMARY_COLOR);
+        contentStream.addRect(MARGIN, MARGIN + 35, pageWidth - 2*MARGIN, 2);
+        contentStream.fill();
 
-        // Pagination stylisée
+        // Pagination élégante
         contentStream.beginText();
-        contentStream.setFont(PDType1Font.HELVETICA, 9);
-        contentStream.setNonStrokingColor(SECONDARY_COLOR);
-        contentStream.newLineAtOffset(pageWidth / 2 - 30, MARGIN + 10);
+        contentStream.setFont(PDType1Font.HELVETICA, 10);
+        contentStream.setNonStrokingColor(TEXT_COLOR);
+        contentStream.newLineAtOffset(pageWidth/2 - 40, MARGIN + 15);
         contentStream.showText(String.format("Page %d sur %d", pageNumber, totalPages));
         contentStream.endText();
 
-        // Copyright
+        // Copyright moderne
         contentStream.beginText();
-        contentStream.setFont(PDType1Font.HELVETICA, 8);
-        contentStream.newLineAtOffset(MARGIN, MARGIN + 10);
-        contentStream.showText("© 2025 Ma Poissonnerie - Tous droits réservés");
+        contentStream.setFont(PDType1Font.HELVETICA, 9);
+        contentStream.newLineAtOffset(MARGIN, MARGIN + 15);
+        contentStream.showText("© " + LocalDateTime.now().getYear() + " Ma Poissonnerie - Tous droits réservés");
         contentStream.endText();
     }
+
 
     public static void genererRapportFournisseurs(List<Fournisseur> fournisseurs, ByteArrayOutputStream outputStream) {
         LOGGER.info("Début de la génération du rapport des fournisseurs");
