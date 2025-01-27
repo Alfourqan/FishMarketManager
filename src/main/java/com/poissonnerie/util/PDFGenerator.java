@@ -39,7 +39,7 @@ public class PDFGenerator {
         private int totalPages;
 
         public PDFTable(PDDocument document, PDPage page, PDPageContentStream contentStream,
-                       float yPosition, float[] columnWidths, int totalPages) {
+                        float yPosition, float[] columnWidths, int totalPages) {
             this.document = document;
             this.page = page;
             this.contentStream = contentStream;
@@ -53,73 +53,95 @@ public class PDFGenerator {
         }
 
         public void addHeaderCell(String text, int column) throws IOException {
-            float xPosition = MARGIN;
-            for (int i = 0; i < column; i++) {
-                xPosition += columnWidths[i];
+            try {
+                float xPosition = MARGIN;
+                for (int i = 0; i < column; i++) {
+                    xPosition += columnWidths[i];
+                }
+
+                contentStream.setNonStrokingColor(TABLE_HEADER_BG);
+                contentStream.addRect(xPosition, yPosition - 5, columnWidths[column], rowHeight);
+                contentStream.fill();
+
+                contentStream.setNonStrokingColor(Color.BLACK);
+                contentStream.beginText();
+                contentStream.setFont(PDType1Font.HELVETICA_BOLD, 11);
+                contentStream.newLineAtOffset(xPosition + cellMargin, yPosition + 5);
+                contentStream.showText(text != null ? text : "");
+                contentStream.endText();
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE, "Erreur lors de l'ajout d'une cellule d'en-tête: " + e.getMessage(), e);
+                throw e;
             }
-
-            // Dessiner le fond de la cellule d'en-tête
-            contentStream.setNonStrokingColor(TABLE_HEADER_BG);
-            contentStream.addRect(xPosition, yPosition - 5, columnWidths[column], rowHeight);
-            contentStream.fill();
-
-            // Restaurer la couleur par défaut pour le texte
-            contentStream.setNonStrokingColor(Color.BLACK);
-
-            contentStream.beginText();
-            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 11);
-            contentStream.newLineAtOffset(xPosition + cellMargin, yPosition + 5);
-            contentStream.showText(text != null ? text : "");
-            contentStream.endText();
         }
 
         public void addCell(String text, int column, boolean isHeader) throws IOException {
-            float xPosition = MARGIN;
-            for (int i = 0; i < column; i++) {
-                xPosition += columnWidths[i];
-            }
+            try {
+                float xPosition = MARGIN;
+                for (int i = 0; i < column; i++) {
+                    xPosition += columnWidths[i];
+                }
 
-            contentStream.setFont(isHeader ? PDType1Font.HELVETICA_BOLD : PDType1Font.HELVETICA, 10);
-            contentStream.beginText();
-            contentStream.newLineAtOffset(xPosition + cellMargin, yPosition + 5);
-            contentStream.showText(text != null ? text : "");
-            contentStream.endText();
+                contentStream.setFont(isHeader ? PDType1Font.HELVETICA_BOLD : PDType1Font.HELVETICA, 10);
+                contentStream.beginText();
+                contentStream.newLineAtOffset(xPosition + cellMargin, yPosition + 5);
+                contentStream.showText(text != null ? text : "");
+                contentStream.endText();
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE, "Erreur lors de l'ajout d'une cellule: " + e.getMessage(), e);
+                throw e;
+            }
         }
 
         public void drawRowLines() throws IOException {
-            float xPosition = MARGIN;
+            try {
+                float xPosition = MARGIN;
 
-            // Ligne horizontale
-            contentStream.setStrokingColor(TABLE_BORDER);
-            contentStream.moveTo(xPosition, yPosition - 5);
-            contentStream.lineTo(xPosition + tableWidth, yPosition - 5);
-            contentStream.stroke();
-
-            // Lignes verticales
-            float currentX = xPosition;
-            for (float width : columnWidths) {
-                contentStream.moveTo(currentX, yPosition + rowHeight);
-                contentStream.lineTo(currentX, yPosition - rowHeight);
+                contentStream.setStrokingColor(TABLE_BORDER);
+                contentStream.moveTo(xPosition, yPosition - 5);
+                contentStream.lineTo(xPosition + tableWidth, yPosition - 5);
                 contentStream.stroke();
-                currentX += width;
-            }
 
-            // Restaurer la couleur noire par défaut
-            contentStream.setStrokingColor(Color.BLACK);
+                float currentX = xPosition;
+                for (float width : columnWidths) {
+                    contentStream.moveTo(currentX, yPosition + rowHeight);
+                    contentStream.lineTo(currentX, yPosition - rowHeight);
+                    contentStream.stroke();
+                    currentX += width;
+                }
+
+                contentStream.setStrokingColor(Color.BLACK);
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE, "Erreur lors du dessin des lignes: " + e.getMessage(), e);
+                throw e;
+            }
         }
 
         public void nextRow() throws IOException {
             yPosition -= rowHeight;
             if (yPosition < (MARGIN + FOOTER_HEIGHT + rowHeight)) {
-                contentStream.close();
-                currentPage++;
-                PDPage newPage = new PDPage(PDRectangle.A4);
-                document.addPage(newPage);
-                contentStream = new PDPageContentStream(document, newPage);
-                addHeader(contentStream, newPage);
-                addFooter(contentStream, newPage, currentPage, totalPages);
-                yPosition = page.getMediaBox().getHeight() - HEADER_HEIGHT - 40;
-                page = newPage;
+                try {
+                    LOGGER.info("Création d'une nouvelle page dans le rapport");
+                    PDPageContentStream oldContentStream = this.contentStream;
+                    oldContentStream.close();
+
+                    currentPage++;
+                    PDPage newPage = new PDPage(PDRectangle.A4);
+                    document.addPage(newPage);
+
+                    PDPageContentStream newContentStream = new PDPageContentStream(document, newPage);
+                    addHeader(newContentStream, newPage);
+                    addFooter(newContentStream, newPage, currentPage, totalPages);
+
+                    this.contentStream = newContentStream;
+                    this.page = newPage;
+                    this.yPosition = newPage.getMediaBox().getHeight() - HEADER_HEIGHT - 40;
+
+                    LOGGER.info("Nouvelle page créée avec succès - Page " + currentPage);
+                } catch (IOException e) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors de la création d'une nouvelle page: " + e.getMessage(), e);
+                    throw new IOException("Erreur lors de la création d'une nouvelle page", e);
+                }
             }
         }
     }
@@ -128,12 +150,10 @@ public class PDFGenerator {
         float pageHeight = page.getMediaBox().getHeight();
         float pageWidth = page.getMediaBox().getWidth();
 
-        // Rectangle d'en-tête
         contentStream.setNonStrokingColor(HEADER_BG_COLOR);
         contentStream.addRect(0, pageHeight - HEADER_HEIGHT, pageWidth, HEADER_HEIGHT);
         contentStream.fill();
 
-        // Titre principal
         contentStream.setNonStrokingColor(PRIMARY_COLOR);
         contentStream.beginText();
         contentStream.setFont(PDType1Font.HELVETICA_BOLD, 24);
@@ -141,7 +161,6 @@ public class PDFGenerator {
         contentStream.showText("MA POISSONNERIE");
         contentStream.endText();
 
-        // Sous-titre
         contentStream.setNonStrokingColor(Color.DARK_GRAY);
         contentStream.beginText();
         contentStream.setFont(PDType1Font.HELVETICA, 12);
@@ -149,14 +168,12 @@ public class PDFGenerator {
         contentStream.showText("La fraîcheur au quotidien");
         contentStream.endText();
 
-        // Date
         contentStream.beginText();
         contentStream.setFont(PDType1Font.HELVETICA, 10);
         contentStream.newLineAtOffset(pageWidth - 200, pageHeight - 60);
         contentStream.showText("Généré le: " + DATE_FORMATTER.format(LocalDateTime.now()));
         contentStream.endText();
 
-        // Restaurer la couleur par défaut
         contentStream.setNonStrokingColor(Color.BLACK);
     }
 
@@ -164,41 +181,39 @@ public class PDFGenerator {
         float pageHeight = page.getMediaBox().getHeight();
         float pageWidth = page.getMediaBox().getWidth();
 
-        // Ligne de séparation
         contentStream.setStrokingColor(TABLE_BORDER);
         contentStream.moveTo(MARGIN, MARGIN);
         contentStream.lineTo(pageWidth - MARGIN, MARGIN);
         contentStream.stroke();
 
-        // Pagination
         contentStream.beginText();
         contentStream.setFont(PDType1Font.HELVETICA, 9);
         contentStream.newLineAtOffset(pageWidth / 2 - 30, MARGIN - 15);
         contentStream.showText(String.format("Page %d sur %d", pageNumber, totalPages));
         contentStream.endText();
 
-        // Copyright
         contentStream.beginText();
         contentStream.setFont(PDType1Font.HELVETICA, 8);
         contentStream.newLineAtOffset(MARGIN, MARGIN - 15);
         contentStream.showText("© 2025 Ma Poissonnerie - Tous droits réservés");
         contentStream.endText();
 
-        // Restaurer la couleur par défaut
         contentStream.setStrokingColor(Color.BLACK);
     }
 
     public static void genererRapportFournisseurs(List<Fournisseur> fournisseurs, ByteArrayOutputStream outputStream) {
+        LOGGER.info("Début de la génération du rapport des fournisseurs");
         try (PDDocument document = new PDDocument()) {
-            int totalPages = (int) Math.ceil(fournisseurs.size() / 20.0) + 1; // Estimation du nombre de pages
+            int totalPages = (int) Math.ceil(fournisseurs.size() / 20.0) + 1;
+            LOGGER.info("Nombre total de pages estimé: " + totalPages);
+
             PDPage firstPage = new PDPage(PDRectangle.A4);
             document.addPage(firstPage);
 
             try (PDPageContentStream contentStream = new PDPageContentStream(document, firstPage)) {
-                // Ajouter l'en-tête
+                LOGGER.info("Création de l'en-tête du rapport");
                 addHeader(contentStream, firstPage);
 
-                // Titre du rapport
                 contentStream.beginText();
                 contentStream.setNonStrokingColor(PRIMARY_COLOR);
                 contentStream.setFont(PDType1Font.HELVETICA_BOLD, 18);
@@ -206,15 +221,14 @@ public class PDFGenerator {
                 contentStream.showText("Liste des Fournisseurs");
                 contentStream.endText();
 
-                // Ajouter le pied de page
                 addFooter(contentStream, firstPage, 1, totalPages);
 
-                // Configuration de la table
                 float[] columnWidths = {150, 100, 100, 150};
                 float startY = firstPage.getMediaBox().getHeight() - HEADER_HEIGHT - 60;
+
+                LOGGER.info("Configuration de la table des fournisseurs");
                 PDFTable table = new PDFTable(document, firstPage, contentStream, startY, columnWidths, totalPages);
 
-                // En-têtes de la table
                 String[] headers = {"Nom", "Contact", "Téléphone", "Email"};
                 for (int i = 0; i < headers.length; i++) {
                     table.addHeaderCell(headers[i], i);
@@ -222,8 +236,9 @@ public class PDFGenerator {
                 table.drawRowLines();
                 table.nextRow();
 
-                // Données
+                LOGGER.info("Ajout des données des fournisseurs");
                 contentStream.setNonStrokingColor(Color.BLACK);
+                int count = 0;
                 for (Fournisseur fournisseur : fournisseurs) {
                     table.addCell(fournisseur.getNom(), 0, false);
                     table.addCell(fournisseur.getContact(), 1, false);
@@ -231,14 +246,20 @@ public class PDFGenerator {
                     table.addCell(fournisseur.getEmail(), 3, false);
                     table.drawRowLines();
                     table.nextRow();
+                    count++;
+                    if (count % 20 == 0) {
+                        LOGGER.info("Traitement de " + count + " fournisseurs sur " + fournisseurs.size());
+                    }
                 }
             }
 
+            LOGGER.info("Sauvegarde du document PDF");
             document.save(outputStream);
             LOGGER.info("Rapport des fournisseurs PDF généré avec succès");
+
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF des fournisseurs", e);
-            throw new RuntimeException("Erreur lors de la génération du rapport PDF", e);
+            throw new RuntimeException("Erreur lors de la génération du rapport PDF: " + e.getMessage(), e);
         }
     }
 
@@ -307,10 +328,8 @@ public class PDFGenerator {
             document.addPage(firstPage);
 
             try (PDPageContentStream contentStream = new PDPageContentStream(document, firstPage)) {
-                // Ajouter l'en-tête
                 addHeader(contentStream, firstPage);
 
-                // Titre du rapport
                 contentStream.beginText();
                 contentStream.setNonStrokingColor(PRIMARY_COLOR);
                 contentStream.setFont(PDType1Font.HELVETICA_BOLD, 18);
@@ -318,7 +337,6 @@ public class PDFGenerator {
                 contentStream.showText("État des Créances");
                 contentStream.endText();
 
-                // Ajouter le pied de page
                 addFooter(contentStream, firstPage, 1, totalPages);
 
                 float[] columnWidths = {150, 100, 100, 100};
@@ -464,7 +482,6 @@ public class PDFGenerator {
             throw new RuntimeException("Erreur lors de la génération du rapport", e);
         }
     }
-
 
 
     public static void genererReglementCreance(Client client, double montantPaye, double nouveauSolde, String cheminFichier) {

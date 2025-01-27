@@ -1,0 +1,967 @@
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: djata, Solde: 85.0
+02:03:42.752 [AWT-EventQueue-0] DEBUG com.zaxxer.hikari.pool.PoolBase -- PoissonneriePool - Reset (autoCommit) on connection org.sqlite.jdbc4.JDBC4Connection@115aaf2e
+Jan 27, 2025 2:03:42 AM com.poissonnerie.view.VenteViewSwing loadData
+INFO: Clients chargés
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Jan 27, 2025 2:03:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 20 mises à jour: 1 lignes
+Jan 27, 2025 2:03:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 19 mises à jour: 1 lignes
+Jan 27, 2025 2:03:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 18 mises à jour: 1 lignes
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 7: Client 7
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 7, Nom: Client 7
+Jan 27, 2025 2:03:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 17 mises à jour: 1 lignes
+Jan 27, 2025 2:03:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 16 mises à jour: 1 lignes
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 6, Nom: BABI
+Jan 27, 2025 2:03:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 15 mises à jour: 2 lignes
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 27, 2025 2:03:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 14 mises à jour: 1 lignes
+Jan 27, 2025 2:03:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 13 mises à jour: 1 lignes
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 27, 2025 2:03:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 12 mises à jour: 1 lignes
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 27, 2025 2:03:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 11 mises à jour: 1 lignes
+Jan 27, 2025 2:03:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 10 mises à jour: 1 lignes
+Jan 27, 2025 2:03:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 9 mises à jour: 1 lignes
+Jan 27, 2025 2:03:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 7 mises à jour: 1 lignes
+Jan 27, 2025 2:03:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 8 mises à jour: 1 lignes
+Jan 27, 2025 2:03:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 6 mises à jour: 1 lignes
+Jan 27, 2025 2:03:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 5 mises à jour: 1 lignes
+Jan 27, 2025 2:03:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 4 mises à jour: 1 lignes
+Jan 27, 2025 2:03:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 3 mises à jour: 1 lignes
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 27, 2025 2:03:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 2 mises à jour: 1 lignes
+Jan 27, 2025 2:03:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 1 mises à jour: 1 lignes
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 20 ventes
+Jan 27, 2025 2:03:42 AM com.poissonnerie.view.VenteViewSwing loadData
+INFO: Ventes chargées: 20 ventes
+Jan 27, 2025 2:03:42 AM com.poissonnerie.view.VenteViewSwing loadData
+INFO: Données chargées avec succès
+Chargement des clients...
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController chargerClients
+INFO: Chargement des clients...
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController chargerClients
+INFO: Clients chargés avec succès: 132 clients, Solde total: 22679.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: BABI, Solde: 3180.0
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: Client Test Créance, Solde: 150.5
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController lambda$chargerClients$2
+INFO: Client avec créance: djata, Solde: 85.0
+02:03:42.801 [AWT-EventQueue-0] DEBUG com.zaxxer.hikari.pool.PoolBase -- PoissonneriePool - Reset (autoCommit) on connection org.sqlite.jdbc4.JDBC4Connection@115aaf2e
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.ClientController getClients
+INFO: Retour de 132 clients, dont 131 avec solde positif
+Clients chargés avec succès
+Chargement des mouvements de caisse...
+Mouvements de caisse chargés avec succès: 22 mouvements
+État actuel de la caisse - Solde: 1000.0€, Ouverte: false
+Jan 27, 2025 2:03:42 AM com.poissonnerie.view.InventaireViewSwing <init>
+INFO: Initialisation de InventaireViewSwing
+Jan 27, 2025 2:03:42 AM com.poissonnerie.model.InventaireManager ajouterObserver
+INFO: Observer ajouté. Total observers: 1
+Jan 27, 2025 2:03:42 AM com.poissonnerie.view.InventaireViewSwing refreshTable
+INFO: Rafraîchissement de la table d'inventaire
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Chargement des fournisseurs...
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Fournisseurs chargés: 32
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Initialisation des tables de la base de données...
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Base de données optimisée avec succès
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Initialisation des tables de la base de données...
+Jan 27, 2025 2:03:42 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Base de données optimisée avec succès
+Jan 27, 2025 2:03:43 AM com.poissonnerie.Main$1 lambda$done$0
+INFO: Fenêtre principale affichée
+Jan 27, 2025 2:03:43 AM com.poissonnerie.view.AccueilViewSwing loadData
+INFO: Début du chargement des données...
+Jan 27, 2025 2:03:43 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des ventes...
+Jan 27, 2025 2:03:43 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Jan 27, 2025 2:03:43 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 20 mises à jour: 1 lignes
+Jan 27, 2025 2:03:43 AM com.poissonnerie.controller.ClientController getClients
+INFO: Retour de 132 clients, dont 131 avec solde positif
+Jan 27, 2025 2:03:43 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 19 mises à jour: 1 lignes
+Jan 27, 2025 2:03:43 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 18 mises à jour: 1 lignes
+Jan 27, 2025 2:03:43 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 7: Client 7
+Jan 27, 2025 2:03:43 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 7, Nom: Client 7
+Jan 27, 2025 2:03:43 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 17 mises à jour: 1 lignes
+Jan 27, 2025 2:03:43 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 16 mises à jour: 1 lignes
+Jan 27, 2025 2:03:43 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 6, Nom: BABI
+Jan 27, 2025 2:03:43 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 15 mises à jour: 2 lignes
+Jan 27, 2025 2:03:43 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 27, 2025 2:03:43 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 27, 2025 2:03:43 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 14 mises à jour: 1 lignes
+Jan 27, 2025 2:03:43 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 13 mises à jour: 1 lignes
+Jan 27, 2025 2:03:43 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 27, 2025 2:03:43 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 12 mises à jour: 1 lignes
+Jan 27, 2025 2:03:43 AM com.poissonnerie.view.VenteViewSwing lambda$refreshVentesTable$7
+INFO: Table des ventes mise à jour avec 20 ventes
+Jan 27, 2025 2:03:43 AM com.poissonnerie.view.InventaireViewSwing lambda$updateStatus$7
+INFO: Status mis à jour: Chargement des données...
+Jan 27, 2025 2:03:43 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 27, 2025 2:03:43 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 11 mises à jour: 1 lignes
+Jan 27, 2025 2:03:43 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 10 mises à jour: 1 lignes
+Jan 27, 2025 2:03:43 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 9 mises à jour: 1 lignes
+Jan 27, 2025 2:03:43 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 7 mises à jour: 1 lignes
+Jan 27, 2025 2:03:43 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 8 mises à jour: 1 lignes
+Jan 27, 2025 2:03:43 AM com.poissonnerie.view.InventaireViewSwing lambda$refreshTable$9
+INFO: Table rafraîchie avec succès
+Jan 27, 2025 2:03:43 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 6 mises à jour: 1 lignes
+Jan 27, 2025 2:03:43 AM com.poissonnerie.view.InventaireViewSwing lambda$updateStatus$7
+INFO: Status mis à jour: Données chargées avec succès
+Jan 27, 2025 2:03:43 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 5 mises à jour: 1 lignes
+Jan 27, 2025 2:03:43 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 4 mises à jour: 1 lignes
+Jan 27, 2025 2:03:43 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 3 mises à jour: 1 lignes
+Jan 27, 2025 2:03:43 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 27, 2025 2:03:43 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 27, 2025 2:03:43 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 2 mises à jour: 1 lignes
+Jan 27, 2025 2:03:43 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 1 mises à jour: 1 lignes
+Jan 27, 2025 2:03:43 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 20 ventes
+Jan 27, 2025 2:03:43 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de ventes chargées: 20
+Jan 27, 2025 2:03:43 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des produits...
+Jan 27, 2025 2:03:43 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de produits chargés: 4
+Jan 27, 2025 2:03:43 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des mouvements de caisse...
+Chargement des mouvements de caisse...
+Mouvements de caisse chargés avec succès: 22 mouvements
+État actuel de la caisse - Solde: 1000.0€, Ouverte: false
+Jan 27, 2025 2:03:43 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de mouvements chargés: 22
+Jan 27, 2025 2:03:43 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Calcul des ventes du jour...
+Jan 27, 2025 2:03:43 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Total des ventes du jour: $0.00
+Jan 27, 2025 2:03:43 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Calcul des produits en rupture...
+Jan 27, 2025 2:03:43 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Nombre de produits en rupture: 1
+Jan 27, 2025 2:03:43 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Calcul des encaissements du jour...
+Jan 27, 2025 2:03:43 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Total des encaissements du jour: $301.00
+Jan 27, 2025 2:03:43 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Calcul du chiffre d'affaires total...
+Jan 27, 2025 2:03:43 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Chiffre daffaires total: {0,number,currency}
+Jan 27, 2025 2:03:43 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface avec les nouvelles valeurs...
+Jan 27, 2025 2:03:43 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Ventes du jour: $0.00
+Jan 27, 2025 2:03:43 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Produits en rupture: 1
+Jan 27, 2025 2:03:43 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Encaissements du jour: $301.00
+Jan 27, 2025 2:03:43 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Chiffre daffaires: {0,number,currency}
+Jan 27, 2025 2:03:43 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface terminée
+Jan 27, 2025 2:03:43 AM com.poissonnerie.model.ConfigurationParam decryptValue
+WARNING: Valeur non décryptée car clé de cryptage non configurée ou valeur vide
+Jan 27, 2025 2:03:43 AM com.poissonnerie.model.ConfigurationParam setValeur
+WARNING: Erreur lors du traitement de la valeur
+java.lang.IllegalArgumentException: Format de téléphone invalide
+        at com.poissonnerie.model.ConfigurationParam.validateValeur(ConfigurationParam.java:111)
+        at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:185)
+        at com.poissonnerie.model.ConfigurationParam.<init>(ConfigurationParam.java:36)
+        at com.poissonnerie.controller.ConfigurationController.chargerConfigurations(ConfigurationController.java:70)
+        at com.poissonnerie.controller.ConfigurationController.getConfigurations(ConfigurationController.java:40)
+        at com.poissonnerie.view.ConfigurationViewSwing.loadData(ConfigurationViewSwing.java:995)
+        at com.poissonnerie.view.ConfigurationViewSwing$3.doInBackground(ConfigurationViewSwing.java:345)
+        at com.poissonnerie.view.ConfigurationViewSwing$3.doInBackground(ConfigurationViewSwing.java:342)
+        at java.desktop/javax.swing.SwingWorker$1.call(SwingWorker.java:305)
+        at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+        at java.desktop/javax.swing.SwingWorker.run(SwingWorker.java:342)
+        at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+        at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+        at java.base/java.lang.Thread.run(Thread.java:1583)
+
+Jan 27, 2025 2:03:43 AM com.poissonnerie.controller.ConfigurationController chargerConfigurations
+WARNING: Configuration invalide ignorée: Impossible de traiter la valeur: Format de téléphone invalide
+Jan 27, 2025 2:03:43 AM com.poissonnerie.controller.ConfigurationController chargerConfigurations
+INFO: Configurations chargées: 18 entrées
+Jan 27, 2025 2:03:50 AM org.apache.pdfbox.pdmodel.font.PDType1Font <init>
+WARNING: Using fallback font LiberationSans for base font Times-Roman
+Jan 27, 2025 2:03:50 AM org.apache.pdfbox.pdmodel.font.PDType1Font <init>
+WARNING: Using fallback font LiberationSans for base font Times-Bold
+Jan 27, 2025 2:03:50 AM org.apache.pdfbox.pdmodel.font.PDType1Font <init>
+WARNING: Using fallback font LiberationSans for base font Times-Italic
+Jan 27, 2025 2:03:50 AM org.apache.pdfbox.pdmodel.font.PDType1Font <init>
+WARNING: Using fallback font LiberationSans for base font Times-BoldItalic
+Jan 27, 2025 2:03:50 AM org.apache.pdfbox.pdmodel.font.PDType1Font <init>
+WARNING: Using fallback font LiberationSans for base font Helvetica
+Jan 27, 2025 2:03:50 AM org.apache.pdfbox.pdmodel.font.PDType1Font <init>
+WARNING: Using fallback font LiberationSans for base font Helvetica-Bold
+Jan 27, 2025 2:03:50 AM org.apache.pdfbox.pdmodel.font.PDType1Font <init>
+WARNING: Using fallback font LiberationSans for base font Helvetica-Oblique
+Jan 27, 2025 2:03:50 AM org.apache.pdfbox.pdmodel.font.PDType1Font <init>
+WARNING: Using fallback font LiberationSans for base font Helvetica-BoldOblique
+Jan 27, 2025 2:03:50 AM org.apache.pdfbox.pdmodel.font.PDType1Font <init>
+WARNING: Using fallback font LiberationSans for base font Courier
+Jan 27, 2025 2:03:50 AM org.apache.pdfbox.pdmodel.font.PDType1Font <init>
+WARNING: Using fallback font LiberationSans for base font Courier-Bold
+Jan 27, 2025 2:03:50 AM org.apache.pdfbox.pdmodel.font.PDType1Font <init>
+WARNING: Using fallback font LiberationSans for base font Courier-Oblique
+Jan 27, 2025 2:03:50 AM org.apache.pdfbox.pdmodel.font.PDType1Font <init>
+WARNING: Using fallback font LiberationSans for base font Courier-BoldOblique
+Jan 27, 2025 2:03:50 AM org.apache.pdfbox.pdmodel.font.PDType1Font <init>
+WARNING: Using fallback font LiberationSans for base font Symbol
+Jan 27, 2025 2:03:50 AM org.apache.pdfbox.pdmodel.font.PDType1Font <init>
+WARNING: Using fallback font LiberationSans for base font ZapfDingbats
+02:04:11.808 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Before cleanup stats (total=2, active=0, idle=2, waiting=0)
+02:04:11.809 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - After cleanup  stats (total=2, active=0, idle=2, waiting=0)
+02:04:11.809 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Fill pool skipped, pool has sufficient level or currently being filled.
+Jan 27, 2025 2:04:12 AM com.poissonnerie.view.AccueilViewSwing loadData
+INFO: Début du chargement des données...
+Jan 27, 2025 2:04:12 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des ventes...
+Jan 27, 2025 2:04:12 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Jan 27, 2025 2:04:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 20 mises à jour: 1 lignes
+Jan 27, 2025 2:04:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 19 mises à jour: 1 lignes
+Jan 27, 2025 2:04:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 18 mises à jour: 1 lignes
+Jan 27, 2025 2:04:12 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 7: Client 7
+Jan 27, 2025 2:04:12 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 7, Nom: Client 7
+Jan 27, 2025 2:04:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 17 mises à jour: 1 lignes
+Jan 27, 2025 2:04:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 16 mises à jour: 1 lignes
+Jan 27, 2025 2:04:12 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 6, Nom: BABI
+Jan 27, 2025 2:04:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 15 mises à jour: 2 lignes
+Jan 27, 2025 2:04:12 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 27, 2025 2:04:12 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 27, 2025 2:04:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 14 mises à jour: 1 lignes
+Jan 27, 2025 2:04:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 13 mises à jour: 1 lignes
+Jan 27, 2025 2:04:12 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 27, 2025 2:04:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 12 mises à jour: 1 lignes
+Jan 27, 2025 2:04:12 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 27, 2025 2:04:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 11 mises à jour: 1 lignes
+Jan 27, 2025 2:04:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 10 mises à jour: 1 lignes
+Jan 27, 2025 2:04:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 9 mises à jour: 1 lignes
+Jan 27, 2025 2:04:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 7 mises à jour: 1 lignes
+Jan 27, 2025 2:04:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 8 mises à jour: 1 lignes
+Jan 27, 2025 2:04:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 6 mises à jour: 1 lignes
+Jan 27, 2025 2:04:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 5 mises à jour: 1 lignes
+Jan 27, 2025 2:04:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 4 mises à jour: 1 lignes
+Jan 27, 2025 2:04:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 3 mises à jour: 1 lignes
+Jan 27, 2025 2:04:12 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 27, 2025 2:04:12 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 27, 2025 2:04:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 2 mises à jour: 1 lignes
+Jan 27, 2025 2:04:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 1 mises à jour: 1 lignes
+Jan 27, 2025 2:04:12 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 20 ventes
+Jan 27, 2025 2:04:12 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de ventes chargées: 20
+Jan 27, 2025 2:04:12 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des produits...
+Jan 27, 2025 2:04:12 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de produits chargés: 4
+Jan 27, 2025 2:04:12 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des mouvements de caisse...
+Chargement des mouvements de caisse...
+Mouvements de caisse chargés avec succès: 22 mouvements
+État actuel de la caisse - Solde: 1000.0€, Ouverte: false
+Jan 27, 2025 2:04:12 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de mouvements chargés: 22
+Jan 27, 2025 2:04:12 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Calcul des ventes du jour...
+Jan 27, 2025 2:04:12 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Total des ventes du jour: $0.00
+Jan 27, 2025 2:04:12 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Calcul des produits en rupture...
+Jan 27, 2025 2:04:12 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Nombre de produits en rupture: 1
+Jan 27, 2025 2:04:12 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Calcul des encaissements du jour...
+Jan 27, 2025 2:04:12 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Total des encaissements du jour: $301.00
+Jan 27, 2025 2:04:12 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Calcul du chiffre d'affaires total...
+Jan 27, 2025 2:04:12 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Chiffre daffaires total: {0,number,currency}
+Jan 27, 2025 2:04:12 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface avec les nouvelles valeurs...
+Jan 27, 2025 2:04:12 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Ventes du jour: $0.00
+Jan 27, 2025 2:04:12 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Produits en rupture: 1
+Jan 27, 2025 2:04:12 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Encaissements du jour: $301.00
+Jan 27, 2025 2:04:12 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Chiffre daffaires: {0,number,currency}
+Jan 27, 2025 2:04:12 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface terminée
+02:04:41.809 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Before cleanup stats (total=2, active=0, idle=2, waiting=0)
+02:04:41.810 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - After cleanup  stats (total=1, active=0, idle=1, waiting=0)
+02:04:41.810 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Fill pool skipped, pool has sufficient level or currently being filled.
+02:04:41.810 [PoissonneriePool connection closer] DEBUG com.zaxxer.hikari.pool.PoolBase -- PoissonneriePool - Closing connection org.sqlite.jdbc4.JDBC4Connection@457400f4: (connection has passed idleTimeout)
+Jan 27, 2025 2:04:42 AM com.poissonnerie.view.AccueilViewSwing loadData
+INFO: Début du chargement des données...
+Jan 27, 2025 2:04:42 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des ventes...
+Jan 27, 2025 2:04:42 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Jan 27, 2025 2:04:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 20 mises à jour: 1 lignes
+Jan 27, 2025 2:04:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 19 mises à jour: 1 lignes
+Jan 27, 2025 2:04:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 18 mises à jour: 1 lignes
+Jan 27, 2025 2:04:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 7: Client 7
+Jan 27, 2025 2:04:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 7, Nom: Client 7
+Jan 27, 2025 2:04:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 17 mises à jour: 1 lignes
+Jan 27, 2025 2:04:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 16 mises à jour: 1 lignes
+Jan 27, 2025 2:04:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 6, Nom: BABI
+Jan 27, 2025 2:04:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 15 mises à jour: 2 lignes
+Jan 27, 2025 2:04:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 27, 2025 2:04:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 27, 2025 2:04:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 14 mises à jour: 1 lignes
+Jan 27, 2025 2:04:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 13 mises à jour: 1 lignes
+Jan 27, 2025 2:04:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 27, 2025 2:04:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 12 mises à jour: 1 lignes
+Jan 27, 2025 2:04:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 27, 2025 2:04:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 11 mises à jour: 1 lignes
+Jan 27, 2025 2:04:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 10 mises à jour: 1 lignes
+Jan 27, 2025 2:04:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 9 mises à jour: 1 lignes
+Jan 27, 2025 2:04:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 7 mises à jour: 1 lignes
+Jan 27, 2025 2:04:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 8 mises à jour: 1 lignes
+Jan 27, 2025 2:04:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 6 mises à jour: 1 lignes
+Jan 27, 2025 2:04:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 5 mises à jour: 1 lignes
+Jan 27, 2025 2:04:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 4 mises à jour: 1 lignes
+Jan 27, 2025 2:04:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 3 mises à jour: 1 lignes
+Jan 27, 2025 2:04:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 27, 2025 2:04:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 27, 2025 2:04:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 2 mises à jour: 1 lignes
+Jan 27, 2025 2:04:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 1 mises à jour: 1 lignes
+Jan 27, 2025 2:04:42 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 20 ventes
+Jan 27, 2025 2:04:42 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de ventes chargées: 20
+Jan 27, 2025 2:04:42 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des produits...
+Jan 27, 2025 2:04:42 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de produits chargés: 4
+Jan 27, 2025 2:04:42 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des mouvements de caisse...
+Chargement des mouvements de caisse...
+Mouvements de caisse chargés avec succès: 22 mouvements
+État actuel de la caisse - Solde: 1000.0€, Ouverte: false
+Jan 27, 2025 2:04:42 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de mouvements chargés: 22
+Jan 27, 2025 2:04:42 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Calcul des ventes du jour...
+Jan 27, 2025 2:04:42 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Total des ventes du jour: $0.00
+Jan 27, 2025 2:04:42 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Calcul des produits en rupture...
+Jan 27, 2025 2:04:42 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Nombre de produits en rupture: 1
+Jan 27, 2025 2:04:42 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Calcul des encaissements du jour...
+Jan 27, 2025 2:04:42 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Total des encaissements du jour: $301.00
+Jan 27, 2025 2:04:42 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Calcul du chiffre d'affaires total...
+Jan 27, 2025 2:04:42 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Chiffre daffaires total: {0,number,currency}
+Jan 27, 2025 2:04:42 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface avec les nouvelles valeurs...
+Jan 27, 2025 2:04:42 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Ventes du jour: $0.00
+Jan 27, 2025 2:04:42 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Produits en rupture: 1
+Jan 27, 2025 2:04:42 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Encaissements du jour: $301.00
+Jan 27, 2025 2:04:42 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Chiffre daffaires: {0,number,currency}
+Jan 27, 2025 2:04:42 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface terminée
+02:05:11.810 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Before cleanup stats (total=1, active=0, idle=1, waiting=0)
+02:05:11.810 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - After cleanup  stats (total=1, active=0, idle=1, waiting=0)
+02:05:11.810 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Fill pool skipped, pool has sufficient level or currently being filled.
+Jan 27, 2025 2:05:12 AM com.poissonnerie.view.AccueilViewSwing loadData
+INFO: Début du chargement des données...
+Jan 27, 2025 2:05:12 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des ventes...
+Jan 27, 2025 2:05:12 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Jan 27, 2025 2:05:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 20 mises à jour: 1 lignes
+Jan 27, 2025 2:05:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 19 mises à jour: 1 lignes
+Jan 27, 2025 2:05:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 18 mises à jour: 1 lignes
+Jan 27, 2025 2:05:12 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 7: Client 7
+Jan 27, 2025 2:05:12 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 7, Nom: Client 7
+Jan 27, 2025 2:05:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 17 mises à jour: 1 lignes
+Jan 27, 2025 2:05:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 16 mises à jour: 1 lignes
+Jan 27, 2025 2:05:12 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 6, Nom: BABI
+Jan 27, 2025 2:05:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 15 mises à jour: 2 lignes
+Jan 27, 2025 2:05:12 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 27, 2025 2:05:12 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 27, 2025 2:05:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 14 mises à jour: 1 lignes
+Jan 27, 2025 2:05:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 13 mises à jour: 1 lignes
+Jan 27, 2025 2:05:12 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 27, 2025 2:05:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 12 mises à jour: 1 lignes
+Jan 27, 2025 2:05:12 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 27, 2025 2:05:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 11 mises à jour: 1 lignes
+Jan 27, 2025 2:05:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 10 mises à jour: 1 lignes
+Jan 27, 2025 2:05:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 9 mises à jour: 1 lignes
+Jan 27, 2025 2:05:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 7 mises à jour: 1 lignes
+Jan 27, 2025 2:05:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 8 mises à jour: 1 lignes
+Jan 27, 2025 2:05:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 6 mises à jour: 1 lignes
+Jan 27, 2025 2:05:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 5 mises à jour: 1 lignes
+Jan 27, 2025 2:05:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 4 mises à jour: 1 lignes
+Jan 27, 2025 2:05:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 3 mises à jour: 1 lignes
+Jan 27, 2025 2:05:12 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 27, 2025 2:05:12 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 27, 2025 2:05:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 2 mises à jour: 1 lignes
+Jan 27, 2025 2:05:12 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 1 mises à jour: 1 lignes
+Jan 27, 2025 2:05:12 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 20 ventes
+Jan 27, 2025 2:05:12 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de ventes chargées: 20
+Jan 27, 2025 2:05:12 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des produits...
+Jan 27, 2025 2:05:12 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de produits chargés: 4
+Jan 27, 2025 2:05:12 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des mouvements de caisse...
+Chargement des mouvements de caisse...
+Mouvements de caisse chargés avec succès: 22 mouvements
+État actuel de la caisse - Solde: 1000.0€, Ouverte: false
+Jan 27, 2025 2:05:12 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de mouvements chargés: 22
+Jan 27, 2025 2:05:12 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Calcul des ventes du jour...
+Jan 27, 2025 2:05:12 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Total des ventes du jour: $0.00
+Jan 27, 2025 2:05:12 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Calcul des produits en rupture...
+Jan 27, 2025 2:05:12 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Nombre de produits en rupture: 1
+Jan 27, 2025 2:05:12 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Calcul des encaissements du jour...
+Jan 27, 2025 2:05:12 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Total des encaissements du jour: $301.00
+Jan 27, 2025 2:05:12 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Calcul du chiffre d'affaires total...
+Jan 27, 2025 2:05:12 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Chiffre daffaires total: {0,number,currency}
+Jan 27, 2025 2:05:12 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface avec les nouvelles valeurs...
+Jan 27, 2025 2:05:12 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Ventes du jour: $0.00
+Jan 27, 2025 2:05:12 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Produits en rupture: 1
+Jan 27, 2025 2:05:12 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Encaissements du jour: $301.00
+Jan 27, 2025 2:05:12 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Chiffre daffaires: {0,number,currency}
+Jan 27, 2025 2:05:12 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface terminée
+02:05:41.811 [PoissonneriePool housekeeper] DEB
