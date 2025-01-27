@@ -27,6 +27,7 @@ com/poissonnerie/view/FournisseurViewSwing$1.class
 com/poissonnerie/util/CacheManager$Cache$1.class
 com/poissonnerie/view/VenteViewSwing$1.class
 com/poissonnerie/view/AccueilViewSwing$1.class
+com/poissonnerie/util/ThemeManager.class
 com/poissonnerie/controller/ProduitController.class
 com/poissonnerie/view/InventaireViewSwing.class
 com/poissonnerie/view/ProduitViewSwing$4.class
@@ -79,6 +80,7 @@ com/poissonnerie/view/MainViewSwing.class
 com/poissonnerie/controller/VenteController.class
 com/poissonnerie/util/CacheManager$Cache.class
 com/poissonnerie/view/ReportViewSwing$3.class
+com/poissonnerie/util/ThemeManager$Theme.class
 com/poissonnerie/model/InventaireManager$InventaireObserver.class
 com/poissonnerie/view/ReportViewSwing$5.class
 com/poissonnerie/view/InventaireViewSwing$3.class
