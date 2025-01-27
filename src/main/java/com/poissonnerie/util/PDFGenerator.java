@@ -9,7 +9,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.time.LocalDateTime;
@@ -18,23 +17,29 @@ import java.awt.Color;
 public class PDFGenerator {
     private static final Logger LOGGER = Logger.getLogger(PDFGenerator.class.getName());
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-    private static final float MARGIN = 50;
-    private static final float HEADER_HEIGHT = 100;
-    private static final float FOOTER_HEIGHT = 30;
-    private static final Color PRIMARY_COLOR = new Color(0, 135, 136);
-    private static final Color HEADER_BG_COLOR = new Color(245, 245, 245);
+
+    // Constantes de mise en page améliorées
+    private static final float MARGIN = 40;
+    private static final float HEADER_HEIGHT = 120;
+    private static final float FOOTER_HEIGHT = 40;
+
+    // Nouvelle palette de couleurs moderne
+    private static final Color PRIMARY_COLOR = new Color(0, 102, 204);    // Bleu professionnel
+    private static final Color SECONDARY_COLOR = new Color(64, 64, 64);   // Gris foncé
+    private static final Color ACCENT_COLOR = new Color(245, 166, 35);    // Orange accent
+    private static final Color BACKGROUND_COLOR = new Color(249, 249, 249); // Gris très clair
     private static final Color TABLE_HEADER_BG = new Color(240, 240, 240);
-    private static final Color TABLE_BORDER = new Color(220, 220, 220);
+    private static final Color TABLE_BORDER = new Color(200, 200, 200);
 
     private static class PDFTable {
         private float yPosition;
         private float[] columnWidths;
-        private float rowHeight = 25;
+        private float rowHeight = 30; // Augmenté pour plus d'espace
         private PDPageContentStream contentStream;
         private PDPage page;
         private PDDocument document;
         private float tableWidth;
-        private float cellMargin = 5f;
+        private float cellMargin = 8f; // Augmenté pour plus d'espace
         private int currentPage = 1;
         private int totalPages;
 
@@ -59,34 +64,46 @@ public class PDFGenerator {
                     xPosition += columnWidths[i];
                 }
 
-                contentStream.setNonStrokingColor(TABLE_HEADER_BG);
+                // Fond de l'en-tête avec dégradé
+                contentStream.setNonStrokingColor(PRIMARY_COLOR);
                 contentStream.addRect(xPosition, yPosition - 5, columnWidths[column], rowHeight);
                 contentStream.fill();
 
-                contentStream.setNonStrokingColor(Color.BLACK);
+                // Texte en blanc pour meilleur contraste
+                contentStream.setNonStrokingColor(Color.WHITE);
                 contentStream.beginText();
                 contentStream.setFont(PDType1Font.HELVETICA_BOLD, 11);
-                contentStream.newLineAtOffset(xPosition + cellMargin, yPosition + 5);
+                contentStream.newLineAtOffset(xPosition + cellMargin, yPosition + 7);
                 contentStream.showText(text != null ? text : "");
                 contentStream.endText();
+
             } catch (IOException e) {
                 LOGGER.log(Level.SEVERE, "Erreur lors de l'ajout d'une cellule d'en-tête: " + e.getMessage(), e);
                 throw e;
             }
         }
 
-        public void addCell(String text, int column, boolean isHeader) throws IOException {
+        public void addCell(String text, int column, boolean highlight) throws IOException {
             try {
                 float xPosition = MARGIN;
                 for (int i = 0; i < column; i++) {
                     xPosition += columnWidths[i];
                 }
 
-                contentStream.setFont(isHeader ? PDType1Font.HELVETICA_BOLD : PDType1Font.HELVETICA, 10);
+                // Effet de surbrillance pour les lignes alternées
+                if (highlight) {
+                    contentStream.setNonStrokingColor(BACKGROUND_COLOR);
+                    contentStream.addRect(xPosition, yPosition - 5, columnWidths[column], rowHeight);
+                    contentStream.fill();
+                }
+
+                contentStream.setNonStrokingColor(SECONDARY_COLOR);
                 contentStream.beginText();
-                contentStream.newLineAtOffset(xPosition + cellMargin, yPosition + 5);
+                contentStream.setFont(PDType1Font.HELVETICA, 10);
+                contentStream.newLineAtOffset(xPosition + cellMargin, yPosition + 7);
                 contentStream.showText(text != null ? text : "");
                 contentStream.endText();
+
             } catch (IOException e) {
                 LOGGER.log(Level.SEVERE, "Erreur lors de l'ajout d'une cellule: " + e.getMessage(), e);
                 throw e;
@@ -97,19 +114,25 @@ public class PDFGenerator {
             try {
                 float xPosition = MARGIN;
 
+                // Lignes de tableau plus fines et élégantes
                 contentStream.setStrokingColor(TABLE_BORDER);
+                contentStream.setLineWidth(0.5f);
+
+                // Ligne horizontale
                 contentStream.moveTo(xPosition, yPosition - 5);
                 contentStream.lineTo(xPosition + tableWidth, yPosition - 5);
                 contentStream.stroke();
 
+                // Lignes verticales
                 float currentX = xPosition;
                 for (float width : columnWidths) {
                     contentStream.moveTo(currentX, yPosition + rowHeight);
-                    contentStream.lineTo(currentX, yPosition - rowHeight);
+                    contentStream.lineTo(currentX, yPosition - 5);
                     contentStream.stroke();
                     currentX += width;
                 }
 
+                contentStream.setLineWidth(1.0f);
                 contentStream.setStrokingColor(Color.BLACK);
             } catch (IOException e) {
                 LOGGER.log(Level.SEVERE, "Erreur lors du dessin des lignes: " + e.getMessage(), e);
@@ -140,7 +163,7 @@ public class PDFGenerator {
                     LOGGER.info("Nouvelle page créée avec succès - Page " + currentPage);
                 } catch (IOException e) {
                     LOGGER.log(Level.SEVERE, "Erreur lors de la création d'une nouvelle page: " + e.getMessage(), e);
-                    throw new IOException("Erreur lors de la création d'une nouvelle page", e);
+                    throw e;
                 }
             }
         }
@@ -150,27 +173,30 @@ public class PDFGenerator {
         float pageHeight = page.getMediaBox().getHeight();
         float pageWidth = page.getMediaBox().getWidth();
 
-        contentStream.setNonStrokingColor(HEADER_BG_COLOR);
+        // Bande supérieure élégante
+        contentStream.setNonStrokingColor(PRIMARY_COLOR);
         contentStream.addRect(0, pageHeight - HEADER_HEIGHT, pageWidth, HEADER_HEIGHT);
         contentStream.fill();
 
-        contentStream.setNonStrokingColor(PRIMARY_COLOR);
+        // Logo et titre
+        contentStream.setNonStrokingColor(Color.WHITE);
         contentStream.beginText();
-        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 24);
-        contentStream.newLineAtOffset(MARGIN, pageHeight - 60);
+        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 28);
+        contentStream.newLineAtOffset(MARGIN, pageHeight - 70);
         contentStream.showText("MA POISSONNERIE");
         contentStream.endText();
 
-        contentStream.setNonStrokingColor(Color.DARK_GRAY);
+        // Sous-titre
         contentStream.beginText();
-        contentStream.setFont(PDType1Font.HELVETICA, 12);
-        contentStream.newLineAtOffset(MARGIN, pageHeight - 80);
+        contentStream.setFont(PDType1Font.HELVETICA, 14);
+        contentStream.newLineAtOffset(MARGIN, pageHeight - 95);
         contentStream.showText("La fraîcheur au quotidien");
         contentStream.endText();
 
+        // Date de génération
         contentStream.beginText();
         contentStream.setFont(PDType1Font.HELVETICA, 10);
-        contentStream.newLineAtOffset(pageWidth - 200, pageHeight - 60);
+        contentStream.newLineAtOffset(pageWidth - 200, pageHeight - 70);
         contentStream.showText("Généré le: " + DATE_FORMATTER.format(LocalDateTime.now()));
         contentStream.endText();
 
@@ -181,24 +207,28 @@ public class PDFGenerator {
         float pageHeight = page.getMediaBox().getHeight();
         float pageWidth = page.getMediaBox().getWidth();
 
-        contentStream.setStrokingColor(TABLE_BORDER);
-        contentStream.moveTo(MARGIN, MARGIN);
-        contentStream.lineTo(pageWidth - MARGIN, MARGIN);
+        // Ligne de séparation élégante
+        contentStream.setStrokingColor(PRIMARY_COLOR);
+        contentStream.setLineWidth(2f);
+        contentStream.moveTo(MARGIN, MARGIN + 25);
+        contentStream.lineTo(pageWidth - MARGIN, MARGIN + 25);
         contentStream.stroke();
+        contentStream.setLineWidth(1.0f);
 
+        // Pagination stylisée
         contentStream.beginText();
         contentStream.setFont(PDType1Font.HELVETICA, 9);
-        contentStream.newLineAtOffset(pageWidth / 2 - 30, MARGIN - 15);
+        contentStream.setNonStrokingColor(SECONDARY_COLOR);
+        contentStream.newLineAtOffset(pageWidth / 2 - 30, MARGIN + 10);
         contentStream.showText(String.format("Page %d sur %d", pageNumber, totalPages));
         contentStream.endText();
 
+        // Copyright
         contentStream.beginText();
         contentStream.setFont(PDType1Font.HELVETICA, 8);
-        contentStream.newLineAtOffset(MARGIN, MARGIN - 15);
+        contentStream.newLineAtOffset(MARGIN, MARGIN + 10);
         contentStream.showText("© 2025 Ma Poissonnerie - Tous droits réservés");
         contentStream.endText();
-
-        contentStream.setStrokingColor(Color.BLACK);
     }
 
     public static void genererRapportFournisseurs(List<Fournisseur> fournisseurs, ByteArrayOutputStream outputStream) {
@@ -239,14 +269,16 @@ public class PDFGenerator {
                 LOGGER.info("Ajout des données des fournisseurs");
                 contentStream.setNonStrokingColor(Color.BLACK);
                 int count = 0;
+                boolean highlight = false;
                 for (Fournisseur fournisseur : fournisseurs) {
-                    table.addCell(fournisseur.getNom(), 0, false);
-                    table.addCell(fournisseur.getContact(), 1, false);
-                    table.addCell(fournisseur.getTelephone(), 2, false);
-                    table.addCell(fournisseur.getEmail(), 3, false);
+                    table.addCell(fournisseur.getNom(), 0, highlight);
+                    table.addCell(fournisseur.getContact(), 1, highlight);
+                    table.addCell(fournisseur.getTelephone(), 2, highlight);
+                    table.addCell(fournisseur.getEmail(), 3, highlight);
                     table.drawRowLines();
                     table.nextRow();
                     count++;
+                    highlight = !highlight; // Alternate highlighting
                     if (count % 20 == 0) {
                         LOGGER.info("Traitement de " + count + " fournisseurs sur " + fournisseurs.size());
                     }
@@ -351,14 +383,16 @@ public class PDFGenerator {
                 table.nextRow();
 
                 contentStream.setNonStrokingColor(Color.BLACK);
+                boolean highlight = false;
                 for (Client client : clients) {
                     if (client.getSolde() > 0) {
-                        table.addCell(client.getNom(), 0, false);
-                        table.addCell(client.getTelephone(), 1, false);
-                        table.addCell(String.format("%.2f €", client.getSolde()), 2, false);
-                        table.addCell("-", 3, false);
+                        table.addCell(client.getNom(), 0, highlight);
+                        table.addCell(client.getTelephone(), 1, highlight);
+                        table.addCell(String.format("%.2f €", client.getSolde()), 2, highlight);
+                        table.addCell("-", 3, highlight);
                         table.drawRowLines();
                         table.nextRow();
+                        highlight = !highlight;
                     }
                 }
             }
@@ -400,21 +434,23 @@ public class PDFGenerator {
                 table.nextRow();
 
                 double valeurTotaleStock = 0;
+                boolean highlight = false;
                 for (Produit p : produits) {
-                    table.addCell(String.valueOf(p.getId()), 0, false);
-                    table.addCell(p.getNom(), 1, false);
-                    table.addCell(p.getCategorie(), 2, false);
-                    table.addCell(String.format("%.2f €", p.getPrixAchat()), 3, false);
-                    table.addCell(String.format("%.2f €", p.getPrixVente()), 4, false);
-                    table.addCell(String.valueOf(p.getStock()), 5, false);
-                    table.addCell(String.valueOf(p.getSeuilAlerte()), 6, false);
+                    table.addCell(String.valueOf(p.getId()), 0, highlight);
+                    table.addCell(p.getNom(), 1, highlight);
+                    table.addCell(p.getCategorie(), 2, highlight);
+                    table.addCell(String.format("%.2f €", p.getPrixAchat()), 3, highlight);
+                    table.addCell(String.format("%.2f €", p.getPrixVente()), 4, highlight);
+                    table.addCell(String.valueOf(p.getStock()), 5, highlight);
+                    table.addCell(String.valueOf(p.getSeuilAlerte()), 6, highlight);
 
                     double valeurStock = p.getStock() * p.getPrixAchat();
-                    table.addCell(String.format("%.2f €", valeurStock), 7, false);
+                    table.addCell(String.format("%.2f €", valeurStock), 7, highlight);
                     valeurTotaleStock += valeurStock;
 
                     table.drawRowLines();
                     table.nextRow();
+                    highlight = !highlight;
                 }
 
                 contentStream.beginText();
@@ -456,24 +492,25 @@ public class PDFGenerator {
                 }
                 table.drawRowLines();
                 table.nextRow();
-
+                boolean highlight = false;
                 for (Vente v : ventes) {
-                    table.addCell(v.getDate().format(DATE_FORMATTER), 0, false);
-                    table.addCell(v.getClient() != null ? v.getClient().getNom() : "Vente comptant", 1, false);
-                    table.addCell(String.valueOf(v.getLignes().size()), 2, false);
-                    table.addCell(String.format("%.2f €", v.getTotalHT()), 3, false);
-                    table.addCell(String.format("%.2f €", v.getMontantTVA()), 4, false);
-                    table.addCell(String.format("%.2f €", v.getTotal()), 5, false);
-                    table.addCell(v.getModePaiement().getLibelle(), 6, false);
+                    table.addCell(v.getDate().format(DATE_FORMATTER), 0, highlight);
+                    table.addCell(v.getClient() != null ? v.getClient().getNom() : "Vente comptant", 1, highlight);
+                    table.addCell(String.valueOf(v.getLignes().size()), 2, highlight);
+                    table.addCell(String.format("%.2f €", v.getTotalHT()), 3, highlight);
+                    table.addCell(String.format("%.2f €", v.getMontantTVA()), 4, highlight);
+                    table.addCell(String.format("%.2f €", v.getTotal()), 5, highlight);
+                    table.addCell(v.getModePaiement().getLibelle(), 6, highlight);
 
                     double margeVente = 0.0;
                     for (Vente.LigneVente ligne : v.getLignes()) {
                         double marge = (ligne.getPrixUnitaire() - ligne.getProduit().getPrixAchat()) * ligne.getQuantite();
                         margeVente += marge;
                     }
-                    table.addCell(String.format("%.2f €", margeVente), 7, false);
+                    table.addCell(String.format("%.2f €", margeVente), 7, highlight);
                     table.drawRowLines();
                     table.nextRow();
+                    highlight = !highlight;
                 }
             }
             document.save(outputStream);
