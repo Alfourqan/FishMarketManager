@@ -9,7 +9,7 @@ public class Produit {
     private int stock;
     private int seuilAlerte;
     private String reference;
-    private Fournisseur fournisseur;  // Nouveau champ
+    private Fournisseur fournisseur;
 
     public Produit(int id, String nom, String categorie, double prixAchat, double prixVente, int stock, int seuilAlerte) {
         this.id = id;
@@ -22,11 +22,7 @@ public class Produit {
         this.reference = generateReference();
     }
 
-    // Nouveau getter et setter pour fournisseur
-    public Fournisseur getFournisseur() { return fournisseur; }
-    public void setFournisseur(Fournisseur fournisseur) { this.fournisseur = fournisseur; }
-
-    // Getters et setters existants
+    // Getters et setters essentiels
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -42,11 +38,6 @@ public class Produit {
     public double getPrixVente() { return prixVente; }
     public void setPrixVente(double prixVente) { this.prixVente = prixVente; }
 
-    public double getPrix() { return prixVente; }
-
-    public double getMarge() { return prixVente - prixAchat; }
-    public double getTauxMarge() { return prixAchat > 0 ? ((prixVente - prixAchat) / prixAchat) * 100 : 0; }
-
     public int getStock() { return stock; }
     public void setStock(int stock) { this.stock = stock; }
 
@@ -55,15 +46,19 @@ public class Produit {
 
     public String getReference() { return reference; }
 
+    public Fournisseur getFournisseur() { return fournisseur; }
+    public void setFournisseur(Fournisseur fournisseur) { this.fournisseur = fournisseur; }
+
+    // Méthodes de calcul optimisées
+    public double getMarge() { return prixVente - prixAchat; }
+    public double getTauxMarge() { return prixAchat > 0 ? ((prixVente - prixAchat) / prixAchat) * 100 : 0; }
+
     private String generateReference() {
         return String.format("P%04d-%s", id, 
             categorie.substring(0, Math.min(3, categorie.length())).toUpperCase());
     }
 
-    public int getQuantite() { 
-        return getStock(); 
-    }
-
+    // Gestion du stock
     public void ajusterStock(int quantite) {
         int nouveauStock = this.stock + quantite;
         if (nouveauStock < 0) {
@@ -74,49 +69,39 @@ public class Produit {
         this.stock = nouveauStock;
     }
 
+    // Méthodes de vérification du stock
     public boolean estStockBas() {
-        return this.stock > 0 && this.stock <= this.seuilAlerte;
+        return stock > 0 && stock <= seuilAlerte;
     }
 
     public boolean estEnRupture() {
-        return this.stock == 0;
+        return stock == 0;
     }
 
+    // Statut du stock
     public String getStatutStock() {
-        if (this.stock == 0) {
-            return "RUPTURE";
-        } else if (this.stock <= this.seuilAlerte) {
-            return "BAS";
-        } else if (this.stock <= this.seuilAlerte * 2) {
-            return "ATTENTION";
-        } else {
-            return "NORMAL";
-        }
+        if (stock == 0) return "RUPTURE";
+        if (stock <= seuilAlerte) return "BAS";
+        if (stock <= seuilAlerte * 2) return "ATTENTION";
+        return "NORMAL";
     }
 
     public String getStatutStockFormatted() {
         switch (getStatutStock()) {
-            case "RUPTURE":
-                return "⛔ RUPTURE DE STOCK";
-            case "BAS":
-                return String.format("⚠️ Stock critique: %d (seuil: %d)", stock, seuilAlerte);
-            case "ATTENTION":
-                return String.format("⚠️ Stock à surveiller: %d (seuil: %d)", stock, seuilAlerte);
-            default:
-                return String.format("✓ Stock normal: %d", stock);
+            case "RUPTURE": return "⛔ RUPTURE DE STOCK";
+            case "BAS": return String.format("⚠️ Stock critique: %d (seuil: %d)", stock, seuilAlerte);
+            case "ATTENTION": return String.format("⚠️ Stock à surveiller: %d (seuil: %d)", stock, seuilAlerte);
+            default: return String.format("✓ Stock normal: %d", stock);
         }
     }
 
     @Override
     public String toString() {
-        String fournisseurInfo = fournisseur != null ? ", Fournisseur: " + fournisseur.getNom() : "";
-        return String.format("%s (Réf: %s) - Achat: %.0f FCFA, Vente: %.0f FCFA (%s)%s %s",
+        return String.format("%s (Réf: %s) - Prix: %.0f FCFA %s %s",
             nom,
             reference,
-            prixAchat,
             prixVente,
-            categorie,
-            fournisseurInfo,
+            fournisseur != null ? "- " + fournisseur.getNom() : "",
             getStatutStockFormatted());
     }
 }

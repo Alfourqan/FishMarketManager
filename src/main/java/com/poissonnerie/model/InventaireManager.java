@@ -93,7 +93,7 @@ public class InventaireManager {
                     if (nouveauStock == 0) {
                         LOGGER.warning("Rupture de stock pour " + produit.getNom());
                         observer.onRuptureStock(produit);
-                    } else if (produit.estStockBas()) {
+                    } else if (nouveauStock <= produit.getSeuilAlerte()) {
                         LOGGER.warning("Stock bas pour " + produit.getNom());
                         observer.onStockBas(produit);
                     }
@@ -131,9 +131,9 @@ public class InventaireManager {
 
         List<Produit> produitsBas = new ArrayList<>();
         for (Produit produit : produits) {
-            if (produit != null && (produit.estStockBas() || produit.estEnRupture())) {
+            if (produit != null && (produit.getStock() <= produit.getSeuilAlerte())) {
                 produitsBas.add(produit);
-                LOGGER.info("Produit en stock bas ou en rupture détecté: " + produit.getNom());
+                LOGGER.info("Produit en stock bas détecté: " + produit.getNom());
             }
         }
         return Collections.unmodifiableList(produitsBas);
@@ -164,7 +164,7 @@ public class InventaireManager {
 
         // Valeur totale du stock
         double valeurTotale = produits.stream()
-            .mapToDouble(p -> p.getPrix() * p.getStock())
+            .mapToDouble(p -> p.getPrixVente() * p.getStock())
             .sum();
         stats.put("valeur_totale", valeurTotale);
 
@@ -177,7 +177,7 @@ public class InventaireManager {
 
         // Pourcentage de produits en alerte
         long produitsEnAlerte = produits.stream()
-            .filter(Produit::estStockBas)
+            .filter(p -> p.getStock() <= p.getSeuilAlerte())
             .count();
         double pourcentageAlerte = (double) produitsEnAlerte / produits.size() * 100;
         stats.put("pourcentage_alerte", pourcentageAlerte);

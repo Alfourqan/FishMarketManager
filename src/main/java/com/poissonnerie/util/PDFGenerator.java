@@ -3,7 +3,6 @@ package com.poissonnerie.util;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.*;
 import com.poissonnerie.model.*;
-import com.poissonnerie.model.Vente.ModePaiement;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -42,10 +41,10 @@ public class PDFGenerator {
             Map<String, Double> benefices,
             Map<String, Double> marges,
             ByteArrayOutputStream outputStream) throws DocumentException {
-        Document document = null;
+        Document document = new Document(PageSize.A4.rotate());
         try {
-            document = new Document(PageSize.A4.rotate());
             PdfWriter writer = PdfWriter.getInstance(document, outputStream);
+            writer.setPageEvent(new SimpleFooter());
             document.open();
 
             // En-tête avec date et titre
@@ -86,7 +85,7 @@ public class PDFGenerator {
 
             LOGGER.info("Rapport financier PDF généré avec succès");
         } finally {
-            if (document != null && document.isOpen()) {
+            if (document.isOpen()) {
                 document.close();
             }
         }
@@ -149,6 +148,82 @@ public class PDFGenerator {
         document.add(table);
     }
 
+    public static String genererPreviewTicket(Vente vente) {
+        String tempFile = "preview_ticket_" + System.currentTimeMillis() + ".pdf";
+        Document document = new Document(PageSize.A4);
+        try {
+            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(tempFile));
+            writer.setPageEvent(new SimpleFooter());
+            document.open();
+            genererContenuTicket(document, vente);
+            return tempFile;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération de la prévisualisation du ticket", e);
+            throw new RuntimeException("Erreur lors de la génération de la prévisualisation", e);
+        } finally {
+            if (document.isOpen()) {
+                document.close();
+            }
+        }
+    }
+
+    private static void genererContenuTicket(Document document, Vente vente) throws DocumentException {
+        // Configuration de la page pour le format ticket
+        document.setMargins(20, 20, 20, 20);
+
+        // En-tête
+        Paragraph businessName = new Paragraph("MA POISSONNERIE", TITLE_FONT);
+        businessName.setAlignment(Element.ALIGN_CENTER);
+        document.add(businessName);
+
+        // Détails de la vente
+        document.add(new Paragraph("Date: " + DATE_FORMATTER.format(vente.getDate()), NORMAL_FONT));
+        document.add(new Paragraph("Client: " + (vente.getClient() != null ? vente.getClient().getNom() : "Vente comptant"), NORMAL_FONT));
+        document.add(new Paragraph("----------------------------------------", NORMAL_FONT));
+
+        // Articles
+        PdfPTable table = new PdfPTable(new float[]{4, 1, 2, 2});
+        table.setWidthPercentage(100);
+        table.addCell(new PdfPCell(new Phrase("Article", SUBTITLE_FONT)));
+        table.addCell(new PdfPCell(new Phrase("Qté", SUBTITLE_FONT)));
+        table.addCell(new PdfPCell(new Phrase("P.U.", SUBTITLE_FONT)));
+        table.addCell(new PdfPCell(new Phrase("Total", SUBTITLE_FONT)));
+
+        for (Vente.LigneVente ligne : vente.getLignes()) {
+            table.addCell(new Phrase(ligne.getProduit().getNom(), NORMAL_FONT));
+            table.addCell(new Phrase(String.valueOf(ligne.getQuantite()), NORMAL_FONT));
+            table.addCell(new Phrase(String.format("%.2f", ligne.getPrixUnitaire()), NORMAL_FONT));
+            table.addCell(new Phrase(String.format("%.2f", ligne.getPrixUnitaire() * ligne.getQuantite()), NORMAL_FONT));
+        }
+
+        document.add(table);
+        document.add(new Paragraph("----------------------------------------", NORMAL_FONT));
+
+        // Totaux
+        Paragraph totals = new Paragraph();
+        totals.add(new Chunk("Total HT: ", NORMAL_FONT));
+        totals.add(new Chunk(String.format("%.2f €\n", vente.getTotalHT()), SUBTITLE_FONT));
+        totals.add(new Chunk("TVA: ", NORMAL_FONT));
+        totals.add(new Chunk(String.format("%.2f €\n", vente.getMontantTVA()), SUBTITLE_FONT));
+        totals.add(new Chunk("Total TTC: ", NORMAL_FONT));
+        totals.add(new Chunk(String.format("%.2f €", vente.getTotal()), SUBTITLE_FONT));
+        totals.setAlignment(Element.ALIGN_RIGHT);
+        document.add(totals);
+
+        // Pied de page
+        document.add(new Paragraph("\n\nMerci de votre visite !", NORMAL_FONT));
+        document.add(new Paragraph("MA POISSONNERIE - Le meilleur de la mer", SMALL_FONT));
+    }
+
+    public static void sauvegarderPDF(byte[] pdfData, String nomFichier) throws IOException {
+        try (FileOutputStream fos = new FileOutputStream(nomFichier)) {
+            fos.write(pdfData);
+            LOGGER.info("PDF sauvegardé avec succès : " + nomFichier);
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la sauvegarde du PDF", e);
+            throw e;
+        }
+    }
     public static void genererRapportStocks(List<Produit> produits, Map<String, Double> statistiques, ByteArrayOutputStream outputStream) throws DocumentException {
         Document document = null;
         try {
@@ -294,7 +369,7 @@ public class PDFGenerator {
             double totalTTC = 0;
             double totalMarge = 0;
             Map<String, Double> ventesParJour = new TreeMap<>();
-            Map<ModePaiement, Double> ventesParMode = new EnumMap<>(ModePaiement.class);
+            Map<Vente.ModePaiement, Double> ventesParMode = new EnumMap<>(Vente.ModePaiement.class);
 
             // Données
             for (Vente v : ventes) {
@@ -358,7 +433,7 @@ public class PDFGenerator {
             modeTable.setWidthPercentage(70);
             modeTable.setSpacingBefore(10f);
 
-            for (Map.Entry<ModePaiement, Double> entry : ventesParMode.entrySet()) {
+            for (Map.Entry<Vente.ModePaiement, Double> entry : ventesParMode.entrySet()) {
                 addTableCell(modeTable, entry.getKey().getLibelle(),
                         String.format("%.2f €", entry.getValue()), false);
             }
@@ -497,27 +572,6 @@ public class PDFGenerator {
         }
     }
 
-    public static String genererPreviewTicket(Vente vente) {
-        Document document = null;
-        String tempFile = "preview_ticket_" + System.currentTimeMillis() + ".pdf";
-        try {
-            document = new Document(PageSize.A4);
-            PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(tempFile));
-            SimpleFooter footer = new SimpleFooter();
-            writer.setPageEvent(footer);
-            document.open();
-            genererContenuTicket(document, vente);
-            return tempFile;
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération de la prévisualisation du ticket", e);
-            throw new RuntimeException("Erreur lors de la génération de la prévisualisation", e);
-        } finally {
-            if (document != null && document.isOpen()) {
-                document.close();
-            }
-        }
-    }
-
     public static void genererTicket(Vente vente, String cheminFichier) {
         // Créer et imprimer le ticket texte
         TextBillPrinter printer = new TextBillPrinter(vente);
@@ -548,59 +602,6 @@ public class PDFGenerator {
             }
         }
     }
-
-    private static void genererContenuTicket(Document document, Vente vente) throws DocumentException {
-        // Configuration de la page pour le format ticket
-        document.setMargins(20, 20, 20, 20);
-
-        // Utiliser une police monospace pour maintenir l'alignement
-        Font titleFont = new Font(Font.FontFamily.COURIER, 14, Font.BOLD);
-        Font normalFont = new Font(Font.FontFamily.COURIER, 10, Font.NORMAL);
-        Font boldFont = new Font(Font.FontFamily.COURIER, 10, Font.BOLD);
-
-        // En-tête
-        Paragraph businessName = new Paragraph("                         MA POISSONNERIE", titleFont);
-        businessName.setAlignment(Element.ALIGN_LEFT);
-        document.add(businessName);
-
-        // Adresse
-        document.add(new Paragraph("\t123 Rue de la Mer", normalFont));
-        document.add(new Paragraph("\t75001 PARIS", normalFont));
-        document.add(new Paragraph("\t+33 1 23 45 67 89", normalFont));
-        document.add(new Paragraph("----------------------------------------------------------------", normalFont));
-
-        // En-tête des colonnes
-        document.add(new Paragraph(" Iteam\t\tQty\tPrice", normalFont));
-        document.add(new Paragraph("----------------------------------------------------------------", normalFont));
-
-        // Articles
-        for (Vente.LigneVente ligne : vente.getLignes()) {
-            String nomProduit = ligne.getProduit().getNom();
-            if (nomProduit.length() > 20) {
-                nomProduit = nomProduit.substring(0, 17) + "...";
-            }
-
-            // Format: Nom du produit (aligné à gauche) Quantité Prix
-            String articleLine = String.format("%-20s\t%d\t%.2f",
-                    nomProduit,
-                    ligne.getQuantite(),
-                    ligne.getPrixUnitaire() * ligne.getQuantite());
-            document.add(new Paragraph(articleLine, normalFont));
-        }
-
-        document.add(new Paragraph("----------------------------------------------------------------", normalFont));
-
-        // Totaux
-        document.add(new Paragraph(String.format("SubTotal :\t\t%.2f", vente.getTotalHT()), normalFont));
-        document.add(new Paragraph(String.format("Cash :\t\t\t%.2f", vente.getTotal()), normalFont));
-        document.add(new Paragraph(String.format("Balance :\t\t%.2f", 0.00), normalFont));
-
-        document.add(new Paragraph("====================================", normalFont));
-        document.add(new Paragraph("                     Thanks For Your Business...!", boldFont));
-        document.add(new Paragraph("----------------------------------------------------------------", normalFont));
-        document.add(new Paragraph("                     Software by MA POISSONNERIE", normalFont));
-    }
-
     public static void genererRapportCreances(List<Client> clients, String cheminFichier) {
         Document document = null;
         try {
@@ -697,24 +698,5 @@ public class PDFGenerator {
                 document.close();
             }
         }
-    }
-
-    // Méthodes utilitaires migrées depuis PDFUtils
-    public static void sauvegarderPDF(byte[] pdfData, String nomFichier) throws IOException {
-        try (FileOutputStream fos = new FileOutputStream(nomFichier)) {
-            fos.write(pdfData);
-            LOGGER.info("PDF sauvegardé avec succès : " + nomFichier);
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la sauvegarde du PDF", e);
-            throw e;
-        }
-    }
-
-    public static byte[] getBytes(ByteArrayOutputStream baos) {
-        return baos.toByteArray();
-    }
-
-    public static void convertirEtSauvegarder(ByteArrayOutputStream baos, String nomFichier) throws IOException {
-        sauvegarderPDF(getBytes(baos), nomFichier);
     }
 }

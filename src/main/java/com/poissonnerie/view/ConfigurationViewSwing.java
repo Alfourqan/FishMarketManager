@@ -42,19 +42,27 @@ public class ConfigurationViewSwing {
     private final JPanel mainPanel;
     private final ConfigurationController controller;
     private final Map<String, JComponent> champsSaisie;
-    private final Color couleurPrincipale = new Color(33, 150, 243);
-    private final Color couleurFond = new Color(245, 245, 245);
-    private final Font titreFont = new Font("Segoe UI", Font.BOLD, 24);
-    private final Font sousTitreFont = new Font("Segoe UI", Font.BOLD, 16);
-    private final Font texteNormalFont = new Font("Segoe UI", Font.PLAIN, 14);
-    private JPanel previewPanel;
-    private static final Set<String> FORMATS_IMAGE_AUTORISES = new HashSet<>(Arrays.asList("jpg", "jpeg", "png", "gif"));
-    private static final long TAILLE_MAX_LOGO = 1024 * 1024; // 1MB
+
+    // Constants optimized and grouped
+    private static final Color COULEUR_PRINCIPALE = new Color(33, 150, 243);
+    private static final Color COULEUR_FOND = new Color(245, 245, 245);
+    private static final Color COULEUR_BORDURE = new Color(200, 200, 200);
+    private static final Font TITRE_FONT = new Font("Segoe UI", Font.BOLD, 24);
+    private static final Font SOUS_TITRE_FONT = new Font("Segoe UI", Font.BOLD, 16);
+    private static final Font TEXTE_NORMAL_FONT = new Font("Segoe UI", Font.PLAIN, 14);
+
+    // Keep only essential file format restrictions
+    private static final Set<String> FORMATS_IMAGE_AUTORISES = new HashSet<>(Arrays.asList("jpg", "jpeg", "png"));
+    private static final long TAILLE_MAX_LOGO = 512 * 1024; // Reduced to 512KB
+
+    // Optimize preview executor
     private static final ExecutorService previewExecutor = Executors.newSingleThreadExecutor(r -> {
         Thread t = new Thread(r, "PreviewUpdater");
         t.setDaemon(true);
         return t;
     });
+
+    private JPanel previewPanel;
     private Timer previewUpdateTimer;
 
     public ConfigurationViewSwing() {
@@ -62,30 +70,29 @@ public class ConfigurationViewSwing {
         controller = new ConfigurationController();
         champsSaisie = new HashMap<>();
         SwingUtilities.invokeLater(this::initializeComponents);
-        Runtime.getRuntime().addShutdownHook(new Thread(previewExecutor::shutdown));
     }
 
     private void styleTextField(JTextField textField) {
-        textField.setFont(texteNormalFont);
+        textField.setFont(TEXTE_NORMAL_FONT);
         textField.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createLineBorder(COULEUR_BORDURE),
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
     }
 
     private void styleTextArea(JTextArea textArea) {
-        textArea.setFont(texteNormalFont);
+        textArea.setFont(TEXTE_NORMAL_FONT);
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
         textArea.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createLineBorder(COULEUR_BORDURE),
             BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
     }
 
     private JButton createStyledButton(String text, MaterialDesign icon, Color color) {
         JButton button = new JButton(text);
-        button.setFont(texteNormalFont);
+        button.setFont(TEXTE_NORMAL_FONT);
 
         FontIcon fontIcon = FontIcon.of(icon);
         fontIcon.setIconSize(16);
@@ -232,7 +239,7 @@ public class ConfigurationViewSwing {
     }
     private void initializeComponents() {
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        mainPanel.setBackground(couleurFond);
+        mainPanel.setBackground(COULEUR_FOND);
 
         // Initialisation des composants en arrière-plan
         SwingWorker<Void, Void> worker = new SwingWorker<>() {
@@ -507,11 +514,11 @@ public class ConfigurationViewSwing {
     private JPanel createPreviewPanel() {
         JPanel panel = new JPanel(new BorderLayout());
         Border titledBorder = BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createLineBorder(COULEUR_BORDURE),
             "Prévisualisation du reçu",
             TitledBorder.LEFT,
             TitledBorder.TOP,
-            sousTitreFont
+            SOUS_TITRE_FONT
         );
         panel.setBorder(titledBorder);
         panel.setBackground(Color.WHITE);
@@ -524,7 +531,7 @@ public class ConfigurationViewSwing {
         panel.add(new JScrollPane(previewArea), BorderLayout.CENTER);
 
         JButton updatePreviewButton = createStyledButton("Mettre à jour la prévisualisation",
-            MaterialDesign.MDI_REFRESH, new Color(76, 175, 80));
+            MaterialDesign.MDI_REFRESH, COULEUR_PRINCIPALE);
         updatePreviewButton.addActionListener(e -> updatePreview());
         panel.add(updatePreviewButton, BorderLayout.SOUTH);
 
@@ -576,11 +583,11 @@ public class ConfigurationViewSwing {
 
         FontIcon settingsIcon = FontIcon.of(MaterialDesign.MDI_SETTINGS);
         settingsIcon.setIconSize(32);
-        settingsIcon.setIconColor(couleurPrincipale);
+        settingsIcon.setIconColor(COULEUR_PRINCIPALE);
         JLabel iconLabel = new JLabel(settingsIcon);
 
         JLabel titleLabel = new JLabel("Paramètres de l'Application");
-        titleLabel.setFont(titreFont);
+        titleLabel.setFont(TITRE_FONT);
         titleLabel.setForeground(new Color(33, 33, 33));
 
         headerPanel.add(iconLabel, BorderLayout.WEST);
@@ -593,11 +600,11 @@ public class ConfigurationViewSwing {
         panel.setOpaque(false);
         panel.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createTitledBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200)),
+                BorderFactory.createLineBorder(COULEUR_BORDURE),
                 title,
                 TitledBorder.LEFT,
                 TitledBorder.TOP,
-                sousTitreFont,
+                SOUS_TITRE_FONT,
                 new Color(33, 33, 33)
             ),
             BorderFactory.createEmptyBorder(10, 10, 10, 10)
@@ -607,7 +614,7 @@ public class ConfigurationViewSwing {
         if (icon != null) {
             FontIcon fontIcon = FontIcon.of(icon);
             fontIcon.setIconSize(24);
-            fontIcon.setIconColor(couleurPrincipale);
+            fontIcon.setIconColor(COULEUR_PRINCIPALE);
             JLabel iconLabel = new JLabel(fontIcon);
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.gridx = 0;
@@ -624,7 +631,7 @@ public class ConfigurationViewSwing {
         JPanel panel = createSectionPanel("Configuration TVA", MaterialDesign.MDI_PERCENT);
 
         JCheckBox tvaEnabledCheck = (JCheckBox) champsSaisie.get(ConfigurationParam.CLE_TVA_ENABLED);
-        tvaEnabledCheck.setFont(texteNormalFont);
+        tvaEnabledCheck.setFont(TEXTE_NORMAL_FONT);
         tvaEnabledCheck.setToolTipText("Active ou désactive le calcul de la TVA sur les ventes");
 
         JPanel tauxPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -642,7 +649,7 @@ public class ConfigurationViewSwing {
             updatePreview();
         });
 
-        tauxTvaSpinner.setFont(texteNormalFont);
+        tauxTvaSpinner.setFont(TEXTE_NORMAL_FONT);
 
         tvaEnabledCheck.addActionListener(e -> {
             boolean enabled = tvaEnabledCheck.isSelected();
@@ -712,10 +719,10 @@ public class ConfigurationViewSwing {
 
         for (String[] champ : champs) {
             JLabel label = new JLabel(champ[1] + ":");
-            label.setFont(texteNormalFont);
+            label.setFont(TEXTE_NORMAL_FONT);
 
             JTextField textField = (JTextField) champsSaisie.get(champ[0]);
-            textField.setFont(texteNormalFont);
+            textField.setFont(TEXTE_NORMAL_FONT);
             styleTextField(textField);
 
             panel.add(label, gbc);
@@ -741,9 +748,9 @@ public class ConfigurationViewSwing {
 
         // Format des reçus
         JLabel formatLabel = new JLabel("Format des reçus:");
-        formatLabel.setFont(texteNormalFont);
+        formatLabel.setFont(TEXTE_NORMAL_FONT);
         JComboBox<String> formatCombo = (JComboBox<String>) champsSaisie.get(ConfigurationParam.CLE_FORMAT_RECU);
-        formatCombo.setFont(texteNormalFont);
+        formatCombo.setFont(TEXTE_NORMAL_FONT);
         formatCombo.setToolTipText("COMPACT: Version simplifiée du reçu\nDETAILLE: Version complète avec informations additionnelles");
 
         panel.add(formatLabel, gbc);
@@ -754,9 +761,9 @@ public class ConfigurationViewSwing {
         gbc.gridx = 0;
         gbc.gridy++;
         JLabel bordureLabel = new JLabel("Style de bordure:");
-        bordureLabel.setFont(texteNormalFont);
+        bordureLabel.setFont(TEXTE_NORMAL_FONT);
         JComboBox<String> bordureCombo = (JComboBox<String>) champsSaisie.get(ConfigurationParam.CLE_STYLE_BORDURE_RECU);
-        bordureCombo.setFont(texteNormalFont);
+        bordureCombo.setFont(TEXTE_NORMAL_FONT);
 
         panel.add(bordureLabel, gbc);
         gbc.gridx = 1;
@@ -767,9 +774,9 @@ public class ConfigurationViewSwing {
         gbc.gridy++;
         JPanel policeTitrePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel policeTitreLabel = new JLabel("Taille police titre:");
-        policeTitreLabel.setFont(texteNormalFont);
+        policeTitreLabel.setFont(TEXTE_NORMAL_FONT);
         JSpinner policeTitreSpinner = (JSpinner) champsSaisie.get(ConfigurationParam.CLE_POLICE_TITRE_RECU);
-        policeTitreSpinner.setFont(texteNormalFont);
+        policeTitreSpinner.setFont(TEXTE_NORMAL_FONT);
         policeTitrePanel.add(policeTitreLabel);
         policeTitrePanel.add(policeTitreSpinner);
 
@@ -781,9 +788,9 @@ public class ConfigurationViewSwing {
         gbc.gridy++;
         JPanel policeTextePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel policeTexteLabel = new JLabel("Taille police texte:");
-        policeTexteLabel.setFont(texteNormalFont);
+        policeTexteLabel.setFont(TEXTE_NORMAL_FONT);
         JSpinner policeTexteSpinner = (JSpinner) champsSaisie.get(ConfigurationParam.CLE_POLICE_TEXTE_RECU);
-        policeTexteSpinner.setFont(texteNormalFont);
+        policeTexteSpinner.setFont(TEXTE_NORMAL_FONT);
         policeTextePanel.add(policeTexteLabel);
         policeTextePanel.add(policeTexteSpinner);
 
@@ -864,7 +871,7 @@ public class ConfigurationViewSwing {
         optionsPanel.setBorder(BorderFactory.createTitledBorder("Options supplémentaires"));
 
         JCheckBox afficherTVACheck = (JCheckBox) champsSaisie.get(ConfigurationParam.CLE_AFFICHER_TVA_DETAILS);
-        afficherTVACheck.setFont(texteNormalFont);
+        afficherTVACheck.setFont(TEXTE_NORMAL_FONT);
         optionsPanel.add(afficherTVACheck);
 
         panel.add(optionsPanel, gbc);
@@ -872,7 +879,7 @@ public class ConfigurationViewSwing {
         // Prévisualisation
         gbc.gridy++;
         JLabel previewLabel = new JLabel("Les modifications sont visibles dans l'aperçu à droite");
-        previewLabel.setFont(new Font(texteNormalFont.getName(), Font.ITALIC, texteNormalFont.getSize()));
+        previewLabel.setFont(new Font(TEXTE_NORMAL_FONT.getName(), Font.ITALIC, TEXTE_NORMAL_FONT.getSize()));
         previewLabel.setForeground(new Color(128, 128, 128));
         panel.add(previewLabel, gbc);
 
@@ -1018,7 +1025,7 @@ public class ConfigurationViewSwing {
 
         // Bouton Exporter
         JButton exportButton = createStyledButton("Exporter", MaterialDesign.MDI_EXPORT,
-            new Color(33, 150, 243));
+            COULEUR_PRINCIPALE);
         exportButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -1043,7 +1050,7 @@ public class ConfigurationViewSwing {
 
         // Bouton Importer
         JButton importButton = createStyledButton("Importer", MaterialDesign.MDI_IMPORT,
-            new Color(76, 175, 80));
+            COULEUR_PRINCIPALE);
         importButton.addActionListener(e -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -1064,7 +1071,7 @@ public class ConfigurationViewSwing {
 
         // Bouton Réinitialiser
         JButton resetButton = createStyledButton("Réinitialiser", MaterialDesign.MDI_RESTORE,
-            new Color(244, 67, 54));
+            COULEUR_PRINCIPALE);
         resetButton.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(mainPanel,
                 "Voulez-vous vraiment réinitialiser toutes les configurations ?",
@@ -1087,7 +1094,7 @@ public class ConfigurationViewSwing {
 
         // Bouton Sauvegarder
         JButton saveButton = createStyledButton("Sauvegarder", MaterialDesign.MDI_CONTENT_SAVE,
-            new Color(33, 150, 243));
+            COULEUR_PRINCIPALE);
         saveButton.addActionListener(e -> {
             try {
                 List<ConfigurationParam> configsToSave = new ArrayList<>();

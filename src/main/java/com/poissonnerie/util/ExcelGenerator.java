@@ -4,7 +4,6 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import com.poissonnerie.model.*;
-import com.poissonnerie.model.Vente.ModePaiement; // Added import
 import java.io.FileOutputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -70,7 +69,7 @@ public class ExcelGenerator {
                 stockSheet.setColumnWidth(i, 256 * 15);
             }
 
-            double valeurTotaleStock = 0.0;
+            double valeurTotaleStock = 0;
             int rowNum = 1;
             Map<String, Integer> produitsParCategorie = new HashMap<>();
 
@@ -88,11 +87,11 @@ public class ExcelGenerator {
                 prixVenteCell.setCellValue(p.getPrixVente());
                 applyCurrencyStyle(workbook, (XSSFCell)prixVenteCell);
 
-                row.createCell(5).setCellValue(p.getQuantite());
+                row.createCell(5).setCellValue(p.getStock());
                 row.createCell(6).setCellValue(p.getSeuilAlerte());
-                row.createCell(7).setCellValue(p.getQuantite() <= p.getSeuilAlerte() ? "ALERTE" : "OK");
+                row.createCell(7).setCellValue(p.getStock() <= p.getSeuilAlerte() ? "ALERTE" : "OK");
 
-                double valeurStock = p.getQuantite() * p.getPrixAchat();
+                double valeurStock = p.getStock() * p.getPrixAchat();
                 Cell valeurStockCell = row.createCell(8);
                 valeurStockCell.setCellValue(valeurStock);
                 applyCurrencyStyle(workbook, (XSSFCell)valeurStockCell);
@@ -278,7 +277,7 @@ public class ExcelGenerator {
             // Données détaillées des ventes
             int rowNum = 1;
             Map<String, Double> ventesParJour = new TreeMap<>();
-            Map<ModePaiement, Double> ventesParMode = new EnumMap<>(ModePaiement.class);
+            Map<Vente.ModePaiement, Double> ventesParMode = new EnumMap<>(Vente.ModePaiement.class);
             Map<String, Double> ventesParCategorie = new HashMap<>();
             double totalMarge = 0.0;
 
@@ -351,7 +350,7 @@ public class ExcelGenerator {
     private static void creerFeuilleAnalysesVentes(
             XSSFWorkbook workbook,
             Map<String, Double> ventesParJour,
-            Map<ModePaiement, Double> ventesParMode,
+            Map<Vente.ModePaiement, Double> ventesParMode,
             Map<String, Double> ventesParCategorie,
             double totalMarge) {
 
@@ -378,7 +377,7 @@ public class ExcelGenerator {
         modeTitle.createCell(0).setCellValue("Ventes par mode de paiement");
         applyHeaderStyle(workbook, (XSSFCell)modeTitle.getCell(0));
 
-        for (Map.Entry<ModePaiement, Double> entry : ventesParMode.entrySet()) {
+        for (Map.Entry<Vente.ModePaiement, Double> entry : ventesParMode.entrySet()) {
             Row row = analyseSheet.createRow(rowNum++);
             row.createCell(0).setCellValue(entry.getKey().getLibelle());
             Cell valueCell = row.createCell(1);
