@@ -144,70 +144,11 @@ public class PDFGenerator {
         }
     }
 
-    public static void genererRapportVentes(List<Vente> ventes, ByteArrayOutputStream outputStream) {
-        try (PDDocument document = new PDDocument()) {
-            PDPage page = createLandscapePage();
-            document.addPage(page);
-            PDPageContentStream contentStream = new PDPageContentStream(document, page);
-
-            contentStream.beginText();
-            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 18);
-            contentStream.newLineAtOffset(50, page.getMediaBox().getHeight() - 50);
-            contentStream.showText("Rapport des Ventes");
-            contentStream.endText();
-
-            float[] columnWidths = {70, 100, 50, 70, 70, 70, 70, 70};
-            PDFTable table = new PDFTable(document, page, contentStream, page.getMediaBox().getHeight() - 100, columnWidths);
-            String[] headers = {
-                    "Date", "Client", "Produits", "Total HT", "TVA",
-                    "Total TTC", "Mode", "Marge"
-            };
-
-            for (int i = 0; i < headers.length; i++) {
-                table.addCell(headers[i], i, true);
-            }
-            table.drawRowLines();
-            table.nextRow();
-
-            double totalHT = 0;
-            double totalTVA = 0;
-            double totalTTC = 0;
-            double totalMarge = 0;
-            Map<String, Double> ventesParJour = new TreeMap<>();
-            Map<Vente.ModePaiement, Double> ventesParMode = new EnumMap<>(Vente.ModePaiement.class);
-
-
-            for (Vente v : ventes) {
-                table.addCell(v.getDate().format(DATE_FORMATTER), 0, false);
-                table.addCell(v.getClient() != null ? v.getClient().getNom() : "Vente comptant", 1, false);
-                table.addCell(String.valueOf(v.getLignes().size()), 2, false);
-                table.addCell(String.format("%.2f €", v.getTotalHT()), 3, false);
-                table.addCell(String.format("%.2f €", v.getMontantTVA()), 4, false);
-                table.addCell(String.format("%.2f €", v.getTotal()), 5, false);
-                table.addCell(v.getModePaiement().getLibelle(), 6, false);
-
-                double margeVente = 0.0;
-                for (Vente.LigneVente ligne : v.getLignes()) {
-                    double marge = (ligne.getPrixUnitaire() - ligne.getProduit().getPrixAchat()) * ligne.getQuantite();
-                    margeVente += marge;
-                }
-                table.addCell(String.format("%.2f €", margeVente), 7, false);
-                table.drawRowLines();
-                table.nextRow();
-            }
-
-            contentStream.close();
-            document.save(outputStream);
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport des ventes", e);
-            throw new RuntimeException("Erreur lors de la génération du rapport", e);
-        }
-    }
-
     public static void genererRapportCreances(List<Client> clients, ByteArrayOutputStream outputStream) {
         try (PDDocument document = new PDDocument()) {
             PDPage page = new PDPage();
             document.addPage(page);
+
             PDPageContentStream contentStream = new PDPageContentStream(document, page);
 
             contentStream.beginText();
@@ -241,6 +182,45 @@ public class PDFGenerator {
             document.save(outputStream);
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport des créances", e);
+            throw new RuntimeException("Erreur lors de la génération du rapport", e);
+        }
+    }
+
+    public static void genererRapportFournisseurs(List<Fournisseur> fournisseurs, ByteArrayOutputStream outputStream) {
+        try (PDDocument document = new PDDocument()) {
+            PDPage page = new PDPage();
+            document.addPage(page);
+            PDPageContentStream contentStream = new PDPageContentStream(document, page);
+
+            contentStream.beginText();
+            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 18);
+            contentStream.newLineAtOffset(50, page.getMediaBox().getHeight() - 50);
+            contentStream.showText("Liste des Fournisseurs");
+            contentStream.endText();
+
+            float[] columnWidths = {150, 100, 100, 100};
+            PDFTable table = new PDFTable(document, page, contentStream, page.getMediaBox().getHeight() - 100, columnWidths);
+
+            String[] headers = {"Nom", "Contact", "Téléphone", "Email"};
+            for (int i = 0; i < headers.length; i++) {
+                table.addCell(headers[i], i, true);
+            }
+            table.drawRowLines();
+            table.nextRow();
+
+            for (Fournisseur fournisseur : fournisseurs) {
+                table.addCell(fournisseur.getNom(), 0, false);
+                table.addCell(fournisseur.getContact(), 1, false);
+                table.addCell(fournisseur.getTelephone(), 2, false);
+                table.addCell(fournisseur.getEmail(), 3, false);
+                table.drawRowLines();
+                table.nextRow();
+            }
+
+            contentStream.close();
+            document.save(outputStream);
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport des fournisseurs", e);
             throw new RuntimeException("Erreur lors de la génération du rapport", e);
         }
     }
@@ -309,6 +289,114 @@ public class PDFGenerator {
         }
     }
 
+    public static void genererRapportVentes(List<Vente> ventes, ByteArrayOutputStream outputStream) {
+        try (PDDocument document = new PDDocument()) {
+            PDPage page = createLandscapePage();
+            document.addPage(page);
+            PDPageContentStream contentStream = new PDPageContentStream(document, page);
+
+            contentStream.beginText();
+            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 18);
+            contentStream.newLineAtOffset(50, page.getMediaBox().getHeight() - 50);
+            contentStream.showText("Rapport des Ventes");
+            contentStream.endText();
+
+            float[] columnWidths = {70, 100, 50, 70, 70, 70, 70, 70};
+            PDFTable table = new PDFTable(document, page, contentStream, page.getMediaBox().getHeight() - 100, columnWidths);
+            String[] headers = {
+                    "Date", "Client", "Produits", "Total HT", "TVA",
+                    "Total TTC", "Mode", "Marge"
+            };
+
+            for (int i = 0; i < headers.length; i++) {
+                table.addCell(headers[i], i, true);
+            }
+            table.drawRowLines();
+            table.nextRow();
+
+            for (Vente v : ventes) {
+                table.addCell(v.getDate().format(DATE_FORMATTER), 0, false);
+                table.addCell(v.getClient() != null ? v.getClient().getNom() : "Vente comptant", 1, false);
+                table.addCell(String.valueOf(v.getLignes().size()), 2, false);
+                table.addCell(String.format("%.2f €", v.getTotalHT()), 3, false);
+                table.addCell(String.format("%.2f €", v.getMontantTVA()), 4, false);
+                table.addCell(String.format("%.2f €", v.getTotal()), 5, false);
+                table.addCell(v.getModePaiement().getLibelle(), 6, false);
+
+                double margeVente = 0.0;
+                for (Vente.LigneVente ligne : v.getLignes()) {
+                    double marge = (ligne.getPrixUnitaire() - ligne.getProduit().getPrixAchat()) * ligne.getQuantite();
+                    margeVente += marge;
+                }
+                table.addCell(String.format("%.2f €", margeVente), 7, false);
+                table.drawRowLines();
+                table.nextRow();
+            }
+
+            contentStream.close();
+            document.save(outputStream);
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport des ventes", e);
+            throw new RuntimeException("Erreur lors de la génération du rapport", e);
+        }
+    }
+
+    public static void genererReglementCreance(Client client, double montantPaye, double nouveauSolde, String cheminFichier) {
+        try (PDDocument document = new PDDocument()) {
+            PDPage page = new PDPage();
+            document.addPage(page);
+            PDPageContentStream contentStream = new PDPageContentStream(document, page);
+
+            contentStream.beginText();
+            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 18);
+            contentStream.newLineAtOffset(50, page.getMediaBox().getHeight() - 50);
+            contentStream.showText("Reçu de Paiement - Créance");
+            contentStream.endText();
+
+            contentStream.beginText();
+            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 14);
+            contentStream.newLineAtOffset(50, page.getMediaBox().getHeight() - 80);
+            contentStream.showText("Client: " + client.getNom());
+            contentStream.endText();
+
+            contentStream.beginText();
+            contentStream.setFont(PDType1Font.HELVETICA, 12);
+            contentStream.newLineAtOffset(50, page.getMediaBox().getHeight() - 110);
+            contentStream.showText("Téléphone: " + client.getTelephone());
+            contentStream.endText();
+
+            contentStream.beginText();
+            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 14);
+            contentStream.newLineAtOffset(50, page.getMediaBox().getHeight() - 140);
+            contentStream.showText("Détails du paiement:");
+            contentStream.endText();
+
+            contentStream.beginText();
+            contentStream.setFont(PDType1Font.HELVETICA, 12);
+            contentStream.newLineAtOffset(50, page.getMediaBox().getHeight() - 170);
+            contentStream.showText("Montant payé: " + String.format("%.2f €", montantPaye));
+            contentStream.endText();
+
+            contentStream.beginText();
+            contentStream.setFont(PDType1Font.HELVETICA, 12);
+            contentStream.newLineAtOffset(50, page.getMediaBox().getHeight() - 200);
+            contentStream.showText("Nouveau solde: " + String.format("%.2f €", nouveauSolde));
+            contentStream.endText();
+
+            contentStream.beginText();
+            contentStream.setFont(PDType1Font.HELVETICA, 12);
+            contentStream.newLineAtOffset(50, page.getMediaBox().getHeight() - 230);
+            contentStream.showText("Date: " + DATE_FORMATTER.format(LocalDateTime.now()));
+            contentStream.endText();
+
+            contentStream.close();
+            document.save(new FileOutputStream(cheminFichier));
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du reçu de paiement", e);
+            throw new RuntimeException("Erreur lors de la génération du reçu", e);
+        }
+    }
+
     public static void genererTicket(Vente vente, String cheminFichier) {
         try (PDDocument document = new PDDocument()) {
             PDPage page = new PDPage();
@@ -329,7 +417,6 @@ public class PDFGenerator {
 
             contentStream.close();
             document.save(new FileOutputStream(cheminFichier));
-            return;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du ticket", e);
             throw new RuntimeException("Erreur lors de la génération du ticket", e);
