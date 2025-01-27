@@ -5,7 +5,7 @@ import com.poissonnerie.controller.ProduitController;
 import com.poissonnerie.controller.ClientController;
 import com.poissonnerie.model.*;
 import com.poissonnerie.util.PDFGenerator;
-import com.poissonnerie.util.TextBillPrinter; 
+import com.poissonnerie.util.TextBillPrinter;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -26,6 +26,7 @@ import java.time.ZoneId;
 
 public class VenteViewSwing {
     private static final Logger LOGGER = Logger.getLogger(VenteViewSwing.class.getName());
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     private final JPanel mainPanel;
     private final VenteController venteController;
     private final ProduitController produitController;
@@ -290,13 +291,30 @@ public class VenteViewSwing {
                     );
                     vente.setLignes(new ArrayList<>(panier));
 
-                    String preview = PDFGenerator.genererPreviewTicket(vente);
+                    String cheminTempPreview = "preview_ticket_" + System.currentTimeMillis() + ".pdf";
+                    PDFGenerator.genererPreviewTicket(vente, cheminTempPreview);
 
                     JDialog previewDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel),
                             "Prévisualisation du ticket", true);
                     previewDialog.setLayout(new BorderLayout(10, 10));
 
-                    JTextArea previewArea = new JTextArea(preview);
+                    // Créer un aperçu textuel du ticket
+                    StringBuilder previewText = new StringBuilder();
+                    previewText.append("MA POISSONNERIE\n\n");
+                    previewText.append("Date: ").append(DATE_FORMATTER.format(vente.getDate())).append("\n");
+                    if (vente.getClient() != null) {
+                        previewText.append("Client: ").append(vente.getClient().getNom()).append("\n");
+                    }
+                    previewText.append("\nProduits:\n");
+                    for (Vente.LigneVente ligne : vente.getLignes()) {
+                        previewText.append(String.format("%s x%d : %.2f €\n",
+                                ligne.getProduit().getNom(),
+                                ligne.getQuantite(),
+                                ligne.getQuantite() * ligne.getPrixUnitaire()));
+                    }
+                    previewText.append("\nTotal: ").append(String.format("%.2f €", vente.getTotal()));
+
+                    JTextArea previewArea = new JTextArea(previewText.toString());
                     previewArea.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
                     previewArea.setEditable(false);
                     previewArea.setBackground(Color.WHITE);
@@ -862,7 +880,7 @@ public class VenteViewSwing {
             LOGGER.info(String.format("Règlement effectué pour le client %s: %.2f€, nouveau solde: %.2f€",
                     client.getNom(), montantRegle, nouveauSolde));
 
-            JOptionPane.showMessageDialog(mainPanel,
+                        JOptionPane.showMessageDialog(mainPanel,
                     "Règlement enregistré avec succès",
                     "Succès",
                     JOptionPane.INFORMATION_MESSAGE);

@@ -1,0 +1,129 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------< com.poissonnerie:gestion-poissonnerie >----------------
+[INFO] Building gestion-poissonnerie 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ gestion-poissonnerie ---
+[INFO] Deleting /home/runner/workspace/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ gestion-poissonnerie ---
+[WARNING] Using platform encoding (UTF-8 actually) to copy filtered resources, i.e. build is platform dependent!
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ gestion-poissonnerie ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 38 source files with javac [debug target 11] to target/classes
+[WARNING] system modules path not set in conjunction with -source 11
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[752,77] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[765,78] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[807,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[810,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[88,41] unchecked cast
+  required: java.util.List<com.poissonnerie.model.Produit>
+  found:    java.util.List<capture#1 of ?>
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[89,78] unchecked cast
+  required: java.util.List<com.poissonnerie.model.Produit>
+  found:    java.util.List<capture#2 of ?>
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[196,30] unchecked call to setValue(K,java.lang.Number) as a member of the raw type org.jfree.data.general.DefaultPieDataset
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  5.060 s
+[INFO] Finished at: 2025-01-27T23:41:04Z
+[INFO] ------------------------------------------------------------------------
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------< com.poissonnerie:gestion-poissonnerie >----------------
+[INFO] Building gestion-poissonnerie 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ gestion-poissonnerie ---
+Jan 27, 2025 11:41:06 PM com.poissonnerie.Main main
+INFO: Démarrage de l'application...
+Jan 27, 2025 11:41:07 PM com.poissonnerie.Main lambda$main$0
+INFO: Thème installé
+Jan 27, 2025 11:41:07 PM com.poissonnerie.Main lambda$main$0
+INFO: Interface configurée
+Jan 27, 2025 11:41:07 PM com.poissonnerie.Main lambda$main$0
+INFO: SplashScreen créé et affiché
+Jan 27, 2025 11:41:07 PM com.poissonnerie.util.DatabaseManager initDatabase
+INFO: Initialisation de la base de données...
+23:41:07.328 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- PoissonneriePool - configuration:
+23:41:07.336 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- allowPoolSuspension.............false
+23:41:07.336 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- autoCommit......................true
+23:41:07.336 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- catalog.........................none
+23:41:07.337 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- connectionInitSql...............none
+23:41:07.337 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- connectionTestQuery.............none
+23:41:07.337 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- connectionTimeout...............3000
+23:41:07.338 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- dataSource......................none
+23:41:07.338 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- dataSourceClassName.............none
+23:41:07.338 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- dataSourceJNDI..................none
+23:41:07.338 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- dataSourceProperties............{password=<masked>, pragma.synchronous=NORMAL, pragma.journal_mode=WAL, pragma.foreign_keys=ON, cache_size=2000, busy_timeout=3000}
+23:41:07.339 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- driverClassName.................none
+23:41:07.339 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- exceptionOverrideClassName......none
+23:41:07.339 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- healthCheckProperties...........{}
+23:41:07.339 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- healthCheckRegistry.............none
+23:41:07.339 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- idleTimeout.....................60000
+23:41:07.339 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- initializationFailTimeout.......1
+23:41:07.339 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- isolateInternalQueries..........false
+23:41:07.340 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- jdbcUrl.........................jdbc:sqlite:poissonnerie.db
+23:41:07.340 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- keepaliveTime...................0
+23:41:07.340 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- leakDetectionThreshold..........0
+23:41:07.340 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- maxLifetime.....................300000
+23:41:07.340 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- maximumPoolSize.................3
+23:41:07.340 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- metricRegistry..................none
+23:41:07.341 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- metricsTrackerFactory...........none
+23:41:07.341 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- minimumIdle.....................1
+23:41:07.341 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- password........................<masked>
+23:41:07.341 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- poolName........................"PoissonneriePool"
+23:41:07.341 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- readOnly........................false
+23:41:07.341 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- registerMbeans..................false
+23:41:07.341 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- scheduledExecutor...............none
+23:41:07.342 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- schema..........................none
+23:41:07.342 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- threadFactory...................internal
+23:41:07.342 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- transactionIsolation............default
+23:41:07.342 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- username........................none
+23:41:07.342 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- validationTimeout...............5000
+23:41:07.346 [SwingWorker-pool-1-thread-1] INFO com.zaxxer.hikari.HikariDataSource -- PoissonneriePool - Starting...
+23:41:07.354 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.util.DriverDataSource -- Loaded driver with class name org.sqlite.JDBC for jdbcUrl=jdbc:sqlite:poissonnerie.db
+23:41:07.876 [SwingWorker-pool-1-thread-1] INFO com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Added connection org.sqlite.jdbc4.JDBC4Connection@584976c0
+23:41:07.879 [SwingWorker-pool-1-thread-1] INFO com.zaxxer.hikari.HikariDataSource -- PoissonneriePool - Start completed.
+Jan 27, 2025 11:41:07 PM com.poissonnerie.util.DatabaseConnectionPool initializeDataSource
+INFO: Pool de connexions initialisé avec succès
+Jan 27, 2025 11:41:07 PM com.poissonnerie.util.DatabaseManager initDatabase
+INFO: Base de données initialisée avec succès
+Jan 27, 2025 11:41:07 PM com.poissonnerie.Main$1 doInBackground
+INFO: Base de données initialisée
+Jan 27, 2025 11:41:07 PM com.poissonnerie.controller.ClientController ajouterClientTest
+INFO: Ajout d'un client test avec créance...
+Jan 27, 2025 11:41:07 PM com.poissonnerie.controller.ClientController ajouterClient
+INFO: Tentative d'ajout d'un nouveau client: Client Test Créance
+Jan 27, 2025 11:41:07 PM com.poissonnerie.controller.ClientController ajouterClient
+INFO: Client ajouté avec succès, ID: 155
+23:41:07.955 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.pool.PoolBase -- PoissonneriePool - Reset (autoCommit) on connection org.sqlite.jdbc4.JDBC4Connection@584976c0
+Jan 27, 2025 11:41:07 PM com.poissonnerie.controller.ClientController ajouterClientTest
+INFO: Client test ajouté avec succès: Client Test Créance, Solde: 150.5
+Jan 27, 2025 11:41:07 PM com.poissonnerie.Main$1 doInBackground
+INFO: Données chargées
+23:41:07.980 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Before cleanup stats (total=1, active=0, idle=1, waiting=0)
+23:41:07.981 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - After cleanup  stats (total=1, active=0, idle=1, waiting=0)
+23:41:07.981 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Fill pool skipped, pool has sufficient level or currently being filled.
+23:41:08.003 [PoissonneriePool connection adder] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Added connection org.sqlite.jdbc4.JDBC4Connection@5ba3c11b
+Jan 27, 2025 11:41:08 PM com.poissonnerie.controller.AuthenticationController createDefaultAdmin
+INFO: Création de l'utilisateur admin avec mot de passe hashé
+Jan 27, 2025 11:41:08 PM com.poissonnerie.controller.AuthenticationController createDefaultAdmin
+INFO: Utilisateur administrateur par défaut créé avec succès
+23:41:08.033 [PoissonneriePool connection adder] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Connection not added, stats (total=2, active=0, idle=2, waiting=0)
+Jan 27, 2025 11:41:09 PM com.poissonnerie.Main$1 lambda$done$1
+INFO: Transition vers login effectuée
