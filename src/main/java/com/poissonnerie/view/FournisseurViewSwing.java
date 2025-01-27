@@ -8,6 +8,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -54,7 +55,7 @@ public class FournisseurViewSwing {
         DefaultTableCellRenderer cellRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value,
-                    boolean isSelected, boolean hasFocus, int row, int column) {
+                                                           boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value,
                         isSelected, hasFocus, row, column);
                 if (!isSelected) {
@@ -83,7 +84,7 @@ public class FournisseurViewSwing {
         DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value,
-                    boolean isSelected, boolean hasFocus, int row, int column) {
+                                                           boolean isSelected, boolean hasFocus, int row, int column) {
                 JLabel label = (JLabel) super.getTableCellRendererComponent(table, value,
                         isSelected, hasFocus, row, column);
                 label.setBackground(new Color(33, 33, 33));
@@ -258,8 +259,8 @@ public class FournisseurViewSwing {
 
     private void showFournisseurDialog(Fournisseur fournisseur) {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel),
-                                  fournisseur == null ? "Nouveau fournisseur" : "Modifier fournisseur",
-                                  true);
+                fournisseur == null ? "Nouveau fournisseur" : "Modifier fournisseur",
+                true);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
         JPanel panel = new JPanel(new GridBagLayout());
@@ -297,7 +298,7 @@ public class FournisseurViewSwing {
         okButton.addActionListener(evt -> {
             try {
                 validateAndSaveFournisseur(fournisseur, nomField, contactField, telephoneField,
-                                         emailField, adresseArea);
+                        emailField, adresseArea);
                 dialog.dispose();
             } catch (Exception e) {
                 showErrorMessage(e.getMessage());
@@ -342,7 +343,7 @@ public class FournisseurViewSwing {
     }
 
     private void addFormField(JPanel panel, GridBagConstraints gbc, String labelText,
-                             JComponent field, int row) {
+                              JComponent field, int row) {
         gbc.gridx = 0;
         gbc.gridy = row;
         gbc.weightx = 0;
@@ -357,8 +358,8 @@ public class FournisseurViewSwing {
     }
 
     private void validateAndSaveFournisseur(Fournisseur fournisseur, JTextField nomField,
-                                           JTextField contactField, JTextField telephoneField,
-                                           JTextField emailField, JTextArea adresseArea) {
+                                            JTextField contactField, JTextField telephoneField,
+                                            JTextField emailField, JTextArea adresseArea) {
         String nom = nomField.getText().trim();
         String contact = contactField.getText().trim();
         String telephone = telephoneField.getText().trim();
@@ -395,7 +396,7 @@ public class FournisseurViewSwing {
 
     private boolean showConfirmDialog(String message) {
         return JOptionPane.showConfirmDialog(mainPanel, message, "Confirmation",
-                                          JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+                JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
     }
 
     private void refreshTable() {
@@ -448,8 +449,10 @@ public class FournisseurViewSwing {
 
     private void genererRapport() {
         try {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             String nomFichier = "rapport_fournisseurs_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss")) + ".pdf";
-            PDFGenerator.genererRapportFournisseurs(controller.getFournisseurs(), nomFichier);
+            PDFGenerator.genererRapportFournisseurs(controller.getFournisseurs(), outputStream);
+            PDFGenerator.sauvegarderPDF(outputStream.toByteArray(), nomFichier);
             showSuccessMessage("Rapport généré avec succès :\n" + nomFichier);
 
             try {
