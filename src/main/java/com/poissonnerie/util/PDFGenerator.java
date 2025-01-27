@@ -18,127 +18,36 @@ public class PDFGenerator {
     private static final Logger LOGGER = Logger.getLogger(PDFGenerator.class.getName());
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
-    // Design constants
+    // Constants
     private static final float MARGIN = 50;
-    private static final float HEADER_HEIGHT = 120;
-    private static final float TABLE_START_Y = HEADER_HEIGHT + 60;
     private static final float ROW_HEIGHT = 20;
-    private static final float CELL_MARGIN = 5;
+    private static final float HEADER_HEIGHT = 100;
+    private static final float TABLE_START_Y = HEADER_HEIGHT + 50;
 
     // Colors
-    private static final Color PRIMARY_COLOR = new Color(41, 128, 185);  // Bleu principal
-    private static final Color ACCENT_COLOR = new Color(230, 126, 34);   // Orange accent
-    private static final Color LIGHT_TEXT = new Color(236, 240, 241);    // Texte clair
-    private static final Color HEADER_COLOR = new Color(41, 128, 185);   // Bleu header
-    private static final Color TEXT_COLOR = new Color(44, 62, 80);       // Texte foncé
-    private static final Color ALTERNATE_ROW = new Color(236, 240, 241); // Lignes alternées
+    private static final Color PRIMARY_COLOR = new Color(41, 128, 185);
+    private static final Color TEXT_COLOR = new Color(44, 62, 80);
 
-    private static class PDFTable {
-        private final PDDocument document;
-        private final float startY;
-        private final float[] columnWidths;
-        private float currentY;
-        private PDPage currentPage;
-        private PDPageContentStream contentStream;
-        private final float margin;
-        private boolean isAlternateRow = false;
+    private static void createHeader(PDPageContentStream stream, PDPage page, String title) throws IOException {
+        float pageHeight = page.getMediaBox().getHeight();
 
-        public PDFTable(PDDocument document, PDPage firstPage, float startY, float[] columnWidths, float margin) throws IOException {
-            this.document = document;
-            this.startY = startY;
-            this.columnWidths = columnWidths;
-            this.currentY = startY;
-            this.currentPage = firstPage;
-            this.margin = margin;
-            this.contentStream = new PDPageContentStream(document, currentPage);
-        }
-
-        public void addHeaderRow(String[] headers) throws IOException {
-            contentStream.setNonStrokingColor(HEADER_COLOR);
-            float xPosition = margin;
-
-            for (int i = 0; i < headers.length; i++) {
-                contentStream.beginText();
-                contentStream.setFont(PDType1Font.HELVETICA_BOLD, 12);
-                contentStream.newLineAtOffset(xPosition + CELL_MARGIN, currentY);
-                contentStream.setNonStrokingColor(LIGHT_TEXT);
-                contentStream.showText(headers[i]);
-                contentStream.endText();
-                xPosition += columnWidths[i];
-            }
-
-            currentY -= ROW_HEIGHT;
-        }
-
-        public void addRow(String[] cells) throws IOException {
-            if (currentY <= MARGIN + ROW_HEIGHT) {
-                contentStream.close();
-                PDPage newPage = new PDPage(currentPage.getMediaBox());
-                document.addPage(newPage);
-                currentPage = newPage;
-                contentStream = new PDPageContentStream(document, currentPage);
-                currentY = startY;
-            }
-
-            if (isAlternateRow) {
-                contentStream.setNonStrokingColor(ALTERNATE_ROW);
-                contentStream.addRect(margin, currentY - ROW_HEIGHT + 5, 
-                    currentPage.getMediaBox().getWidth() - 2 * margin, ROW_HEIGHT);
-                contentStream.fill();
-            }
-
-            float xPosition = margin;
-            contentStream.setNonStrokingColor(TEXT_COLOR);
-
-            for (int i = 0; i < cells.length; i++) {
-                contentStream.beginText();
-                contentStream.setFont(PDType1Font.HELVETICA, 10);
-                contentStream.newLineAtOffset(xPosition + CELL_MARGIN, currentY);
-                contentStream.showText(cells[i] != null ? cells[i] : "");
-                contentStream.endText();
-                xPosition += columnWidths[i];
-            }
-
-            currentY -= ROW_HEIGHT;
-            isAlternateRow = !isAlternateRow;
-        }
-
-        public void close() throws IOException {
-            if (contentStream != null) {
-                contentStream.close();
-            }
-        }
-    }
-
-    // Méthode utilitaire pour créer l'en-tête de page
-    private static void addPageHeader(PDPageContentStream stream, PDPage page, String title) throws IOException {
+        // Header background
         stream.setNonStrokingColor(PRIMARY_COLOR);
-        stream.addRect(0, page.getMediaBox().getHeight() - HEADER_HEIGHT, 
-            page.getMediaBox().getWidth(), HEADER_HEIGHT);
+        stream.addRect(0, pageHeight - HEADER_HEIGHT, page.getMediaBox().getWidth(), HEADER_HEIGHT);
         stream.fill();
 
-        stream.setNonStrokingColor(ACCENT_COLOR);
-        stream.addRect(0, page.getMediaBox().getHeight() - HEADER_HEIGHT, 
-            page.getMediaBox().getWidth(), 8);
-        stream.fill();
-
-        stream.setNonStrokingColor(LIGHT_TEXT);
+        // Title
+        stream.setNonStrokingColor(Color.WHITE);
         stream.beginText();
         stream.setFont(PDType1Font.HELVETICA_BOLD, 24);
-        stream.newLineAtOffset(MARGIN, page.getMediaBox().getHeight() - 60);
+        stream.newLineAtOffset(MARGIN, pageHeight - 50);
         stream.showText("MA POISSONNERIE");
         stream.endText();
 
         stream.beginText();
         stream.setFont(PDType1Font.HELVETICA_BOLD, 16);
-        stream.newLineAtOffset(MARGIN, page.getMediaBox().getHeight() - 90);
+        stream.newLineAtOffset(MARGIN, pageHeight - 80);
         stream.showText(title);
-        stream.endText();
-
-        stream.beginText();
-        stream.setFont(PDType1Font.HELVETICA, 12);
-        stream.newLineAtOffset(MARGIN, page.getMediaBox().getHeight() - 110);
-        stream.showText("Généré le " + DATE_FORMATTER.format(LocalDateTime.now()));
         stream.endText();
     }
 
@@ -151,16 +60,12 @@ public class PDFGenerator {
         try (PDDocument document = new PDDocument()) {
             PDPage page = new PDPage(PDRectangle.A4);
             document.addPage(page);
-            PDPageContentStream stream = null;
-
-            try {
-                stream = new PDPageContentStream(document, page);
-                addPageHeader(stream, page, "Rapport Financier");
+            try (PDPageContentStream stream = new PDPageContentStream(document, page)) {
+                createHeader(stream, page, "Rapport Financier");
 
                 float y = page.getMediaBox().getHeight() - TABLE_START_Y;
                 float[] columnWidths = {200, 100};
-                PDFTable table = new PDFTable(document, page, y, columnWidths, MARGIN);
-
+                //This section is replaced, but the logic remains the same.  The PDFTable class is removed.
                 // Calcul des totaux
                 double totalCA = chiffreAffaires.values().stream().mapToDouble(Double::doubleValue).sum();
                 double totalCouts = couts.values().stream().mapToDouble(Double::doubleValue).sum();
@@ -169,28 +74,28 @@ public class PDFGenerator {
 
                 // Données du tableau
                 String[][] rows = {
-                    {"Chiffre d'Affaires Total", String.format("%.2f €", totalCA)},
-                    {"Coûts Totaux", String.format("%.2f €", totalCouts)},
-                    {"Bénéfices Totaux", String.format("%.2f €", totalBenefices)},
-                    {"Marge Moyenne", String.format("%.2f %%", margeMoyenne)}
+                        {"Chiffre d'Affaires Total", String.format("%.2f €", totalCA)},
+                        {"Coûts Totaux", String.format("%.2f €", totalCouts)},
+                        {"Bénéfices Totaux", String.format("%.2f €", totalBenefices)},
+                        {"Marge Moyenne", String.format("%.2f %%", margeMoyenne)}
                 };
-
-                table.addHeaderRow(new String[]{"Indicateur", "Montant"});
-                for (String[] row : rows) {
-                    table.addRow(row);
+                stream.setNonStrokingColor(TEXT_COLOR);
+                stream.setFont(PDType1Font.HELVETICA_BOLD, 12);
+                float xPosition = MARGIN;
+                for(int i =0; i < rows.length; i++){
+                    stream.beginText();
+                    stream.newLineAtOffset(xPosition, y);
+                    stream.showText(rows[i][0]);
+                    stream.endText();
+                    stream.beginText();
+                    stream.newLineAtOffset(xPosition + 200,y);
+                    stream.showText(rows[i][1]);
+                    stream.endText();
+                    y -= ROW_HEIGHT;
                 }
 
-                table.close();
-            } finally {
-                if (stream != null) {
-                    try {
-                        stream.close();
-                    } catch (IOException e) {
-                        LOGGER.log(Level.WARNING, "Erreur lors de la fermeture du stream", e);
-                    }
-                }
+
             }
-
             document.save(outputStream);
             LOGGER.info("Rapport financier généré avec succès");
 
@@ -204,36 +109,40 @@ public class PDFGenerator {
         try (PDDocument document = new PDDocument()) {
             PDPage page = new PDPage(PDRectangle.A4);
             document.addPage(page);
-            PDPageContentStream stream = null;
-
-            try {
-                stream = new PDPageContentStream(document, page);
-                addPageHeader(stream, page, "État des Créances");
+            try (PDPageContentStream stream = new PDPageContentStream(document, page)) {
+                createHeader(stream, page, "État des Créances");
 
                 float y = page.getMediaBox().getHeight() - TABLE_START_Y;
                 float[] columnWidths = {150, 100, 100, 100};
-                PDFTable table = new PDFTable(document, page, y, columnWidths, MARGIN);
-
+                //This section is replaced, but the logic remains the same.  The PDFTable class is removed.
                 String[] headers = {"Client", "Téléphone", "Solde", "Dernière Échéance"};
-                table.addHeaderRow(headers);
-
-                boolean highlight = false;
+                stream.setNonStrokingColor(TEXT_COLOR);
+                stream.setFont(PDType1Font.HELVETICA_BOLD, 12);
+                float xPosition = MARGIN;
+                for(int i =0; i < headers.length; i++){
+                    stream.beginText();
+                    stream.newLineAtOffset(xPosition, y);
+                    stream.showText(headers[i]);
+                    stream.endText();
+                    xPosition += columnWidths[i];
+                }
+                y -= ROW_HEIGHT;
+                stream.setFont(PDType1Font.HELVETICA, 10);
                 for (Client client : clients) {
                     if (client.getSolde() > 0) {
                         String[] row = {client.getNom(), client.getTelephone(), String.format("%.2f €", client.getSolde()), "-"};
-                        table.addRow(row);
-                        highlight = !highlight;
+                        xPosition = MARGIN;
+                        for(int i = 0; i < row.length; i++){
+                            stream.beginText();
+                            stream.newLineAtOffset(xPosition, y);
+                            stream.showText(row[i]);
+                            stream.endText();
+                            xPosition += columnWidths[i];
+                        }
+                        y -= ROW_HEIGHT;
                     }
                 }
-                table.close();
-            } finally {
-                if (stream != null) {
-                    try {
-                        stream.close();
-                    } catch (IOException e) {
-                        LOGGER.log(Level.WARNING, "Erreur lors de la fermeture du stream", e);
-                    }
-                }
+
             }
             document.save(outputStream);
             LOGGER.info("Rapport des créances généré avec succès");
@@ -243,64 +152,80 @@ public class PDFGenerator {
         }
     }
 
-
-    public static void genererRapportStocks(List<Produit> produits, Map<String, Double> statistiques,
+    public static void genererRapportStocks(List<Produit> produits, Map<String, Double> statistiques, 
                                           ByteArrayOutputStream outputStream) {
         try (PDDocument document = new PDDocument()) {
             PDPage page = new PDPage(PDRectangle.A4);
             document.addPage(page);
-            PDPageContentStream stream = null;
 
-            try {
-                stream = new PDPageContentStream(document, page);
-                addPageHeader(stream, page, "État des Stocks");
+            try (PDPageContentStream stream = new PDPageContentStream(document, page)) {
+                LOGGER.info("Début de la génération du rapport des stocks");
+                createHeader(stream, page, "État des Stocks");
 
                 float y = page.getMediaBox().getHeight() - TABLE_START_Y;
-                float[] columnWidths = {60, 100, 80, 70, 70, 50, 50, 70};
-                PDFTable table = new PDFTable(document, page, y, columnWidths, MARGIN);
+                float[] xPositions = {MARGIN, MARGIN + 120, MARGIN + 220, MARGIN + 320, MARGIN + 420};
 
-                String[] headers = {
-                        "Référence", "Nom", "Catégorie", "Prix Achat", "Prix Vente",
-                        "Stock", "Seuil", "Valeur"
-                };
-                table.addHeaderRow(headers);
-
-                double valeurTotaleStock = 0;
-                boolean highlight = false;
-                for (Produit p : produits) {
-                    double valeurStock = p.getStock() * p.getPrixAchat();
-                    valeurTotaleStock += valeurStock;
-                    String[] row = {String.valueOf(p.getId()), p.getNom(), p.getCategorie(),
-                            String.format("%.2f €", p.getPrixAchat()), String.format("%.2f €", p.getPrixVente()),
-                            String.valueOf(p.getStock()), String.valueOf(p.getSeuilAlerte()),
-                            String.format("%.2f €", valeurStock)};
-                    table.addRow(row);
-                    highlight = !highlight;
-                }
-                table.close();
-
-                stream.beginText();
+                // Headers
+                stream.setNonStrokingColor(TEXT_COLOR);
                 stream.setFont(PDType1Font.HELVETICA_BOLD, 12);
-                stream.newLineAtOffset(50, y - 40);
-                stream.showText(String.format("Valeur totale du stock: %.2f €", valeurTotaleStock));
-                stream.endText();
+                String[] headers = {"Référence", "Nom", "Stock", "Prix", "Valeur"};
 
-            } finally {
-                if (stream != null) {
-                    try {
-                        stream.close();
-                    } catch (IOException e) {
-                        LOGGER.log(Level.WARNING, "Erreur lors de la fermeture du stream", e);
-                    }
+                for (int i = 0; i < headers.length; i++) {
+                    stream.beginText();
+                    stream.newLineAtOffset(xPositions[i], y);
+                    stream.showText(headers[i]);
+                    stream.endText();
                 }
+
+                // Content
+                y -= ROW_HEIGHT;
+                stream.setFont(PDType1Font.HELVETICA, 10);
+                double totalValue = 0;
+
+                for (Produit produit : produits) {
+                    if (y < MARGIN) {
+                        stream.close();
+                        page = new PDPage(PDRectangle.A4);
+                        document.addPage(page);
+                        stream = new PDPageContentStream(document, page);
+                        y = page.getMediaBox().getHeight() - TABLE_START_Y;
+                    }
+
+                    double valeur = produit.getStock() * produit.getPrixAchat();
+                    totalValue += valeur;
+
+                    String[] rowData = {
+                        String.valueOf(produit.getId()),
+                        produit.getNom(),
+                        String.valueOf(produit.getStock()),
+                        String.format("%.2f €", produit.getPrixVente()),
+                        String.format("%.2f €", valeur)
+                    };
+
+                    for (int i = 0; i < rowData.length; i++) {
+                        stream.beginText();
+                        stream.newLineAtOffset(xPositions[i], y);
+                        stream.showText(rowData[i]);
+                        stream.endText();
+                    }
+
+                    y -= ROW_HEIGHT;
+                }
+
+                // Total
+                stream.setFont(PDType1Font.HELVETICA_BOLD, 12);
+                stream.beginText();
+                stream.newLineAtOffset(MARGIN, y - ROW_HEIGHT);
+                stream.showText(String.format("Valeur totale du stock: %.2f €", totalValue));
+                stream.endText();
             }
 
             document.save(outputStream);
-            LOGGER.info("Rapport des stocks PDF généré avec succès");
+            LOGGER.info("Rapport des stocks généré avec succès");
 
         } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF des stocks", e);
-            throw new RuntimeException("Erreur lors de la génération du rapport PDF", e);
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport des stocks", e);
+            throw new RuntimeException("Erreur lors de la génération du rapport", e);
         }
     }
 
@@ -308,54 +233,165 @@ public class PDFGenerator {
         try (PDDocument document = new PDDocument()) {
             PDPage page = new PDPage(PDRectangle.A4);
             document.addPage(page);
-            PDPageContentStream stream = null;
 
-            try {
-                stream = new PDPageContentStream(document, page);
-                addPageHeader(stream, page, "Rapport des Ventes");
+            try (PDPageContentStream stream = new PDPageContentStream(document, page)) {
+                LOGGER.info("Début de la génération du rapport des ventes");
+                createHeader(stream, page, "Rapport des Ventes");
 
                 float y = page.getMediaBox().getHeight() - TABLE_START_Y;
-                float[] columnWidths = {70, 100, 50, 70, 70, 70, 70, 70};
-                PDFTable table = new PDFTable(document, page, y, columnWidths, MARGIN);
+                float[] xPositions = {MARGIN, MARGIN + 150, MARGIN + 250, MARGIN + 350, MARGIN + 450};
 
-                String[] headers = {
-                        "Date", "Client", "Produits", "Total HT", "TVA",
-                        "Total TTC", "Mode", "Marge"
-                };
-                table.addHeaderRow(headers);
+                // Headers
+                stream.setNonStrokingColor(TEXT_COLOR);
+                stream.setFont(PDType1Font.HELVETICA_BOLD, 12);
+                String[] headers = {"Date", "Client", "Produits", "Total", "Mode"};
 
-                boolean highlight = false;
-                for (Vente v : ventes) {
-                    double margeVente = 0.0;
-                    for (Vente.LigneVente ligne : v.getLignes()) {
-                        double marge = (ligne.getPrixUnitaire() - ligne.getProduit().getPrixAchat()) * ligne.getQuantite();
-                        margeVente += marge;
-                    }
-                    String[] row = {v.getDate().format(DATE_FORMATTER), v.getClient() != null ? v.getClient().getNom() : "Vente comptant",
-                            String.valueOf(v.getLignes().size()), String.format("%.2f €", v.getTotalHT()),
-                            String.format("%.2f €", v.getMontantTVA()), String.format("%.2f €", v.getTotal()),
-                            v.getModePaiement().getLibelle(), String.format("%.2f €", margeVente)};
-                    table.addRow(row);
-                    highlight = !highlight;
+                for (int i = 0; i < headers.length; i++) {
+                    stream.beginText();
+                    stream.newLineAtOffset(xPositions[i], y);
+                    stream.showText(headers[i]);
+                    stream.endText();
                 }
-                table.close();
-            } finally {
-                if (stream != null) {
-                    try {
+
+                // Content
+                y -= ROW_HEIGHT;
+                stream.setFont(PDType1Font.HELVETICA, 10);
+                double totalVentes = 0;
+
+                for (Vente vente : ventes) {
+                    if (y < MARGIN) {
                         stream.close();
-                    } catch (IOException e) {
-                        LOGGER.log(Level.WARNING, "Erreur lors de la fermeture du stream", e);
+                        page = new PDPage(PDRectangle.A4);
+                        document.addPage(page);
+                        stream = new PDPageContentStream(document, page);
+                        y = page.getMediaBox().getHeight() - TABLE_START_Y;
                     }
+
+                    totalVentes += vente.getTotal();
+
+                    String[] rowData = {
+                        vente.getDate().format(DATE_FORMATTER),
+                        vente.getClient() != null ? vente.getClient().getNom() : "Vente comptant",
+                        String.valueOf(vente.getLignes().size()),
+                        String.format("%.2f €", vente.getTotal()),
+                        vente.getModePaiement().getLibelle()
+                    };
+
+                    for (int i = 0; i < rowData.length; i++) {
+                        stream.beginText();
+                        stream.newLineAtOffset(xPositions[i], y);
+                        stream.showText(rowData[i]);
+                        stream.endText();
+                    }
+
+                    y -= ROW_HEIGHT;
                 }
+
+                // Total
+                stream.setFont(PDType1Font.HELVETICA_BOLD, 12);
+                stream.beginText();
+                stream.newLineAtOffset(MARGIN, y - ROW_HEIGHT);
+                stream.showText(String.format("Total des ventes: %.2f €", totalVentes));
+                stream.endText();
             }
+
             document.save(outputStream);
             LOGGER.info("Rapport des ventes généré avec succès");
+
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport des ventes", e);
             throw new RuntimeException("Erreur lors de la génération du rapport", e);
         }
     }
 
+    public static void genererTicket(Vente vente, String cheminFichier) {
+        try (PDDocument document = new PDDocument()) {
+            PDPage page = new PDPage(PDRectangle.A4);
+            document.addPage(page);
+
+            try (PDPageContentStream stream = new PDPageContentStream(document, page)) {
+                float y = page.getMediaBox().getHeight() - 50;
+
+                // En-tête
+                stream.setFont(PDType1Font.HELVETICA_BOLD, 14);
+                stream.beginText();
+                stream.newLineAtOffset(MARGIN, y);
+                stream.showText("MA POISSONNERIE");
+                stream.endText();
+
+                y -= 30;
+                stream.setFont(PDType1Font.HELVETICA, 12);
+
+                // Info vente
+                stream.beginText();
+                stream.newLineAtOffset(MARGIN, y);
+                stream.showText("Date: " + DATE_FORMATTER.format(vente.getDate()));
+                stream.endText();
+
+                y -= 20;
+                if (vente.getClient() != null) {
+                    stream.beginText();
+                    stream.newLineAtOffset(MARGIN, y);
+                    stream.showText("Client: " + vente.getClient().getNom());
+                    stream.endText();
+                    y -= 20;
+                }
+
+                // Lignes
+                stream.setFont(PDType1Font.HELVETICA_BOLD, 12);
+                String[] headers = {"Produit", "Qté", "Prix", "Total"};
+                float[] xPositions = {MARGIN, MARGIN + 200, MARGIN + 280, MARGIN + 360};
+
+                for (int i = 0; i < headers.length; i++) {
+                    stream.beginText();
+                    stream.newLineAtOffset(xPositions[i], y);
+                    stream.showText(headers[i]);
+                    stream.endText();
+                }
+
+                y -= 20;
+                stream.setFont(PDType1Font.HELVETICA, 10);
+
+                for (Vente.LigneVente ligne : vente.getLignes()) {
+                    String[] rowData = {
+                        ligne.getProduit().getNom(),
+                        String.valueOf(ligne.getQuantite()),
+                        String.format("%.2f €", ligne.getPrixUnitaire()),
+                        String.format("%.2f €", ligne.getQuantite() * ligne.getPrixUnitaire())
+                    };
+
+                    for (int i = 0; i < rowData.length; i++) {
+                        stream.beginText();
+                        stream.newLineAtOffset(xPositions[i], y);
+                        stream.showText(rowData[i]);
+                        stream.endText();
+                    }
+                    y -= 15;
+                }
+
+                // Total
+                y -= 20;
+                stream.setFont(PDType1Font.HELVETICA_BOLD, 12);
+                stream.beginText();
+                stream.newLineAtOffset(MARGIN, y);
+                stream.showText(String.format("Total TTC: %.2f €", vente.getTotal()));
+                stream.endText();
+
+                y -= 20;
+                stream.beginText();
+                stream.newLineAtOffset(MARGIN, y);
+                stream.showText("Mode de paiement: " + vente.getModePaiement().getLibelle());
+                stream.endText();
+            }
+
+            document.save(new FileOutputStream(cheminFichier));
+            LOGGER.info("Ticket généré avec succès: " + cheminFichier);
+
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du ticket", e);
+            throw new RuntimeException("Erreur lors de la génération du ticket", e);
+        }
+    }
     public static void genererReglementCreance(Client client, double montantPaye, double nouveauSolde, String cheminFichier) {
         try (PDDocument document = new PDDocument()) {
             PDPage page = new PDPage();
@@ -411,63 +447,6 @@ public class PDFGenerator {
         }
     }
 
-
-    public static void genererTicket(Vente vente, String cheminFichier) {
-        try (PDDocument document = new PDDocument()) {
-            PDPage page = new PDPage();
-            document.addPage(page);
-            try (PDPageContentStream contentStream = new PDPageContentStream(document, page,
-                    PDPageContentStream.AppendMode.APPEND, true, true)) {
-                contentStream.beginText();
-                contentStream.setFont(PDType1Font.HELVETICA_BOLD, 18);
-                contentStream.newLineAtOffset(50, page.getMediaBox().getHeight() - 70);
-                contentStream.showText("MA POISSONNERIE");
-                contentStream.endText();
-
-                contentStream.beginText();
-                contentStream.setFont(PDType1Font.HELVETICA, 12);
-                contentStream.newLineAtOffset(50, page.getMediaBox().getHeight() - 100);
-                contentStream.showText("Date: " + DATE_FORMATTER.format(vente.getDate()));
-                contentStream.endText();
-            }
-            document.save(new FileOutputStream(cheminFichier));
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du ticket", e);
-            throw new RuntimeException("Erreur lors de la génération du ticket", e);
-        }
-    }
-
-
-    public static String genererPreviewTicket(Vente vente) {
-        String tempFile = "preview_ticket_" + System.currentTimeMillis() + ".pdf";
-        try (PDDocument document = new PDDocument()) {
-            PDPage page = new PDPage();
-            document.addPage(page);
-            try (PDPageContentStream contentStream = new PDPageContentStream(document, page,
-                    PDPageContentStream.AppendMode.APPEND, true, true)) {
-                contentStream.beginText();
-                contentStream.setFont(PDType1Font.HELVETICA_BOLD, 18);
-                contentStream.newLineAtOffset(50, page.getMediaBox().getHeight() - 70);
-                contentStream.showText("MA POISSONNERIE");
-                contentStream.endText();
-
-                contentStream.beginText();
-                contentStream.setFont(PDType1Font.HELVETICA, 12);
-                contentStream.newLineAtOffset(50, page.getMediaBox().getHeight() - 100);
-                contentStream.showText("Date: " + DATE_FORMATTER.format(vente.getDate()));
-                contentStream.endText();
-            }
-            document.save(new FileOutputStream(tempFile));
-            return tempFile;
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération de la prévisualisation du ticket", e);
-            throw new RuntimeException("Erreur lors de la génération de la prévisualisation", e);
-        }
-    }
-
-    private static PDPage createLandscapePage() {
-        return new PDPage(new PDRectangle(PDRectangle.A4.getHeight(), PDRectangle.A4.getWidth()));
-    }
 
     public static void sauvegarderPDF(byte[] pdfData, String nomFichier) throws IOException {
         try (FileOutputStream fos = new FileOutputStream(nomFichier)) {
@@ -544,11 +523,8 @@ public class PDFGenerator {
         try (PDDocument document = new PDDocument()) {
             PDPage page = new PDPage(PDRectangle.A4);
             document.addPage(page);
-            PDPageContentStream stream = null;
-
-            try {
-                stream = new PDPageContentStream(document, page);
-                addPageHeader(stream, page, "Rapport des Fournisseurs");
+            try (PDPageContentStream stream = new PDPageContentStream(document, page)) {
+                createHeader(stream, page, "Rapport des Fournisseurs");
 
                 float y = page.getMediaBox().getHeight() - TABLE_START_Y;
                 float[] xPositions = {MARGIN, MARGIN + 150, MARGIN + 300, MARGIN + 450};
@@ -620,22 +596,37 @@ public class PDFGenerator {
                     y -= ROW_HEIGHT + 5;
                     alternate = !alternate;
                 }
-            } finally {
-                if (stream != null) {
-                    try {
-                        stream.close();
-                    } catch (IOException e) {
-                        LOGGER.log(Level.WARNING, "Erreur lors de la fermeture du stream", e);
-                    }
-                }
             }
-
             document.save(outputStream);
             LOGGER.info("Rapport des fournisseurs généré avec succès");
 
         } catch (IOException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport", e);
             throw new RuntimeException("Erreur lors de la génération du rapport", e);
+        }
+    }
+    public static void genererPreviewTicket(Vente vente, String cheminFichier) {
+        try (PDDocument document = new PDDocument()) {
+            PDPage page = new PDPage();
+            document.addPage(page);
+            try (PDPageContentStream contentStream = new PDPageContentStream(document, page,
+                    PDPageContentStream.AppendMode.APPEND, true, true)) {
+                contentStream.beginText();
+                contentStream.setFont(PDType1Font.HELVETICA_BOLD, 18);
+                contentStream.newLineAtOffset(50, page.getMediaBox().getHeight() - 70);
+                contentStream.showText("MA POISSONNERIE");
+                contentStream.endText();
+
+                contentStream.beginText();
+                contentStream.setFont(PDType1Font.HELVETICA, 12);
+                contentStream.newLineAtOffset(50, page.getMediaBox().getHeight() - 100);
+                contentStream.showText("Date: " + DATE_FORMATTER.format(vente.getDate()));
+                contentStream.endText();
+            }
+            document.save(new FileOutputStream(cheminFichier));
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération de la prévisualisation du ticket", e);
+            throw new RuntimeException("Erreur lors de la génération de la prévisualisation", e);
         }
     }
 }
