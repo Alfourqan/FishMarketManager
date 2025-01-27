@@ -36,15 +36,15 @@ public class PDFGenerator {
     private static class PDFTable {
         private float yPosition;
         private float[] columnWidths;
-        private float rowHeight = 35;  // Plus d'espace pour le contenu
+        private float rowHeight = 35;
         private PDPageContentStream contentStream;
         private PDPage page;
         private PDDocument document;
         private float tableWidth;
-        private float cellMargin = 12f;  // Marge intérieure plus large
+        private float cellMargin = 12f;
         private int currentPage = 1;
         private int totalPages;
-        private float cornerRadius = 3f;  // Rayon des coins arrondis
+        private float cornerRadius = 3f;
 
         public PDFTable(PDDocument document, PDPage page, PDPageContentStream contentStream,
                        float yPosition, float[] columnWidths, int totalPages) {
@@ -61,35 +61,28 @@ public class PDFGenerator {
         }
 
         public void addHeaderCell(String text, int column) throws IOException {
-            try {
-                float xPosition = MARGIN + CONTENT_PADDING;
-                for (int i = 0; i < column; i++) {
-                    xPosition += columnWidths[i];
-                }
-
-                // Fond du header avec dégradé et coins arrondis
-                contentStream.setNonStrokingColor(TABLE_HEADER);
-                drawRoundedRect(contentStream, xPosition, yPosition - rowHeight + 5, 
-                              columnWidths[column], rowHeight, cornerRadius);
-                contentStream.fill();
-
-                // Texte en blanc
-                contentStream.setNonStrokingColor(LIGHT_TEXT);
-                contentStream.beginText();
-                contentStream.setFont(PDType1Font.HELVETICA_BOLD, 11);
-                contentStream.newLineAtOffset(xPosition + cellMargin, yPosition - rowHeight/2 + 5);
-                contentStream.showText(text != null ? text : "");
-                contentStream.endText();
-
-            } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "Erreur lors de l'ajout d'une cellule d'en-tête", e);
-                throw e;
+            float xPosition = MARGIN + CONTENT_PADDING;
+            for (int i = 0; i < column; i++) {
+                xPosition += columnWidths[i];
             }
+
+            // Fond du header avec coins arrondis
+            contentStream.setNonStrokingColor(TABLE_HEADER);
+            drawRoundedRect(contentStream, xPosition, yPosition - rowHeight + 5, 
+                          columnWidths[column], rowHeight, cornerRadius);
+            contentStream.fill();
+
+            // Texte en blanc
+            contentStream.setNonStrokingColor(LIGHT_TEXT);
+            contentStream.beginText();
+            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 11);
+            contentStream.newLineAtOffset(xPosition + cellMargin, yPosition - rowHeight/2 + 5);
+            contentStream.showText(text != null ? text : "");
+            contentStream.endText();
         }
 
         private void drawRoundedRect(PDPageContentStream contentStream, float x, float y, 
                                    float width, float height, float radius) throws IOException {
-            // Coins arrondis
             contentStream.moveTo(x + radius, y);
             contentStream.lineTo(x + width - radius, y);
             contentStream.curveTo(x + width, y, x + width, y, x + width, y + radius);
@@ -103,79 +96,180 @@ public class PDFGenerator {
         }
 
         public void addCell(String text, int column, boolean highlight) throws IOException {
-            try {
-                float xPosition = MARGIN + CONTENT_PADDING;
-                for (int i = 0; i < column; i++) {
-                    xPosition += columnWidths[i];
-                }
-
-                if (highlight) {
-                    contentStream.setNonStrokingColor(BACKGROUND_LIGHT);
-                    drawRoundedRect(contentStream, xPosition, yPosition - rowHeight + 5,
-                                  columnWidths[column], rowHeight, cornerRadius);
-                    contentStream.fill();
-                }
-
-                contentStream.setNonStrokingColor(TEXT_COLOR);
-                contentStream.beginText();
-                contentStream.setFont(PDType1Font.HELVETICA, 10);
-                contentStream.newLineAtOffset(xPosition + cellMargin, yPosition - rowHeight/2 + 5);
-                contentStream.showText(text != null ? text : "");
-                contentStream.endText();
-
-            } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "Erreur lors de l'ajout d'une cellule", e);
-                throw e;
+            float xPosition = MARGIN + CONTENT_PADDING;
+            for (int i = 0; i < column; i++) {
+                xPosition += columnWidths[i];
             }
+
+            if (highlight) {
+                contentStream.setNonStrokingColor(BACKGROUND_LIGHT);
+                drawRoundedRect(contentStream, xPosition, yPosition - rowHeight + 5,
+                              columnWidths[column], rowHeight, cornerRadius);
+                contentStream.fill();
+            }
+
+            contentStream.setNonStrokingColor(TEXT_COLOR);
+            contentStream.beginText();
+            contentStream.setFont(PDType1Font.HELVETICA, 10);
+            contentStream.newLineAtOffset(xPosition + cellMargin, yPosition - rowHeight/2 + 5);
+            contentStream.showText(text != null ? text : "");
+            contentStream.endText();
         }
 
         public void drawRowLines() throws IOException {
-            try {
-                float xPosition = MARGIN + CONTENT_PADDING;
-                contentStream.setStrokingColor(TABLE_BORDER);
-                contentStream.setLineWidth(0.5f);
+            float xPosition = MARGIN + CONTENT_PADDING;
+            contentStream.setStrokingColor(TABLE_BORDER);
+            contentStream.setLineWidth(0.5f);
 
-                // Ligne horizontale subtile
-                contentStream.moveTo(xPosition, yPosition - rowHeight + 4);
-                contentStream.lineTo(xPosition + tableWidth, yPosition - rowHeight + 4);
-                contentStream.stroke();
+            contentStream.moveTo(xPosition, yPosition - rowHeight + 4);
+            contentStream.lineTo(xPosition + tableWidth, yPosition - rowHeight + 4);
+            contentStream.stroke();
 
-                contentStream.setLineWidth(1.0f);
-                contentStream.setStrokingColor(TEXT_COLOR);
-            } catch (IOException e) {
-                LOGGER.log(Level.SEVERE, "Erreur lors du dessin des lignes", e);
-                throw e;
-            }
+            contentStream.setLineWidth(1.0f);
+            contentStream.setStrokingColor(TEXT_COLOR);
         }
 
         public void nextRow() throws IOException {
             yPosition -= rowHeight;
             if (yPosition < (MARGIN + FOOTER_HEIGHT + rowHeight)) {
-                try {
-                    LOGGER.info("Création d'une nouvelle page");
-                    PDPageContentStream oldContentStream = this.contentStream;
-                    oldContentStream.close();
+                PDPageContentStream oldContentStream = this.contentStream;
+                oldContentStream.close();
 
-                    currentPage++;
-                    PDPage newPage = new PDPage(PDRectangle.A4);
-                    document.addPage(newPage);
+                currentPage++;
+                PDPage newPage = new PDPage(PDRectangle.A4);
+                document.addPage(newPage);
 
-                    PDPageContentStream newContentStream = new PDPageContentStream(document, newPage);
-                    addHeader(newContentStream, newPage);
-                    addFooter(newContentStream, newPage, currentPage, totalPages);
+                PDPageContentStream newContentStream = new PDPageContentStream(document, newPage,
+                        PDPageContentStream.AppendMode.APPEND, true, true);
+                addHeader(newContentStream, newPage);
+                addFooter(newContentStream, newPage, currentPage, totalPages);
 
-                    this.contentStream = newContentStream;
-                    this.page = newPage;
-                    this.yPosition = newPage.getMediaBox().getHeight() - HEADER_HEIGHT - 40;
+                this.contentStream = newContentStream;
+                this.page = newPage;
+                this.yPosition = newPage.getMediaBox().getHeight() - HEADER_HEIGHT - 40;
+            }
+        }
 
-                    LOGGER.info("Nouvelle page créée - Page " + currentPage);
-                } catch (IOException e) {
-                    LOGGER.log(Level.SEVERE, "Erreur lors de la création d'une nouvelle page", e);
-                    throw e;
-                }
+        public void close() throws IOException {
+            if (contentStream != null) {
+                contentStream.close();
             }
         }
     }
+
+    private static void addHeader(PDPageContentStream contentStream, PDPage page) throws IOException {
+        float pageHeight = page.getMediaBox().getHeight();
+        float pageWidth = page.getMediaBox().getWidth();
+
+        contentStream.setNonStrokingColor(PRIMARY_COLOR);
+        contentStream.addRect(0, pageHeight - HEADER_HEIGHT, pageWidth, HEADER_HEIGHT);
+        contentStream.fill();
+
+        contentStream.setNonStrokingColor(ACCENT_COLOR);
+        contentStream.addRect(0, pageHeight - HEADER_HEIGHT, pageWidth, 8);
+        contentStream.fill();
+
+        contentStream.setNonStrokingColor(LIGHT_TEXT);
+        contentStream.beginText();
+        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 32);
+        contentStream.newLineAtOffset(MARGIN, pageHeight - 80);
+        contentStream.showText("MA POISSONNERIE");
+        contentStream.endText();
+
+        contentStream.beginText();
+        contentStream.setFont(PDType1Font.HELVETICA, 16);
+        contentStream.newLineAtOffset(MARGIN, pageHeight - 110);
+        contentStream.showText("La fraîcheur au quotidien");
+        contentStream.endText();
+
+        contentStream.beginText();
+        contentStream.setFont(PDType1Font.HELVETICA, 10);
+        contentStream.newLineAtOffset(pageWidth - 200, pageHeight - 80);
+        contentStream.showText("Généré le: " + DATE_FORMATTER.format(LocalDateTime.now()));
+        contentStream.endText();
+    }
+
+    private static void addFooter(PDPageContentStream contentStream, PDPage page, 
+                                int pageNumber, int totalPages) throws IOException {
+        float pageHeight = page.getMediaBox().getHeight();
+        float pageWidth = page.getMediaBox().getWidth();
+
+        contentStream.setNonStrokingColor(PRIMARY_COLOR);
+        contentStream.addRect(MARGIN, MARGIN + 35, pageWidth - 2*MARGIN, 2);
+        contentStream.fill();
+
+        contentStream.beginText();
+        contentStream.setFont(PDType1Font.HELVETICA, 10);
+        contentStream.setNonStrokingColor(TEXT_COLOR);
+        contentStream.newLineAtOffset(pageWidth/2 - 40, MARGIN + 15);
+        contentStream.showText(String.format("Page %d sur %d", pageNumber, totalPages));
+        contentStream.endText();
+
+        contentStream.beginText();
+        contentStream.setFont(PDType1Font.HELVETICA, 9);
+        contentStream.newLineAtOffset(MARGIN, MARGIN + 15);
+        contentStream.showText("© " + LocalDateTime.now().getYear() + " Ma Poissonnerie - Tous droits réservés");
+        contentStream.endText();
+    }
+
+    public static void genererRapportFournisseurs(List<Fournisseur> fournisseurs, ByteArrayOutputStream outputStream) {
+        LOGGER.info("Début de la génération du rapport des fournisseurs");
+
+        try (PDDocument document = new PDDocument()) {
+            PDPage firstPage = new PDPage(PDRectangle.A4);
+            document.addPage(firstPage);
+
+            PDPageContentStream contentStream = new PDPageContentStream(document, firstPage,
+                    PDPageContentStream.AppendMode.APPEND, true, true);
+
+            int totalPages = (int) Math.ceil(fournisseurs.size() / 20.0) + 1;
+            addHeader(contentStream, firstPage);
+
+            contentStream.beginText();
+            contentStream.setNonStrokingColor(PRIMARY_COLOR);
+            contentStream.setFont(PDType1Font.HELVETICA_BOLD, 18);
+            contentStream.newLineAtOffset(MARGIN, firstPage.getMediaBox().getHeight() - HEADER_HEIGHT - 30);
+            contentStream.showText("Liste des Fournisseurs");
+            contentStream.endText();
+
+            addFooter(contentStream, firstPage, 1, totalPages);
+
+            float[] columnWidths = {150, 100, 100, 150};
+            float startY = firstPage.getMediaBox().getHeight() - HEADER_HEIGHT - 60;
+
+            PDFTable table = new PDFTable(document, firstPage, contentStream, startY, columnWidths, totalPages);
+
+            try {
+                String[] headers = {"Nom", "Contact", "Téléphone", "Email"};
+                for (int i = 0; i < headers.length; i++) {
+                    table.addHeaderCell(headers[i], i);
+                }
+                table.drawRowLines();
+                table.nextRow();
+
+                boolean highlight = false;
+                for (Fournisseur fournisseur : fournisseurs) {
+                    table.addCell(fournisseur.getNom(), 0, highlight);
+                    table.addCell(fournisseur.getContact(), 1, highlight);
+                    table.addCell(fournisseur.getTelephone(), 2, highlight);
+                    table.addCell(fournisseur.getEmail(), 3, highlight);
+                    table.drawRowLines();
+                    table.nextRow();
+                    highlight = !highlight;
+                }
+            } finally {
+                table.close();
+            }
+
+            document.save(outputStream);
+            LOGGER.info("Rapport des fournisseurs généré avec succès");
+
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF des fournisseurs", e);
+            throw new RuntimeException("Erreur lors de la génération du rapport PDF", e);
+        }
+    }
+
 
     private static void addHeader(PDPageContentStream contentStream, PDPage page) throws IOException {
         float pageHeight = page.getMediaBox().getHeight();
@@ -240,84 +334,6 @@ public class PDFGenerator {
         contentStream.endText();
     }
 
-
-    public static void genererRapportFournisseurs(List<Fournisseur> fournisseurs, ByteArrayOutputStream outputStream) {
-        LOGGER.info("Début de la génération du rapport des fournisseurs");
-        try (PDDocument document = new PDDocument()) {
-            int totalPages = (int) Math.ceil(fournisseurs.size() / 20.0) + 1;
-            LOGGER.info("Nombre total de pages estimé: " + totalPages);
-
-            PDPage firstPage = new PDPage(PDRectangle.A4);
-            document.addPage(firstPage);
-
-            try (PDPageContentStream contentStream = new PDPageContentStream(document, firstPage)) {
-                LOGGER.info("Création de l'en-tête du rapport");
-                addHeader(contentStream, firstPage);
-
-                contentStream.beginText();
-                contentStream.setNonStrokingColor(PRIMARY_COLOR);
-                contentStream.setFont(PDType1Font.HELVETICA_BOLD, 18);
-                contentStream.newLineAtOffset(MARGIN, firstPage.getMediaBox().getHeight() - HEADER_HEIGHT - 30);
-                contentStream.showText("Liste des Fournisseurs");
-                contentStream.endText();
-
-                addFooter(contentStream, firstPage, 1, totalPages);
-
-                float[] columnWidths = {150, 100, 100, 150};
-                float startY = firstPage.getMediaBox().getHeight() - HEADER_HEIGHT - 60;
-
-                LOGGER.info("Configuration de la table des fournisseurs");
-                PDFTable table = new PDFTable(document, firstPage, contentStream, startY, columnWidths, totalPages);
-
-                String[] headers = {"Nom", "Contact", "Téléphone", "Email"};
-                for (int i = 0; i < headers.length; i++) {
-                    table.addHeaderCell(headers[i], i);
-                }
-                table.drawRowLines();
-                table.nextRow();
-
-                LOGGER.info("Ajout des données des fournisseurs");
-                contentStream.setNonStrokingColor(Color.BLACK);
-                int count = 0;
-                boolean highlight = false;
-                for (Fournisseur fournisseur : fournisseurs) {
-                    table.addCell(fournisseur.getNom(), 0, highlight);
-                    table.addCell(fournisseur.getContact(), 1, highlight);
-                    table.addCell(fournisseur.getTelephone(), 2, highlight);
-                    table.addCell(fournisseur.getEmail(), 3, highlight);
-                    table.drawRowLines();
-                    table.nextRow();
-                    count++;
-                    highlight = !highlight; // Alternate highlighting
-                    if (count % 20 == 0) {
-                        LOGGER.info("Traitement de " + count + " fournisseurs sur " + fournisseurs.size());
-                    }
-                }
-            }
-
-            LOGGER.info("Sauvegarde du document PDF");
-            document.save(outputStream);
-            LOGGER.info("Rapport des fournisseurs PDF généré avec succès");
-
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF des fournisseurs", e);
-            throw new RuntimeException("Erreur lors de la génération du rapport PDF: " + e.getMessage(), e);
-        }
-    }
-
-    private static PDPage createLandscapePage() {
-        return new PDPage(new PDRectangle(PDRectangle.A4.getHeight(), PDRectangle.A4.getWidth()));
-    }
-
-    public static void sauvegarderPDF(byte[] pdfData, String nomFichier) throws IOException {
-        try (FileOutputStream fos = new FileOutputStream(nomFichier)) {
-            fos.write(pdfData);
-            LOGGER.info("PDF sauvegardé avec succès : " + nomFichier);
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la sauvegarde du PDF", e);
-            throw e;
-        }
-    }
     public static void genererRapportFinancier(
             Map<String, Double> chiffreAffaires,
             Map<String, Double> couts,
@@ -327,7 +343,8 @@ public class PDFGenerator {
         try (PDDocument document = new PDDocument()) {
             PDPage page = createLandscapePage();
             document.addPage(page);
-            try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
+            try (PDPageContentStream contentStream = new PDPageContentStream(document, page,
+                    PDPageContentStream.AppendMode.APPEND, true, true)) {
                 contentStream.beginText();
                 contentStream.setFont(PDType1Font.HELVETICA_BOLD, 14);
                 contentStream.newLineAtOffset(50, page.getMediaBox().getHeight() - 70);
@@ -354,6 +371,7 @@ public class PDFGenerator {
                 summaryTable.addCell(String.format("%.2f %%", margeMoyenne), 1, true);
 
                 summaryTable.drawRowLines();
+                summaryTable.close();
             }
             document.save(outputStream);
         } catch (IOException e) {
@@ -369,7 +387,9 @@ public class PDFGenerator {
             PDPage firstPage = new PDPage(PDRectangle.A4);
             document.addPage(firstPage);
 
-            try (PDPageContentStream contentStream = new PDPageContentStream(document, firstPage)) {
+            PDPageContentStream contentStream = new PDPageContentStream(document, firstPage,
+                    PDPageContentStream.AppendMode.APPEND, true, true);
+            try {
                 addHeader(contentStream, firstPage);
 
                 contentStream.beginText();
@@ -405,6 +425,10 @@ public class PDFGenerator {
                         highlight = !highlight;
                     }
                 }
+                table.close();
+            } catch (IOException e) {
+                LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport des créances", e);
+                throw new RuntimeException("Erreur lors de la génération du rapport", e);
             }
             document.save(outputStream);
             LOGGER.info("Rapport des créances généré avec succès");
@@ -419,7 +443,8 @@ public class PDFGenerator {
         try (PDDocument document = new PDDocument()) {
             PDPage page = new PDPage();
             document.addPage(page);
-            try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
+            try (PDPageContentStream contentStream = new PDPageContentStream(document, page,
+                    PDPageContentStream.AppendMode.APPEND, true, true)) {
                 float yStart = page.getMediaBox().getHeight() - 50;
                 float tableWidth = page.getMediaBox().getWidth() - 100;
 
@@ -462,6 +487,7 @@ public class PDFGenerator {
                     table.nextRow();
                     highlight = !highlight;
                 }
+                table.close();
 
                 contentStream.beginText();
                 contentStream.setFont(PDType1Font.HELVETICA_BOLD, 12);
@@ -483,7 +509,8 @@ public class PDFGenerator {
         try (PDDocument document = new PDDocument()) {
             PDPage page = createLandscapePage();
             document.addPage(page);
-            try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
+            try (PDPageContentStream contentStream = new PDPageContentStream(document, page,
+                    PDPageContentStream.AppendMode.APPEND, true, true)) {
                 contentStream.beginText();
                 contentStream.setFont(PDType1Font.HELVETICA_BOLD, 18);
                 contentStream.newLineAtOffset(50, page.getMediaBox().getHeight() - 50);
@@ -522,6 +549,7 @@ public class PDFGenerator {
                     table.nextRow();
                     highlight = !highlight;
                 }
+                table.close();
             }
             document.save(outputStream);
         } catch (IOException e) {
@@ -535,7 +563,8 @@ public class PDFGenerator {
         try (PDDocument document = new PDDocument()) {
             PDPage page = new PDPage();
             document.addPage(page);
-            try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
+            try (PDPageContentStream contentStream = new PDPageContentStream(document, page,
+                    PDPageContentStream.AppendMode.APPEND, true, true)) {
                 contentStream.beginText();
                 contentStream.setFont(PDType1Font.HELVETICA_BOLD, 18);
                 contentStream.newLineAtOffset(50, page.getMediaBox().getHeight() - 50);
@@ -590,7 +619,8 @@ public class PDFGenerator {
         try (PDDocument document = new PDDocument()) {
             PDPage page = new PDPage();
             document.addPage(page);
-            try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
+            try (PDPageContentStream contentStream = new PDPageContentStream(document, page,
+                    PDPageContentStream.AppendMode.APPEND, true, true)) {
                 contentStream.beginText();
                 contentStream.setFont(PDType1Font.HELVETICA_BOLD, 18);
                 contentStream.newLineAtOffset(50, page.getMediaBox().getHeight() - 70);
@@ -616,7 +646,8 @@ public class PDFGenerator {
         try (PDDocument document = new PDDocument()) {
             PDPage page = new PDPage();
             document.addPage(page);
-            try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
+            try (PDPageContentStream contentStream = new PDPageContentStream(document, page,
+                    PDPageContentStream.AppendMode.APPEND, true, true)) {
                 contentStream.beginText();
                 contentStream.setFont(PDType1Font.HELVETICA_BOLD, 18);
                 contentStream.newLineAtOffset(50, page.getMediaBox().getHeight() - 70);
@@ -634,6 +665,20 @@ public class PDFGenerator {
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération de la prévisualisation du ticket", e);
             throw new RuntimeException("Erreur lors de la génération de la prévisualisation", e);
+        }
+    }
+
+    private static PDPage createLandscapePage() {
+        return new PDPage(new PDRectangle(PDRectangle.A4.getHeight(), PDRectangle.A4.getWidth()));
+    }
+
+    public static void sauvegarderPDF(byte[] pdfData, String nomFichier) throws IOException {
+        try (FileOutputStream fos = new FileOutputStream(nomFichier)) {
+            fos.write(pdfData);
+            LOGGER.info("PDF sauvegardé avec succès : " + nomFichier);
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la sauvegarde du PDF", e);
+            throw e;
         }
     }
 }
