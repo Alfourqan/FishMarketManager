@@ -38,6 +38,31 @@ public class ReportController {
         }
     }
 
+    public Map<String, Double> calculerStatistiquesStocks(List<Produit> produits) {
+        Map<String, Double> stats = new HashMap<>();
+
+        // Valeur totale du stock
+        double valeurTotale = produits.stream()
+            .mapToDouble(p -> p.getPrixVente() * p.getStock())
+            .sum();
+        stats.put("Valeur totale du stock", valeurTotale);
+
+        // Nombre de produits en rupture
+        long produitsEnRupture = produits.stream()
+            .filter(p -> p.getStock() <= p.getSeuilAlerte())
+            .count();
+        stats.put("Produits en alerte stock", (double) produitsEnRupture);
+
+        // Moyenne des quantités
+        double moyenneQuantites = produits.stream()
+            .mapToDouble(Produit::getStock)
+            .average()
+            .orElse(0.0);
+        stats.put("Moyenne des quantités", moyenneQuantites);
+
+        return stats;
+    }
+
     public void genererRapportVentesExcel(LocalDateTime debut, LocalDateTime fin, String cheminFichier) {
         try {
             List<Vente> ventes = venteController.getVentes().stream()
@@ -199,30 +224,6 @@ public class ReportController {
         return marges;
     }
 
-    public Map<String, Double> calculerStatistiquesStocks(List<Produit> produits) {
-        Map<String, Double> stats = new HashMap<>();
-
-        // Valeur totale du stock
-        double valeurTotale = produits.stream()
-            .mapToDouble(p -> p.getPrix() * p.getQuantite())
-            .sum();
-        stats.put("Valeur totale du stock", valeurTotale);
-
-        // Nombre de produits en rupture
-        long produitsEnRupture = produits.stream()
-            .filter(p -> p.getQuantite() <= p.getSeuilAlerte())
-            .count();
-        stats.put("Produits en alerte stock", (double) produitsEnRupture);
-
-        // Moyenne des quantités
-        double moyenneQuantites = produits.stream()
-            .mapToDouble(Produit::getQuantite)
-            .average()
-            .orElse(0.0);
-        stats.put("Moyenne des quantités", moyenneQuantites);
-
-        return stats;
-    }
 
     public void genererRapportStocksPDF(List<Produit> produits, Map<String, Double> statistiques, ByteArrayOutputStream outputStream) {
         try {
@@ -288,7 +289,7 @@ public class ReportController {
             return produits.stream()
                 .collect(Collectors.groupingBy(
                     Produit::getCategorie,
-                    Collectors.summingInt(Produit::getQuantite)
+                    Collectors.summingInt(Produit::getStock) 
                 ));
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de l'analyse des stocks par catégorie", e);
@@ -355,13 +356,13 @@ public class ReportController {
 
             // Produits en alerte
             long nbProduitsAlerte = produits.stream()
-                .filter(p -> p.getQuantite() <= p.getSeuilAlerte())
+                .filter(p -> p.getStock() <= p.getSeuilAlerte())
                 .count();
             analyses.put("Nombre de produits en alerte", (double) nbProduitsAlerte);
 
             // Valeur moyenne du stock
             double valeurMoyenne = produits.stream()
-                .mapToDouble(p -> p.getPrixAchat() * p.getQuantite())
+                .mapToDouble(p -> p.getPrixAchat() * p.getStock())
                 .average()
                 .orElse(0.0);
             analyses.put("Valeur moyenne du stock", valeurMoyenne);
@@ -377,7 +378,7 @@ public class ReportController {
         if (produits.isEmpty()) return 0.0;
 
         double valeurStockMoyen = produits.stream()
-            .mapToDouble(p -> p.getPrixAchat() * p.getQuantite())
+            .mapToDouble(p -> p.getPrixAchat() * p.getStock())
             .average()
             .orElse(0.0);
 

@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.io.*;
-import java.util.List;  // Explicit import to resolve ambiguity
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
@@ -26,8 +26,12 @@ import org.jfree.chart.*;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
 import java.awt.event.ItemEvent;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.rendering.PDFRenderer;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.parser.PdfReaderContentParser;
+import com.itextpdf.text.pdf.parser.SimpleTextExtractionStrategy;
+import javax.imageio.ImageIO;
+
 
 public class ReportViewSwing {
     private static final Logger LOGGER = Logger.getLogger(ReportViewSwing.class.getName());
@@ -78,13 +82,13 @@ public class ReportViewSwing {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             switch (type.toLowerCase()) {
                 case "ventes":
-                    reportController.genererRapportVentesPDF(dateDebut.atStartOfDay(), 
+                    reportController.genererRapportVentesPDF(dateDebut.atStartOfDay(),
                         dateFin.atTime(23, 59, 59), outputStream);
                     break;
                 case "stocks":
                     Map<String, Double> statsStocks = reportController.calculerStatistiquesStocks(
                         (List<Produit>) donnees);
-                    reportController.genererRapportStocksPDF((List<Produit>) donnees, 
+                    reportController.genererRapportStocksPDF((List<Produit>) donnees,
                         statsStocks, outputStream);
                     break;
                 case "fournisseurs":
@@ -99,9 +103,10 @@ public class ReportViewSwing {
                     break;
             }
 
-            try (PDDocument document = PDDocument.load(outputStream.toByteArray())) {
-                document.save(nomFichier);
+            try (FileOutputStream fos = new FileOutputStream(nomFichier)) {
+                fos.write(outputStream.toByteArray());
             }
+
 
             showSuccessMessage("Succès", MSG_SUCCES_GENERATION + nomFichier);
             ouvrirFichier(nomFichier);
@@ -117,14 +122,14 @@ public class ReportViewSwing {
 
         try {
             addChartFromData(
-                reportController.analyserVentesParPeriode(dateDebut.atStartOfDay(), 
+                reportController.analyserVentesParPeriode(dateDebut.atStartOfDay(),
                     dateFin.atTime(23, 59, 59)),
-                "Évolution des ventes", "Période", "Montant (€)", 
+                "Évolution des ventes", "Période", "Montant (€)",
                 ChartType.LINE
             );
 
             addChartFromData(
-                reportController.analyserModePaiement(dateDebut.atStartOfDay(), 
+                reportController.analyserModePaiement(dateDebut.atStartOfDay(),
                     dateFin.atTime(23, 59, 59)),
                 "Modes de paiement", null, null,
                 ChartType.PIE
@@ -172,8 +177,8 @@ public class ReportViewSwing {
         LINE, BAR, PIE
     }
 
-    private void addChartFromData(Map<String, Double> data, String title, String xLabel, 
-        String yLabel, ChartType type) {
+    private void addChartFromData(Map<String, Double> data, String title, String xLabel,
+                                  String yLabel, ChartType type) {
         if (data == null || data.isEmpty()) return;
 
         JFreeChart chart;
@@ -589,54 +594,26 @@ public class ReportViewSwing {
     }
     private JDialog previewDialog;
     private JLabel previewLabel;
-    private PDDocument currentDocument;
-    private PDFRenderer pdfRenderer;
+    private byte[] currentPdfData;
     private int currentPage;
+    private int totalPages;
 
     private void afficherPrevisualisation(byte[] pdfData) {
         try {
             if (previewDialog == null) {
-                previewDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel), "Prévisualisation du rapport", true);
-                previewDialog.setLayout(new BorderLayout());
-                previewDialog.setSize(800, 1000);
-                previewDialog.setLocationRelativeTo(null);
-
-                                // Panel de navigation
-                JPanel navigationPanel = new JPanel(new FlowLayout());
-                JButton previousButton = createStyledButton("Précédent", MaterialDesign.MDI_CHEVRON_LEFT, PRIMARY_COLOR);
-                JButton nextButton = createStyledButton("Suivant", MaterialDesign.MDI_CHEVRON_RIGHT, PRIMARY_COLOR);
-                JButton printButton = createStyledButton("Imprimer", MaterialDesign.MDI_PRINTER, SUCCESS_COLOR);
-
-                previousButton.addActionListener(e -> afficherPagePrecedente());
-                nextButton.addActionListener(e -> afficherPageSuivante());
-                printButton.addActionListener(e -> imprimerRapport());
-
-                navigationPanel.add(previousButton);
-                navigationPanel.add(nextButton);
-                navigationPanel.add(printButton);
-
-                // Label pour l'aperçu
-                previewLabel = new JLabel();
-                JScrollPane scrollPane = new JScrollPane(previewLabel);
-                scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-
-                previewDialog.add(navigationPanel, BorderLayout.NORTH);
-                previewDialog.add(scrollPane, BorderLayout.CENTER);
+                initializePreviewDialog();
             }
 
-            // Fermer le document précédent s'il existe
-            if (currentDocument != null) {
-                currentDocument.close();
-            }
+            this.currentPdfData = pdfData;
+            this.currentPage = 1;
 
-            // Charger le PDF
-            ByteArrayInputStream bais = new ByteArrayInputStream(pdfData);
-            currentDocument = PDDocument.load(bais);
-            pdfRenderer = new PDFRenderer(currentDocument);
-            currentPage = 0;
+            // Calculer le nombre total de pages
+            PdfReader reader = new PdfReader(pdfData);
+            this.totalPages = reader.getNumberOfPages();
+            reader.close();
 
             // Afficher la première page
-            afficherPage(currentPage);
+            afficherPage(1);
             previewDialog.setVisible(true);
 
         } catch (Exception e) {
@@ -645,14 +622,52 @@ public class ReportViewSwing {
         }
     }
 
+    private void initializePreviewDialog() {
+        previewDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel),
+            "Prévisualisation du rapport", true);
+        previewDialog.setLayout(new BorderLayout());
+        previewDialog.setSize(800, 1000);
+        previewDialog.setLocationRelativeTo(null);
+
+        JPanel navigationPanel = new JPanel(new FlowLayout());
+        JButton previousButton = createStyledButton("Précédent",
+            MaterialDesign.MDI_CHEVRON_LEFT, PRIMARY_COLOR);
+        JButton nextButton = createStyledButton("Suivant",
+            MaterialDesign.MDI_CHEVRON_RIGHT, PRIMARY_COLOR);
+        JButton printButton = createStyledButton("Imprimer",
+            MaterialDesign.MDI_PRINTER, SUCCESS_COLOR);
+
+        previousButton.addActionListener(e -> afficherPagePrecedente());
+        nextButton.addActionListener(e -> afficherPageSuivante());
+        printButton.addActionListener(e -> imprimerRapport());
+
+        navigationPanel.add(previousButton);
+        navigationPanel.add(nextButton);
+        navigationPanel.add(printButton);
+
+        previewLabel = new JLabel();
+        JScrollPane scrollPane = new JScrollPane(previewLabel);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+
+        previewDialog.add(navigationPanel, BorderLayout.NORTH);
+        previewDialog.add(scrollPane, BorderLayout.CENTER);
+    }
+
     private void afficherPage(int pageNumber) {
         try {
-            if (currentDocument != null && pageNumber >= 0 && pageNumber < currentDocument.getNumberOfPages()) {
-                BufferedImage image = pdfRenderer.renderImageWithDPI(pageNumber, 100);
-                ImageIcon icon = new ImageIcon(image);
-                previewLabel.setIcon(icon);
-                previewDialog.setTitle(String.format("Prévisualisation du rapport (Page %d/%d)", 
-                    pageNumber + 1, currentDocument.getNumberOfPages()));
+            if (currentPdfData != null && pageNumber > 0 && pageNumber <= totalPages) {
+                // Créer une image à partir de la page PDF
+                PdfReader reader = new PdfReader(currentPdfData);
+                BufferedImage image = generateImageFromPDF(reader, pageNumber);
+                reader.close();
+
+                if (image != null) {
+                    ImageIcon icon = new ImageIcon(image);
+                    previewLabel.setIcon(icon);
+                    previewDialog.setTitle(String.format("Prévisualisation du rapport (Page %d/%d)",
+                        pageNumber, totalPages));
+                    currentPage = pageNumber;
+                }
             }
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de l'affichage de la page " + pageNumber, e);
@@ -660,24 +675,88 @@ public class ReportViewSwing {
         }
     }
 
+    private BufferedImage generateImageFromPDF(PdfReader reader, int pageNumber) {
+        try {
+            // Créer une image avec une résolution suffisante
+            BufferedImage image = new BufferedImage(2000, 2800, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2d = image.createGraphics();
+            g2d.setColor(Color.WHITE);
+            g2d.fillRect(0, 0, image.getWidth(), image.getHeight());
+
+            // Extraire le texte de la page
+            PdfReaderContentParser parser = new PdfReaderContentParser(reader);
+            SimpleTextExtractionStrategy strategy = parser.processContent(
+                pageNumber, new SimpleTextExtractionStrategy());
+            String text = strategy.getResultantText();
+
+            // Dessiner le texte sur l'image
+            g2d.setColor(Color.BLACK);
+            g2d.setFont(new Font("Serif", Font.PLAIN, 12));
+            drawPDFContent(g2d, text);
+            g2d.dispose();
+
+            return image;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération de l'image", e);
+            return null;
+        }
+    }
+
+    private void drawPDFContent(Graphics2D g2d, String text) {
+        int y = 50;
+        for (String line : text.split("\n")) {
+            g2d.drawString(line, 50, y);
+            y += 15;
+        }
+    }
+
     private void afficherPageSuivante() {
-        if (currentDocument != null && currentPage < currentDocument.getNumberOfPages() - 1) {
-            currentPage++;
-            afficherPage(currentPage);
+        if (currentPage < totalPages) {
+            afficherPage(currentPage + 1);
         }
     }
 
     private void afficherPagePrecedente() {
-        if (currentDocument != null && currentPage > 0) {
-            currentPage--;
-            afficherPage(currentPage);
+        if (currentPage > 1) {
+            afficherPage(currentPage - 1);
         }
     }
 
     private void imprimerRapport() {
         try {
             PrinterJob job = PrinterJob.getPrinterJob();
-            job.setPageable(new PDFPageable(currentDocument));
+            PageFormat pageFormat = job.defaultPage();
+            job.setPrintable(new Printable() {
+                public int print(Graphics graphics, PageFormat pageFormat, int pageIndex)
+                    throws PrinterException {
+                    if (pageIndex >= totalPages) {
+                        return Printable.NO_SUCH_PAGE;
+                    }
+
+                    try {
+                        Graphics2D g2d = (Graphics2D) graphics;
+                        g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
+
+                        // Générer l'image de la page
+                        PdfReader reader = new PdfReader(currentPdfData);
+                        BufferedImage image = generateImageFromPDF(reader, pageIndex + 1);
+                        reader.close();
+
+                        if (image != null) {
+                            double scale = Math.min(
+                                pageFormat.getImageableWidth() / image.getWidth(),
+                                pageFormat.getImageableHeight() / image.getHeight()
+                            );
+                            g2d.scale(scale, scale);
+                            g2d.drawImage(image, 0, 0, null);
+                        }
+
+                        return Printable.PAGE_EXISTS;
+                    } catch (Exception e) {
+                        throw new PrinterException(e.getMessage());
+                    }
+                }
+            });
 
             if (job.printDialog()) {
                 job.print();
@@ -689,53 +768,6 @@ public class ReportViewSwing {
         }
     }
 
-    private static class PDFPageable implements Printable, java.awt.print.Pageable {
-        private PDDocument document;
-
-        public PDFPageable(PDDocument document) {
-            this.document = document;
-        }
-
-        @Override
-        public int getNumberOfPages() {
-            return document.getNumberOfPages();
-        }
-
-        @Override
-        public PageFormat getPageFormat(int pageIndex) {
-            return PrinterJob.getPrinterJob().defaultPage();
-        }
-
-        @Override
-        public Printable getPrintable(int pageIndex) {
-            return this;
-        }
-
-        @Override
-        public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) throws PrinterException {
-            if (pageIndex >= document.getNumberOfPages()) {
-                return Printable.NO_SUCH_PAGE;
-            }
-
-            try {
-                Graphics2D g2d = (Graphics2D) graphics;
-                g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
-
-                BufferedImage image = new PDFRenderer(document).renderImageWithDPI(pageIndex, 300);
-                double scale = Math.min(
-                    pageFormat.getImageableWidth() / image.getWidth(),
-                    pageFormat.getImageableHeight() / image.getHeight()
-                );
-
-                g2d.scale(scale, scale);
-                g2d.drawImage(image, 0, 0, null);
-
-                return Printable.PAGE_EXISTS;
-            } catch (IOException e) {
-                throw new PrinterException(e.getMessage());
-            }
-        }
-    }
     private void afficherEtatCreances() {
         try {
             ClientController clientController = new ClientController();
@@ -815,24 +847,24 @@ public class ReportViewSwing {
         table.setShowHorizontalLines(true);
         table.setGridColor(new Color(230, 230, 230));
 
-        table.getTableHeader().setBackground(new Color(240,240, 240));
+        table.getTableHeader().setBackground(new Color(240, 240, 240));
         table.getTableHeader().setForeground(new Color(33, 33, 33));
         table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
         table.getTableHeader().setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(200, 200, 200)));
 
-        table.getColumnModel().getColumn(3).setCellRenderer((TableCellRenderer)(table1, value, isSelected, hasFocus, row, column) -> {
+        table.getColumnModel().getColumn(3).setCellRenderer((TableCellRenderer) (table1, value, isSelected, hasFocus, row, column) -> {
             JButton button = new JButton("Détails");
             button.setBackground(PRIMARY_COLOR);
             button.setForeground(Color.WHITE);
             button.setFocusPainted(false);
-button.setBorderPainted(false);
+            button.setBorderPainted(false);
             return button;
         });
 
         table.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(new JCheckBox()) {
             @Override
-            public Component getTableCellEditorComponent(JTable table,Object value,
-                    boolean isSelected, int row, int col) {
+            public Component getTableCellEditorComponent(JTable table, Object value,
+                                                        boolean isSelected, int row, int col) {
                 JButton button = new JButton("Détails");
                 button.setBackground(PRIMARY_COLOR);
                 button.setForeground(Color.WHITE);
