@@ -2,19 +2,16 @@ package com.poissonnerie.controller;
 
 import com.poissonnerie.model.Fournisseur;
 import com.poissonnerie.util.DatabaseManager;
-import com.poissonnerie.util.CacheManager;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class FournisseurController {
     private static final Logger LOGGER = Logger.getLogger(FournisseurController.class.getName());
-    private static final String CACHE_NAME = "fournisseurs";
-    private final CacheManager.Cache<List<Fournisseur>> fournisseursCache;
+    private List<Fournisseur> fournisseurs;
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
         "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$"
     );
@@ -23,19 +20,12 @@ public class FournisseurController {
     );
 
     public FournisseurController() {
-        this.fournisseursCache = CacheManager.getInstance().getCache(CACHE_NAME);
+        this.fournisseurs = new ArrayList<>();
     }
 
     public void chargerFournisseurs() {
         LOGGER.info("Chargement des fournisseurs...");
-        List<Fournisseur> fournisseursFromCache = fournisseursCache.get("all");
-
-        if (fournisseursFromCache != null) {
-            LOGGER.info("Utilisation du cache pour les fournisseurs");
-            return;
-        }
-
-        List<Fournisseur> nouveauxFournisseurs = new ArrayList<>();
+        fournisseurs.clear();
         String sql = "SELECT * FROM fournisseurs WHERE supprime = false ORDER BY nom";
 
         try (Connection conn = DatabaseManager.getConnection();
@@ -44,11 +34,9 @@ public class FournisseurController {
 
             while (rs.next()) {
                 Fournisseur fournisseur = creerFournisseurDepuisResultSet(rs);
-                nouveauxFournisseurs.add(fournisseur);
+                fournisseurs.add(fournisseur);
             }
-
-            fournisseursCache.put("all", nouveauxFournisseurs);
-            LOGGER.info("Fournisseurs chargés avec succès: " + nouveauxFournisseurs.size() + " enregistrements");
+            LOGGER.info("Fournisseurs chargés avec succès: " + fournisseurs.size() + " enregistrements");
 
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors du chargement des fournisseurs", e);
@@ -57,12 +45,7 @@ public class FournisseurController {
     }
 
     public List<Fournisseur> getFournisseurs() {
-        List<Fournisseur> fournisseursFromCache = fournisseursCache.get("all");
-        if (fournisseursFromCache == null) {
-            chargerFournisseurs();
-            fournisseursFromCache = fournisseursCache.get("all");
-        }
-        return new ArrayList<>(fournisseursFromCache != null ? fournisseursFromCache : new ArrayList<>());
+        return new ArrayList<>(fournisseurs);
     }
 
     public void ajouterFournisseur(Fournisseur fournisseur) {
@@ -74,14 +57,14 @@ public class FournisseurController {
         LOGGER.info("Tentative d'ajout d'un nouveau fournisseur: " + fournisseur.getNom());
         validateFournisseur(fournisseur);
 
-        String sql = "INSERT INTO fournisseurs (nom, contact, telephone, email, adresse, statut, supprime) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, false)";
+        String insertSql = "INSERT INTO fournisseurs (nom, contact, telephone, email, adresse, statut, supprime) " +
+                          "VALUES (?, ?, ?, ?, ?, ?, false)";
         String getIdSql = "SELECT last_insert_rowid()";
 
         try (Connection conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(false);
 
-            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            try (PreparedStatement pstmt = conn.prepareStatement(insertSql)) {
                 preparerStatementFournisseur(pstmt, fournisseur);
                 int rowsAffected = pstmt.executeUpdate();
 
@@ -89,13 +72,12 @@ public class FournisseurController {
                     throw new SQLException("L'insertion du fournisseur a échoué.");
                 }
 
+                // Récupérer l'ID généré
                 try (Statement stmt = conn.createStatement();
                      ResultSet rs = stmt.executeQuery(getIdSql)) {
                     if (rs.next()) {
                         fournisseur.setId(rs.getInt(1));
-                        List<Fournisseur> currentFournisseurs = getFournisseurs();
-                        currentFournisseurs.add(fournisseur);
-                        fournisseursCache.put("all", currentFournisseurs);
+                        fournisseurs.add(fournisseur);
                         conn.commit();
                         LOGGER.info("Fournisseur ajouté avec succès, ID: " + fournisseur.getId());
                     } else {
@@ -131,11 +113,9 @@ public class FournisseurController {
                     throw new IllegalStateException("Fournisseur non trouvé ou déjà supprimé: " + fournisseur.getId());
                 }
 
-                int index = getFournisseurs().indexOf(fournisseur);
+                int index = fournisseurs.indexOf(fournisseur);
                 if (index != -1) {
-                    List<Fournisseur> currentFournisseurs = getFournisseurs();
-                    currentFournisseurs.set(index, fournisseur);
-                    fournisseursCache.put("all", currentFournisseurs);
+                    fournisseurs.set(index, fournisseur);
                 }
 
                 conn.commit();
@@ -149,7 +129,6 @@ public class FournisseurController {
             LOGGER.log(Level.SEVERE, "Erreur de connexion lors de la mise à jour du fournisseur", e);
             throw new RuntimeException("Erreur lors de la mise à jour du fournisseur", e);
         }
-        invalidateCache();
     }
 
     public void supprimerFournisseur(Fournisseur fournisseur) {
@@ -171,9 +150,7 @@ public class FournisseurController {
                     throw new IllegalStateException("Fournisseur non trouvé ou déjà supprimé: " + fournisseur.getId());
                 }
 
-                List<Fournisseur> currentFournisseurs = getFournisseurs();
-                currentFournisseurs.remove(fournisseur);
-                fournisseursCache.put("all", currentFournisseurs);
+                fournisseurs.remove(fournisseur);
                 conn.commit();
                 LOGGER.info("Fournisseur supprimé avec succès, ID: " + fournisseur.getId());
             } catch (SQLException e) {
@@ -185,7 +162,6 @@ public class FournisseurController {
             LOGGER.log(Level.SEVERE, "Erreur de connexion lors de la suppression du fournisseur", e);
             throw new RuntimeException("Erreur lors de la suppression du fournisseur", e);
         }
-        invalidateCache();
     }
 
     public List<Fournisseur> rechercherFournisseurs(String terme) {
@@ -306,9 +282,5 @@ public class FournisseurController {
             LOGGER.log(Level.SEVERE, "Erreur lors de la création d'un fournisseur depuis le ResultSet", e);
             throw e;
         }
-    }
-
-    private void invalidateCache() {
-        fournisseursCache.remove("all");
     }
 }
