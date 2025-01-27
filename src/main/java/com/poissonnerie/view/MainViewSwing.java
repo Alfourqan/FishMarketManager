@@ -7,6 +7,8 @@ import com.poissonnerie.model.*;
 import java.io.File;
 import org.kordamp.ikonli.materialdesign.MaterialDesign;
 import org.kordamp.ikonli.swing.FontIcon;
+import com.poissonnerie.util.ThemeManager;
+import com.poissonnerie.util.ThemeManager.Theme;
 
 public class MainViewSwing {
     private final JPanel mainPanel;
@@ -32,6 +34,8 @@ public class MainViewSwing {
     }
 
     private void initializeComponents() {
+        Theme currentTheme = ThemeManager.getInstance().getCurrentTheme();
+
         JPanel headerPanel = createHeader();
         mainPanel.add(headerPanel, BorderLayout.NORTH);
 
@@ -40,17 +44,23 @@ public class MainViewSwing {
 
         mainPanel.add(contentPanel, BorderLayout.CENTER);
 
+        // Appliquer le thème au panneau principal
+        mainPanel.setBackground(currentTheme.getBackgroundColor());
+        contentPanel.setBackground(currentTheme.getBackgroundColor());
+
         addViews();
     }
 
     private JPanel createHeader() {
+        Theme currentTheme = ThemeManager.getInstance().getCurrentTheme();
+
         JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.setBackground(new Color(76, 175, 80));
+        headerPanel.setBackground(currentTheme.getPrimaryColor());
         headerPanel.setPreferredSize(new Dimension(0, 50));
 
         titleLabel = new JLabel(currentTitle, SwingConstants.CENTER);
-        titleLabel.setForeground(Color.WHITE);
-        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        titleLabel.setForeground(currentTheme.getTextColor());
+        titleLabel.setFont(currentTheme.getHeaderFont());
         titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
         headerPanel.add(titleLabel, BorderLayout.CENTER);
@@ -63,9 +73,11 @@ public class MainViewSwing {
     }
 
     private JPanel createNavigationPanel() {
+        Theme currentTheme = ThemeManager.getInstance().getCurrentTheme();
+
         JPanel navigationPanel = new JPanel();
         navigationPanel.setLayout(new BoxLayout(navigationPanel, BoxLayout.Y_AXIS));
-        navigationPanel.setBackground(new Color(33, 37, 41));
+        navigationPanel.setBackground(currentTheme.getSecondaryColor());
         navigationPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
         navigationPanel.setPreferredSize(new Dimension(200, 0));
 
@@ -117,12 +129,14 @@ public class MainViewSwing {
     }
 
     private JToggleButton createNavigationButton(String text, MaterialDesign iconCode) {
+        Theme currentTheme = ThemeManager.getInstance().getCurrentTheme();
+
         JToggleButton button = new JToggleButton(text);
 
         // Configuration de l'icône
         FontIcon icon = FontIcon.of(iconCode);
         icon.setIconSize(18);
-        icon.setIconColor(Color.WHITE);
+        icon.setIconColor(currentTheme.getTextColor());
         button.setIcon(icon);
 
         // Style du bouton
@@ -132,22 +146,22 @@ public class MainViewSwing {
         button.setPreferredSize(new Dimension(170, 40));
         button.setMaximumSize(new Dimension(170, 40));
         button.setMinimumSize(new Dimension(170, 40));
-        button.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        button.setForeground(Color.WHITE);
-        button.setBackground(new Color(33, 37, 41));
+        button.setFont(currentTheme.getBodyFont());
+        button.setForeground(currentTheme.getTextColor());
+        button.setBackground(currentTheme.getSecondaryColor());
         button.setBorderPainted(false);
         button.setOpaque(true);
 
-        // Effet de survol
+        // Effet de survol avec les couleurs du thème
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 if (!button.isSelected()) {
-                    button.setBackground(new Color(44, 49, 54));
+                    button.setBackground(currentTheme.getAccentColor());
                 }
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 if (!button.isSelected()) {
-                    button.setBackground(new Color(33, 37, 41));
+                    button.setBackground(currentTheme.getSecondaryColor());
                 }
             }
         });

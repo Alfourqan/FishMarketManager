@@ -230,6 +230,18 @@ public class ConfigurationParam {
     public static final String CLE_AFFICHER_TVA_DETAILS = "AFFICHER_TVA_DETAILS";
     public static final String CLE_INFO_SUPPLEMENTAIRE_RECU = "INFO_SUPPLEMENTAIRE_RECU";
 
+    //Theme constants
+    public static final String CLE_THEME = "THEME_ACTIF";
+    public static final String CLE_THEME_PERSONNALISE = "THEME_PERSONNALISE";
+    public static final String CLE_THEME_PRIMAIRE = "THEME_COULEUR_PRIMAIRE";
+    public static final String CLE_THEME_SECONDAIRE = "THEME_COULEUR_SECONDAIRE";
+    public static final String CLE_THEME_FOND = "THEME_COULEUR_FOND";
+    public static final String CLE_THEME_TEXTE = "THEME_COULEUR_TEXTE";
+    public static final String CLE_THEME_ACCENT = "THEME_COULEUR_ACCENT";
+    public static final String CLE_THEME_POLICE_TITRE = "THEME_POLICE_TITRE";
+    public static final String CLE_THEME_POLICE_CORPS = "THEME_POLICE_CORPS";
+
+
     private static final java.util.Set<String> CLES_SENSIBLES = new java.util.HashSet<>(java.util.Arrays.asList(
         CLE_EMAIL,
         CLE_TELEPHONE_ENTREPRISE,
