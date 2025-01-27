@@ -788,8 +788,7 @@ public class ConfigurationViewSwing {
         gbc.gridy++;
         JPanel policeTextePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel policeTexteLabel = new JLabel("Taille police texte:");
-        policeTexteLabel.setFont(TEXTE_NORMAL_FONT);
-        JSpinner policeTexteSpinner = (JSpinner) champsSaisie.get(ConfigurationParam.CLE_POLICE_TEXTE_RECU);
+        policeTexteLabel.setFont(TEXTE_NORMAL_FONTFONT);
         policeTexteSpinner.setFont(TEXTE_NORMAL_FONT);
         policeTextePanel.add(policeTexteLabel);
         policeTextePanel.add(policeTexteSpinner);
@@ -1008,8 +1007,10 @@ public class ConfigurationViewSwing {
                         }
                     } else if (composant instanceof JCheckBox) {
                         ((JCheckBox) composant).setSelected(Boolean.parseBoolean(entry.getValue()));
-                    } else if (composant instanceof JComboBox) {
-                        ((JComboBox<?>) composant).setSelectedItem(entry.getValue());
+                    } else if (composant instanceof JComboBox<?>) {
+                        @SuppressWarnings("unchecked")
+                        JComboBox<String> combo = (JComboBox<String>) composant;
+                        combo.setSelectedItem(entry.getValue());
                     }
                 }
             }
@@ -1111,7 +1112,7 @@ public class ConfigurationViewSwing {
                         valeur = String.valueOf(((JSpinner) composant).getValue());
                     } else if (composant instanceof JCheckBox) {
                         valeur = String.valueOf(((JCheckBox) composant).isSelected());
-                    } else if (composant instanceof JComboBox) {
+                    } else if (composant instanceof JComboBox<?>) {
                         Object selectedItem = ((JComboBox<?>) composant).getSelectedItem();
                         valeur = selectedItem != null ? selectedItem.toString() : "";
                     }

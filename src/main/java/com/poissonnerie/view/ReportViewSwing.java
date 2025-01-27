@@ -192,7 +192,7 @@ public class ReportViewSwing {
                 chart = ChartFactory.createBarChart(title, xLabel, yLabel, barDataset);
                 break;
             case PIE:
-                DefaultPieDataset pieDataset = new DefaultPieDataset();
+                DefaultPieDataset<String> pieDataset = new DefaultPieDataset<>();
                 data.forEach(pieDataset::setValue);
                 chart = ChartFactory.createPieChart(title, pieDataset, true, true, false);
                 break;
