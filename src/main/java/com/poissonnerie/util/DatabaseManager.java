@@ -13,6 +13,7 @@ import java.util.logging.Level;
 public class DatabaseManager {
     private static final Logger LOGGER = Logger.getLogger(DatabaseManager.class.getName());
     private static volatile boolean isInitialized = false;
+    private static final Object INIT_LOCK = new Object();
 
     public static void main(String[] args) {
         try {
@@ -25,63 +26,90 @@ public class DatabaseManager {
         }
     }
 
-    public static synchronized Connection getConnection() throws SQLException {
+    public static Connection getConnection() throws SQLException {
         if (!isInitialized) {
-            initDatabase();
+            synchronized (INIT_LOCK) {
+                if (!isInitialized) {
+                    initDatabase();
+                }
+            }
         }
         return DatabaseConnectionPool.getConnection();
     }
 
-    public static synchronized void initDatabase() {
+    public static void initDatabase() {
         if (isInitialized) {
             return;
         }
 
-        LOGGER.info("Initialisation de la base de données...");
-
-        try (Connection conn = DatabaseConnectionPool.getConnection();
-             Statement stmt = conn.createStatement()) {
-
-            // Configuration minimale SQLite
-            stmt.execute("PRAGMA foreign_keys = OFF");
-            stmt.execute("PRAGMA journal_mode = WAL");
-            stmt.execute("PRAGMA synchronous = NORMAL");
-
-            String schema = loadSchemaFromResource();
-            if (schema == null || schema.trim().isEmpty()) {
-                throw new IllegalStateException("Schema SQL vide ou introuvable");
+        synchronized (INIT_LOCK) {
+            if (isInitialized) {
+                return;
             }
 
-            // Exécution du schéma
-            for (String sql : schema.split(";")) {
-                sql = sql.trim();
-                if (!sql.isEmpty()) {
-                    try {
-                        stmt.execute(sql);
-                        LOGGER.fine("Exécution SQL réussie: " + sql.substring(0, Math.min(sql.length(), 50)) + "...");
-                    } catch (SQLException e) {
-                        if (!e.getMessage().contains("table already exists")) {
-                            LOGGER.warning("Erreur SQL: " + e.getMessage() + " pour la requête: " + sql);
-                            throw e;
+            LOGGER.info("Initialisation de la base de données...");
+            Connection conn = null;
+
+            try {
+                conn = DatabaseConnectionPool.getConnection();
+                try (Statement stmt = conn.createStatement()) {
+                    // Configuration initiale
+                    stmt.execute("PRAGMA foreign_keys = OFF");
+                    stmt.execute("PRAGMA journal_mode = WAL");
+                    stmt.execute("PRAGMA synchronous = NORMAL");
+
+                    String schema = loadSchemaFromResource();
+                    if (schema == null || schema.trim().isEmpty()) {
+                        throw new IllegalStateException("Schema SQL vide ou introuvable");
+                    }
+
+                    conn.setAutoCommit(false);
+                    for (String sql : schema.split(";")) {
+                        sql = sql.trim();
+                        if (!sql.isEmpty()) {
+                            try {
+                                stmt.execute(sql);
+                                LOGGER.fine("Exécution SQL réussie: " + sql.substring(0, Math.min(sql.length(), 50)) + "...");
+                            } catch (SQLException e) {
+                                if (!e.getMessage().contains("table already exists")) {
+                                    throw e;
+                                }
+                            }
                         }
+                    }
+                    conn.commit();
+
+                    // Insertion des données de test si nécessaire
+                    insertTestDataIfEmpty(conn);
+
+                    stmt.execute("PRAGMA foreign_keys = ON");
+                    isInitialized = true;
+                    LOGGER.info("Base de données initialisée avec succès");
+                }
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Erreur fatale lors de l'initialisation", e);
+                if (conn != null) {
+                    try {
+                        conn.rollback();
+                    } catch (SQLException ex) {
+                        LOGGER.log(Level.SEVERE, "Erreur lors du rollback", ex);
+                    }
+                }
+                throw new RuntimeException("Erreur d'initialisation: " + e.getMessage(), e);
+            } finally {
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        LOGGER.log(Level.WARNING, "Erreur lors de la fermeture de la connexion", e);
                     }
                 }
             }
-
-            // Insertion des données de test si la base est vide
-            insertTestDataIfEmpty(conn);
-
-            stmt.execute("PRAGMA foreign_keys = ON");
-            isInitialized = true;
-            LOGGER.info("Base de données initialisée avec succès");
-
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur fatale lors de l'initialisation", e);
-            throw new RuntimeException("Erreur d'initialisation: " + e.getMessage(), e);
         }
     }
 
     private static void insertTestDataIfEmpty(Connection conn) throws SQLException {
+        conn.setAutoCommit(true);
         try (Statement stmt = conn.createStatement()) {
             // Vérifier si la table produits est vide
             var rs = stmt.executeQuery("SELECT COUNT(*) FROM produits");
@@ -126,6 +154,7 @@ public class DatabaseManager {
             stmt.execute("PRAGMA quick_check");
             stmt.execute("PRAGMA integrity_check");
             stmt.execute("PRAGMA foreign_key_check");
+            LOGGER.info("Vérification de la santé de la base de données réussie");
         }
     }
 }
