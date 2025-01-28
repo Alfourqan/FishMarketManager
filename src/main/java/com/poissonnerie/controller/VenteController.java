@@ -1,7 +1,7 @@
 package com.poissonnerie.controller;
 
 import com.poissonnerie.model.*;
-import com.poissonnerie.util.DatabaseManager; // Assuming this is used elsewhere, otherwise replace
+import com.poissonnerie.util.DatabaseManager; 
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.Instant;
@@ -151,16 +151,13 @@ public class VenteController {
         validateVente(vente);
 
         try (Connection conn = DatabaseManager.getConnection()) {
+            conn.setAutoCommit(false);
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-            conn.setAutoCommit(false);
-            
-            try {
-                Statement stmt = conn.createStatement();
-                stmt.execute("SET SESSION TRANSACTION TIMEOUT " + TRANSACTION_TIMEOUT_SECONDS);
-            conn.setAutoCommit(false);
-            conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 
-            try {
+            try (Statement stmt = conn.createStatement()) {
+                stmt.execute("PRAGMA foreign_keys = ON");
+                stmt.execute("PRAGMA busy_timeout = " + (TRANSACTION_TIMEOUT_SECONDS * 1000));
+
                 // Vérification du stock avec retries
                 int retryCount = 0;
                 boolean success = false;
@@ -183,7 +180,7 @@ public class VenteController {
                 vente.setId(venteId);
 
                 // Insertion des lignes et mise à jour des stocks
-                insererLigneVente(conn, venteId, vente); // Modified call
+                insererLigneVente(conn, venteId, vente);
 
                 // Mise à jour du solde client si nécessaire
                 if (vente.isCredit() && vente.getClient() != null) {
@@ -359,7 +356,6 @@ public class VenteController {
             LOGGER.info("Stock mis à jour pour le produit " + ligne.getProduit().getId());
         }
     }
-
 
 
     private Client creerClientDepuisResultSet(ResultSet rs) throws SQLException {
