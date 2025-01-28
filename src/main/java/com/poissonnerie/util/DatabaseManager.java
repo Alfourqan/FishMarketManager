@@ -55,21 +55,12 @@ public class DatabaseManager {
             try {
                 conn = DatabaseConnectionPool.getConnection();
 
-                // Configuration SQLite avant toute opération
-                try (Statement initStmt = conn.createStatement()) {
-                    initStmt.execute("PRAGMA foreign_keys = OFF");
-                    initStmt.execute("PRAGMA cache_size = 4000");
-                    initStmt.execute("PRAGMA busy_timeout = 60000");
-                    LOGGER.info("Configuration SQLite initialisée");
-                }
-
                 // Chargement et exécution du schéma
                 String schema = loadSchemaFromResource();
                 if (schema == null || schema.trim().isEmpty()) {
                     throw new IllegalStateException("Schema SQL vide ou introuvable");
                 }
 
-                conn.setAutoCommit(false);
                 try (Statement stmt = conn.createStatement()) {
                     for (String sql : schema.split(";")) {
                         sql = sql.trim();
@@ -84,20 +75,10 @@ public class DatabaseManager {
                             }
                         }
                     }
-                    conn.commit();
                     LOGGER.info("Schéma de base de données appliqué avec succès");
 
                     // Insertion des données de test
                     insertTestDataIfEmpty(conn);
-                } catch (SQLException e) {
-                    if (conn != null) {
-                        try {
-                            conn.rollback();
-                        } catch (SQLException ex) {
-                            LOGGER.log(Level.SEVERE, "Erreur lors du rollback", ex);
-                        }
-                    }
-                    throw e;
                 }
 
                 isInitialized = true;
@@ -119,7 +100,6 @@ public class DatabaseManager {
     }
 
     private static void insertTestDataIfEmpty(Connection conn) throws SQLException {
-        conn.setAutoCommit(true);
         try (Statement stmt = conn.createStatement()) {
             // Vérifier si la table produits est vide
             var rs = stmt.executeQuery("SELECT COUNT(*) FROM produits");
@@ -146,11 +126,10 @@ public class DatabaseManager {
     private static String loadSchemaFromResource() {
         LOGGER.info("Chargement du schéma SQL depuis les ressources...");
         final String schemaPath = "schema.sql";
-        ClassLoader classLoader = DatabaseManager.class.getClassLoader();
 
-        try (InputStream is = classLoader.getResourceAsStream(schemaPath)) {
+        try (InputStream is = DatabaseManager.class.getClassLoader().getResourceAsStream(schemaPath)) {
             if (is == null) {
-                LOGGER.severe("Fichier schema.sql introuvable dans les ressources. Chemin recherché: " + schemaPath);
+                LOGGER.severe("Fichier schema.sql introuvable dans les ressources");
                 throw new IllegalStateException("Fichier schema.sql introuvable dans les ressources");
             }
 
