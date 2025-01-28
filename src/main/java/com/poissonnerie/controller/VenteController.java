@@ -150,7 +150,9 @@ public class VenteController {
         LOGGER.info("Début de l'enregistrement de la vente...");
         validateVente(vente);
 
-        try (Connection conn = DatabaseManager.getConnection()) {
+        Connection conn = null;
+        try {
+            conn = DatabaseManager.getConnection();
             conn.setAutoCommit(false);
             conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 
@@ -192,10 +194,12 @@ public class VenteController {
                 LOGGER.info("Vente enregistrée avec succès, ID: " + vente.getId());
 
             } catch (Exception e) {
-                try {
-                    conn.rollback();
-                } catch (SQLException re) {
-                    LOGGER.log(Level.SEVERE, "Erreur lors du rollback", re);
+                if (conn != null) {
+                    try {
+                        conn.rollback();
+                    } catch (SQLException re) {
+                        LOGGER.log(Level.SEVERE, "Erreur lors du rollback", re);
+                    }
                 }
                 LOGGER.log(Level.SEVERE, "Erreur lors de l'enregistrement de la vente", e);
                 throw new RuntimeException("Erreur lors de l'enregistrement: " + e.getMessage(), e);
@@ -203,6 +207,15 @@ public class VenteController {
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur fatale lors de l'enregistrement de la vente", e);
             throw new RuntimeException("Erreur d'enregistrement: " + e.getMessage(), e);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException e) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors de la fermeture de la connexion", e);
+                }
+            }
         }
     }
 
@@ -317,26 +330,25 @@ public class VenteController {
     }
 
     private void insererLigneVente(Connection conn, int venteId, Vente vente) throws SQLException {
-        try {
-            conn.setAutoCommit(false);
-            for (Vente.LigneVente ligne : vente.getLignes()) {
-                try (PreparedStatement stmt = conn.prepareStatement(SQL_INSERT_LIGNE_VENTE)) {
-                    stmt.setInt(1, venteId);
-                    stmt.setInt(2, ligne.getProduit().getId());
-                    stmt.setInt(3, ligne.getQuantite());
-                    stmt.setDouble(4, ligne.getPrixUnitaire());
-                    stmt.executeUpdate();
+        // Remove nested transaction management since it's handled by the parent method
+        for (Vente.LigneVente ligne : vente.getLignes()) {
+            try (PreparedStatement stmt = conn.prepareStatement(SQL_INSERT_LIGNE_VENTE)) {
+                stmt.setInt(1, venteId);
+                stmt.setInt(2, ligne.getProduit().getId());
+                stmt.setInt(3, ligne.getQuantite());
+                stmt.setDouble(4, ligne.getPrixUnitaire());
+                stmt.executeUpdate();
+
+                // Update stock in the same transaction
+                try (PreparedStatement updateStmt = conn.prepareStatement(SQL_UPDATE_STOCK)) {
+                    updateStmt.setInt(1, ligne.getQuantite());
+                    updateStmt.setInt(2, ligne.getProduit().getId());
+                    updateStmt.setInt(3, ligne.getQuantite());
+                    int rowsAffected = updateStmt.executeUpdate();
+                    if (rowsAffected == 0) {
+                        throw new SQLException("Stock insuffisant pour le produit: " + sanitizeInput(ligne.getProduit().getNom()));
+                    }
                 }
-            }
-            conn.commit();
-        } catch (SQLException e) {
-            if (conn != null) {
-                conn.rollback();
-            }
-            throw e;
-        } finally {
-            if (conn != null) {
-                conn.setAutoCommit(true);
             }
         }
     }

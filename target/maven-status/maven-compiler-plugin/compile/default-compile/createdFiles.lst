@@ -16,7 +16,6 @@ com/poissonnerie/model/MouvementCaisse$TypeMouvement.class
 com/poissonnerie/view/LoginSuccessListener.class
 com/poissonnerie/view/AccueilViewSwing$2.class
 com/poissonnerie/view/ConfigurationViewSwing$2.class
-schema.sql
 com/poissonnerie/util/TextBillPrinter$1.class
 com/poissonnerie/view/NotificationStockView$1.class
 com/poissonnerie/view/ProduitViewSwing$5.class
