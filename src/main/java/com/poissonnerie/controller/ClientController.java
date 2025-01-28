@@ -27,8 +27,6 @@ public class ClientController {
         if (clients.isEmpty()) {
             chargerClients();
         }
-        LOGGER.info("Retour de " + clients.size() + " clients, dont " +
-            clients.stream().filter(c -> c.getSolde() > 0).count() + " avec solde positif");
         return new ArrayList<>(clients);
     }
 
@@ -38,41 +36,26 @@ public class ClientController {
         String sql = "SELECT id, nom, telephone, adresse, solde FROM clients ORDER BY nom";
 
         try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
 
-            conn.setAutoCommit(false);
-            try (ResultSet rs = stmt.executeQuery()) {
-                int count = 0;
-                double totalSoldes = 0.0;
-                while (rs.next()) {
-                    int id = rs.getInt("id");
-                    String nom = rs.getString("nom");
-                    String telephone = rs.getString("telephone");
-                    String adresse = rs.getString("adresse");
-                    double solde = rs.getDouble("solde");
-
-                    Client client = new Client(id, nom, telephone, adresse, solde);
-                    clients.add(client);
-                    count++;
-                    totalSoldes += solde;
-
-                    LOGGER.fine("Client chargé: ID=" + id + ", Nom=" + nom + ", Solde=" + solde);
-                }
-                conn.commit();
-                LOGGER.info("Clients chargés avec succès: " + count + " clients, Solde total: " + totalSoldes);
-
-                // Log des clients avec solde positif
-                clients.stream()
-                    .filter(c -> c.getSolde() > 0)
-                    .forEach(c -> LOGGER.info("Client avec créance: " + c.getNom() + ", Solde: " + c.getSolde()));
-            } catch (SQLException e) {
-                conn.rollback();
-                LOGGER.log(Level.SEVERE, "Erreur lors du chargement des clients", e);
-                throw new RuntimeException("Erreur lors du chargement des clients", e);
+            while (rs.next()) {
+                Client client = new Client(
+                    rs.getInt("id"),
+                    rs.getString("nom"),
+                    rs.getString("telephone"),
+                    rs.getString("adresse"),
+                    rs.getDouble("solde")
+                );
+                clients.add(client);
+                LOGGER.fine("Client chargé: ID=" + client.getId() + ", Nom=" + client.getNom());
             }
+
+            LOGGER.info("Clients chargés avec succès: " + clients.size() + " clients");
+
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur de connexion à la base de données", e);
-            throw new RuntimeException("Erreur de connexion à la base de données", e);
+            LOGGER.log(Level.SEVERE, "Erreur lors du chargement des clients", e);
+            throw new RuntimeException("Erreur lors du chargement des clients", e);
         }
     }
 
@@ -100,58 +83,60 @@ public class ClientController {
     }
 
     private String sanitizeInput(String input) {
-        if (input == null) {
-            return "";
-        }
-        // Échapper les caractères spéciaux HTML et SQL
+        if (input == null) return "";
         return input.replaceAll("[<>\"'%;)(&+]", "");
     }
 
     public void ajouterClient(Client client) {
-        validateClient(client); // Validation d'abord
+        validateClient(client);
         LOGGER.info("Tentative d'ajout d'un nouveau client: " + client.getNom());
 
         String sql = "INSERT INTO clients (nom, telephone, adresse, solde) VALUES (?, ?, ?, ?)";
-        String getIdSql = "SELECT last_insert_rowid() as id";
 
         try (Connection conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(false);
-            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 pstmt.setString(1, sanitizeInput(client.getNom()));
                 pstmt.setString(2, sanitizeInput(client.getTelephone()));
                 pstmt.setString(3, sanitizeInput(client.getAdresse()));
                 pstmt.setDouble(4, client.getSolde());
-                pstmt.executeUpdate();
 
-                // Récupérer l'ID généré
-                try (Statement stmt = conn.createStatement();
-                     ResultSet rs = stmt.executeQuery(getIdSql)) {
+                int rows = pstmt.executeUpdate();
+                if (rows == 0) {
+                    throw new SQLException("L'ajout du client a échoué");
+                }
+
+                try (ResultSet rs = pstmt.getGeneratedKeys()) {
                     if (rs.next()) {
-                        client.setId(rs.getInt("id"));
+                        client.setId(rs.getInt(1));
                         clients.add(client);
+                        conn.commit();
                         LOGGER.info("Client ajouté avec succès, ID: " + client.getId());
+                    } else {
+                        throw new SQLException("Impossible d'obtenir l'ID du client");
                     }
                 }
-                conn.commit();
             } catch (SQLException e) {
                 conn.rollback();
                 LOGGER.log(Level.SEVERE, "Erreur lors de l'ajout du client", e);
-                throw new RuntimeException("Erreur lors de l'ajout du client", e);
+                throw new RuntimeException("Erreur lors de l'ajout du client: " + e.getMessage(), e);
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur de connexion lors de l'ajout du client", e);
-            throw new RuntimeException("Erreur de connexion lors de l'ajout du client", e);
+            throw new RuntimeException("Erreur de connexion lors de l'ajout du client: " + e.getMessage(), e);
         }
     }
 
     public void mettreAJourClient(Client client) {
-        LOGGER.info("Tentative de mise à jour du client ID: " + client.getId());
         validateClient(client);
+        LOGGER.info("Tentative de mise à jour du client ID: " + client.getId());
 
-        String sql = "UPDATE clients SET nom = ?, telephone = ?, adresse = ? WHERE id = ?";
+        String sql = "UPDATE clients SET nom = ?, telephone = ?, adresse = ? WHERE id = ? AND solde >= 0";
 
         try (Connection conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(false);
+
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, sanitizeInput(client.getNom()));
                 pstmt.setString(2, sanitizeInput(client.getTelephone()));
@@ -160,10 +145,9 @@ public class ClientController {
 
                 int rowsUpdated = pstmt.executeUpdate();
                 if (rowsUpdated == 0) {
-                    throw new IllegalStateException("Client non trouvé: " + client.getId());
+                    throw new IllegalStateException("Client non trouvé ou mise à jour impossible: " + client.getId());
                 }
 
-                // Mettre à jour la liste en mémoire
                 int index = clients.indexOf(client);
                 if (index != -1) {
                     clients.set(index, client);
@@ -174,50 +158,63 @@ public class ClientController {
             } catch (SQLException e) {
                 conn.rollback();
                 LOGGER.log(Level.SEVERE, "Erreur lors de la mise à jour du client", e);
-                throw new RuntimeException("Erreur lors de la mise à jour du client", e);
+                throw new RuntimeException("Erreur lors de la mise à jour du client: " + e.getMessage(), e);
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur de connexion lors de la mise à jour du client", e);
-            throw new RuntimeException("Erreur de connexion lors de la mise à jour du client", e);
+            throw new RuntimeException("Erreur de connexion lors de la mise à jour du client: " + e.getMessage(), e);
         }
     }
 
     public void supprimerClient(Client client) {
         if (client == null || client.getId() <= 0) {
-            LOGGER.warning("Tentative de suppression d'un client invalide");
             throw new IllegalArgumentException("Client invalide");
         }
 
         LOGGER.info("Tentative de suppression du client ID: " + client.getId());
-        String sql = "DELETE FROM clients WHERE id = ?";
+
+        // Vérifier d'abord si le client a des ventes associées
+        String checkVentesSql = "SELECT COUNT(*) FROM ventes WHERE client_id = ?";
+        String deleteClientSql = "DELETE FROM clients WHERE id = ? AND solde = 0";
 
         try (Connection conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(false);
-            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setInt(1, client.getId());
-
-                int rowsDeleted = pstmt.executeUpdate();
-                if (rowsDeleted == 0) {
-                    throw new IllegalStateException("Client non trouvé: " + client.getId());
+            try {
+                // Vérifier les ventes
+                try (PreparedStatement checkStmt = conn.prepareStatement(checkVentesSql)) {
+                    checkStmt.setInt(1, client.getId());
+                    ResultSet rs = checkStmt.executeQuery();
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        throw new IllegalStateException("Impossible de supprimer le client car il a des ventes associées");
+                    }
                 }
 
-                clients.remove(client);
-                conn.commit();
-                LOGGER.info("Client supprimé avec succès, ID: " + client.getId());
-            } catch (SQLException e) {
+                // Supprimer le client
+                try (PreparedStatement deleteStmt = conn.prepareStatement(deleteClientSql)) {
+                    deleteStmt.setInt(1, client.getId());
+                    int rowsDeleted = deleteStmt.executeUpdate();
+
+                    if (rowsDeleted == 0) {
+                        throw new IllegalStateException("Client non trouvé ou solde non nul");
+                    }
+
+                    clients.remove(client);
+                    conn.commit();
+                    LOGGER.info("Client supprimé avec succès, ID: " + client.getId());
+                }
+            } catch (SQLException | IllegalStateException e) {
                 conn.rollback();
                 LOGGER.log(Level.SEVERE, "Erreur lors de la suppression du client", e);
-                throw new RuntimeException("Erreur lors de la suppression du client", e);
+                throw new RuntimeException("Erreur lors de la suppression du client: " + e.getMessage(), e);
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur de connexion lors de la suppression du client", e);
-            throw new RuntimeException("Erreur de connexion lors de la suppression du client", e);
+            throw new RuntimeException("Erreur de connexion lors de la suppression du client: " + e.getMessage(), e);
         }
     }
 
     public void reglerCreance(Client client, double montant) {
         if (client == null || client.getId() <= 0) {
-            LOGGER.warning("Tentative de règlement de créance pour un client invalide");
             throw new IllegalArgumentException("Client invalide");
         }
         if (montant <= 0) {
@@ -229,42 +226,44 @@ public class ClientController {
 
         LOGGER.info("Tentative de règlement de créance pour le client ID: " + client.getId() + ", montant: " + montant);
 
+        String updateClientSql = "UPDATE clients SET solde = solde - ? WHERE id = ? AND solde >= ?";
+        String insertMouvementSql = "INSERT INTO mouvements_caisse (type, montant, description) VALUES (?, ?, ?)";
+
         try (Connection conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(false);
             try {
-                String sqlUpdateClient = "UPDATE clients SET solde = solde - ? WHERE id = ? AND solde >= ?";
-                try (PreparedStatement pstmt = conn.prepareStatement(sqlUpdateClient)) {
-                    pstmt.setDouble(1, montant);
-                    pstmt.setInt(2, client.getId());
-                    pstmt.setDouble(3, montant);
+                // Mise à jour du solde client
+                try (PreparedStatement updateStmt = conn.prepareStatement(updateClientSql)) {
+                    updateStmt.setDouble(1, montant);
+                    updateStmt.setInt(2, client.getId());
+                    updateStmt.setDouble(3, montant);
 
-                    int rowsUpdated = pstmt.executeUpdate();
-                    if (rowsUpdated > 0) {
-                        String sqlMouvement = "INSERT INTO mouvements_caisse (type, montant, description) VALUES (?, ?, ?)";
-                        try (PreparedStatement pstmtMvt = conn.prepareStatement(sqlMouvement)) {
-                            pstmtMvt.setString(1, "ENTREE");
-                            pstmtMvt.setDouble(2, montant);
-                            pstmtMvt.setString(3, "Règlement créance - Client: " + sanitizeInput(client.getNom()));
-                            pstmtMvt.executeUpdate();
-                        }
-
-                        client.setSolde(client.getSolde() - montant);
-                        conn.commit();
-                        LOGGER.info("Créance réglée avec succès pour le client " + client.getNom() +
-                            " - Montant: " + montant + "€");
-                    } else {
-                        conn.rollback();
-                        throw new IllegalStateException("Impossible de régler la créance. Vérifiez le solde du client.");
+                    int rowsUpdated = updateStmt.executeUpdate();
+                    if (rowsUpdated == 0) {
+                        throw new IllegalStateException("Impossible de mettre à jour le solde du client");
                     }
+
+                    // Enregistrement du mouvement de caisse
+                    try (PreparedStatement insertStmt = conn.prepareStatement(insertMouvementSql)) {
+                        insertStmt.setString(1, "ENTREE");
+                        insertStmt.setDouble(2, montant);
+                        insertStmt.setString(3, "Règlement créance - Client: " + sanitizeInput(client.getNom()));
+                        insertStmt.executeUpdate();
+                    }
+
+                    client.setSolde(client.getSolde() - montant);
+                    conn.commit();
+                    LOGGER.info("Créance réglée avec succès pour le client " + client.getNom() +
+                              " - Montant: " + montant + "€");
                 }
             } catch (SQLException e) {
                 conn.rollback();
                 LOGGER.log(Level.SEVERE, "Erreur lors du règlement de la créance", e);
-                throw new RuntimeException("Erreur lors du règlement de la créance", e);
+                throw new RuntimeException("Erreur lors du règlement de la créance: " + e.getMessage(), e);
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur de connexion lors du règlement de la créance", e);
-            throw new RuntimeException("Erreur de connexion lors du règlement de la créance", e);
+            throw new RuntimeException("Erreur de connexion lors du règlement de la créance: " + e.getMessage(), e);
         }
     }
 
