@@ -4,7 +4,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 import java.util.logging.Logger;
@@ -53,10 +55,8 @@ public class DatabaseManager {
             try {
                 conn = DatabaseConnectionPool.getConnection();
 
-                // Configuration SQLite avant la transaction
+                // Configuration SQLite avant toute opération
                 try (Statement initStmt = conn.createStatement()) {
-                    initStmt.execute("PRAGMA journal_mode = WAL");
-                    initStmt.execute("PRAGMA synchronous = NORMAL");
                     initStmt.execute("PRAGMA foreign_keys = OFF");
                     initStmt.execute("PRAGMA cache_size = 4000");
                     initStmt.execute("PRAGMA busy_timeout = 60000");
@@ -98,11 +98,6 @@ public class DatabaseManager {
                         }
                     }
                     throw e;
-                }
-
-                // Configuration post-initialisation
-                try (Statement postInitStmt = conn.createStatement()) {
-                    postInitStmt.execute("PRAGMA foreign_keys = ON");
                 }
 
                 isInitialized = true;
@@ -149,19 +144,29 @@ public class DatabaseManager {
     }
 
     private static String loadSchemaFromResource() {
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(
-                    DatabaseManager.class.getClassLoader().getResourceAsStream("schema.sql"),
-                    StandardCharsets.UTF_8))) {
-            return reader.lines().collect(Collectors.joining("\n"));
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur de chargement du schéma", e);
-            throw new RuntimeException("Impossible de charger le schéma", e);
-        }
-    }
+        LOGGER.info("Chargement du schéma SQL depuis les ressources...");
+        final String schemaPath = "schema.sql";
+        ClassLoader classLoader = DatabaseManager.class.getClassLoader();
 
-    public static void closeConnections() {
-        DatabaseConnectionPool.closePool();
+        try (InputStream is = classLoader.getResourceAsStream(schemaPath)) {
+            if (is == null) {
+                LOGGER.severe("Fichier schema.sql introuvable dans les ressources. Chemin recherché: " + schemaPath);
+                throw new IllegalStateException("Fichier schema.sql introuvable dans les ressources");
+            }
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+                String schema = reader.lines().collect(Collectors.joining("\n"));
+                if (schema.trim().isEmpty()) {
+                    LOGGER.severe("Le fichier schema.sql est vide");
+                    throw new IllegalStateException("Le fichier schema.sql est vide");
+                }
+                LOGGER.info("Schéma SQL chargé avec succès");
+                return schema;
+            }
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la lecture du fichier schema.sql", e);
+            throw new RuntimeException("Erreur lors de la lecture du schéma: " + e.getMessage(), e);
+        }
     }
 
     public static void checkDatabaseHealth() throws SQLException {
