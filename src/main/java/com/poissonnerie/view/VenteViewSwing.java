@@ -291,12 +291,9 @@ public class VenteViewSwing {
                     );
                     vente.setLignes(new ArrayList<>(panier));
 
-                    String cheminTempPreview = "preview_ticket_" + System.currentTimeMillis() + ".pdf";
-                    PDFGenerator.genererPreviewTicket(vente, cheminTempPreview);
-
-                    JDialog previewDialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel),
-                            "Prévisualisation du ticket", true);
-                    previewDialog.setLayout(new BorderLayout(10, 10));
+                    // Utiliser uniquement TextBillPrinter pour la prévisualisation
+                    TextBillPrinter printer = new TextBillPrinter(vente);
+                    printer.imprimer();g.setLayout(new BorderLayout(10, 10));
 
                     // Créer un aperçu textuel du ticket
                     StringBuilder previewText = new StringBuilder();
