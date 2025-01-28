@@ -265,7 +265,7 @@ public class VenteController {
     }
 
     private void verifierStockSuffisant(Connection conn, List<Vente.LigneVente> lignes) throws SQLException {
-        String sql = "SELECT p.id, p.stock FROM produits p WHERE p.id = ? FOR UPDATE NOWAIT";
+        String sql = "SELECT p.id, p.stock FROM produits p WHERE p.id = ?";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             for (Vente.LigneVente ligne : lignes) {
