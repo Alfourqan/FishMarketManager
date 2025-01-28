@@ -37,7 +37,7 @@ public class Vente {
     }
 
     private int id;
-    private final LocalDateTime date;
+    private LocalDateTime date;
     private final Client client;
     private final boolean credit;
     private double total;
@@ -211,8 +211,11 @@ public class Vente {
     public double getTauxTVA() {
         return TAUX_TVA_DEFAULT;
     }
-    
+
     public void setDateVente(LocalDateTime dateVente) {
+        if (dateVente == null || dateVente.isAfter(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Date de vente invalide");
+        }
         this.date = dateVente;
     }
 

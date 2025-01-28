@@ -151,6 +151,12 @@ public class VenteController {
         validateVente(vente);
 
         try (Connection conn = DatabaseManager.getConnection()) {
+            conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+            conn.setAutoCommit(false);
+            
+            try {
+                Statement stmt = conn.createStatement();
+                stmt.execute("SET SESSION TRANSACTION TIMEOUT " + TRANSACTION_TIMEOUT_SECONDS);
             conn.setAutoCommit(false);
             conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 
