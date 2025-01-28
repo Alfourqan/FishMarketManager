@@ -222,17 +222,18 @@ public class VenteController {
             erreurs.add("Nombre maximum de lignes dépassé: " + vente.getLignes().size());
         }
 
-        // Vérifications moins strictes pour la date
+        // Vérifications de la date
+        LocalDateTime maintenant = LocalDateTime.now();
         if (vente.getDate() == null) {
-            vente.setDate(LocalDateTime.now());
+            vente.setDateVente(maintenant); // Utilisation de setDateVente au lieu de setDate
         }
 
-        // Vérification du crédit uniquement si mode crédit activé
+        // Autres vérifications...
         if (vente.isCredit() && vente.getClient() == null) {
             erreurs.add("Un client est requis pour une vente à crédit");
         }
 
-        // Vérification des lignes de vente
+        // Vérification des lignes
         for (Vente.LigneVente ligne : vente.getLignes()) {
             if (ligne == null || ligne.getProduit() == null) {
                 erreurs.add("Une ligne de vente est invalide");
@@ -304,7 +305,7 @@ public class VenteController {
             }
         }
     }
-    private void enregistrerLigneVente(Connection conn, int venteId, Vente.LigneVente ligne) throws SQLException {
+    private void insererLigneVente(Connection conn, int venteId, Vente.LigneVente ligne) throws SQLException {
         String sql = "INSERT INTO lignes_vente (vente_id, produit_id, quantite, prix_unitaire) VALUES (?, ?, ?, ?)";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
