@@ -1,0 +1,204 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------< com.poissonnerie:gestion-poissonnerie >----------------
+[INFO] Building gestion-poissonnerie 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ gestion-poissonnerie ---
+[INFO] Deleting /home/runner/workspace/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ gestion-poissonnerie ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ gestion-poissonnerie ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 38 source files with javac [debug target 11] to target/classes
+[WARNING] system modules path not set in conjunction with -source 11
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[754,77] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[767,78] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[809,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[812,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[88,41] unchecked cast
+  required: java.util.List<com.poissonnerie.model.Produit>
+  found:    java.util.List<capture#1 of ?>
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[89,78] unchecked cast
+  required: java.util.List<com.poissonnerie.model.Produit>
+  found:    java.util.List<capture#2 of ?>
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ gestion-poissonnerie ---
+Jan 28, 2025 1:12:55 AM com.poissonnerie.Main main
+INFO: Démarrage de l'application...
+Jan 28, 2025 1:12:57 AM com.poissonnerie.Main lambda$main$0
+INFO: Thème installé
+Jan 28, 2025 1:12:57 AM com.poissonnerie.Main lambda$main$0
+INFO: Interface configurée
+Jan 28, 2025 1:12:57 AM com.poissonnerie.Main lambda$main$0
+INFO: SplashScreen créé et affiché
+Jan 28, 2025 1:12:57 AM com.poissonnerie.util.DatabaseManager initDatabase
+INFO: Initialisation de la base de données...
+Jan 28, 2025 1:12:57 AM com.poissonnerie.util.DatabaseConnectionPool initializeDataSource
+INFO: Initialisation du pool de connexions avec la base de données: /home/runner/workspace/poissonnerie.db
+01:12:58.236 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- PoissonneriePool - configuration:
+01:12:58.313 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- allowPoolSuspension.............false
+01:12:58.316 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- autoCommit......................true
+01:12:58.316 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- catalog.........................none
+01:12:58.316 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- connectionInitSql...............none
+01:12:58.317 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- connectionTestQuery.............none
+01:12:58.317 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- connectionTimeout...............30000
+01:12:58.330 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- dataSource......................none
+01:12:58.330 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- dataSourceClassName.............none
+01:12:58.330 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- dataSourceJNDI..................none
+01:12:58.330 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- dataSourceProperties............{journal_mode=WAL, password=<masked>, cache_size=4000, synchronous=NORMAL, busy_timeout=60000, foreign_keys=ON, default_timeout=60000}
+01:12:58.330 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- driverClassName.................none
+01:12:58.331 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- exceptionOverrideClassName......none
+01:12:58.345 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- healthCheckProperties...........{}
+01:12:58.345 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- healthCheckRegistry.............none
+01:12:58.350 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- idleTimeout.....................600000
+01:12:58.350 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- initializationFailTimeout.......1
+01:12:58.350 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- isolateInternalQueries..........false
+01:12:58.351 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- jdbcUrl.........................jdbc:sqlite:/home/runner/workspace/poissonnerie.db
+01:12:58.351 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- keepaliveTime...................0
+01:12:58.352 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- leakDetectionThreshold..........300000
+01:12:58.352 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- maxLifetime.....................1800000
+01:12:58.353 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- maximumPoolSize.................20
+01:12:58.353 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- metricRegistry..................none
+01:12:58.353 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- metricsTrackerFactory...........none
+01:12:58.353 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- minimumIdle.....................5
+01:12:58.353 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- password........................<masked>
+01:12:58.353 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- poolName........................"PoissonneriePool"
+01:12:58.353 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- readOnly........................false
+01:12:58.353 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- registerMbeans..................false
+01:12:58.354 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- scheduledExecutor...............none
+01:12:58.367 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- schema..........................none
+01:12:58.368 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- threadFactory...................internal
+01:12:58.369 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- transactionIsolation............default
+01:12:58.369 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- username........................none
+01:12:58.373 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- validationTimeout...............5000
+01:12:58.398 [SwingWorker-pool-1-thread-1] INFO com.zaxxer.hikari.HikariDataSource -- PoissonneriePool - Starting...
+01:12:58.491 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.util.DriverDataSource -- Loaded driver with class name org.sqlite.JDBC for jdbcUrl=jdbc:sqlite:/home/runner/workspace/poissonnerie.db
+01:12:59.151 [SwingWorker-pool-1-thread-1] INFO com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Added connection org.sqlite.jdbc4.JDBC4Connection@3ae5f22d
+01:12:59.153 [SwingWorker-pool-1-thread-1] INFO com.zaxxer.hikari.HikariDataSource -- PoissonneriePool - Start completed.
+Jan 28, 2025 1:12:59 AM com.poissonnerie.util.DatabaseConnectionPool initializeDataSource
+INFO: Connexion à la base de données SQLite établie avec succès
+Jan 28, 2025 1:12:59 AM com.poissonnerie.util.DatabaseManager initDatabase
+INFO: Configuration SQLite initialisée
+Jan 28, 2025 1:12:59 AM com.poissonnerie.util.DatabaseManager loadSchemaFromResource
+INFO: Chargement du schéma SQL depuis les ressources...
+Jan 28, 2025 1:12:59 AM com.poissonnerie.util.DatabaseManager loadSchemaFromResource
+INFO: Schéma SQL chargé avec succès
+Jan 28, 2025 1:12:59 AM com.poissonnerie.util.DatabaseManager initDatabase
+SEVERE: Erreur fatale lors de l'initialisation
+org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (Safety level may not be changed inside a transaction)
+        at org.sqlite.core.DB.newSQLException(DB.java:1179)
+        at org.sqlite.core.DB.newSQLException(DB.java:1190)
+        at org.sqlite.core.DB.throwex(DB.java:1150)
+        at org.sqlite.core.NativeDB.prepare_utf8(Native Method)
+        at org.sqlite.core.NativeDB.prepare(NativeDB.java:126)
+        at org.sqlite.core.DB.prepare(DB.java:264)
+        at org.sqlite.jdbc3.JDBC3Statement.lambda$execute$0(JDBC3Statement.java:51)
+        at org.sqlite.jdbc3.JDBC3Statement.withConnectionTimeout(JDBC3Statement.java:454)
+        at org.sqlite.jdbc3.JDBC3Statement.execute(JDBC3Statement.java:40)
+        at com.zaxxer.hikari.pool.ProxyStatement.execute(ProxyStatement.java:94)
+        at com.zaxxer.hikari.pool.HikariProxyStatement.execute(HikariProxyStatement.java)
+        at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:78)
+        at com.poissonnerie.Main$1.doInBackground(Main.java:83)
+        at com.poissonnerie.Main$1.doInBackground(Main.java:78)
+        at java.desktop/javax.swing.SwingWorker$1.call(SwingWorker.java:305)
+        at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+        at java.desktop/javax.swing.SwingWorker.run(SwingWorker.java:342)
+        at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+        at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+        at java.base/java.lang.Thread.run(Thread.java:1583)
+
+01:12:59.185 [SwingWorker-pool-1-thread-1] DEBUG com.zaxxer.hikari.pool.PoolBase -- PoissonneriePool - Reset (autoCommit) on connection org.sqlite.jdbc4.JDBC4Connection@3ae5f22d
+Jan 28, 2025 1:12:59 AM com.poissonnerie.Main$1 doInBackground
+SEVERE: Erreur d'initialisation
+java.lang.RuntimeException: Erreur d'initialisation: [SQLITE_ERROR] SQL error or missing database (Safety level may not be changed inside a transaction)
+        at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:108)
+        at com.poissonnerie.Main$1.doInBackground(Main.java:83)
+        at com.poissonnerie.Main$1.doInBackground(Main.java:78)
+        at java.desktop/javax.swing.SwingWorker$1.call(SwingWorker.java:305)
+        at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+        at java.desktop/javax.swing.SwingWorker.run(SwingWorker.java:342)
+        at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+        at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+        at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (Safety level may not be changed inside a transaction)
+        at org.sqlite.core.DB.newSQLException(DB.java:1179)
+        at org.sqlite.core.DB.newSQLException(DB.java:1190)
+        at org.sqlite.core.DB.throwex(DB.java:1150)
+        at org.sqlite.core.NativeDB.prepare_utf8(Native Method)
+        at org.sqlite.core.NativeDB.prepare(NativeDB.java:126)
+        at org.sqlite.core.DB.prepare(DB.java:264)
+        at org.sqlite.jdbc3.JDBC3Statement.lambda$execute$0(JDBC3Statement.java:51)
+        at org.sqlite.jdbc3.JDBC3Statement.withConnectionTimeout(JDBC3Statement.java:454)
+        at org.sqlite.jdbc3.JDBC3Statement.execute(JDBC3Statement.java:40)
+        at com.zaxxer.hikari.pool.ProxyStatement.execute(ProxyStatement.java:94)
+        at com.zaxxer.hikari.pool.HikariProxyStatement.execute(HikariProxyStatement.java)
+        at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:78)
+        ... 8 more
+
+Jan 28, 2025 1:12:59 AM com.poissonnerie.Main$1 done
+SEVERE: Erreur fatale
+java.util.concurrent.ExecutionException: java.lang.RuntimeException: Erreur d'initialisation: [SQLITE_ERROR] SQL error or missing database (Safety level may not be changed inside a transaction)
+        at java.base/java.util.concurrent.FutureTask.report(FutureTask.java:122)
+        at java.base/java.util.concurrent.FutureTask.get(FutureTask.java:191)
+        at java.desktop/javax.swing.SwingWorker.get(SwingWorker.java:612)
+        at com.poissonnerie.Main$1.done(Main.java:101)
+        at java.desktop/javax.swing.SwingWorker$4.run(SwingWorker.java:749)
+        at java.desktop/javax.swing.SwingWorker$DoSubmitAccumulativeRunnable.run(SwingWorker.java:847)
+        at java.desktop/sun.swing.AccumulativeRunnable.run(AccumulativeRunnable.java:112)
+        at java.desktop/javax.swing.SwingWorker$DoSubmitAccumulativeRunnable.actionPerformed(SwingWorker.java:857)
+        at java.desktop/javax.swing.Timer.fireActionPerformed(Timer.java:311)
+        at java.desktop/javax.swing.Timer$DoPostEvent.run(Timer.java:243)
+        at java.desktop/java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:318)
+        at java.desktop/java.awt.EventQueue.dispatchEventImpl(EventQueue.java:773)
+        at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:720)
+        at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:714)
+        at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+        at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:87)
+        at java.desktop/java.awt.EventQueue.dispatchEvent(EventQueue.java:742)
+        at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:203)
+        at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:124)
+        at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:113)
+        at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:109)
+        at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
+        at java.desktop/java.awt.EventDispatchThread.run(EventDispatchThread.java:90)
+Caused by: java.lang.RuntimeException: Erreur d'initialisation: [SQLITE_ERROR] SQL error or missing database (Safety level may not be changed inside a transaction)
+        at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:108)
+        at com.poissonnerie.Main$1.doInBackground(Main.java:83)
+        at com.poissonnerie.Main$1.doInBackground(Main.java:78)
+        at java.desktop/javax.swing.SwingWorker$1.call(SwingWorker.java:305)
+        at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+        at java.desktop/javax.swing.SwingWorker.run(SwingWorker.java:342)
+        at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+        at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+        at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (Safety level may not be changed inside a transaction)
+        at org.sqlite.core.DB.newSQLException(DB.java:1179)
+        at org.sqlite.core.DB.newSQLException(DB.java:1190)
+        at org.sqlite.core.DB.throwex(DB.java:1150)
+        at org.sqlite.core.NativeDB.prepare_utf8(Native Method)
+        at org.sqlite.core.NativeDB.prepare(NativeDB.java:126)
+        at org.sqlite.core.DB.prepare(DB.java:264)
+        at org.sqlite.jdbc3.JDBC3Statement.lambda$execute$0(JDBC3Statement.java:51)
+        at org.sqlite.jdbc3.JDBC3Statement.withConnectionTimeout(JDBC3Statement.java:454)
+        at org.sqlite.jdbc3.JDBC3Statement.execute(JDBC3Statement.java:40)
+        at com.zaxxer.hikari.pool.ProxyStatement.execute(ProxyStatement.java:94)
+        at com.zaxxer.hikari.pool.HikariProxyStatement.execute(HikariProxyStatement.java)
+        at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:78)
+        ... 8 more
+
+Jan 28, 2025 1:12:59 AM com.poissonnerie.Main showError
+SEVERE: Erreur d'initialisation: java.lang.RuntimeException: Erreur d'initialisation: [SQLITE_ERROR] SQL error or missing database (Safety level may not be changed inside a transaction)
+01:12:59.253 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - Before cleanup stats (total=1, active=0, idle=1, waiting=0)
+01:12:59.255 [PoissonneriePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonneriePool - After cleanup  stats (total=1, active=0, idle=1, waiting=0)

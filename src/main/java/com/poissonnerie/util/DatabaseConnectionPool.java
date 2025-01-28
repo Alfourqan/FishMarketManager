@@ -27,22 +27,25 @@ public class DatabaseConnectionPool {
                     config.setJdbcUrl(DB_URL);
                     config.setPoolName("PoissonneriePool");
 
-                    // Configuration optimisée pour SQLite avec plus de connexions
-                    config.setMaximumPoolSize(20);
-                    config.setMinimumIdle(5);
+                    // Configuration optimisée pour SQLite
+                    config.setMaximumPoolSize(10);
+                    config.setMinimumIdle(2);
                     config.setConnectionTimeout(30000);
                     config.setIdleTimeout(600000);
                     config.setMaxLifetime(1800000);
                     config.setAutoCommit(true);
-                    config.setLeakDetectionThreshold(300000);
 
-                    // Paramètres spécifiques SQLite avec meilleure gestion des verrous
-                    config.addDataSourceProperty("journal_mode", "WAL");
-                    config.addDataSourceProperty("synchronous", "NORMAL");
-                    config.addDataSourceProperty("foreign_keys", "ON");
-                    config.addDataSourceProperty("cache_size", "4000");
-                    config.addDataSourceProperty("busy_timeout", "60000");
-                    config.addDataSourceProperty("default_timeout", "60000");
+                    // Paramètres SQLite optimisés
+                    config.addDataSourceProperty("pragma_settings", 
+                        "PRAGMA journal_mode=WAL;" +
+                        "PRAGMA synchronous=NORMAL;" +
+                        "PRAGMA foreign_keys=ON;" +
+                        "PRAGMA cache_size=4000;" +
+                        "PRAGMA busy_timeout=60000;" +
+                        "PRAGMA temp_store=MEMORY;" +
+                        "PRAGMA mmap_size=268435456;" + // 256MB
+                        "PRAGMA page_size=4096"
+                    );
 
                     try {
                         dataSource = new HikariDataSource(config);
@@ -66,18 +69,9 @@ public class DatabaseConnectionPool {
 
         try {
             Connection conn = dataSource.getConnection();
-
-            // Configuration de la connexion avec timeouts plus longs
-            try (var stmt = conn.createStatement()) {
-                stmt.execute("PRAGMA foreign_keys = ON");
-                stmt.execute("PRAGMA busy_timeout = 60000");
-                stmt.execute("PRAGMA timeout = 60000");
-            }
-
             return conn;
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de l'obtention d'une connexion", e);
-            // Tentative de réinitialisation du pool en cas d'erreur grave
             if (isPoolError(e)) {
                 resetPool();
             }
