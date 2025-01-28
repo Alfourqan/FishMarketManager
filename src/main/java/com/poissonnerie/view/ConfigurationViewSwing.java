@@ -792,7 +792,7 @@ public class ConfigurationViewSwing {
         JLabel policeTexteLabel = new JLabel("Taille police texte:");
         policeTexteLabel.setFont(TEXTE_NORMAL_FONT);
         JSpinner policeTexteSpinner = (JSpinner) champsSaisie.get(ConfigurationParam.CLE_POLICE_TEXTE_RECU);
-        policeTexteSpinner.setFont(TEXTE_NORMAL_FONTFONT);
+        policeTexteSpinner.setFont(TEXTE_NORMAL_FONT);
         policeTextePanel.add(policeTexteLabel);
         policeTextePanel.add(policeTexteSpinner);
 
