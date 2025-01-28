@@ -21,13 +21,15 @@ public class AccueilViewSwing {
     private final VenteController venteController;
     private final ProduitController produitController;
     private final CaisseController caisseController;
+    private final Timer refreshTimer;
+    private boolean isDisposed = false;
 
     // Labels pour les KPIs
     private JLabel ventesJourLabel;
     private JLabel produitsRuptureLabel;
     private JLabel encaissementsJourLabel;
     private JLabel chiffreAffairesLabel;
-    private Timer refreshTimer;
+
 
     // Couleurs et polices modernisées
     private static final Color BACKGROUND_COLOR = new Color(245, 245, 245);
@@ -56,7 +58,11 @@ public class AccueilViewSwing {
         SwingUtilities.invokeLater(this::loadData);
 
         // Mise à jour automatique toutes les 30 secondes
-        refreshTimer = new Timer(30000, e -> loadData());
+        refreshTimer = new Timer(30000, e -> {
+            if (!isDisposed) {
+                loadData();
+            }
+        });
         refreshTimer.start();
     }
 
@@ -121,6 +127,10 @@ public class AccueilViewSwing {
     }
 
     private void loadData() {
+        if (isDisposed) {
+            return;
+        }
+
         LOGGER.log(Level.INFO, "Début du chargement des données...");
 
         // Désactiver les composants pendant le chargement
@@ -163,6 +173,10 @@ public class AccueilViewSwing {
 
             @Override
             protected void done() {
+                if (isDisposed) {
+                    return;
+                }
+
                 try {
                     NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(Locale.FRANCE);
                     if (success) {
@@ -191,12 +205,16 @@ public class AccueilViewSwing {
                     }
                 } catch (Exception e) {
                     LOGGER.log(Level.SEVERE, "Erreur lors de la mise à jour de l'interface", e);
-                    JOptionPane.showMessageDialog(mainPanel,
-                        "Erreur lors de la mise à jour des données : " + e.getMessage(),
-                        "Erreur",
-                        JOptionPane.ERROR_MESSAGE);
+                    if (!isDisposed) {
+                        JOptionPane.showMessageDialog(mainPanel,
+                            "Erreur lors de la mise à jour des données : " + e.getMessage(),
+                            "Erreur",
+                            JOptionPane.ERROR_MESSAGE);
+                    }
                 } finally {
-                    setComponentsEnabled(true);
+                    if (!isDisposed) {
+                        setComponentsEnabled(true);
+                    }
                 }
             }
         };
@@ -385,5 +403,13 @@ public class AccueilViewSwing {
 
     public JPanel getMainPanel() {
         return mainPanel;
+    }
+
+    public void dispose() {
+        isDisposed = true;
+        if (refreshTimer != null) {
+            refreshTimer.stop();
+        }
+        LOGGER.info("AccueilViewSwing disposed");
     }
 }
