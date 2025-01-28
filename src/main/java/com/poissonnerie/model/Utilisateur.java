@@ -42,20 +42,11 @@ public class Utilisateur {
     }
 
     private static String hashMotDePasse(String motDePasse) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(motDePasse.getBytes());
-            StringBuilder hexString = new StringBuilder(64);
+        return BCrypt.hashpw(motDePasse, BCrypt.gensalt(12));
+    }
 
-            for (byte b : hash) {
-                hexString.append(String.format("%02x", b & 0xff));
-            }
-
-            return hexString.toString();
-        } catch (NoSuchAlgorithmException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du hashage du mot de passe", e);
-            throw new RuntimeException("Erreur de sécurité", e);
-        }
+    public boolean verifierMotDePasse(String motDePasse) {
+        return BCrypt.checkpw(motDePasse, this.motDePasse);
     }
 
     public void mettreAJourDernierLogin() {
