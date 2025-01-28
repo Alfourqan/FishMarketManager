@@ -222,13 +222,23 @@ public class VenteController {
             erreurs.add("Nombre maximum de lignes dépassé: " + vente.getLignes().size());
         }
 
-        // Vérifications de la date
-        LocalDateTime maintenant = LocalDateTime.now();
+        // Vérification de la date
         if (vente.getDate() == null) {
-            vente.setDateVente(maintenant); // Utilisation de setDateVente au lieu de setDate
+            LOGGER.warning("Date de vente manquante, une nouvelle vente sera créée");
+            Vente nouvelleVente = new Vente(
+                vente.getId(),
+                LocalDateTime.now(),
+                vente.getClient(),
+                vente.isCredit(),
+                vente.getTotal(),
+                vente.getModePaiement()
+            );
+            // Copier les lignes de vente
+            nouvelleVente.setLignes(vente.getLignes());
+            vente = nouvelleVente;
         }
 
-        // Autres vérifications...
+        // Vérification du crédit
         if (vente.isCredit() && vente.getClient() == null) {
             erreurs.add("Un client est requis pour une vente à crédit");
         }
