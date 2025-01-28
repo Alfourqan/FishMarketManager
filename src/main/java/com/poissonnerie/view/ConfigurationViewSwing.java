@@ -1,41 +1,43 @@
 package com.poissonnerie.view;
 
+import javax.swing.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import javax.swing.Timer;
+import java.util.List;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.DocumentEvent;
+import java.security.MessageDigest;
+import java.nio.file.Files;
+import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
+import java.io.IOException;
 import com.poissonnerie.controller.ConfigurationController;
 import com.poissonnerie.model.ConfigurationParam;
-import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.border.Border;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.DocumentListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.Timer;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.Files;
-import java.security.MessageDigest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import org.kordamp.ikonli.materialdesign.MaterialDesign;
 import org.kordamp.ikonli.swing.FontIcon;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import java.util.Base64;
+
 
 public class ConfigurationViewSwing {
     private static final Logger LOGGER = Logger.getLogger(ConfigurationViewSwing.class.getName());
@@ -790,7 +792,7 @@ public class ConfigurationViewSwing {
         JLabel policeTexteLabel = new JLabel("Taille police texte:");
         policeTexteLabel.setFont(TEXTE_NORMAL_FONT);
         JSpinner policeTexteSpinner = (JSpinner) champsSaisie.get(ConfigurationParam.CLE_POLICE_TEXTE_RECU);
-        policeTexteSpinner.setFont(TEXTE_NORMAL_FONT);
+        policeTexteSpinner.setFont(TEXTE_NORMAL_FONTFONT);
         policeTextePanel.add(policeTexteLabel);
         policeTextePanel.add(policeTexteSpinner);
 
