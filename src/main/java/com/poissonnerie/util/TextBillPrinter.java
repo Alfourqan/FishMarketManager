@@ -10,8 +10,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TextBillPrinter implements Printable {
     private static final Logger LOGGER = Logger.getLogger(TextBillPrinter.class.getName());
@@ -32,8 +30,6 @@ public class TextBillPrinter implements Printable {
 
     // Variable pour le ticket de vente
     private Vente vente;
-    private final AtomicBoolean isGenerated = new AtomicBoolean(false);
-    private final String ticketId;
 
     public TextBillPrinter(Vente vente) {
         if (vente == null) {
@@ -42,7 +38,6 @@ public class TextBillPrinter implements Printable {
         this.vente = vente;
         this.type = "TICKET DE VENTE";
         this.bill = new StringBuilder();
-        this.ticketId = UUID.randomUUID().toString().substring(0, 8);
         generateVenteBillContent();
     }
 
@@ -59,19 +54,13 @@ public class TextBillPrinter implements Printable {
         this.nouveauSolde = nouveauSolde;
         this.date = LocalDateTime.now();
         this.bill = new StringBuilder();
-        this.ticketId = UUID.randomUUID().toString().substring(0, 8);
         generateReglementBillContent();
     }
 
     private void generateVenteBillContent() {
-        if (isGenerated.get()) {
-            LOGGER.warning("Le ticket a déjà été généré");
-            return;
-        }
-
         bill.setLength(0);
 
-        // En-tête avec bordure et ID unique
+        // En-tête avec bordure
         appendCentered("MA POISSONNERIE");
         appendCentered("123 Rue de la Mer");
         appendCentered("75001 PARIS");
@@ -79,9 +68,8 @@ public class TextBillPrinter implements Printable {
         appendCentered("SIRET: 123 456 789 00012");
         appendSeparator();
 
-        // Informations de la vente avec ID unique
-        appendLine(String.format("Ticket ID: %s", ticketId));
-        appendLine(String.format("N° Vente: %s", formatTicketNumber(vente.getId())));
+        // Informations de la vente
+        appendLine(String.format("N° Ticket: %s", formatTicketNumber(vente.getId())));
         appendLine(String.format("Date: %s", DATE_FORMATTER.format(vente.getDate())));
         appendLine(String.format("Mode: %s", vente.getModePaiement().getLibelle()));
         if (vente.getClient() != null) {
@@ -90,7 +78,7 @@ public class TextBillPrinter implements Printable {
         appendSeparator();
 
         // En-tête des articles
-        String header = String.format("%-18s %6s %7s %8s",
+        String header = String.format("%-18s %6s %7s %8s", 
             "Article", "Qté", "P.U.", "Total");
         appendLine(header);
         appendSeparator();
@@ -110,7 +98,7 @@ public class TextBillPrinter implements Printable {
 
         // Totaux avec alignement à droite
         appendAlignedRight(String.format("Total HT:  %8.2f €", totalHT));
-        appendAlignedRight(String.format("TVA %.1f%%: %8.2f €",
+        appendAlignedRight(String.format("TVA %.1f%%: %8.2f €", 
             vente.getTauxTVA(), vente.getMontantTVA()));
         appendSeparator();
         appendAlignedRight(String.format("TOTAL TTC: %8.2f €", vente.getTotal()));
@@ -122,7 +110,6 @@ public class TextBillPrinter implements Printable {
         appendSeparator();
         appendCentered("MA POISSONNERIE");
         appendLine(DATE_FORMATTER.format(LocalDateTime.now()));
-        isGenerated.set(true);
     }
 
     private String formatTicketNumber(int id) {
@@ -196,18 +183,7 @@ public class TextBillPrinter implements Printable {
     }
 
     public void imprimer() {
-        try {
-            if (!isGenerated.get()) {
-                throw new IllegalStateException("Le ticket n'a pas été généré correctement");
-            }
-            showPreview();
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de l'impression du ticket", e);
-            JOptionPane.showMessageDialog(null,
-                "Erreur lors de l'impression du ticket: " + e.getMessage(),
-                "Erreur d'impression",
-                JOptionPane.ERROR_MESSAGE);
-        }
+        showPreview();
     }
 
     private void showPreview() {
