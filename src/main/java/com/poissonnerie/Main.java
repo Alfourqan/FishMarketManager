@@ -20,100 +20,97 @@ public class Main {
     private static LoginView loginView;
 
     public static void main(String[] args) {
-        // Configuration système
-        System.setProperty("java.awt.headless", "false");
-        System.setProperty("sun.java2d.opengl", "true");
+        // Configuration système pour VNC et X11
+        try {
+            System.setProperty("java.awt.headless", "false");
+            System.setProperty("sun.java2d.opengl", "true");
+            System.setProperty("awt.useSystemAAFontSettings", "on");
+            System.setProperty("swing.aatext", "true");
+            System.setProperty("sun.java2d.xrender", "true");
 
-        // Configuration du logging
-        LOGGER.setLevel(Level.ALL);
-        LOGGER.info("Démarrage de l'application...");
+            // Configuration du logging
+            LOGGER.setLevel(Level.ALL);
+            LOGGER.info("Démarrage de l'application...");
 
-        // Initialisation dans l'EDT
-        SwingUtilities.invokeLater(() -> {
-            try {
-                // Installation du thème avant la création des composants
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                FlatMaterialLighterIJTheme.setup();
-                LOGGER.info("Thème installé");
+            // Vérification de l'environnement graphique
+            if (GraphicsEnvironment.isHeadless()) {
+                LOGGER.severe("Environnement graphique non disponible");
+                showError("Erreur critique", new Exception("Environnement graphique non disponible"));
+                System.exit(1);
+            }
 
-                // Configuration UI
-                configureUI();
-                LOGGER.info("Interface configurée");
+            // Initialisation dans l'EDT avec gestion d'erreurs robuste
+            SwingUtilities.invokeAndWait(() -> {
+                try {
+                    // Installation du thème avant la création des composants
+                    UIManager.setLookAndFeel(new FlatMaterialLighterIJTheme());
+                    LOGGER.info("Thème installé");
 
-                // Création et affichage du SplashScreen
-                splash = new SplashScreen();
-                splash.setProgress(0, "Démarrage...");
-                splash.setVisible(true);
-                splash.toFront();
-                LOGGER.info("SplashScreen créé et affiché");
+                    // Configuration UI
+                    configureUI();
+                    LOGGER.info("Interface configurée");
 
-                // Initialisation en arrière-plan
-                new SwingWorker<Void, Void>() {
-                    @Override
-                    protected Void doInBackground() throws Exception {
+                    // Création et affichage du SplashScreen avec position explicite
+                    splash = new SplashScreen();
+                    splash.setLocationRelativeTo(null);
+                    splash.setProgress(0, "Démarrage...");
+                    splash.setVisible(true);
+                    splash.toFront();
+                    LOGGER.info("SplashScreen créé et affiché");
+
+                    // Initialisation en arrière-plan
+                    initializeApplication();
+
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Erreur d'initialisation de l'interface", e);
+                    showError("Erreur d'initialisation", e);
+                }
+            });
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur fatale", e);
+            showError("Erreur fatale", e);
+            System.exit(1);
+        }
+    }
+
+    private static void initializeApplication() {
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                try {
+                    splash.setProgress(30, "Initialisation de la base de données...");
+                    DatabaseManager.initDatabase();
+                    LOGGER.info("Base de données initialisée");
+
+                    splash.setProgress(60, "Chargement des données...");
+                    ClientController clientController = new ClientController();
+                    clientController.ajouterClientTest();
+                    LOGGER.info("Données chargées");
+
+                    return null;
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Erreur d'initialisation", e);
+                    throw e;
+                }
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    get(); // Vérifier les exceptions
+                    splash.setProgress(100, "Prêt !");
+
+                    SwingUtilities.invokeLater(() -> {
                         try {
-                            splash.setProgress(30, "Initialisation de la base de données...");
-                            DatabaseManager.initDatabase();
-                            LOGGER.info("Base de données initialisée");
-
-                            splash.setProgress(60, "Chargement des données...");
-                            ClientController clientController = new ClientController();
-                            clientController.ajouterClientTest();
-                            LOGGER.info("Données chargées");
-
-                            return null;
-                        } catch (Exception e) {
-                            LOGGER.log(Level.SEVERE, "Erreur d'initialisation", e);
-                            throw e;
-                        }
-                    }
-
-                    @Override
-                    protected void done() {
-                        try {
-                            get(); // Vérifier les exceptions
-                            splash.setProgress(100, "Prêt !");
-
                             // Création de la vue de login
                             loginView = new LoginView();
-                            loginView.addLoginSuccessListener(() -> {
-                                // Création de la fenêtre principale après login
-                                mainFrame = new JFrame("Gestion Poissonnerie");
-                                mainFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-
-                                // Configuration de la taille
-                                Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-                                mainFrame.setSize(
-                                    Math.min(1200, screenSize.width - 100),
-                                    Math.min(800, screenSize.height - 100)
-                                );
-                                mainFrame.setLocationRelativeTo(null);
-
-                                // Configuration du contenu
-                                mainFrame.setContentPane(new MainViewSwing().getMainPanel());
-
-                                // Gestion de la fermeture
-                                mainFrame.addWindowListener(new WindowAdapter() {
-                                    @Override
-                                    public void windowClosing(WindowEvent e) {
-                                        try {
-                                            DatabaseManager.closeConnections();
-                                            mainFrame.dispose();
-                                            System.exit(0);
-                                        } catch (Exception ex) {
-                                            LOGGER.log(Level.SEVERE, "Erreur de fermeture", ex);
-                                            System.exit(1);
-                                        }
-                                    }
-                                });
-
-                                mainFrame.setVisible(true);
-                                LOGGER.info("Fenêtre principale affichée");
-                            });
+                            loginView.addLoginSuccessListener(() -> createAndShowMainFrame());
 
                             // Transition SplashScreen -> Login après délai
                             Timer timer = new Timer(1500, e -> {
                                 splash.dispose();
+                                loginView.setLocationRelativeTo(null);
                                 loginView.setVisible(true);
                                 loginView.toFront();
                                 LOGGER.info("Transition vers login effectuée");
@@ -122,15 +119,63 @@ public class Main {
                             timer.start();
 
                         } catch (Exception e) {
-                            LOGGER.log(Level.SEVERE, "Erreur fatale", e);
-                            showError("Erreur d'initialisation", e);
+                            LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation du login", e);
+                            showError("Erreur d'initialisation du login", e);
+                        }
+                    });
+
+                } catch (Exception e) {
+                    LOGGER.log(Level.SEVERE, "Erreur fatale", e);
+                    showError("Erreur d'initialisation", e);
+                }
+            }
+        }.execute();
+    }
+
+    private static void createAndShowMainFrame() {
+        SwingUtilities.invokeLater(() -> {
+            try {
+                // Création de la fenêtre principale
+                mainFrame = new JFrame("Gestion Poissonnerie");
+                mainFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+                // Configuration de la taille avec vérification de l'écran
+                GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+                int screenWidth = gd.getDisplayMode().getWidth();
+                int screenHeight = gd.getDisplayMode().getHeight();
+
+                mainFrame.setSize(
+                    Math.min(1200, screenWidth - 100),
+                    Math.min(800, screenHeight - 100)
+                );
+                mainFrame.setLocationRelativeTo(null);
+
+                // Configuration du contenu
+                mainFrame.setContentPane(new MainViewSwing().getMainPanel());
+
+                // Gestion de la fermeture
+                mainFrame.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosing(WindowEvent e) {
+                        try {
+                            // Nettoyage des ressources
+                            DatabaseManager.checkDatabaseHealth();
+                            mainFrame.dispose();
+                            System.exit(0);
+                        } catch (Exception ex) {
+                            LOGGER.log(Level.SEVERE, "Erreur de fermeture", ex);
+                            System.exit(1);
                         }
                     }
-                }.execute();
+                });
+
+                mainFrame.setVisible(true);
+                mainFrame.toFront();
+                LOGGER.info("Fenêtre principale affichée");
 
             } catch (Exception e) {
-                LOGGER.log(Level.SEVERE, "Erreur fatale", e);
-                showError("Erreur fatale", e);
+                LOGGER.log(Level.SEVERE, "Erreur lors de la création de la fenêtre principale", e);
+                showError("Erreur de création de la fenêtre principale", e);
             }
         });
     }
@@ -172,9 +217,9 @@ public class Main {
         if (splash != null) {
             splash.dispose();
         }
-        if (!GraphicsEnvironment.isHeadless()) {
+        SwingUtilities.invokeLater(() -> {
             JOptionPane.showMessageDialog(null, message, "Erreur", JOptionPane.ERROR_MESSAGE);
-        }
+        });
         System.exit(1);
     }
 }
