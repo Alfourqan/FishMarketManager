@@ -373,29 +373,43 @@ public class ReportViewSwing {
             String nomFichier = "rapport_" + type.toLowerCase() + "_" + LocalDate.now() + ".pdf";
             List<?> donnees = null;
 
+            // Charger les données avant la génération du rapport
             switch (type) {
                 case "Ventes":
                     venteController.chargerVentes();
                     donnees = venteController.getVentes();
+                    LOGGER.info("Données de ventes chargées: " + (donnees != null ? donnees.size() : 0) + " ventes");
                     break;
                 case "Stocks":
                     produitController.chargerProduits();
                     donnees = produitController.getProduits();
+                    LOGGER.info("Données de stocks chargées: " + (donnees != null ? donnees.size() : 0) + " produits");
                     break;
                 case "Fournisseurs":
                     fournisseurController.chargerFournisseurs();
                     donnees = fournisseurController.getFournisseurs();
+                    LOGGER.info("Données de fournisseurs chargées: " + (donnees != null ? donnees.size() : 0) + " fournisseurs");
                     break;
                 case "Créances":
                     ClientController clientController = new ClientController();
                     clientController.chargerClients();
                     donnees = clientController.getClients();
+                    LOGGER.info("Données de créances chargées: " + (donnees != null ? donnees.size() : 0) + " clients");
                     break;
                 case "Chiffre d'affaires":
                     venteController.chargerVentes();
                     donnees = venteController.getVentes();
+                    LOGGER.info("Données de chiffre d'affaires chargées: " + (donnees != null ? donnees.size() : 0) + " ventes");
                     break;
             }
+
+            // Vérifier si les données ont été chargées
+            if (donnees == null || donnees.isEmpty()) {
+                LOGGER.warning("Aucune donnée n'a été chargée pour le rapport de type: " + type);
+                showErrorMessage("Attention", "Aucune donnée disponible pour générer le rapport.");
+                return;
+            }
+
             genererRapport(type.toLowerCase(), donnees, nomFichier);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF", e);
@@ -808,7 +822,7 @@ public class ReportViewSwing {
         });
 
         table.setRowHeight(30);
-        table.setIntercellSpacing(new Dimension(10, 5));
+        table.setIntercellSpacing(new Dimension(110, 5));
         table.setShowGrid(false);
         table.setShowHorizontalLines(true);
         table.setGridColor(new Color(230, 230, 230));
