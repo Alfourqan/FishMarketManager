@@ -1,7 +1,7 @@
 package com.poissonnerie.controller;
 
 import com.poissonnerie.model.*;
-import com.poissonnerie.util.DatabaseManager;
+import com.poissonnerie.util.DatabaseManager; // Assuming this is used elsewhere, otherwise replace
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.Instant;
@@ -177,10 +177,7 @@ public class VenteController {
                 vente.setId(venteId);
 
                 // Insertion des lignes et mise à jour des stocks
-                for (Vente.LigneVente ligne : vente.getLignes()) {
-                    insererLigneVente(conn, venteId, ligne);
-                    mettreAJourStock(conn, ligne);
-                }
+                insererLigneVente(conn, venteId, vente); // Modified call
 
                 // Mise à jour du solde client si nécessaire
                 if (vente.isCredit() && vente.getClient() != null) {
@@ -315,17 +312,29 @@ public class VenteController {
             }
         }
     }
-    private void insererLigneVente(Connection conn, int venteId, Vente.LigneVente ligne) throws SQLException {
-        String sql = "INSERT INTO lignes_vente (vente_id, produit_id, quantite, prix_unitaire) VALUES (?, ?, ?, ?)";
 
-        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setInt(1, venteId);
-            pstmt.setInt(2, ligne.getProduit().getId());
-            pstmt.setInt(3, ligne.getQuantite());
-            pstmt.setDouble(4, ligne.getPrixUnitaire());
-
-            pstmt.executeUpdate();
-            LOGGER.info("Ligne de vente enregistrée pour le produit: " + ligne.getProduit().getId());
+    private void insererLigneVente(Connection conn, int venteId, Vente vente) throws SQLException {
+        try {
+            conn.setAutoCommit(false);
+            for (Vente.LigneVente ligne : vente.getLignes()) {
+                try (PreparedStatement stmt = conn.prepareStatement(SQL_INSERT_LIGNE_VENTE)) {
+                    stmt.setInt(1, venteId);
+                    stmt.setInt(2, ligne.getProduit().getId());
+                    stmt.setInt(3, ligne.getQuantite());
+                    stmt.setDouble(4, ligne.getPrixUnitaire());
+                    stmt.executeUpdate();
+                }
+            }
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) {
+                conn.rollback();
+            }
+            throw e;
+        } finally {
+            if (conn != null) {
+                conn.setAutoCommit(true);
+            }
         }
     }
 

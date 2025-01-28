@@ -792,7 +792,7 @@ public class ConfigurationViewSwing {
         JLabel policeTexteLabel = new JLabel("Taille police texte:");
         policeTexteLabel.setFont(TEXTE_NORMAL_FONT);
         JSpinner policeTexteSpinner = (JSpinner) champsSaisie.get(ConfigurationParam.CLE_POLICE_TEXTE_RECU);
-        policeTexteSpinner.setFont(TEXTE_NORMAL_FONT);
+policeTexteSpinner.setFont(TEXTE_NORMAL_FONT);
         policeTextePanel.add(policeTexteLabel);
         policeTextePanel.add(policeTexteSpinner);
 
@@ -1002,6 +1002,8 @@ public class ConfigurationViewSwing {
                         ((JTextField) composant).setText(entry.getValue());
                     } else if (composant instanceof JTextArea) {
                         ((JTextArea) composant).setText(entry.getValue());
+                    } else if (composant instanceof JComboBox<?>) {
+                        ((JComboBox<?>) composant).setSelectedItem(entry.getValue());
                     } else if (composant instanceof JSpinner) {
                         try {
                             ((JSpinner) composant).setValue(Double.parseDouble(entry.getValue()));

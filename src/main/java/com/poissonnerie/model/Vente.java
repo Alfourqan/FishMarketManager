@@ -211,6 +211,10 @@ public class Vente {
     public double getTauxTVA() {
         return TAUX_TVA_DEFAULT;
     }
+    
+    public void setDateVente(LocalDateTime dateVente) {
+        this.date = dateVente;
+    }
 
     @Override
     public boolean equals(Object o) {
