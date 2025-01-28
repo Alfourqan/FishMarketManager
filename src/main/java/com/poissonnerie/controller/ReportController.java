@@ -343,7 +343,35 @@ public class ReportController {
     }
 
     private List<Fournisseur> getFournisseursAvecStats() {
-        return new ArrayList<>();
+        try {
+            List<Fournisseur> fournisseurs = fournisseurController.getFournisseurs();
+
+            // Enrichir chaque fournisseur avec ses statistiques
+            for (Fournisseur fournisseur : fournisseurs) {
+                // Calculer le total des achats pour ce fournisseur
+                double totalAchats = caisseController.getMouvements().stream()
+                    .filter(m -> m.getType() == MouvementCaisse.TypeMouvement.SORTIE)
+                    .filter(m -> m.getFournisseur() != null && m.getFournisseur().getId() == fournisseur.getId())
+                    .mapToDouble(MouvementCaisse::getMontant)
+                    .sum();
+
+                fournisseur.setTotalAchats(totalAchats);
+
+                // Calculer la date du dernier achat
+                Optional<LocalDateTime> dernierAchat = caisseController.getMouvements().stream()
+                    .filter(m -> m.getType() == MouvementCaisse.TypeMouvement.SORTIE)
+                    .filter(m -> m.getFournisseur() != null && m.getFournisseur().getId() == fournisseur.getId())
+                    .map(MouvementCaisse::getDate)
+                    .max(LocalDateTime::compareTo);
+
+                dernierAchat.ifPresent(fournisseur::setDernierAchat);
+            }
+
+            return fournisseurs;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la récupération des statistiques fournisseurs", e);
+            return new ArrayList<>();
+        }
     }
     public Map<String, Double> analyserPerformanceStock() {
         try {
@@ -429,12 +457,28 @@ public class ReportController {
 
     public Map<String, Double> analyserAchatsFournisseurs(LocalDateTime debut, LocalDateTime fin) {
         try {
-            // Pour l'instant, retourne des données fictives
-            Map<String, Double> donnees = new HashMap<>();
-            donnees.put("Fournisseur 1", 1500.0);
-            donnees.put("Fournisseur 2", 2300.0);
-            donnees.put("Fournisseur 3", 1800.0);
-            return donnees;
+            Map<String, Double> achatsParFournisseur = new HashMap<>();
+            List<Fournisseur> fournisseurs = fournisseurController.getFournisseurs();
+
+            for (Fournisseur fournisseur : fournisseurs) {
+                double totalAchats = caisseController.getMouvements().stream()
+                    .filter(m -> m.getType() == MouvementCaisse.TypeMouvement.SORTIE)
+                    .filter(m -> m.getFournisseur() != null && 
+                               m.getFournisseur().getId() == fournisseur.getId() &&
+                               !m.getDate().isBefore(debut) && 
+                               !m.getDate().isAfter(fin))
+                    .mapToDouble(MouvementCaisse::getMontant)
+                    .sum();
+
+                if (totalAchats > 0) {
+                    achatsParFournisseur.put(fournisseur.getNom(), totalAchats);
+                }
+            }
+
+            LOGGER.info("Analyse des achats fournisseurs terminée. Nombre de fournisseurs avec achats: " + 
+                       achatsParFournisseur.size());
+
+            return achatsParFournisseur;
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de l'analyse des achats par fournisseur", e);
             return new HashMap<>();

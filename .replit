@@ -174,7 +174,6 @@ task = "packager.installForAll"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "DISPLAY=:0 mvn clean compile exec:java -Dexec.mainClass='com.poissonnerie.Main' -Dexec.systemProperties.SKIP_SIRET_VALIDATION=true -Djava.awt.headless=false -Dexec.cleanupDaemonThreads=false"
-waitForPort = 5900
 
 [deployment]
 run = ["sh", "-c", "mvn clean compile && mvn exec:java -Dexec.mainClass=\"com.poissonnerie.Main\" -Dexec.systemProperties.SKIP_SIRET_VALIDATION=true -Djava.awt.headless=false -Dexec.cleanupDaemonThreads=false"]
