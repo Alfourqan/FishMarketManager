@@ -28,8 +28,10 @@ public class DatabaseConnectionPool {
             config.setMinimumIdle(5);
             config.setConnectionTimeout(5000);
             config.setIdleTimeout(300000);
-            config.setMaxLifetime(180000); // 3 minutes
+            config.setMaxLifetime(600000);
             config.setAutoCommit(true);
+            config.setLeakDetectionThreshold(60000);
+
 
             // Paramètres spécifiques SQLite
             config.addDataSourceProperty("journal_mode", "WAL");

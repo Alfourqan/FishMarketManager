@@ -42,35 +42,39 @@ public class AuthenticationController {
     }
 
     private void createDefaultAdmin() {
-        int retries = 3;
-        while (retries > 0) {
-            try (Connection conn = DatabaseManager.getConnection()) {
-                if (conn == null) {
-                    retries--;
-                    Thread.sleep(1000);
-                    continue;
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        try {
+            conn = DatabaseManager.getConnection();
+            conn.setAutoCommit(false);
+            stmt = conn.prepareStatement(
+                "INSERT INTO users (username, password, role) VALUES (?, ?, 'ADMIN')");
+            String hashedPassword = hashPassword("admin"); // Hash le mot de passe par défaut
+            LOGGER.info("Création de l'utilisateur admin avec mot de passe hashé");
+            stmt.setString(1, "admin");
+            stmt.setString(2, hashedPassword);
+            stmt.executeUpdate();
+            conn.commit();
+            LOGGER.info("Utilisateur administrateur par défaut créé avec succès");
+            
+        } catch (SQLException | NoSuchAlgorithmException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors du rollback", ex);
                 }
-                try (PreparedStatement stmt = conn.prepareStatement(
-                     "INSERT INTO users (username, password, role) VALUES (?, ?, 'ADMIN')")) {
-                    String hashedPassword = hashPassword("admin"); // Hash le mot de passe par défaut
-                    LOGGER.info("Création de l'utilisateur admin avec mot de passe hashé");
-                    stmt.setString(1, "admin");
-                    stmt.setString(2, hashedPassword);
-                    stmt.executeUpdate();
-                    LOGGER.info("Utilisateur administrateur par défaut créé avec succès");
-                    return; //Exit after successful creation.
-                } catch (SQLException | NoSuchAlgorithmException e) {
-                    LOGGER.log(Level.SEVERE, "Erreur lors de la création de l'admin par défaut", e);
-                    retries--;
-                    Thread.sleep(1000);
-                }
-            } catch (InterruptedException e) {
-                LOGGER.log(Level.SEVERE, "Thread interrupted", e);
-                Thread.currentThread().interrupt();
-                return;
+            }
+            LOGGER.log(Level.SEVERE, "Erreur lors de la création de l'admin par défaut", e);
+            
+        } finally {
+            try {
+                if (stmt != null) stmt.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                LOGGER.log(Level.SEVERE, "Erreur lors de la fermeture des ressources", e);
             }
         }
-        throw new RuntimeException("Impossible de créer l'utilisateur admin après plusieurs tentatives.");
     }
 
     public boolean authenticate(String username, String password) {
