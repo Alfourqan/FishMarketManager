@@ -252,51 +252,33 @@ public class PDFGenerator {
                 stream.setFont(PDType1Font.HELVETICA, 10);
                 double totalVentes = 0;
 
-                LOGGER.info("Début de la génération du rapport des ventes avec " + 
-                    (ventes != null ? ventes.size() : 0) + " ventes");
+                for (Vente vente : ventes) {
+                    totalVentes += vente.getTotal();
 
-                if (ventes != null && !ventes.isEmpty()) {
-                    for (Vente vente : ventes) {
-                        if (y < 100) { // Si on arrive en bas de la page
-                            stream.close();
-                            page = new PDPage(PDRectangle.A4);
-                            document.addPage(page);
-                            stream = new PDPageContentStream(document, page);
-                            y = page.getMediaBox().getHeight() - TABLE_START_Y;
-                        }
-
-                        totalVentes += vente.getTotal();
-
-                        String[] rowData = {
+                    String[] rowData = {
                             vente.getDate().format(DATE_FORMATTER),
                             vente.getClient() != null ? vente.getClient().getNom() : "Vente comptant",
                             String.valueOf(vente.getLignes().size()),
                             String.format("%.2f €", vente.getTotal()),
                             vente.getModePaiement().getLibelle()
-                        };
+                    };
 
-                        xPosition = MARGIN;
-                        for(int i = 0; i < rowData.length; i++){
-                            stream.beginText();
-                            stream.newLineAtOffset(xPosition, y);
-                            stream.showText(rowData[i]);
-                            stream.endText();
-                            xPosition += columnWidths[i];
-                        }
-                        y -= ROW_HEIGHT;
+                    xPosition = MARGIN;
+                    for(int i = 0; i < rowData.length; i++){
+                        stream.beginText();
+                        stream.newLineAtOffset(xPosition, y);
+                        stream.showText(rowData[i]);
+                        stream.endText();
+                        xPosition += columnWidths[i];
                     }
-
-                    stream.setFont(PDType1Font.HELVETICA_BOLD, 12);
-                    stream.beginText();
-                    stream.newLineAtOffset(MARGIN, y - ROW_HEIGHT);
-                    stream.showText(String.format("Total des ventes: %.2f €", totalVentes));
-                    stream.endText();
-                } else {
-                    stream.beginText();
-                    stream.newLineAtOffset(MARGIN, y - ROW_HEIGHT);
-                    stream.showText("Aucune vente sur la période sélectionnée");
-                    stream.endText();
+                    y -= ROW_HEIGHT;
                 }
+
+                stream.setFont(PDType1Font.HELVETICA_BOLD, 12);
+                stream.beginText();
+                stream.newLineAtOffset(MARGIN, y - ROW_HEIGHT);
+                stream.showText(String.format("Total des ventes: %.2f €", totalVentes));
+                stream.endText();
             }
 
             document.save(outputStream);
