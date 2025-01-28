@@ -157,8 +157,7 @@ task = "packager.installForAll"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "mvn clean compile exec:java -Dexec.mainClass='com.poissonnerie.Main' -Dexec.systemProperties.SKIP_SIRET_VALIDATION=true -Djava.awt.headless=false -Dexec.cleanupDaemonThreads=false"
-waitForPort = 5900
+args = "DISPLAY=:0 mvn clean compile exec:java -Dexec.mainClass='com.poissonnerie.Main' -Dexec.systemProperties.SKIP_SIRET_VALIDATION=true -Djava.awt.headless=false -Dexec.cleanupDaemonThreads=false"
 
 [[workflows.workflow]]
 name = "Java VNC App"

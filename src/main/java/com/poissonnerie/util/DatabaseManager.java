@@ -52,18 +52,25 @@ public class DatabaseManager {
 
             try {
                 conn = DatabaseConnectionPool.getConnection();
+
+                // Configuration SQLite avant la transaction
+                try (Statement initStmt = conn.createStatement()) {
+                    initStmt.execute("PRAGMA journal_mode = WAL");
+                    initStmt.execute("PRAGMA synchronous = NORMAL");
+                    initStmt.execute("PRAGMA foreign_keys = OFF");
+                    initStmt.execute("PRAGMA cache_size = 4000");
+                    initStmt.execute("PRAGMA busy_timeout = 60000");
+                    LOGGER.info("Configuration SQLite initialisée");
+                }
+
+                // Chargement et exécution du schéma
+                String schema = loadSchemaFromResource();
+                if (schema == null || schema.trim().isEmpty()) {
+                    throw new IllegalStateException("Schema SQL vide ou introuvable");
+                }
+
+                conn.setAutoCommit(false);
                 try (Statement stmt = conn.createStatement()) {
-                    // Configuration initiale
-                    stmt.execute("PRAGMA foreign_keys = OFF");
-                    stmt.execute("PRAGMA journal_mode = WAL");
-                    stmt.execute("PRAGMA synchronous = NORMAL");
-
-                    String schema = loadSchemaFromResource();
-                    if (schema == null || schema.trim().isEmpty()) {
-                        throw new IllegalStateException("Schema SQL vide ou introuvable");
-                    }
-
-                    conn.setAutoCommit(false);
                     for (String sql : schema.split(";")) {
                         sql = sql.trim();
                         if (!sql.isEmpty()) {
@@ -78,23 +85,31 @@ public class DatabaseManager {
                         }
                     }
                     conn.commit();
+                    LOGGER.info("Schéma de base de données appliqué avec succès");
 
-                    // Insertion des données de test si nécessaire
+                    // Insertion des données de test
                     insertTestDataIfEmpty(conn);
-
-                    stmt.execute("PRAGMA foreign_keys = ON");
-                    isInitialized = true;
-                    LOGGER.info("Base de données initialisée avec succès");
+                } catch (SQLException e) {
+                    if (conn != null) {
+                        try {
+                            conn.rollback();
+                        } catch (SQLException ex) {
+                            LOGGER.log(Level.SEVERE, "Erreur lors du rollback", ex);
+                        }
+                    }
+                    throw e;
                 }
+
+                // Configuration post-initialisation
+                try (Statement postInitStmt = conn.createStatement()) {
+                    postInitStmt.execute("PRAGMA foreign_keys = ON");
+                }
+
+                isInitialized = true;
+                LOGGER.info("Base de données initialisée avec succès");
+
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Erreur fatale lors de l'initialisation", e);
-                if (conn != null) {
-                    try {
-                        conn.rollback();
-                    } catch (SQLException ex) {
-                        LOGGER.log(Level.SEVERE, "Erreur lors du rollback", ex);
-                    }
-                }
                 throw new RuntimeException("Erreur d'initialisation: " + e.getMessage(), e);
             } finally {
                 if (conn != null) {
@@ -129,6 +144,7 @@ public class DatabaseManager {
                            "('Jean Dupont', '0123456789', '1 rue de la Mer')," +
                            "('Marie Martin', '0987654321', '15 avenue des Poissons')");
             }
+            LOGGER.info("Données de test insérées avec succès");
         }
     }
 
