@@ -6,6 +6,9 @@ import java.security.NoSuchAlgorithmException;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import org.mindrot.jbcrypt.*; //Import BCrypt library
+
+
 public class Utilisateur {
     private static final Logger LOGGER = Logger.getLogger(Utilisateur.class.getName());
 
@@ -35,10 +38,6 @@ public class Utilisateur {
 
     public void setMotDePasse(String motDePasse) {
         this.motDePasse = hashMotDePasse(motDePasse);
-    }
-
-    public boolean verifierMotDePasse(String motDePasse) {
-        return this.motDePasse.equals(hashMotDePasse(motDePasse));
     }
 
     private static String hashMotDePasse(String motDePasse) {

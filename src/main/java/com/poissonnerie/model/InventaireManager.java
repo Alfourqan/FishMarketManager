@@ -82,7 +82,23 @@ public class InventaireManager {
             int nouveauStock = produit.getStock();
 
             // Enregistrer l'ajustement dans l'historique
+            // Ajouter à l'historique local
             historique.add(new AjustementStock(produit, ancienStock, nouveauStock, raison));
+            
+            // Enregistrer dans la base de données
+            try (Connection conn = DatabaseConnectionPool.getConnection();
+                 PreparedStatement stmt = conn.prepareStatement(
+                     "INSERT INTO historique_stock (produit_id, ancien_stock, nouveau_stock, type_mouvement, commentaire) VALUES (?, ?, ?, ?, ?)"
+                 )) {
+                stmt.setInt(1, produit.getId());
+                stmt.setInt(2, ancienStock);
+                stmt.setInt(3, nouveauStock);
+                stmt.setString(4, "AJUSTEMENT");
+                stmt.setString(5, raison);
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                LOGGER.log(Level.SEVERE, "Erreur lors de l'enregistrement de l'historique", e);
+            }
 
             // Notifier les observateurs du changement de stock
             for (InventaireObserver observer : observers) {
