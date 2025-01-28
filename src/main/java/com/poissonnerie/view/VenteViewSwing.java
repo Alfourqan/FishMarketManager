@@ -45,6 +45,8 @@ public class VenteViewSwing {
     private volatile boolean isProcessingOperation = false;
     private JXDatePicker dateDebut;
     private JXDatePicker dateFin;
+    private final StringBuilder previewText;
+    private final JDialog previewDialog;
 
     public VenteViewSwing() {
         mainPanel = new JPanel(new BorderLayout(10, 10));
@@ -52,6 +54,9 @@ public class VenteViewSwing {
         produitController = new ProduitController();
         clientController = new ClientController();
         panier = Collections.synchronizedList(new ArrayList<>());
+        previewText = new StringBuilder();
+        previewDialog = new JDialog((Frame) null, "Aperçu de la vente", true);
+        previewDialog.setLayout(new BorderLayout());
 
         String[] panierColumns = {"Produit", "Quantité", "Prix unitaire", "Total"};
         panierModel = new DefaultTableModel(panierColumns, 0) {
@@ -294,6 +299,7 @@ public class VenteViewSwing {
                     // Utiliser uniquement TextBillPrinter pour la prévisualisation
                     TextBillPrinter printer = new TextBillPrinter(vente);
                     printer.imprimer();
+                    previewText.setLength(0); // Clear previous content
                     previewText.append("MA POISSONNERIE\n\n");
                     previewText.append("Date: ").append(DATE_FORMATTER.format(vente.getDate())).append("\n");
                     if (vente.getClient() != null) {
@@ -313,22 +319,19 @@ public class VenteViewSwing {
                     previewArea.setEditable(false);
                     previewArea.setBackground(Color.WHITE);
                     JScrollPane scrollPane = new JScrollPane(previewArea);
+                    previewDialog.getContentPane().removeAll();
                     previewDialog.add(scrollPane, BorderLayout.CENTER);
 
                     JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
                     JButton confirmerBtn = createStyledButton("Confirmer et imprimer",
                             MaterialDesign.MDI_PRINTER, new Color(76, 175, 80));
                     JButton cancelBtn = createStyledButton("Annuler",
-                            MaterialDesign.MDI_CLOSE, new Color(244, 67, 54));
+                            MaterialDesign.MDI_CLOSE_CIRCLE, new Color(244, 67, 54));
 
                     confirmerBtn.addActionListener(confirmEvent -> {
                         try {
                             venteController.enregistrerVente(vente);
-
-                            // Utilisation du constructeur simple pour ticket de vente
-                            TextBillPrinter printer = new TextBillPrinter(vente);
-                            printer.imprimer();
-
+                            printer.imprimer(); // Réutilisation de l'instance existante
                             previewDialog.dispose();
                             resetForm();
                             refreshComboBoxes();
@@ -874,7 +877,7 @@ public class VenteViewSwing {
             LOGGER.info(String.format("Règlement effectué pour le client %s: %.2f€, nouveau solde: %.2f€",
                     client.getNom(), montantRegle, nouveauSolde));
 
-                        JOptionPane.showMessageDialog(mainPanel,
+            JOptionPane.showMessageDialog(mainPanel,
                     "Règlement enregistré avec succès",
                     "Succès",
                     JOptionPane.INFORMATION_MESSAGE);

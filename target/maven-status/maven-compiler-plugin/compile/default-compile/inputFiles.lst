@@ -17,6 +17,7 @@
 /home/runner/workspace/src/main/java/com/poissonnerie/controller/CaisseController.java
 /home/runner/workspace/src/main/java/com/poissonnerie/view/VenteViewSwing.java
 /home/runner/workspace/src/main/java/com/poissonnerie/util/TextBillPrinter.java
+/home/runner/workspace/src/main/java/com/poissonnerie/util/AuditLogger.java
 /home/runner/workspace/src/main/java/com/poissonnerie/controller/ClientController.java
 /home/runner/workspace/src/main/java/com/poissonnerie/view/LoginSuccessListener.java
 /home/runner/workspace/src/main/java/com/poissonnerie/util/DatabaseManager.java
