@@ -24,10 +24,10 @@ public class DatabaseConnectionPool {
             config.setPoolName("PoissonneriePool");
 
             // Configuration optimisée pour SQLite
-            config.setMaximumPoolSize(1); // SQLite supporte une seule connexion à la fois
-            config.setMinimumIdle(1);
-            config.setConnectionTimeout(30000); // 30 secondes
-            config.setIdleTimeout(60000); // 1 minute
+            config.setMaximumPoolSize(10);
+            config.setMinimumIdle(5);
+            config.setConnectionTimeout(5000);
+            config.setIdleTimeout(300000);
             config.setMaxLifetime(180000); // 3 minutes
             config.setAutoCommit(true);
 
