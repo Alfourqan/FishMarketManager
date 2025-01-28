@@ -293,10 +293,7 @@ public class VenteViewSwing {
 
                     // Utiliser uniquement TextBillPrinter pour la prévisualisation
                     TextBillPrinter printer = new TextBillPrinter(vente);
-                    printer.imprimer();g.setLayout(new BorderLayout(10, 10));
-
-                    // Créer un aperçu textuel du ticket
-                    StringBuilder previewText = new StringBuilder();
+                    printer.imprimer();
                     previewText.append("MA POISSONNERIE\n\n");
                     previewText.append("Date: ").append(DATE_FORMATTER.format(vente.getDate())).append("\n");
                     if (vente.getClient() != null) {
