@@ -1,13 +1,10 @@
 package com.poissonnerie.model;
 
 import java.time.LocalDateTime;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.sql.SQLException;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-
-import org.mindrot.jbcrypt.*; //Import BCrypt library
-
+import org.mindrot.jbcrypt.BCrypt;
 
 public class Utilisateur {
     private static final Logger LOGGER = Logger.getLogger(Utilisateur.class.getName());
@@ -41,11 +38,21 @@ public class Utilisateur {
     }
 
     private static String hashMotDePasse(String motDePasse) {
-        return BCrypt.hashpw(motDePasse, BCrypt.gensalt(12));
+        try {
+            return BCrypt.hashpw(motDePasse, BCrypt.gensalt(12));
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors du hashage du mot de passe", e);
+            throw new RuntimeException("Erreur de sécurité: impossible de hasher le mot de passe", e);
+        }
     }
 
     public boolean verifierMotDePasse(String motDePasse) {
-        return BCrypt.checkpw(motDePasse, this.motDePasse);
+        try {
+            return BCrypt.checkpw(motDePasse, this.motDePasse);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la vérification du mot de passe", e);
+            return false;
+        }
     }
 
     public void mettreAJourDernierLogin() {

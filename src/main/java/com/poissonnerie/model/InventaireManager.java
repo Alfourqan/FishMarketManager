@@ -5,6 +5,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.time.LocalDateTime;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.poissonnerie.util.DatabaseConnectionPool;
 
 public class InventaireManager {
     private static final Logger LOGGER = Logger.getLogger(InventaireManager.class.getName());
@@ -82,14 +86,13 @@ public class InventaireManager {
             int nouveauStock = produit.getStock();
 
             // Enregistrer l'ajustement dans l'historique
-            // Ajouter à l'historique local
             historique.add(new AjustementStock(produit, ancienStock, nouveauStock, raison));
-            
+
             // Enregistrer dans la base de données
             try (Connection conn = DatabaseConnectionPool.getConnection();
                  PreparedStatement stmt = conn.prepareStatement(
-                     "INSERT INTO historique_stock (produit_id, ancien_stock, nouveau_stock, type_mouvement, commentaire) VALUES (?, ?, ?, ?, ?)"
-                 )) {
+                     "INSERT INTO historique_stock (produit_id, ancien_stock, nouveau_stock, type_mouvement, commentaire) " +
+                     "VALUES (?, ?, ?, ?, ?)")) {
                 stmt.setInt(1, produit.getId());
                 stmt.setInt(2, ancienStock);
                 stmt.setInt(3, nouveauStock);
@@ -100,12 +103,11 @@ public class InventaireManager {
                 LOGGER.log(Level.SEVERE, "Erreur lors de l'enregistrement de l'historique", e);
             }
 
-            // Notifier les observateurs du changement de stock
+            // Notifier les observateurs
             for (InventaireObserver observer : observers) {
                 try {
                     observer.onStockAjuste(produit, ancienStock, nouveauStock);
 
-                    // Vérifier si le nouveau stock est bas ou en rupture
                     if (nouveauStock == 0) {
                         LOGGER.warning("Rupture de stock pour " + produit.getNom());
                         observer.onRuptureStock(produit);
