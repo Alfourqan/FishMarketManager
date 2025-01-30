@@ -1,0 +1,251 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------< com.poissonnerie:gestion-poissonnerie >----------------
+[INFO] Building gestion-poissonnerie 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+Downloading from central: https://repo.maven.apache.org/maven2/org/postgresql/postgresql/42.7.1/postgresql-42.7.1.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/postgresql/postgresql/42.7.1/postgresql-42.7.1.pom (2.9 kB at 5.2 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/checkerframework/checker-qual/3.41.0/checker-qual-3.41.0.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/checkerframework/checker-qual/3.41.0/checker-qual-3.41.0.pom (2.1 kB at 105 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/mindrot/jbcrypt/0.4/jbcrypt-0.4.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/mindrot/jbcrypt/0.4/jbcrypt-0.4.pom (4.1 kB at 194 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/postgresql/postgresql/42.7.1/postgresql-42.7.1.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/postgresql/postgresql/42.7.1/postgresql-42.7.1.jar (1.1 MB at 5.1 MB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/checkerframework/checker-qual/3.41.0/checker-qual-3.41.0.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/mindrot/jbcrypt/0.4/jbcrypt-0.4.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/checkerframework/checker-qual/3.41.0/checker-qual-3.41.0.jar (229 kB at 6.2 MB/s)
+Downloaded from central: https://repo.maven.apache.org/maven2/org/mindrot/jbcrypt/0.4/jbcrypt-0.4.jar (17 kB at 356 kB/s)
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ gestion-poissonnerie ---
+[INFO] Deleting /home/runner/workspace/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ gestion-poissonnerie ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ gestion-poissonnerie ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 39 source files with javac [debug target 11] to target/classes
+[WARNING] system modules path not set in conjunction with -source 11
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[754,77] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[767,78] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[809,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[812,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[88,41] unchecked cast
+  required: java.util.List<com.poissonnerie.model.Produit>
+  found:    java.util.List<capture#1 of ?>
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[89,78] unchecked cast
+  required: java.util.List<com.poissonnerie.model.Produit>
+  found:    java.util.List<capture#2 of ?>
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ gestion-poissonnerie ---
+Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/3.4.2/plexus-utils-3.4.2.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/3.4.2/plexus-utils-3.4.2.pom (8.2 kB at 411 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/8/plexus-8.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/8/plexus-8.pom (25 kB at 1.3 MB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-exec/1.3/commons-exec-1.3.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-exec/1.3/commons-exec-1.3.pom (11 kB at 611 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/35/commons-parent-35.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/35/commons-parent-35.pom (58 kB at 2.1 MB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/apache/15/apache-15.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/apache/15/apache-15.pom (15 kB at 952 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/3.4.2/plexus-utils-3.4.2.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/3.4.2/plexus-utils-3.4.2.jar (267 kB at 8.1 MB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-component-annotations/2.1.1/plexus-component-annotations-2.1.1.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-exec/1.3/commons-exec-1.3.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-component-annotations/2.1.1/plexus-component-annotations-2.1.1.jar (4.1 kB at 216 kB/s)
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-exec/1.3/commons-exec-1.3.jar (54 kB at 3.0 MB/s)
+Jan 30, 2025 11:51:32 PM com.poissonnerie.Main main
+INFO: Démarrage de l'application...
+Jan 30, 2025 11:51:36 PM com.poissonnerie.Main lambda$main$0
+INFO: Thème installé
+Jan 30, 2025 11:51:36 PM com.poissonnerie.Main lambda$main$0
+INFO: Interface configurée
+Jan 30, 2025 11:51:36 PM com.poissonnerie.Main lambda$main$0
+INFO: SplashScreen créé et affiché
+Jan 30, 2025 11:51:36 PM com.poissonnerie.util.DatabaseManager initDatabase
+INFO: Initialisation de la base de données...
+Jan 30, 2025 11:51:36 PM com.poissonnerie.util.DatabaseConnectionPool initializeDataSource
+INFO: Initialisation du pool de connexions à la base de données PostgreSQL
+23:51:36.990 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- PoissonneriePool - configuration:
+23:51:36.996 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- allowPoolSuspension.............false
+23:51:36.996 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- autoCommit......................true
+23:51:36.997 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- catalog.........................none
+23:51:36.997 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- connectionInitSql...............none
+23:51:36.997 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- connectionTestQuery.............none
+23:51:36.997 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- connectionTimeout...............30000
+23:51:36.997 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- dataSource......................none
+23:51:36.998 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- dataSourceClassName.............none
+23:51:36.998 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- dataSourceJNDI..................none
+23:51:36.998 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- dataSourceProperties............{password=<masked>, prepStmtCacheSqlLimit=2048, cachePrepStmts=true, prepStmtCacheSize=250, useServerPrepStmts=true}
+23:51:36.998 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- driverClassName.................none
+23:51:36.998 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- exceptionOverrideClassName......none
+23:51:36.998 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- healthCheckProperties...........{}
+23:51:36.998 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- healthCheckRegistry.............none
+23:51:36.999 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- idleTimeout.....................600000
+23:51:36.999 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- initializationFailTimeout.......1
+23:51:36.999 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- isolateInternalQueries..........false
+23:51:36.999 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- jdbcUrl.........................postgresql://neondb_owner:npg_2Utg5XbidGAp@ep-falling-lab-a5vbb7gg.us-east-2.aws.neon.tech/neondb?sslmode=require
+23:51:36.999 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- keepaliveTime...................0
+23:51:36.999 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- leakDetectionThreshold..........60000
+23:51:36.999 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- maxLifetime.....................1800000
+23:51:36.999 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- maximumPoolSize.................10
+23:51:37.000 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- metricRegistry..................none
+23:51:37.000 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- metricsTrackerFactory...........none
+23:51:37.000 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- minimumIdle.....................2
+23:51:37.000 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- password........................<masked>
+23:51:37.000 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- poolName........................"PoissonneriePool"
+23:51:37.000 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- readOnly........................false
+23:51:37.000 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- registerMbeans..................false
+23:51:37.000 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- scheduledExecutor...............none
+23:51:37.000 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- schema..........................none
+23:51:37.001 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- threadFactory...................internal
+23:51:37.001 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- transactionIsolation............default
+23:51:37.001 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- username........................"neondb_owner"
+23:51:37.001 [SwingWorker-pool-3-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- validationTimeout...............5000
+23:51:37.005 [SwingWorker-pool-3-thread-1] INFO com.zaxxer.hikari.HikariDataSource -- PoissonneriePool - Starting...
+Jan 30, 2025 11:51:37 PM com.poissonnerie.util.DatabaseConnectionPool initializeDataSource
+SEVERE: Erreur critique lors de l'initialisation du pool
+java.lang.RuntimeException: Failed to get driver instance for jdbcUrl=postgresql://neondb_owner:npg_2Utg5XbidGAp@ep-falling-lab-a5vbb7gg.us-east-2.aws.neon.tech/neondb?sslmode=require
+    at com.zaxxer.hikari.util.DriverDataSource.<init>(DriverDataSource.java:113)
+    at com.zaxxer.hikari.pool.PoolBase.initializeDataSource(PoolBase.java:327)
+    at com.zaxxer.hikari.pool.PoolBase.<init>(PoolBase.java:113)
+    at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:91)
+    at com.zaxxer.hikari.HikariDataSource.<init>(HikariDataSource.java:80)
+    at com.poissonnerie.util.DatabaseConnectionPool.initializeDataSource(DatabaseConnectionPool.java:49)
+    at com.poissonnerie.util.DatabaseConnectionPool.getConnection(DatabaseConnectionPool.java:76)
+    at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:56)
+    at com.poissonnerie.Main$1.doInBackground(Main.java:83)
+    at com.poissonnerie.Main$1.doInBackground(Main.java:78)
+    at java.desktop/javax.swing.SwingWorker$1.call(SwingWorker.java:305)
+    at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+    at java.desktop/javax.swing.SwingWorker.run(SwingWorker.java:342)
+    at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+    at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+    at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: java.sql.SQLException: No suitable driver
+    at java.sql/java.sql.DriverManager.getDriver(DriverManager.java:300)
+    at com.zaxxer.hikari.util.DriverDataSource.<init>(DriverDataSource.java:105)
+    ... 15 more
+
+Jan 30, 2025 11:51:37 PM com.poissonnerie.util.DatabaseManager initDatabase
+SEVERE: Erreur fatale lors de l'initialisation
+java.lang.RuntimeException: Impossible d'initialiser le pool de connexions
+    at com.poissonnerie.util.DatabaseConnectionPool.initializeDataSource(DatabaseConnectionPool.java:57)
+    at com.poissonnerie.util.DatabaseConnectionPool.getConnection(DatabaseConnectionPool.java:76)
+    at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:56)
+    at com.poissonnerie.Main$1.doInBackground(Main.java:83)
+    at com.poissonnerie.Main$1.doInBackground(Main.java:78)
+    at java.desktop/javax.swing.SwingWorker$1.call(SwingWorker.java:305)
+    at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+    at java.desktop/javax.swing.SwingWorker.run(SwingWorker.java:342)
+    at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+    at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+    at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: java.lang.RuntimeException: Failed to get driver instance for jdbcUrl=postgresql://neondb_owner:npg_2Utg5XbidGAp@ep-falling-lab-a5vbb7gg.us-east-2.aws.neon.tech/neondb?sslmode=require
+    at com.zaxxer.hikari.util.DriverDataSource.<init>(DriverDataSource.java:113)
+    at com.zaxxer.hikari.pool.PoolBase.initializeDataSource(PoolBase.java:327)
+    at com.zaxxer.hikari.pool.PoolBase.<init>(PoolBase.java:113)
+    at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:91)
+    at com.zaxxer.hikari.HikariDataSource.<init>(HikariDataSource.java:80)
+    at com.poissonnerie.util.DatabaseConnectionPool.initializeDataSource(DatabaseConnectionPool.java:49)
+    ... 10 more
+Caused by: java.sql.SQLException: No suitable driver
+    at java.sql/java.sql.DriverManager.getDriver(DriverManager.java:300)
+    at com.zaxxer.hikari.util.DriverDataSource.<init>(DriverDataSource.java:105)
+    ... 15 more
+
+Jan 30, 2025 11:51:37 PM com.poissonnerie.Main$1 doInBackground
+SEVERE: Erreur d'initialisation
+java.lang.RuntimeException: Erreur d'initialisation: Impossible d'initialiser le pool de connexions
+    at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:89)
+    at com.poissonnerie.Main$1.doInBackground(Main.java:83)
+    at com.poissonnerie.Main$1.doInBackground(Main.java:78)
+    at java.desktop/javax.swing.SwingWorker$1.call(SwingWorker.java:305)
+    at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+    at java.desktop/javax.swing.SwingWorker.run(SwingWorker.java:342)
+    at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+    at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+    at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: java.lang.RuntimeException: Impossible d'initialiser le pool de connexions
+    at com.poissonnerie.util.DatabaseConnectionPool.initializeDataSource(DatabaseConnectionPool.java:57)
+    at com.poissonnerie.util.DatabaseConnectionPool.getConnection(DatabaseConnectionPool.java:76)
+    at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:56)
+    ... 8 more
+Caused by: java.lang.RuntimeException: Failed to get driver instance for jdbcUrl=postgresql://neondb_owner:npg_2Utg5XbidGAp@ep-falling-lab-a5vbb7gg.us-east-2.aws.neon.tech/neondb?sslmode=require
+    at com.zaxxer.hikari.util.DriverDataSource.<init>(DriverDataSource.java:113)
+    at com.zaxxer.hikari.pool.PoolBase.initializeDataSource(PoolBase.java:327)
+    at com.zaxxer.hikari.pool.PoolBase.<init>(PoolBase.java:113)
+    at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:91)
+    at com.zaxxer.hikari.HikariDataSource.<init>(HikariDataSource.java:80)
+    at com.poissonnerie.util.DatabaseConnectionPool.initializeDataSource(DatabaseConnectionPool.java:49)
+    ... 10 more
+Caused by: java.sql.SQLException: No suitable driver
+    at java.sql/java.sql.DriverManager.getDriver(DriverManager.java:300)
+    at com.zaxxer.hikari.util.DriverDataSource.<init>(DriverDataSource.java:105)
+    ... 15 more
+
+Jan 30, 2025 11:51:37 PM com.poissonnerie.Main$1 done
+SEVERE: Erreur fatale
+java.util.concurrent.ExecutionException: java.lang.RuntimeException: Erreur d'initialisation: Impossible d'initialiser le pool de connexions
+    at java.base/java.util.concurrent.FutureTask.report(FutureTask.java:122)
+    at java.base/java.util.concurrent.FutureTask.get(FutureTask.java:191)
+    at java.desktop/javax.swing.SwingWorker.get(SwingWorker.java:612)
+    at com.poissonnerie.Main$1.done(Main.java:101)
+    at java.desktop/javax.swing.SwingWorker$4.run(SwingWorker.java:749)
+    at java.desktop/javax.swing.SwingWorker$DoSubmitAccumulativeRunnable.run(SwingWorker.java:847)
+    at java.desktop/sun.swing.AccumulativeRunnable.run(AccumulativeRunnable.java:112)
+    at java.desktop/javax.swing.SwingWorker$DoSubmitAccumulativeRunnable.actionPerformed(SwingWorker.java:857)
+    at java.desktop/javax.swing.Timer.fireActionPerformed(Timer.java:311)
+    at java.desktop/javax.swing.Timer$DoPostEvent.run(Timer.java:243)
+    at java.desktop/java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:318)
+    at java.desktop/java.awt.EventQueue.dispatchEventImpl(EventQueue.java:773)
+    at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:720)
+    at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:714)
+    at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+    at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:87)
+    at java.desktop/java.awt.EventQueue.dispatchEvent(EventQueue.java:742)
+    at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:203)
+    at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:124)
+    at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:113)
+    at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:109)
+    at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
+    at java.desktop/java.awt.EventDispatchThread.run(EventDispatchThread.java:90)
+Caused by: java.lang.RuntimeException: Erreur d'initialisation: Impossible d'initialiser le pool de connexions
+    at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:89)
+    at com.poissonnerie.Main$1.doInBackground(Main.java:83)
+    at com.poissonnerie.Main$1.doInBackground(Main.java:78)
+    at java.desktop/javax.swing.SwingWorker$1.call(SwingWorker.java:305)
+    at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+    at java.desktop/javax.swing.SwingWorker.run(SwingWorker.java:342)
+    at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+    at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+    at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: java.lang.RuntimeException: Impossible d'initialiser le pool de connexions
+    at com.poissonnerie.util.DatabaseConnectionPool.initializeDataSource(DatabaseConnectionPool.java:57)
+    at com.poissonnerie.util.DatabaseConnectionPool.getConnection(DatabaseConnectionPool.java:76)
+    at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:56)
+    ... 8 more
+Caused by: java.lang.RuntimeException: Failed to get driver instance for jdbcUrl=postgresql://neondb_owner:npg_2Utg5XbidGAp@ep-falling-lab-a5vbb7gg.us-east-2.aws.neon.tech/neondb?sslmode=require
+    at com.zaxxer.hikari.util.DriverDataSource.<init>(DriverDataSource.java:113)
+    at com.zaxxer.hikari.pool.PoolBase.initializeDataSource(PoolBase.java:327)
+    at com.zaxxer.hikari.pool.PoolBase.<init>(PoolBase.java:113)
+    at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:91)
+    at com.zaxxer.hikari.HikariDataSource.<init>(HikariDataSource.java:80)
+    at com.poissonnerie.util.DatabaseConnectionPool.initializeDataSource(DatabaseConnectionPool.java:49)
+    ... 10 more
+Caused by: java.sql.SQLException: No suitable driver
+    at java.sql/java.sql.DriverManager.getDriver(DriverManager.java:300)
+    at com.zaxxer.hikari.util.DriverDataSource.<init>(DriverDataSource.java:105)
+    ... 15 more
+
+Jan 30, 2025 11:51:37 PM com.poissonnerie.Main showError
+SEVERE: Erreur d'initialisation: java.lang.RuntimeException: Erreur d'initialisation: Impossible d'initialiser le pool de connexions

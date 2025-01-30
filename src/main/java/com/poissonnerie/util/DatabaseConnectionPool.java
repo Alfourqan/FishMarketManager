@@ -15,42 +15,42 @@ public class DatabaseConnectionPool {
     private static final int MAX_RETRY_ATTEMPTS = 3;
     private static final long RETRY_DELAY_MS = 1000;
     private static final AtomicInteger failureCount = new AtomicInteger(0);
+    private static final String DB_FILE = "poissonnerie.db";
 
     private static void initializeDataSource() {
         if (dataSource == null) {
             synchronized (LOCK) {
                 if (dataSource == null) {
-                    LOGGER.info("Initialisation du pool de connexions à la base de données PostgreSQL");
+                    LOGGER.info("Initialisation du pool de connexions à la base de données SQLite");
 
                     try {
                         HikariConfig config = new HikariConfig();
 
-                        // Configuration PostgreSQL avec variables d'environnement
-                        config.setJdbcUrl(System.getenv("DATABASE_URL"));
-                        config.setUsername(System.getenv("PGUSER"));
-                        config.setPassword(System.getenv("PGPASSWORD"));
-                        config.setPoolName("PoissonneriePool");
+                        // Configuration SQLite
+                        config.setJdbcUrl("jdbc:sqlite:" + DB_FILE);
+                        config.setDriverClassName("org.sqlite.JDBC");
+                        config.setPoolName("PoissonnerieSQLitePool");
 
-                        // Configuration optimisée pour PostgreSQL
-                        config.setMaximumPoolSize(10);
-                        config.setMinimumIdle(2);
+                        // Configuration optimisée pour SQLite
+                        config.setMaximumPoolSize(1); // SQLite supporte une seule connexion à la fois
+                        config.setMinimumIdle(1);
                         config.setConnectionTimeout(30000);
                         config.setIdleTimeout(600000);
                         config.setMaxLifetime(1800000);
                         config.setAutoCommit(true);
                         config.setLeakDetectionThreshold(60000);
 
-                        // Paramètres PostgreSQL optimisés
-                        config.addDataSourceProperty("cachePrepStmts", "true");
-                        config.addDataSourceProperty("prepStmtCacheSize", "250");
-                        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
-                        config.addDataSourceProperty("useServerPrepStmts", "true");
+                        // Propriétés SQLite spécifiques
+                        config.addDataSourceProperty("journal_mode", "WAL");
+                        config.addDataSourceProperty("synchronous", "NORMAL");
+                        config.addDataSourceProperty("foreign_keys", "true");
+                        config.addDataSourceProperty("cache_size", "2000");
 
                         dataSource = new HikariDataSource(config);
                         verifyConnection();
                         failureCount.set(0);
 
-                        LOGGER.info("Pool de connexions PostgreSQL initialisé avec succès");
+                        LOGGER.info("Pool de connexions SQLite initialisé avec succès");
 
                     } catch (Exception e) {
                         LOGGER.log(Level.SEVERE, "Erreur critique lors de l'initialisation du pool", e);
@@ -64,7 +64,7 @@ public class DatabaseConnectionPool {
     private static void verifyConnection() throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
             if (conn.isValid(5)) {
-                LOGGER.info("Connexion à PostgreSQL vérifiée avec succès");
+                LOGGER.info("Connexion à SQLite vérifiée avec succès");
             } else {
                 throw new SQLException("La connexion test n'est pas valide");
             }
