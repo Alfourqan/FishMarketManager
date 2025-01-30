@@ -6,16 +6,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import java.io.File;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class DatabaseConnectionPool {
     private static final Logger LOGGER = Logger.getLogger(DatabaseConnectionPool.class.getName());
     private static volatile HikariDataSource dataSource;
-    private static final String DB_NAME = "poissonnerie.db";
-    private static final String DB_PATH = new File(System.getProperty("user.dir"), DB_NAME).getAbsolutePath();
-    private static final String DB_URL = "jdbc:sqlite:" + DB_PATH;
-
     private static final Object LOCK = new Object();
     private static final int MAX_RETRY_ATTEMPTS = 3;
     private static final long RETRY_DELAY_MS = 1000;
@@ -25,44 +20,37 @@ public class DatabaseConnectionPool {
         if (dataSource == null) {
             synchronized (LOCK) {
                 if (dataSource == null) {
-                    LOGGER.info("Initialisation du pool de connexions avec la base de données: " + DB_PATH);
+                    LOGGER.info("Initialisation du pool de connexions à la base de données PostgreSQL");
 
                     try {
-                        File dbFile = new File(DB_PATH);
-                        if (!dbFile.exists()) {
-                            LOGGER.warning("Base de données non trouvée, création du fichier: " + DB_PATH);
-                            dbFile.createNewFile();
-                        }
-
                         HikariConfig config = new HikariConfig();
-                        config.setJdbcUrl(DB_URL);
+
+                        // Configuration PostgreSQL avec variables d'environnement
+                        config.setJdbcUrl(System.getenv("DATABASE_URL"));
+                        config.setUsername(System.getenv("PGUSER"));
+                        config.setPassword(System.getenv("PGPASSWORD"));
                         config.setPoolName("PoissonneriePool");
 
-                        // Configuration optimisée pour SQLite avec plus de robustesse
-                        config.setMaximumPoolSize(20);        // Augmenté pour plus de disponibilité
-                        config.setMinimumIdle(5);             // Augmenté pour maintenir plus de connexions
-                        config.setConnectionTimeout(60000);    // 60 secondes pour timeout
-                        config.setIdleTimeout(300000);        // 5 minutes
-                        config.setMaxLifetime(1800000);       // 30 minutes
+                        // Configuration optimisée pour PostgreSQL
+                        config.setMaximumPoolSize(10);
+                        config.setMinimumIdle(2);
+                        config.setConnectionTimeout(30000);
+                        config.setIdleTimeout(600000);
+                        config.setMaxLifetime(1800000);
                         config.setAutoCommit(true);
-                        config.setLeakDetectionThreshold(60000); // Détection des fuites après 60s
+                        config.setLeakDetectionThreshold(60000);
 
-                        // Paramètres SQLite optimisés
-                        config.addDataSourceProperty("pragma_settings", 
-                            "PRAGMA journal_mode=WAL;" +
-                            "PRAGMA synchronous=NORMAL;" +
-                            "PRAGMA foreign_keys=ON;" +
-                            "PRAGMA cache_size=10000;" +     // Augmenté
-                            "PRAGMA busy_timeout=60000;" +    // 60 secondes
-                            "PRAGMA temp_store=MEMORY;" +
-                            "PRAGMA mmap_size=536870912;" +  // 512MB
-                            "PRAGMA page_size=4096;" +
-                            "PRAGMA locking_mode=NORMAL"
-                        );
+                        // Paramètres PostgreSQL optimisés
+                        config.addDataSourceProperty("cachePrepStmts", "true");
+                        config.addDataSourceProperty("prepStmtCacheSize", "250");
+                        config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+                        config.addDataSourceProperty("useServerPrepStmts", "true");
 
                         dataSource = new HikariDataSource(config);
                         verifyConnection();
-                        failureCount.set(0); // Réinitialiser le compteur après succès
+                        failureCount.set(0);
+
+                        LOGGER.info("Pool de connexions PostgreSQL initialisé avec succès");
 
                     } catch (Exception e) {
                         LOGGER.log(Level.SEVERE, "Erreur critique lors de l'initialisation du pool", e);
@@ -76,7 +64,7 @@ public class DatabaseConnectionPool {
     private static void verifyConnection() throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
             if (conn.isValid(5)) {
-                LOGGER.info("Connexion à la base de données SQLite vérifiée avec succès");
+                LOGGER.info("Connexion à PostgreSQL vérifiée avec succès");
             } else {
                 throw new SQLException("La connexion test n'est pas valide");
             }
@@ -101,7 +89,7 @@ public class DatabaseConnectionPool {
                 if (attempts == MAX_RETRY_ATTEMPTS) {
                     LOGGER.severe("Échec de l'obtention d'une connexion après " + MAX_RETRY_ATTEMPTS + " tentatives");
                     if (failureCount.incrementAndGet() > 5) {
-                        resetPool(); // Reset après 5 échecs consécutifs
+                        resetPool();
                         failureCount.set(0);
                     }
                     throw e;
@@ -116,13 +104,6 @@ public class DatabaseConnectionPool {
             }
         }
         throw new SQLException("Impossible d'obtenir une connexion valide après " + MAX_RETRY_ATTEMPTS + " tentatives");
-    }
-
-    private static boolean isPoolError(SQLException e) {
-        String message = e.getMessage().toLowerCase();
-        return message.contains("pool") || message.contains("timeout") || 
-               message.contains("connection") || e.getErrorCode() == 17002 ||
-               message.contains("database is locked");
     }
 
     private static synchronized void resetPool() {
