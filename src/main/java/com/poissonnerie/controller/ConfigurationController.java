@@ -1,7 +1,7 @@
 package com.poissonnerie.controller;
 
 import com.poissonnerie.model.ConfigurationParam;
-import com.poissonnerie.util.DatabaseConnectionPool;
+import com.poissonnerie.util.DatabaseManager;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +52,7 @@ public class ConfigurationController {
         configurations.clear();
         configCache.clear();
 
-        try (Connection conn = DatabaseConnectionPool.getConnection();
+        try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement("SELECT * FROM configurations ORDER BY cle")) {
 
             ResultSet rs = stmt.executeQuery();
@@ -62,20 +62,12 @@ public class ConfigurationController {
                     String valeur = sanitizeInput(rs.getString("valeur"));
                     String description = sanitizeInput(rs.getString("description"));
 
-                    if (cle.equals(ConfigurationParam.CLE_SIRET_ENTREPRISE)) {
-                        System.setProperty("SKIP_SIRET_VALIDATION", "true");
-                    }
-
                     ConfigurationParam config = new ConfigurationParam(
                         rs.getInt("id"),
                         cle,
                         valeur,
                         description
                     );
-
-                    if (cle.equals(ConfigurationParam.CLE_SIRET_ENTREPRISE)) {
-                        System.clearProperty("SKIP_SIRET_VALIDATION");
-                    }
 
                     configurations.add(config);
                     configCache.put(config.getCle(), config.getValeur());
@@ -97,7 +89,7 @@ public class ConfigurationController {
         String sql = "UPDATE configurations SET valeur = ? WHERE cle = ?";
         LOGGER.info("Mise à jour de la configuration: " + config.getCle());
 
-        try (Connection conn = DatabaseConnectionPool.getConnection();
+        try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
             pstmt.setString(1, sanitizeInput(config.getValeur()));
@@ -124,7 +116,6 @@ public class ConfigurationController {
     }
 
     public void reinitialiserConfigurations() {
-        System.setProperty("SKIP_SIRET_VALIDATION", "true");
         try {
             String sql = "UPDATE configurations SET valeur = CASE " +
                         "WHEN cle = ? THEN '20.0' " +
@@ -135,7 +126,7 @@ public class ConfigurationController {
                         "ELSE valeur END " +
                         "WHERE cle IN (?, ?, ?, ?, ?)";
 
-            try (Connection conn = DatabaseConnectionPool.getConnection();
+            try (Connection conn = DatabaseManager.getConnection();
                  PreparedStatement stmt = conn.prepareStatement(sql)) {
 
                 String[] params = {
@@ -159,8 +150,6 @@ public class ConfigurationController {
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la réinitialisation des configurations", e);
             throw new RuntimeException("Erreur lors de la réinitialisation des configurations", e);
-        } finally {
-            System.clearProperty("SKIP_SIRET_VALIDATION");
         }
     }
 
@@ -171,7 +160,7 @@ public class ConfigurationController {
 
         Connection conn = null;
         try {
-            conn = DatabaseConnectionPool.getConnection();
+            conn = DatabaseManager.getConnection();
             conn.setAutoCommit(false);
 
             String sql = "UPDATE configurations SET valeur = ? WHERE cle = ?";

@@ -1,4 +1,3 @@
-
 package com.poissonnerie.util;
 
 import java.sql.Connection;
@@ -11,7 +10,7 @@ public class AuditLogger {
     private static final Logger LOGGER = Logger.getLogger(AuditLogger.class.getName());
 
     public static void logAction(Integer utilisateurId, String typeAction, String entite, String description, String details) {
-        try (Connection conn = DatabaseConnectionPool.getConnection();
+        try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(
                  "INSERT INTO journal_actions (utilisateur_id, type_action, entite, description, details) VALUES (?, ?, ?, ?, ?)"
              )) {

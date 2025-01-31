@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import com.poissonnerie.util.DatabaseConnectionPool;
+import com.poissonnerie.util.DatabaseManager;
 
 public class InventaireManager {
     private static final Logger LOGGER = Logger.getLogger(InventaireManager.class.getName());
@@ -89,7 +89,7 @@ public class InventaireManager {
             historique.add(new AjustementStock(produit, ancienStock, nouveauStock, raison));
 
             // Enregistrer dans la base de données
-            try (Connection conn = DatabaseConnectionPool.getConnection();
+            try (Connection conn = DatabaseManager.getConnection();
                  PreparedStatement stmt = conn.prepareStatement(
                      "INSERT INTO historique_stock (produit_id, ancien_stock, nouveau_stock, type_mouvement, commentaire) " +
                      "VALUES (?, ?, ?, ?, ?)")) {
