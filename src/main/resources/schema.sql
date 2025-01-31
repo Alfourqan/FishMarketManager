@@ -10,6 +10,8 @@ PRAGMA foreign_keys = OFF;  -- Désactivé temporairement pour la migration
 -- Tables principales dans l'ordre de dépendance
 DROP TABLE IF EXISTS mouvements_caisse;
 DROP TABLE IF EXISTS user_actions;
+DROP TABLE IF EXISTS ventes;
+DROP TABLE IF EXISTS lignes_vente;
 DROP TABLE IF EXISTS users;
 
 CREATE TABLE users (
@@ -61,7 +63,8 @@ CREATE TABLE IF NOT EXISTS clients (
     nom TEXT NOT NULL,
     telephone TEXT,
     adresse TEXT,
-    solde REAL DEFAULT 0
+    solde REAL DEFAULT 0,
+    supprime BOOLEAN DEFAULT false
 );
 
 CREATE TABLE IF NOT EXISTS fournisseurs (
@@ -75,16 +78,17 @@ CREATE TABLE IF NOT EXISTS fournisseurs (
     supprime BOOLEAN DEFAULT false
 );
 
-CREATE TABLE IF NOT EXISTS ventes (
+CREATE TABLE ventes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     date INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000),
     client_id INTEGER,
     credit INTEGER DEFAULT 0,
     total REAL NOT NULL,
+    supprime BOOLEAN DEFAULT false,
     FOREIGN KEY (client_id) REFERENCES clients(id)
 );
 
-CREATE TABLE IF NOT EXISTS lignes_vente (
+CREATE TABLE lignes_vente (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     vente_id INTEGER,
     produit_id INTEGER,
@@ -100,7 +104,6 @@ CREATE TABLE IF NOT EXISTS configurations (
     valeur TEXT,
     description TEXT
 );
-
 
 -- Index optimisés
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);

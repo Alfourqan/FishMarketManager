@@ -1,0 +1,427 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------< com.poissonnerie:gestion-poissonnerie >----------------
+[INFO] Building gestion-poissonnerie 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ gestion-poissonnerie ---
+[INFO] Deleting /home/runner/workspace/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ gestion-poissonnerie ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ gestion-poissonnerie ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 41 source files with javac [debug target 11] to target/classes
+[WARNING] system modules path not set in conjunction with -source 11
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[754,77] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[767,78] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[809,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[812,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[88,41] unchecked cast
+  required: java.util.List<com.poissonnerie.model.Produit>
+  found:    java.util.List<capture#1 of ?>
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[89,78] unchecked cast
+  required: java.util.List<com.poissonnerie.model.Produit>
+  found:    java.util.List<capture#2 of ?>
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ gestion-poissonnerie ---
+[INFO] skip non existing resourceDirectory /home/runner/workspace/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ gestion-poissonnerie ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.2.2:test (default-test) @ gestion-poissonnerie ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jar:3.3.0:jar (default-jar) @ gestion-poissonnerie ---
+[INFO] Building jar: /home/runner/workspace/target/gestion-poissonnerie-1.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- install:3.1.1:install (default-install) @ gestion-poissonnerie ---
+[INFO] Installing /home/runner/workspace/pom.xml to /home/runner/.m2/repository/com/poissonnerie/gestion-poissonnerie/1.0-SNAPSHOT/gestion-poissonnerie-1.0-SNAPSHOT.pom
+[INFO] Installing /home/runner/workspace/target/gestion-poissonnerie-1.0-SNAPSHOT.jar to /home/runner/.m2/repository/com/poissonnerie/gestion-poissonnerie/1.0-SNAPSHOT/gestion-poissonnerie-1.0-SNAPSHOT.jar
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  7.859 s
+[INFO] Finished at: 2025-01-31T19:36:18Z
+[INFO] ------------------------------------------------------------------------
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------< com.poissonnerie:gestion-poissonnerie >----------------
+[INFO] Building gestion-poissonnerie 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ gestion-poissonnerie ---
+Jan 31, 2025 7:36:21 PM com.poissonnerie.Main main
+INFO: Configuration système initialisée
+Jan 31, 2025 7:36:21 PM com.poissonnerie.Main lambda$main$0
+INFO: Démarrage de l'application dans l'EDT...
+Jan 31, 2025 7:36:21 PM com.poissonnerie.Main lambda$initializeApplication$1
+INFO: Thème et UI configurés avec succès
+Jan 31, 2025 7:36:21 PM com.poissonnerie.Main lambda$initializeApplication$2
+INFO: SplashScreen créé et affiché
+Jan 31, 2025 7:36:21 PM com.poissonnerie.Main lambda$startBackgroundInitialization$3
+INFO: Début de l'initialisation en arrière-plan
+Jan 31, 2025 7:36:21 PM com.poissonnerie.Main initializeDatabase
+INFO: Début de l'initialisation de la base de données
+Jan 31, 2025 7:36:21 PM com.poissonnerie.util.DatabaseManager initDatabase
+INFO: Initialisation de la base de données...
+Jan 31, 2025 7:36:21 PM com.poissonnerie.util.DatabaseManager initDatabase
+INFO: Création du fichier de base de données...
+Jan 31, 2025 7:36:22 PM com.poissonnerie.util.DatabaseManager loadSchemaFromResource
+INFO: Chargement du schéma SQL depuis les ressources...
+Jan 31, 2025 7:36:22 PM com.poissonnerie.util.DatabaseManager loadSchemaFromResource
+INFO: Schéma SQL chargé avec succès
+Jan 31, 2025 7:36:22 PM com.poissonnerie.util.DatabaseManager insertTestDataIfEmpty
+INFO: Vérification et insertion des données de test...
+Jan 31, 2025 7:36:22 PM com.poissonnerie.util.DatabaseManager insertTestDataIfEmpty
+INFO: Données de test insérées avec succès
+Jan 31, 2025 7:36:22 PM com.poissonnerie.util.DatabaseManager initDatabase
+INFO: Base de données initialisée avec succès
+Jan 31, 2025 7:36:22 PM com.poissonnerie.Main initializeDatabase
+INFO: Base de données initialisée avec succès
+Jan 31, 2025 7:36:22 PM com.poissonnerie.Main loadInitialData
+INFO: Début du chargement des données initiales
+Jan 31, 2025 7:36:22 PM com.poissonnerie.controller.ClientController ajouterClientTest
+INFO: Ajout d'un client test avec créance...
+Jan 31, 2025 7:36:22 PM com.poissonnerie.controller.ClientController ajouterClient
+INFO: Tentative d'ajout d'un nouveau client: Client Test Créance
+Jan 31, 2025 7:36:22 PM com.poissonnerie.controller.ClientController ajouterClient
+INFO: Client ajouté avec succès, ID: 1
+Jan 31, 2025 7:36:22 PM com.poissonnerie.controller.ClientController ajouterClientTest
+INFO: Client test ajouté avec succès: Client Test Créance, Solde: 150.5
+Jan 31, 2025 7:36:22 PM com.poissonnerie.Main loadInitialData
+INFO: Données initiales chargées avec succès
+Jan 31, 2025 7:36:22 PM com.poissonnerie.Main startBackgroundInitialization
+INFO: Initialisation en arrière-plan terminée avec succès
+Jan 31, 2025 7:36:22 PM com.poissonnerie.controller.AuthenticationController createDefaultAdmin
+INFO: Création de l'utilisateur admin avec mot de passe hashé
+Jan 31, 2025 7:36:22 PM com.poissonnerie.controller.AuthenticationController createDefaultAdmin
+INFO: Utilisateur administrateur par défaut créé avec succès
+Jan 31, 2025 7:36:24 PM com.poissonnerie.Main lambda$showLoginScreen$5
+INFO: Transition vers login effectuée
+Jan 31, 2025 7:36:46 PM com.poissonnerie.controller.AuthenticationController authenticate
+INFO: Tentative d'authentification pour l'utilisateur: admin
+Jan 31, 2025 7:36:47 PM com.poissonnerie.controller.AuthenticationController updateLastLogin
+INFO: Mise à jour de la dernière connexion pour: admin
+Jan 31, 2025 7:36:47 PM com.poissonnerie.controller.AuthenticationController authenticate
+INFO: Authentification réussie pour l'utilisateur: admin
+Jan 31, 2025 7:36:48 PM com.poissonnerie.Main lambda$createAndShowMainFrame$7
+INFO: Création de la fenêtre principale
+Jan 31, 2025 7:36:48 PM com.poissonnerie.controller.UserActionController migrateTable
+INFO: Migration de la table user_actions effectuée avec succès
+Jan 31, 2025 7:36:48 PM com.poissonnerie.controller.UserActionController <init>
+INFO: UserActionController initialisé avec succès
+Jan 31, 2025 7:36:48 PM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Initialisation des tables de la base de données...
+Jan 31, 2025 7:36:48 PM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Base de données optimisée avec succès
+Jan 31, 2025 7:36:48 PM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Initialisation des tables de la base de données...
+Jan 31, 2025 7:36:48 PM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Base de données optimisée avec succès
+Jan 31, 2025 7:36:48 PM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Chargement des fournisseurs...
+Jan 31, 2025 7:36:48 PM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Fournisseurs chargés: 0
+Jan 31, 2025 7:36:48 PM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Initialisation des tables de la base de données...
+Jan 31, 2025 7:36:48 PM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Base de données optimisée avec succès
+Jan 31, 2025 7:36:48 PM com.poissonnerie.view.VenteViewSwing loadData
+INFO: Chargement des données de vente...
+Jan 31, 2025 7:36:48 PM com.poissonnerie.view.VenteViewSwing loadData
+INFO: Produits chargés
+Jan 31, 2025 7:36:48 PM com.poissonnerie.controller.ClientController chargerClients
+INFO: Chargement des clients...
+Jan 31, 2025 7:36:48 PM com.poissonnerie.controller.ClientController chargerClients
+INFO: Clients chargés avec succès: 1 clients
+Jan 31, 2025 7:36:48 PM com.poissonnerie.view.VenteViewSwing loadData
+INFO: Clients chargés
+Jan 31, 2025 7:36:48 PM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Jan 31, 2025 7:36:48 PM com.poissonnerie.controller.VenteController chargerVentes
+SEVERE: Erreur lors du chargement des ventes
+org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (no such column: v.supprime)
+    at org.sqlite.core.DB.newSQLException(DB.java:1179)
+    at org.sqlite.core.DB.newSQLException(DB.java:1190)
+    at org.sqlite.core.DB.throwex(DB.java:1150)
+    at org.sqlite.core.NativeDB.prepare_utf8(Native Method)
+    at org.sqlite.core.NativeDB.prepare(NativeDB.java:126)
+    at org.sqlite.core.DB.prepare(DB.java:264)
+    at org.sqlite.core.CorePreparedStatement.<init>(CorePreparedStatement.java:46)
+    at org.sqlite.jdbc3.JDBC3PreparedStatement.<init>(JDBC3PreparedStatement.java:32)
+    at org.sqlite.jdbc4.JDBC4PreparedStatement.<init>(JDBC4PreparedStatement.java:25)
+    at org.sqlite.jdbc4.JDBC4Connection.prepareStatement(JDBC4Connection.java:34)
+    at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:226)
+    at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:206)
+    at com.poissonnerie.controller.VenteController.chargerVentes(VenteController.java:82)
+    at com.poissonnerie.view.VenteViewSwing.loadData(VenteViewSwing.java:98)
+    at com.poissonnerie.view.VenteViewSwing.<init>(VenteViewSwing.java:80)
+    at com.poissonnerie.view.MainViewSwing.addViews(MainViewSwing.java:161)
+    at com.poissonnerie.view.MainViewSwing.initializeComponents(MainViewSwing.java:43)
+    at com.poissonnerie.view.MainViewSwing.<init>(MainViewSwing.java:31)
+    at com.poissonnerie.Main.lambda$createAndShowMainFrame$7(Main.java:175)
+    at java.desktop/java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:318)
+    at java.desktop/java.awt.EventQueue.dispatchEventImpl(EventQueue.java:773)
+    at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:720)
+    at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:714)
+    at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+    at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:87)
+    at java.desktop/java.awt.EventQueue.dispatchEvent(EventQueue.java:742)
+    at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:203)
+    at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:124)
+    at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:113)
+    at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:109)
+    at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
+    at java.desktop/java.awt.EventDispatchThread.run(EventDispatchThread.java:90)
+
+Jan 31, 2025 7:36:48 PM com.poissonnerie.view.VenteViewSwing loadData
+SEVERE: Erreur lors du chargement des données
+java.lang.RuntimeException: Erreur lors du chargement des ventes
+    at com.poissonnerie.controller.VenteController.chargerVentes(VenteController.java:110)
+    at com.poissonnerie.view.VenteViewSwing.loadData(VenteViewSwing.java:98)
+    at com.poissonnerie.view.VenteViewSwing.<init>(VenteViewSwing.java:80)
+    at com.poissonnerie.view.MainViewSwing.addViews(MainViewSwing.java:161)
+    at com.poissonnerie.view.MainViewSwing.initializeComponents(MainViewSwing.java:43)
+    at com.poissonnerie.view.MainViewSwing.<init>(MainViewSwing.java:31)
+    at com.poissonnerie.Main.lambda$createAndShowMainFrame$7(Main.java:175)
+    at java.desktop/java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:318)
+    at java.desktop/java.awt.EventQueue.dispatchEventImpl(EventQueue.java:773)
+    at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:720)
+    at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:714)
+    at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+    at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:87)
+    at java.desktop/java.awt.EventQueue.dispatchEvent(EventQueue.java:742)
+    at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:203)
+    at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:124)
+    at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:113)
+    at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:109)
+    at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
+    at java.desktop/java.awt.EventDispatchThread.run(EventDispatchThread.java:90)
+Caused by: org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (no such column: v.supprime)
+    at org.sqlite.core.DB.newSQLException(DB.java:1179)
+    at org.sqlite.core.DB.newSQLException(DB.java:1190)
+    at org.sqlite.core.DB.throwex(DB.java:1150)
+    at org.sqlite.core.NativeDB.prepare_utf8(Native Method)
+    at org.sqlite.core.NativeDB.prepare(NativeDB.java:126)
+    at org.sqlite.core.DB.prepare(DB.java:264)
+    at org.sqlite.core.CorePreparedStatement.<init>(CorePreparedStatement.java:46)
+    at org.sqlite.jdbc3.JDBC3PreparedStatement.<init>(JDBC3PreparedStatement.java:32)
+    at org.sqlite.jdbc4.JDBC4PreparedStatement.<init>(JDBC4PreparedStatement.java:25)
+    at org.sqlite.jdbc4.JDBC4Connection.prepareStatement(JDBC4Connection.java:34)
+    at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:226)
+    at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:206)
+    at com.poissonnerie.controller.VenteController.chargerVentes(VenteController.java:82)
+    ... 19 more
+
+Chargement des clients...
+Jan 31, 2025 7:36:48 PM com.poissonnerie.controller.ClientController chargerClients
+INFO: Chargement des clients...
+Jan 31, 2025 7:36:48 PM com.poissonnerie.controller.ClientController chargerClients
+INFO: Clients chargés avec succès: 1 clients
+Clients chargés avec succès
+Jan 31, 2025 7:36:48 PM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: Chargement des mouvements de caisse...
+Jan 31, 2025 7:36:48 PM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: Mouvements de caisse chargés avec succès: 0 mouvements
+Jan 31, 2025 7:36:48 PM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: État actuel de la caisse - Solde: 0.00€, Ouverte: false
+Jan 31, 2025 7:36:48 PM com.poissonnerie.view.InventaireViewSwing <init>
+INFO: Initialisation de InventaireViewSwing
+Jan 31, 2025 7:36:48 PM com.poissonnerie.model.InventaireManager ajouterObserver
+INFO: Observer ajouté. Total observers: 1
+Jan 31, 2025 7:36:48 PM com.poissonnerie.view.InventaireViewSwing refreshTable
+INFO: Rafraîchissement de la table d'inventaire
+Jan 31, 2025 7:36:48 PM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Chargement des fournisseurs...
+Jan 31, 2025 7:36:48 PM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Fournisseurs chargés: 0
+Jan 31, 2025 7:36:48 PM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Initialisation des tables de la base de données...
+Jan 31, 2025 7:36:48 PM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Base de données optimisée avec succès
+Jan 31, 2025 7:36:48 PM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Initialisation des tables de la base de données...
+Jan 31, 2025 7:36:48 PM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Base de données optimisée avec succès
+Jan 31, 2025 7:36:49 PM com.poissonnerie.Main lambda$createAndShowMainFrame$7
+INFO: Fenêtre principale affichée avec succès
+Jan 31, 2025 7:36:49 PM com.poissonnerie.view.AccueilViewSwing loadData
+INFO: Début du chargement des données...
+Jan 31, 2025 7:36:49 PM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des ventes...
+Jan 31, 2025 7:36:49 PM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Jan 31, 2025 7:36:49 PM com.poissonnerie.controller.VenteController chargerVentes
+SEVERE: Erreur lors du chargement des ventes
+org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (no such column: v.supprime)
+    at org.sqlite.core.DB.newSQLException(DB.java:1179)
+    at org.sqlite.core.DB.newSQLException(DB.java:1190)
+    at org.sqlite.core.DB.throwex(DB.java:1150)
+    at org.sqlite.core.NativeDB.prepare_utf8(Native Method)
+    at org.sqlite.core.NativeDB.prepare(NativeDB.java:126)
+    at org.sqlite.core.DB.prepare(DB.java:264)
+    at org.sqlite.core.CorePreparedStatement.<init>(CorePreparedStatement.java:46)
+    at org.sqlite.jdbc3.JDBC3PreparedStatement.<init>(JDBC3PreparedStatement.java:32)
+    at org.sqlite.jdbc4.JDBC4PreparedStatement.<init>(JDBC4PreparedStatement.java:25)
+    at org.sqlite.jdbc4.JDBC4Connection.prepareStatement(JDBC4Connection.java:34)
+    at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:226)
+    at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:206)
+    at com.poissonnerie.controller.VenteController.chargerVentes(VenteController.java:82)
+    at com.poissonnerie.view.AccueilViewSwing$1.doInBackground(AccueilViewSwing.java:151)
+    at com.poissonnerie.view.AccueilViewSwing$1.doInBackground(AccueilViewSwing.java:139)
+    at java.desktop/javax.swing.SwingWorker$1.call(SwingWorker.java:305)
+    at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+    at java.desktop/javax.swing.SwingWorker.run(SwingWorker.java:342)
+    at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+    at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+    at java.base/java.lang.Thread.run(Thread.java:1583)
+
+Jan 31, 2025 7:36:49 PM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+SEVERE: Erreur lors du chargement des données
+java.lang.RuntimeException: Erreur lors du chargement des ventes
+    at com.poissonnerie.controller.VenteController.chargerVentes(VenteController.java:110)
+    at com.poissonnerie.view.AccueilViewSwing$1.doInBackground(AccueilViewSwing.java:151)
+    at com.poissonnerie.view.AccueilViewSwing$1.doInBackground(AccueilViewSwing.java:139)
+    at java.desktop/javax.swing.SwingWorker$1.call(SwingWorker.java:305)
+    at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+    at java.desktop/javax.swing.SwingWorker.run(SwingWorker.java:342)
+    at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+    at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+    at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (no such column: v.supprime)
+    at org.sqlite.core.DB.newSQLException(DB.java:1179)
+    at org.sqlite.core.DB.newSQLException(DB.java:1190)
+    at org.sqlite.core.DB.throwex(DB.java:1150)
+    at org.sqlite.core.NativeDB.prepare_utf8(Native Method)
+    at org.sqlite.core.NativeDB.prepare(NativeDB.java:126)
+    at org.sqlite.core.DB.prepare(DB.java:264)
+    at org.sqlite.core.CorePreparedStatement.<init>(CorePreparedStatement.java:46)
+    at org.sqlite.jdbc3.JDBC3PreparedStatement.<init>(JDBC3PreparedStatement.java:32)
+    at org.sqlite.jdbc4.JDBC4PreparedStatement.<init>(JDBC4PreparedStatement.java:25)
+    at org.sqlite.jdbc4.JDBC4Connection.prepareStatement(JDBC4Connection.java:34)
+    at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:226)
+    at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:206)
+    at com.poissonnerie.controller.VenteController.chargerVentes(VenteController.java:82)
+    ... 8 more
+
+Jan 31, 2025 7:36:49 PM com.poissonnerie.view.InventaireViewSwing lambda$updateStatus$7
+INFO: Status mis à jour: Chargement des données...
+Jan 31, 2025 7:36:49 PM com.poissonnerie.view.InventaireViewSwing lambda$refreshTable$9
+INFO: Table rafraîchie avec succès
+Jan 31, 2025 7:36:49 PM com.poissonnerie.view.InventaireViewSwing lambda$updateStatus$7
+INFO: Status mis à jour: Données chargées avec succès
+Jan 31, 2025 7:36:49 PM com.poissonnerie.model.ConfigurationParam setValeur
+WARNING: Erreur lors du traitement de la valeur
+java.lang.IllegalArgumentException: Format d'email invalide
+    at com.poissonnerie.model.ConfigurationParam.validateValeur(ConfigurationParam.java:74)
+    at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:185)
+    at com.poissonnerie.model.ConfigurationParam.<init>(ConfigurationParam.java:36)
+    at com.poissonnerie.controller.ConfigurationController.chargerConfigurations(ConfigurationController.java:66)
+    at com.poissonnerie.controller.ConfigurationController.getConfigurations(ConfigurationController.java:40)
+    at com.poissonnerie.view.ConfigurationViewSwing.loadData(ConfigurationViewSwing.java:997)
+    at com.poissonnerie.view.ConfigurationViewSwing$3.doInBackground(ConfigurationViewSwing.java:347)
+    at com.poissonnerie.view.ConfigurationViewSwing$3.doInBackground(ConfigurationViewSwing.java:344)
+    at java.desktop/javax.swing.SwingWorker$1.call(SwingWorker.java:305)
+    at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+    at java.desktop/javax.swing.SwingWorker.run(SwingWorker.java:342)
+    at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+    at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+    at java.base/java.lang.Thread.run(Thread.java:1583)
+
+Jan 31, 2025 7:36:49 PM com.poissonnerie.controller.ConfigurationController chargerConfigurations
+WARNING: Configuration invalide ignorée: Impossible de traiter la valeur: Format d'email invalide
+Jan 31, 2025 7:36:49 PM com.poissonnerie.model.ConfigurationParam decryptValue
+WARNING: Valeur non décryptée car clé de cryptage non configurée ou valeur vide
+Jan 31, 2025 7:36:49 PM com.poissonnerie.model.ConfigurationParam setValeur
+WARNING: Erreur lors du traitement de la valeur
+java.lang.IllegalArgumentException: Format de téléphone invalide
+    at com.poissonnerie.model.ConfigurationParam.validateValeur(ConfigurationParam.java:111)
+    at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:185)
+    at com.poissonnerie.model.ConfigurationParam.<init>(ConfigurationParam.java:36)
+    at com.poissonnerie.controller.ConfigurationController.chargerConfigurations(ConfigurationController.java:66)
+    at com.poissonnerie.controller.ConfigurationController.getConfigurations(ConfigurationController.java:40)
+    at com.poissonnerie.view.ConfigurationViewSwing.loadData(ConfigurationViewSwing.java:997)
+    at com.poissonnerie.view.ConfigurationViewSwing$3.doInBackground(ConfigurationViewSwing.java:347)
+    at com.poissonnerie.view.ConfigurationViewSwing$3.doInBackground(ConfigurationViewSwing.java:344)
+    at java.desktop/javax.swing.SwingWorker$1.call(SwingWorker.java:305)
+    at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+    at java.desktop/javax.swing.SwingWorker.run(SwingWorker.java:342)
+    at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+    at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+    at java.base/java.lang.Thread.run(Thread.java:1583)
+
+Jan 31, 2025 7:36:49 PM com.poissonnerie.controller.ConfigurationController chargerConfigurations
+WARNING: Configuration invalide ignorée: Impossible de traiter la valeur: Format de téléphone invalide
+Jan 31, 2025 7:36:49 PM com.poissonnerie.controller.ConfigurationController chargerConfigurations
+INFO: Configurations chargées: 5 entrées
+Jan 31, 2025 7:37:18 PM com.poissonnerie.view.AccueilViewSwing loadData
+INFO: Début du chargement des données...
+Jan 31, 2025 7:37:18 PM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des ventes...
+Jan 31, 2025 7:37:18 PM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Jan 31, 2025 7:37:18 PM com.poissonnerie.controller.VenteController chargerVentes
+SEVERE: Erreur lors du chargement des ventes
+org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (no such column: v.supprime)
+    at org.sqlite.core.DB.newSQLException(DB.java:1179)
+    at org.sqlite.core.DB.newSQLException(DB.java:1190)
+    at org.sqlite.core.DB.throwex(DB.java:1150)
+    at org.sqlite.core.NativeDB.prepare_utf8(Native Method)
+    at org.sqlite.core.NativeDB.prepare(NativeDB.java:126)
+    at org.sqlite.core.DB.prepare(DB.java:264)
+    at org.sqlite.core.CorePreparedStatement.<init>(CorePreparedStatement.java:46)
+    at org.sqlite.jdbc3.JDBC3PreparedStatement.<init>(JDBC3PreparedStatement.java:32)
+    at org.sqlite.jdbc4.JDBC4PreparedStatement.<init>(JDBC4PreparedStatement.java:25)
+    at org.sqlite.jdbc4.JDBC4Connection.prepareStatement(JDBC4Connection.java:34)
+    at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:226)
+    at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:206)
+    at com.poissonnerie.controller.VenteController.chargerVentes(VenteController.java:82)
+    at com.poissonnerie.view.AccueilViewSwing$1.doInBackground(AccueilViewSwing.java:151)
+    at com.poissonnerie.view.AccueilViewSwing$1.doInBackground(AccueilViewSwing.java:139)
+    at java.desktop/javax.swing.SwingWorker$1.call(SwingWorker.java:305)
+    at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+    at java.desktop/javax.swing.SwingWorker.run(SwingWorker.java:342)
+    at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+    at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+    at java.base/java.lang.Thread.run(Thread.java:1583)
+
+Jan 31, 2025 7:37:18 PM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+SEVERE: Erreur lors du chargement des données
+java.lang.RuntimeException: Erreur lors du chargement des ventes
+    at com.poissonnerie.controller.VenteController.chargerVentes(VenteController.java:110)
+    at com.poissonnerie.view.AccueilViewSwing$1.doInBackground(AccueilViewSwing.java:151)
+    at com.poissonnerie.view.AccueilViewSwing$1.doInBackground(AccueilViewSwing.java:139)
+    at java.desktop/javax.swing.SwingWorker$1.call(SwingWorker.java:305)
+    at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+    at java.desktop/javax.swing.SwingWorker.run(SwingWorker.java:342)
+    at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+    at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+    at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (no such column: v.supprime)
+    at org.sqlite.core.DB.newSQLException(DB.java:1179)
+    at org.sqlite.core.DB.newSQLException(DB.java:1190)
+    at org.sqlite.core.DB.throwex(DB.java:1150)
+    at org.sqlite.core.NativeDB.prepare_utf8(Native Method)
+    at org.sqlite.core.NativeDB.prepare(NativeDB.java:126)
+    at org.sqlite.core.DB.prepare(DB.java:264)
+    at org.sqlite.core.CorePreparedStatement.<init>(CorePreparedStatement.java:46)
+    at org.sqlite.jdbc3.JDBC3PreparedStatement.<init>(JDBC3PreparedStatement.java:32)
+    at org.sqlite.jdbc4.JDBC4PreparedStatement.<init>(JDBC4PreparedStatement.java:25)
+    at org.sqlite.jdbc4.JDBC4Connection.prepareStatement(JDBC4Connection.java:34)
+    at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:226)
+    at org.sqlite.jdbc3.JDBC3Connection.prepareStatement(JDBC3Connection.java:206)
+    at com.poissonnerie.controller.VenteController.chargerVentes(VenteController.java:82)
+    ... 8 more
