@@ -1,0 +1,231 @@
+[INFO] Scanning for projects...
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-compiler-plugin/3.11.0/maven-compiler-plugin-3.11.0.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-compiler-plugin/3.11.0/maven-compiler-plugin-3.11.0.pom (9.8 kB at 3.4 kB/s)
+[INFO] 
+[INFO] ---------------< com.poissonnerie:gestion-poissonnerie >----------------
+[INFO] Building gestion-poissonnerie 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/apache/13/apache-13.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/apache/13/apache-13.pom (14 kB at 17 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/com/google/code/gson/gson/2.10.1/gson-2.10.1.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/com/google/code/gson/gson/2.10.1/gson-2.10.1.pom (9.4 kB at 223 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/com/google/code/gson/gson-parent/2.10.1/gson-parent-2.10.1.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/com/google/code/gson/gson-parent/2.10.1/gson-parent-2.10.1.pom (13 kB at 123 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter/5.9.2/junit-jupiter-5.9.2.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter/5.9.2/junit-jupiter-5.9.2.pom (3.2 kB at 20 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-api/5.9.2/junit-jupiter-api-5.9.2.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-api/5.9.2/junit-jupiter-api-5.9.2.pom (3.2 kB at 34 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-commons/1.9.2/junit-platform-commons-1.9.2.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-commons/1.9.2/junit-platform-commons-1.9.2.pom (2.8 kB at 33 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.pom (1.5 kB at 16 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/com/formdev/flatlaf-intellij-themes/3.2.1/flatlaf-intellij-themes-3.2.1.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/com/formdev/flatlaf-intellij-themes/3.2.1/flatlaf-intellij-themes-3.2.1.jar (291 kB at 529 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/com/formdev/flatlaf-extras/3.2.1/flatlaf-extras-3.2.1.jar
+Downloading from central: https://repo.maven.apache.org/maven2/com/github/weisj/jsvg/1.1.0/jsvg-1.1.0.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/kordamp/ikonli/ikonli-swing/12.3.1/ikonli-swing-12.3.1.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/kordamp/ikonli/ikonli-core/12.3.1/ikonli-core-12.3.1.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/kordamp/ikonli/ikonli-materialdesign-pack/12.3.1/ikonli-materialdesign-pack-12.3.1.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/kordamp/ikonli/ikonli-swing/12.3.1/ikonli-swing-12.3.1.jar (10 kB at 22 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/swinglabs/swingx/swingx-all/1.6.5-1/swingx-all-1.6.5-1.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/com/formdev/flatlaf-extras/3.2.1/flatlaf-extras-3.2.1.jar (115 kB at 217 kB/s)
+Downloaded from central: https://repo.maven.apache.org/maven2/org/kordamp/ikonli/ikonli-core/12.3.1/ikonli-core-12.3.1.jar (14 kB at 28 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/com/zaxxer/HikariCP/5.1.0/HikariCP-5.1.0.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/xerial/sqlite-jdbc/3.42.0.0/sqlite-jdbc-3.42.0.0.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/com/github/weisj/jsvg/1.1.0/jsvg-1.1.0.jar (498 kB at 214 kB/s)
+Downloaded from central: https://repo.maven.apache.org/maven2/org/kordamp/ikonli/ikonli-materialdesign-pack/12.3.1/ikonli-materialdesign-pack-12.3.1.jar (215 kB at 93 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/mindrot/jbcrypt/0.4/jbcrypt-0.4.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/2.0.9/slf4j-api-2.0.9.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/com/zaxxer/HikariCP/5.1.0/HikariCP-5.1.0.jar (162 kB at 64 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/ch/qos/logback/logback-classic/1.4.14/logback-classic-1.4.14.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/slf4j/slf4j-api/2.0.9/slf4j-api-2.0.9.jar (65 kB at 19 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/ch/qos/logback/logback-core/1.4.14/logback-core-1.4.14.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/mindrot/jbcrypt/0.4/jbcrypt-0.4.jar (17 kB at 4.8 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/com/itextpdf/itextpdf/5.5.13.3/itextpdf-5.5.13.3.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/ch/qos/logback/logback-classic/1.4.14/logback-classic-1.4.14.jar (284 kB at 76 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/pdfbox/pdfbox/2.0.30/pdfbox-2.0.30.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/swinglabs/swingx/swingx-all/1.6.5-1/swingx-all-1.6.5-1.jar (1.5 MB at 327 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/pdfbox/fontbox/2.0.30/fontbox-2.0.30.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/ch/qos/logback/logback-core/1.4.14/logback-core-1.4.14.jar (597 kB at 120 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/commons-logging/commons-logging/1.2/commons-logging-1.2.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/commons-logging/commons-logging/1.2/commons-logging-1.2.jar (62 kB at 8.9 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/poi/poi/5.2.3/poi-5.2.3.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/com/itextpdf/itextpdf/5.5.13.3/itextpdf-5.5.13.3.jar (2.3 MB at 332 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.15/commons-codec-1.15.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/pdfbox/pdfbox/2.0.30/pdfbox-2.0.30.jar (2.8 MB at 395 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-collections4/4.4/commons-collections4-4.4.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/pdfbox/fontbox/2.0.30/fontbox-2.0.30.jar (1.6 MB at 212 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-math3/3.6.1/commons-math3-3.6.1.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-collections4/4.4/commons-collections4-4.4.jar (752 kB at 90 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar (327 kB at 37 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/com/zaxxer/SparseBitSet/1.2/SparseBitSet-1.2.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/commons-codec/commons-codec/1.15/commons-codec-1.15.jar (354 kB at 37 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j-api/2.18.0/log4j-api-2.18.0.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/logging/log4j/log4j-api/2.18.0/log4j-api-2.18.0.jar (315 kB at 30 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/poi/poi-ooxml/5.2.3/poi-ooxml-5.2.3.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/poi/poi/5.2.3/poi-5.2.3.jar (3.0 MB at 278 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/poi/poi-ooxml-lite/5.2.3/poi-ooxml-lite-5.2.3.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/com/zaxxer/SparseBitSet/1.2/SparseBitSet-1.2.jar (25 kB at 2.3 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/xmlbeans/xmlbeans/5.1.1/xmlbeans-5.1.1.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/poi/poi-ooxml/5.2.3/poi-ooxml-5.2.3.jar (2.0 MB at 175 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-compress/1.21/commons-compress-1.21.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/xmlbeans/xmlbeans/5.1.1/xmlbeans-5.1.1.jar (2.2 MB at 187 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/com/github/virtuald/curvesapi/1.07/curvesapi-1.07.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-math3/3.6.1/commons-math3-3.6.1.jar (2.2 MB at 182 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/jfree/jfreechart/1.5.4/jfreechart-1.5.4.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/com/github/virtuald/curvesapi/1.07/curvesapi-1.07.jar (112 kB at 9.1 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/com/google/code/gson/gson/2.10.1/gson-2.10.1.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/jfree/jfreechart/1.5.4/jfreechart-1.5.4.jar (1.6 MB at 133 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter/5.9.2/junit-jupiter-5.9.2.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/com/google/code/gson/gson/2.10.1/gson-2.10.1.jar (283 kB at 22 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-api/5.9.2/junit-jupiter-api-5.9.2.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-compress/1.21/commons-compress-1.21.jar (1.0 MB at 79 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-api/5.9.2/junit-jupiter-api-5.9.2.jar (208 kB at 16 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-commons/1.9.2/junit-platform-commons-1.9.2.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-commons/1.9.2/junit-platform-commons-1.9.2.jar (103 kB at 7.8 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/opentest4j/opentest4j/1.2.0/opentest4j-1.2.0.jar (7.7 kB at 576 B/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-params/5.9.2/junit-jupiter-params-5.9.2.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter/5.9.2/junit-jupiter-5.9.2.jar (6.4 kB at 476 B/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-engine/5.9.2/junit-jupiter-engine-5.9.2.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apiguardian/apiguardian-api/1.1.2/apiguardian-api-1.1.2.jar (6.8 kB at 504 B/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-engine/1.9.2/junit-platform-engine-1.9.2.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-engine/5.9.2/junit-jupiter-engine-5.9.2.jar (247 kB at 18 kB/s)
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/jupiter/junit-jupiter-params/5.9.2/junit-jupiter-params-5.9.2.jar (580 kB at 41 kB/s)
+Downloaded from central: https://repo.maven.apache.org/maven2/org/junit/platform/junit-platform-engine/1.9.2/junit-platform-engine-1.9.2.jar (189 kB at 13 kB/s)
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/poi/poi-ooxml-lite/5.2.3/poi-ooxml-lite-5.2.3.jar (5.9 MB at 411 kB/s)
+Downloaded from central: https://repo.maven.apache.org/maven2/org/xerial/sqlite-jdbc/3.42.0.0/sqlite-jdbc-3.42.0.0.jar (13 MB at 892 kB/s)
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ gestion-poissonnerie ---
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-utils/3.3.4/maven-shared-utils-3.3.4.pom (5.8 kB at 69 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-components/34/maven-shared-components-34.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/shared/maven-shared-components/34/maven-shared-components-34.pom (5.1 kB at 170 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/34/maven-parent-34.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/maven-parent/34/maven-parent-34.pom (43 kB at 1.1 MB/s)
+[INFO] Deleting /home/runner/workspace/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ gestion-poissonnerie ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ gestion-poissonnerie ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 41 source files with javac [debug target 11] to target/classes
+[WARNING] system modules path not set in conjunction with -source 11
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[754,77] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[767,78] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[809,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[812,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[88,41] unchecked cast
+  required: java.util.List<com.poissonnerie.model.Produit>
+  found:    java.util.List<capture#1 of ?>
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[89,78] unchecked cast
+  required: java.util.List<com.poissonnerie.model.Produit>
+  found:    java.util.List<capture#2 of ?>
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ gestion-poissonnerie ---
+Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/3.4.2/plexus-utils-3.4.2.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/3.4.2/plexus-utils-3.4.2.pom (8.2 kB at 14 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/8/plexus-8.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus/8/plexus-8.pom (25 kB at 149 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-exec/1.3/commons-exec-1.3.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-exec/1.3/commons-exec-1.3.pom (11 kB at 207 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/35/commons-parent-35.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-parent/35/commons-parent-35.pom (58 kB at 2.6 MB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/apache/15/apache-15.pom
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/apache/15/apache-15.pom (15 kB at 33 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/3.4.2/plexus-utils-3.4.2.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-utils/3.4.2/plexus-utils-3.4.2.jar (267 kB at 793 kB/s)
+Downloading from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-component-annotations/2.1.1/plexus-component-annotations-2.1.1.jar
+Downloading from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-exec/1.3/commons-exec-1.3.jar
+Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/commons/commons-exec/1.3/commons-exec-1.3.jar (54 kB at 351 kB/s)
+Downloaded from central: https://repo.maven.apache.org/maven2/org/codehaus/plexus/plexus-component-annotations/2.1.1/plexus-component-annotations-2.1.1.jar (4.1 kB at 22 kB/s)
+Jan 31, 2025 5:54:37 PM com.poissonnerie.Main main
+INFO: Configuration système initialisée
+Jan 31, 2025 5:54:43 PM com.poissonnerie.Main lambda$main$0
+INFO: Démarrage de l'application dans l'EDT...
+Jan 31, 2025 5:54:44 PM com.poissonnerie.Main lambda$initializeApplication$1
+INFO: Thème et UI configurés avec succès
+Jan 31, 2025 5:54:45 PM com.poissonnerie.Main lambda$initializeApplication$2
+INFO: SplashScreen créé et affiché
+Jan 31, 2025 5:54:45 PM com.poissonnerie.Main lambda$startBackgroundInitialization$3
+INFO: Début de l'initialisation en arrière-plan
+Jan 31, 2025 5:54:45 PM com.poissonnerie.Main initializeDatabase
+INFO: Début de l'initialisation de la base de données
+Jan 31, 2025 5:54:45 PM com.poissonnerie.util.DatabaseManager initDatabase
+INFO: Initialisation de la base de données...
+Jan 31, 2025 5:54:46 PM com.poissonnerie.util.DatabaseManager loadSchemaFromResource
+INFO: Chargement du schéma SQL depuis les ressources...
+Jan 31, 2025 5:54:46 PM com.poissonnerie.util.DatabaseManager initDatabase
+SEVERE: Erreur fatale lors de l'initialisation
+java.lang.IllegalStateException: Fichier schema.sql introuvable dans les ressources
+    at com.poissonnerie.util.DatabaseManager.loadSchemaFromResource(DatabaseManager.java:123)
+    at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:89)
+    at com.poissonnerie.Main.initializeDatabase(Main.java:128)
+    at com.poissonnerie.Main.lambda$startBackgroundInitialization$3(Main.java:101)
+    at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+    at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+    at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+    at java.base/java.lang.Thread.run(Thread.java:1583)
+
+Jan 31, 2025 5:54:46 PM com.poissonnerie.Main lambda$startBackgroundInitialization$3
+SEVERE: Erreur lors de l'initialisation en arrière-plan
+java.lang.RuntimeException: Erreur d'initialisation: Fichier schema.sql introuvable dans les ressources
+    at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:114)
+    at com.poissonnerie.Main.initializeDatabase(Main.java:128)
+    at com.poissonnerie.Main.lambda$startBackgroundInitialization$3(Main.java:101)
+    at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+    at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+    at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+    at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: java.lang.IllegalStateException: Fichier schema.sql introuvable dans les ressources
+    at com.poissonnerie.util.DatabaseManager.loadSchemaFromResource(DatabaseManager.java:123)
+    at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:89)
+    ... 6 more
+
+Jan 31, 2025 5:54:46 PM com.poissonnerie.Main handleFatalError
+SEVERE: Erreur lors de l'initialisation: java.util.concurrent.CompletionException: java.lang.RuntimeException: Erreur d'initialisation: Fichier schema.sql introuvable dans les ressources
+java.util.concurrent.ExecutionException: java.util.concurrent.CompletionException: java.lang.RuntimeException: Erreur d'initialisation: Fichier schema.sql introuvable dans les ressources
+    at java.base/java.util.concurrent.FutureTask.report(FutureTask.java:122)
+    at java.base/java.util.concurrent.FutureTask.get(FutureTask.java:205)
+    at com.poissonnerie.Main.startBackgroundInitialization(Main.java:112)
+    at com.poissonnerie.Main.lambda$initializeApplication$2(Main.java:89)
+    at java.desktop/java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:318)
+    at java.desktop/java.awt.EventQueue.dispatchEventImpl(EventQueue.java:773)
+    at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:720)
+    at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:714)
+    at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+    at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:87)
+    at java.desktop/java.awt.EventQueue.dispatchEvent(EventQueue.java:742)
+    at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:203)
+    at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:124)
+    at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:113)
+    at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:109)
+    at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
+    at java.desktop/java.awt.EventDispatchThread.run(EventDispatchThread.java:90)
+Caused by: java.util.concurrent.CompletionException: java.lang.RuntimeException: Erreur d'initialisation: Fichier schema.sql introuvable dans les ressources
+    at com.poissonnerie.Main.lambda$startBackgroundInitialization$3(Main.java:106)
+    at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+    at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+    at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+    at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: java.lang.RuntimeException: Erreur d'initialisation: Fichier schema.sql introuvable dans les ressources
+    at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:114)
+    at com.poissonnerie.Main.initializeDatabase(Main.java:128)
+    at com.poissonnerie.Main.lambda$startBackgroundInitialization$3(Main.java:101)
+    ... 4 more
+Caused by: java.lang.IllegalStateException: Fichier schema.sql introuvable dans les ressources
+    at com.poissonnerie.util.DatabaseManager.loadSchemaFromResource(DatabaseManager.java:123)
+    at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:89)
+    ... 6 more

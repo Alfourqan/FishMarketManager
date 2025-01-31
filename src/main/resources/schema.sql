@@ -26,7 +26,8 @@ CREATE TABLE IF NOT EXISTS produits (
     prix_achat REAL NOT NULL,
     prix_vente REAL NOT NULL,
     stock INTEGER NOT NULL,
-    seuil_alerte INTEGER NOT NULL
+    seuil_alerte INTEGER NOT NULL,
+    supprime BOOLEAN DEFAULT false
 );
 
 CREATE TABLE IF NOT EXISTS clients (
@@ -82,6 +83,17 @@ CREATE TABLE IF NOT EXISTS configurations (
     description TEXT
 );
 
+-- Nouvelle table pour le journal des actions utilisateurs
+CREATE TABLE IF NOT EXISTS user_actions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    action_type TEXT NOT NULL,
+    username TEXT NOT NULL,
+    date_time TEXT NOT NULL,
+    description TEXT NOT NULL,
+    entity_type TEXT NOT NULL,
+    entity_id INTEGER NOT NULL
+);
+
 -- Index optimisés
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 CREATE INDEX IF NOT EXISTS idx_produits_nom ON produits(nom);
@@ -93,6 +105,9 @@ CREATE INDEX IF NOT EXISTS idx_lignes_vente_vente ON lignes_vente(vente_id);
 CREATE INDEX IF NOT EXISTS idx_lignes_vente_produit ON lignes_vente(produit_id);
 CREATE INDEX IF NOT EXISTS idx_mouvements_caisse_date ON mouvements_caisse(date);
 CREATE INDEX IF NOT EXISTS idx_mouvements_caisse_type ON mouvements_caisse(type);
+CREATE INDEX IF NOT EXISTS idx_user_actions_date ON user_actions(date_time);
+CREATE INDEX IF NOT EXISTS idx_user_actions_type ON user_actions(action_type);
+CREATE INDEX IF NOT EXISTS idx_user_actions_entity ON user_actions(entity_type, entity_id);
 
 -- Configurations par défaut
 INSERT OR IGNORE INTO configurations (cle, valeur, description) VALUES
