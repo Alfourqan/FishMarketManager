@@ -8,7 +8,11 @@ PRAGMA busy_timeout = 30000;
 PRAGMA foreign_keys = OFF;  -- Désactivé temporairement pour la migration
 
 -- Tables principales dans l'ordre de dépendance
-CREATE TABLE IF NOT EXISTS users (
+DROP TABLE IF EXISTS mouvements_caisse;
+DROP TABLE IF EXISTS user_actions;
+DROP TABLE IF EXISTS users;
+
+CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL,
@@ -19,13 +23,24 @@ CREATE TABLE IF NOT EXISTS users (
     CONSTRAINT username_min_length CHECK (length(username) >= 3)
 );
 
--- Création de la table mouvements_caisse
-CREATE TABLE IF NOT EXISTS mouvements_caisse (
+CREATE TABLE mouvements_caisse (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     date TEXT DEFAULT (datetime('now', 'localtime')),
     type TEXT NOT NULL CHECK (type IN ('ENTREE', 'SORTIE', 'OUVERTURE', 'CLOTURE')),
-    montant REAL NOT NULL,
+    montant REAL NOT NULL CHECK (montant > 0),
     description TEXT,
+    user_id INTEGER,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE user_actions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    action_type TEXT NOT NULL,
+    username TEXT NOT NULL,
+    date_time TEXT NOT NULL,
+    description TEXT NOT NULL,
+    entity_type TEXT NOT NULL,
+    entity_id INTEGER NOT NULL,
     user_id INTEGER,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
@@ -86,16 +101,6 @@ CREATE TABLE IF NOT EXISTS configurations (
     description TEXT
 );
 
-CREATE TABLE IF NOT EXISTS user_actions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    action_type TEXT NOT NULL,
-    username TEXT NOT NULL,
-    date_time TEXT NOT NULL,
-    description TEXT NOT NULL,
-    entity_type TEXT NOT NULL,
-    entity_id INTEGER NOT NULL,
-    user_id INTEGER  -- Permettre les valeurs NULL
-);
 
 -- Index optimisés
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
@@ -114,9 +119,6 @@ CREATE INDEX IF NOT EXISTS idx_user_actions_type ON user_actions(action_type);
 CREATE INDEX IF NOT EXISTS idx_user_actions_entity ON user_actions(entity_type, entity_id);
 CREATE INDEX IF NOT EXISTS idx_user_actions_user ON user_actions(user_id);
 
--- Réactivation des foreign keys après la migration
-PRAGMA foreign_keys = ON;
-
 -- Configurations par défaut
 INSERT OR IGNORE INTO configurations (cle, valeur, description) VALUES
 ('TAUX_TVA', '20.0', 'Taux de TVA en pourcentage'),
@@ -125,16 +127,7 @@ INSERT OR IGNORE INTO configurations (cle, valeur, description) VALUES
 ('ADRESSE_ENTREPRISE', '', 'Adresse de l''entreprise'),
 ('TELEPHONE_ENTREPRISE', '', 'Numéro de téléphone de l''entreprise'),
 ('EMAIL_ENTREPRISE', '', 'Adresse email de l''entreprise'),
-('SIRET_ENTREPRISE', '12345678901234', 'Numéro SIRET de l''entreprise'),
-('LOGO_PATH', '', 'Chemin vers le logo de l''entreprise'),
-('FORMAT_RECU', 'COMPACT', 'Format des reçus (COMPACT ou DETAILLE)'),
-('PIED_PAGE_RECU', 'Merci de votre visite !', 'Message en pied de page des reçus'),
-('EN_TETE_RECU', '', 'Message en en-tête des reçus'),
-('POLICE_TITRE_RECU', '14', 'Taille de la police pour le titre du reçu'),
-('POLICE_TEXTE_RECU', '12', 'Taille de la police pour le texte du reçu'),
-('ALIGNEMENT_TITRE_RECU', 'CENTRE', 'Alignement du titre (GAUCHE, CENTRE, DROITE)'),
-('ALIGNEMENT_TEXTE_RECU', 'GAUCHE', 'Alignement du texte (GAUCHE, CENTRE, DROITE)'),
-('STYLE_BORDURE_RECU', 'SIMPLE', 'Style de bordure du reçu (SIMPLE, DOUBLE, POINTILLES)'),
-('MESSAGE_COMMERCIAL_RECU', '', 'Message commercial ou promotionnel sur le reçu'),
-('AFFICHER_TVA_DETAILS', 'true', 'Afficher les détails de TVA sur le reçu'),
-('INFO_SUPPLEMENTAIRE_RECU', '', 'Informations supplémentaires sur le reçu');
+('SIRET_ENTREPRISE', '12345678901234', 'Numéro SIRET de l''entreprise');
+
+-- Réactivation des foreign keys après la migration
+PRAGMA foreign_keys = ON;
