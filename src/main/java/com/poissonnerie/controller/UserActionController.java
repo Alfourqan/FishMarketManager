@@ -17,7 +17,13 @@ public class UserActionController {
     private static UserActionController instance;
 
     private UserActionController() {
-        createTableIfNotExists();
+        try {
+            createTableIfNotExists();
+            LOGGER.info("UserActionController initialisé avec succès");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de UserActionController", e);
+            throw new RuntimeException("Erreur lors de l'initialisation de UserActionController", e);
+        }
     }
 
     public static UserActionController getInstance() {
@@ -28,7 +34,7 @@ public class UserActionController {
     }
 
     private void createTableIfNotExists() {
-        String sql = "CREATE TABLE IF NOT EXISTS user_actions (" +
+        String sql = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (" +
             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
             "action_type TEXT NOT NULL," +
             "username TEXT NOT NULL," +
@@ -41,20 +47,33 @@ public class UserActionController {
         try (Connection conn = DatabaseManager.getConnection();
              Statement stmt = conn.createStatement()) {
             stmt.execute(sql);
-            LOGGER.info("Table user_actions créée ou déjà existante");
+
+            // Création des index si nécessaire
+            stmt.execute("CREATE INDEX IF NOT EXISTS idx_user_actions_date ON " + TABLE_NAME + "(date_time)");
+            stmt.execute("CREATE INDEX IF NOT EXISTS idx_user_actions_type ON " + TABLE_NAME + "(action_type)");
+            stmt.execute("CREATE INDEX IF NOT EXISTS idx_user_actions_entity ON " + TABLE_NAME + "(entity_type, entity_id)");
+
+            LOGGER.info("Table " + TABLE_NAME + " et index créés ou déjà existants");
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la création de la table user_actions", e);
-            throw new RuntimeException("Erreur lors de la création de la table user_actions", e);
+            LOGGER.log(Level.SEVERE, "Erreur lors de la création de la table " + TABLE_NAME, e);
+            throw new RuntimeException("Erreur lors de la création de la table " + TABLE_NAME, e);
         }
     }
 
     public void logAction(UserAction action) {
-        String sql = "INSERT INTO user_actions " +
-            "(action_type, username, date_time, description, entity_type, entity_id) " +
+        if (action == null) {
+            LOGGER.warning("Tentative de journalisation d'une action null");
+            return;
+        }
+
+        String sql = "INSERT INTO " + TABLE_NAME +
+            " (action_type, username, date_time, description, entity_type, entity_id) " +
             "VALUES (?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            LOGGER.fine("Préparation de l'enregistrement de l'action: " + action);
 
             pstmt.setString(1, action.getType().name());
             pstmt.setString(2, action.getUsername());
@@ -63,17 +82,21 @@ public class UserActionController {
             pstmt.setString(5, action.getEntityType().name());
             pstmt.setInt(6, action.getEntityId());
 
-            pstmt.executeUpdate();
-            LOGGER.info("Action utilisateur enregistrée: " + action);
+            int result = pstmt.executeUpdate();
+            if (result > 0) {
+                LOGGER.info("Action utilisateur enregistrée avec succès: " + action);
+            } else {
+                LOGGER.warning("Aucune ligne insérée pour l'action: " + action);
+            }
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de l'enregistrement de l'action utilisateur", e);
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'enregistrement de l'action utilisateur: " + action, e);
             throw new RuntimeException("Erreur lors de l'enregistrement de l'action utilisateur", e);
         }
     }
 
     public List<UserAction> getActions(LocalDateTime debut, LocalDateTime fin) {
-        String sql = "SELECT * FROM user_actions " +
-            "WHERE date_time BETWEEN ? AND ? " +
+        String sql = "SELECT * FROM " + TABLE_NAME +
+            " WHERE date_time BETWEEN ? AND ? " +
             "ORDER BY date_time DESC";
 
         List<UserAction> actions = new ArrayList<>();
@@ -99,53 +122,16 @@ public class UserActionController {
                     actions.add(action);
                 }
             }
+            LOGGER.info("Récupération de " + actions.size() + " actions entre " + debut + " et " + fin);
+            return actions;
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la récupération des actions utilisateur", e);
             throw new RuntimeException("Erreur lors de la récupération des actions utilisateur", e);
         }
-
-        return actions;
-    }
-
-    public List<UserAction> getActionsByEntityType(UserAction.EntityType entityType, LocalDateTime debut, LocalDateTime fin) {
-        String sql = "SELECT * FROM user_actions " +
-            "WHERE entity_type = ? AND date_time BETWEEN ? AND ? " +
-            "ORDER BY date_time DESC";
-
-        List<UserAction> actions = new ArrayList<>();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            pstmt.setString(1, entityType.name());
-            pstmt.setString(2, debut.format(formatter));
-            pstmt.setString(3, fin.format(formatter));
-
-            try (ResultSet rs = pstmt.executeQuery()) {
-                while (rs.next()) {
-                    UserAction action = new UserAction(
-                        UserAction.ActionType.valueOf(rs.getString("action_type")),
-                        rs.getString("username"),
-                        rs.getString("description"),
-                        UserAction.EntityType.valueOf(rs.getString("entity_type")),
-                        rs.getInt("entity_id")
-                    );
-                    action.setId(rs.getInt("id"));
-                    action.setDateTime(LocalDateTime.parse(rs.getString("date_time"), formatter));
-                    actions.add(action);
-                }
-            }
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la récupération des actions par type d'entité", e);
-            throw new RuntimeException("Erreur lors de la récupération des actions par type d'entité", e);
-        }
-
-        return actions;
     }
 
     public void purgerActions(LocalDateTime dateLimite) {
-        String sql = "DELETE FROM user_actions WHERE date_time < ?";
+        String sql = "DELETE FROM " + TABLE_NAME + " WHERE date_time < ?";
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         try (Connection conn = DatabaseManager.getConnection();
