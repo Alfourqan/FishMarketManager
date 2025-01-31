@@ -227,6 +227,7 @@ public class ClientController {
         LOGGER.info("Tentative de règlement de créance pour le client ID: " + client.getId() + ", montant: " + montant);
 
         String updateClientSql = "UPDATE clients SET solde = solde - ? WHERE id = ? AND solde >= ?";
+        String insertReglementSql = "INSERT INTO reglements_clients (client_id, montant, type_paiement, commentaire) VALUES (?, ?, ?, ?)";
         String insertMouvementSql = "INSERT INTO mouvements_caisse (type, montant, description) VALUES (?, ?, ?)";
 
         try (Connection conn = DatabaseManager.getConnection()) {
@@ -243,6 +244,15 @@ public class ClientController {
                         throw new IllegalStateException("Impossible de mettre à jour le solde du client");
                     }
 
+                    // Enregistrement du règlement client
+                    try (PreparedStatement reglementStmt = conn.prepareStatement(insertReglementSql)) {
+                        reglementStmt.setInt(1, client.getId());
+                        reglementStmt.setDouble(2, montant);
+                        reglementStmt.setString(3, "ESPECES"); // Par défaut en espèces
+                        reglementStmt.setString(4, "Règlement de créance");
+                        reglementStmt.executeUpdate();
+                    }
+
                     // Enregistrement du mouvement de caisse
                     try (PreparedStatement insertStmt = conn.prepareStatement(insertMouvementSql)) {
                         insertStmt.setString(1, "ENTREE");
@@ -254,7 +264,7 @@ public class ClientController {
                     client.setSolde(client.getSolde() - montant);
                     conn.commit();
                     LOGGER.info("Créance réglée avec succès pour le client " + client.getNom() +
-                              " - Montant: " + montant + "€");
+                            " - Montant: " + montant + "€");
                 }
             } catch (SQLException e) {
                 conn.rollback();

@@ -8,6 +8,7 @@ PRAGMA busy_timeout = 30000;
 PRAGMA foreign_keys = OFF;  -- Désactivé temporairement pour la migration
 
 -- Tables principales dans l'ordre de dépendance
+DROP TABLE IF EXISTS reglements_clients;
 DROP TABLE IF EXISTS mouvements_caisse;
 DROP TABLE IF EXISTS user_actions;
 DROP TABLE IF EXISTS ventes;
@@ -129,6 +130,31 @@ CREATE TABLE lignes_vente (
     CONSTRAINT quantite_positive CHECK (quantite > 0),
     CONSTRAINT prix_unitaire_positif CHECK (prix_unitaire > 0)
 );
+
+-- Nouvelle table pour les règlements clients
+CREATE TABLE IF NOT EXISTS reglements_clients (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    client_id INTEGER NOT NULL,
+    date INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000),
+    montant REAL NOT NULL,
+    type_paiement TEXT NOT NULL,
+    commentaire TEXT,
+    vente_id INTEGER,
+    user_id INTEGER,
+    FOREIGN KEY (client_id) REFERENCES clients(id),
+    FOREIGN KEY (vente_id) REFERENCES ventes(id),
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT montant_positif CHECK (montant > 0),
+    CONSTRAINT type_paiement_valide CHECK (type_paiement IN ('ESPECES', 'CARTE', 'CHEQUE', 'VIREMENT')),
+    CONSTRAINT commentaire_min_length CHECK (commentaire IS NULL OR length(trim(commentaire)) >= 3)
+);
+
+-- Ajout des index pour la nouvelle table
+CREATE INDEX IF NOT EXISTS idx_reglements_clients_client ON reglements_clients(client_id);
+CREATE INDEX IF NOT EXISTS idx_reglements_clients_date ON reglements_clients(date);
+CREATE INDEX IF NOT EXISTS idx_reglements_clients_vente ON reglements_clients(vente_id);
+CREATE INDEX IF NOT EXISTS idx_reglements_clients_user ON reglements_clients(user_id);
+
 
 -- Index optimisés
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
