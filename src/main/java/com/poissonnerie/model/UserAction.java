@@ -10,6 +10,7 @@ public class UserAction {
     private String description;
     private EntityType entityType;
     private int entityId;
+    private int userId;
 
     public enum ActionType {
         CREATION("Création"),
@@ -112,6 +113,14 @@ public class UserAction {
 
     public void setEntityId(int entityId) {
         this.entityId = entityId;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public void setUserId(int userId) {
+        this.userId = userId;
     }
 
     @Override
