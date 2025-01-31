@@ -11,28 +11,25 @@ import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.TimeUnit;
 
 public class DatabaseManager {
     private static final Logger LOGGER = Logger.getLogger(DatabaseManager.class.getName());
-    private static volatile boolean isInitialized = false;
+    private static final AtomicBoolean isInitialized = new AtomicBoolean(false);
     private static final Object INIT_LOCK = new Object();
-
-    public static void main(String[] args) {
-        try {
-            LOGGER.info("Démarrage de l'initialisation de la base de données...");
-            initDatabase();
-            LOGGER.info("Base de données initialisée avec succès");
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de la base de données", e);
-            System.exit(1);
-        }
-    }
+    private static final int INIT_TIMEOUT_SECONDS = 30;
 
     public static Connection getConnection() throws SQLException {
-        if (!isInitialized) {
+        if (!isInitialized.get()) {
             synchronized (INIT_LOCK) {
-                if (!isInitialized) {
-                    initDatabase();
+                if (!isInitialized.get()) {
+                    try {
+                        initDatabase();
+                    } catch (Exception e) {
+                        LOGGER.log(Level.SEVERE, "Échec de l'initialisation de la base de données", e);
+                        throw new SQLException("Échec de l'initialisation de la base de données", e);
+                    }
                 }
             }
         }
@@ -40,37 +37,43 @@ public class DatabaseManager {
     }
 
     public static void initDatabase() {
-        if (isInitialized) {
+        if (isInitialized.get()) {
             return;
         }
 
         synchronized (INIT_LOCK) {
-            if (isInitialized) {
+            if (isInitialized.get()) {
                 return;
             }
 
             LOGGER.info("Initialisation de la base de données...");
             Connection conn = null;
+            long startTime = System.nanoTime();
 
             try {
                 conn = DatabaseConnectionPool.getConnection();
-
-                // Chargement et exécution du schéma
-                String schema = loadSchemaFromResource();
-                if (schema == null || schema.trim().isEmpty()) {
-                    throw new IllegalStateException("Schema SQL vide ou introuvable");
-                }
+                conn.setAutoCommit(false);
 
                 try (Statement stmt = conn.createStatement()) {
-                    for (String sql : schema.split(";")) {
+                    // Configuration SQLite optimisée
+                    stmt.execute("PRAGMA foreign_keys = ON");
+                    stmt.execute("PRAGMA journal_mode = WAL");
+                    stmt.execute("PRAGMA synchronous = NORMAL");
+                    stmt.execute("PRAGMA cache_size = 2000");
+                    stmt.execute("PRAGMA page_size = 4096");
+                    stmt.execute("PRAGMA busy_timeout = 30000");
+
+                    // Chargement et exécution du schéma
+                    String schema = loadSchemaFromResource();
+                    if (schema == null || schema.trim().isEmpty()) {
+                        throw new IllegalStateException("Schema SQL vide ou introuvable");
+                    }
+
+                    String[] statements = schema.split(";");
+                    for (String sql : statements) {
                         sql = sql.trim();
                         if (!sql.isEmpty()) {
                             try {
-                                stmt.execute("PRAGMA foreign_keys = ON");
-                                stmt.execute("PRAGMA journal_mode = WAL");
-                                stmt.execute("PRAGMA synchronous = NORMAL");
-                                stmt.execute("PRAGMA cache_size = 2000");
-                                stmt.execute("PRAGMA page_size = 4096");
                                 stmt.execute(sql);
                                 LOGGER.fine("Exécution SQL réussie: " + sql.substring(0, Math.min(sql.length(), 50)) + "...");
                             } catch (SQLException e) {
@@ -80,21 +83,29 @@ public class DatabaseManager {
                             }
                         }
                     }
-                    LOGGER.info("Schéma de base de données appliqué avec succès");
 
                     // Insertion des données de test si nécessaire
                     insertTestDataIfEmpty(conn);
+                    conn.commit();
+
+                    long duration = TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - startTime);
+                    LOGGER.info("Base de données initialisée avec succès en " + duration + " secondes");
+                    isInitialized.set(true);
                 }
-
-                isInitialized = true;
-                LOGGER.info("Base de données initialisée avec succès");
-
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Erreur fatale lors de l'initialisation", e);
+                if (conn != null) {
+                    try {
+                        conn.rollback();
+                    } catch (SQLException re) {
+                        LOGGER.log(Level.SEVERE, "Erreur lors du rollback", re);
+                    }
+                }
                 throw new RuntimeException("Erreur d'initialisation: " + e.getMessage(), e);
             } finally {
                 if (conn != null) {
                     try {
+                        conn.setAutoCommit(true);
                         conn.close();
                     } catch (SQLException e) {
                         LOGGER.log(Level.WARNING, "Erreur lors de la fermeture de la connexion", e);
@@ -105,42 +116,32 @@ public class DatabaseManager {
     }
 
     private static void insertTestDataIfEmpty(Connection conn) throws SQLException {
+        LOGGER.info("Vérification et insertion des données de test...");
         try (Statement stmt = conn.createStatement()) {
-            // Vérifier si la table produits est vide
+            // Vérification table produits
             var rs = stmt.executeQuery("SELECT COUNT(*) FROM produits");
             if (rs.next() && rs.getInt(1) == 0) {
-                // Insérer quelques produits de test
                 stmt.execute("INSERT INTO produits (nom, categorie, prix_achat, prix_vente, stock, seuil_alerte) VALUES " +
                            "('Saumon frais', 'Poisson', 15.00, 25.00, 50, 10)," +
                            "('Thon rouge', 'Poisson', 20.00, 35.00, 30, 5)," +
                            "('Crevettes', 'Fruits de mer', 12.00, 18.00, 100, 20)");
             }
 
-            // Vérifier si la table utilisateurs est vide
-            rs = stmt.executeQuery("SELECT COUNT(*) FROM users");
-            if (rs.next() && rs.getInt(1) == 0) {
-                // L'utilisateur admin sera créé par AuthenticationController
-                LOGGER.info("La table users est vide, l'utilisateur admin sera créé par AuthenticationController");
-            }
-
+            // La table users sera initialisée par AuthenticationController
             LOGGER.info("Données de test insérées avec succès");
         }
     }
 
     private static String loadSchemaFromResource() {
         LOGGER.info("Chargement du schéma SQL depuis les ressources...");
-        final String schemaPath = "schema.sql";
-
-        try (InputStream is = DatabaseManager.class.getClassLoader().getResourceAsStream(schemaPath)) {
+        try (InputStream is = DatabaseManager.class.getClassLoader().getResourceAsStream("schema.sql")) {
             if (is == null) {
-                LOGGER.severe("Fichier schema.sql introuvable dans les ressources");
                 throw new IllegalStateException("Fichier schema.sql introuvable dans les ressources");
             }
 
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
                 String schema = reader.lines().collect(Collectors.joining("\n"));
                 if (schema.trim().isEmpty()) {
-                    LOGGER.severe("Le fichier schema.sql est vide");
                     throw new IllegalStateException("Le fichier schema.sql est vide");
                 }
                 LOGGER.info("Schéma SQL chargé avec succès");

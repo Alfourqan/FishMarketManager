@@ -26,25 +26,26 @@ public class DatabaseConnectionPool {
                     try {
                         HikariConfig config = new HikariConfig();
 
-                        // Configuration SQLite
+                        // Configuration SQLite de base
                         config.setJdbcUrl("jdbc:sqlite:" + DB_FILE);
                         config.setDriverClassName("org.sqlite.JDBC");
                         config.setPoolName("PoissonnerieSQLitePool");
 
-                        // Configuration optimisée pour SQLite
-                        config.setMaximumPoolSize(1); // SQLite supporte une seule connexion à la fois
+                        // Configuration optimisée pour SQLite avec une seule connexion
+                        config.setMaximumPoolSize(1);
                         config.setMinimumIdle(1);
-                        config.setConnectionTimeout(30000);
-                        config.setIdleTimeout(600000);
-                        config.setMaxLifetime(1800000);
+                        config.setConnectionTimeout(60000); // 60 secondes
+                        config.setIdleTimeout(300000); // 5 minutes
+                        config.setMaxLifetime(1200000); // 20 minutes
                         config.setAutoCommit(true);
-                        config.setLeakDetectionThreshold(60000);
+                        config.setLeakDetectionThreshold(300000); // 5 minutes
 
                         // Propriétés SQLite spécifiques
                         config.addDataSourceProperty("journal_mode", "WAL");
                         config.addDataSourceProperty("synchronous", "NORMAL");
                         config.addDataSourceProperty("foreign_keys", "true");
                         config.addDataSourceProperty("cache_size", "2000");
+                        config.addDataSourceProperty("busy_timeout", "30000");
 
                         dataSource = new HikariDataSource(config);
                         verifyConnection();
@@ -63,11 +64,10 @@ public class DatabaseConnectionPool {
 
     private static void verifyConnection() throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
-            if (conn.isValid(5)) {
-                LOGGER.info("Connexion à SQLite vérifiée avec succès");
-            } else {
+            if (!conn.isValid(10)) { // Augmentation du timeout à 10 secondes
                 throw new SQLException("La connexion test n'est pas valide");
             }
+            LOGGER.info("Connexion à SQLite vérifiée avec succès");
         }
     }
 
@@ -76,34 +76,46 @@ public class DatabaseConnectionPool {
             initializeDataSource();
         }
 
+        Connection conn = null;
         int attempts = 0;
+        SQLException lastException = null;
+
         while (attempts < MAX_RETRY_ATTEMPTS) {
             try {
-                Connection conn = dataSource.getConnection();
-                if (conn.isValid(5)) {
+                conn = dataSource.getConnection();
+                if (conn.isValid(10)) {
                     return conn;
                 }
-                throw new SQLException("Connexion invalide obtenue du pool");
-            } catch (SQLException e) {
-                attempts++;
-                if (attempts == MAX_RETRY_ATTEMPTS) {
-                    LOGGER.severe("Échec de l'obtention d'une connexion après " + MAX_RETRY_ATTEMPTS + " tentatives");
-                    if (failureCount.incrementAndGet() > 5) {
-                        resetPool();
-                        failureCount.set(0);
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        LOGGER.log(Level.WARNING, "Erreur lors de la fermeture de la connexion invalide", e);
                     }
-                    throw e;
                 }
-                LOGGER.warning("Tentative " + attempts + "/" + MAX_RETRY_ATTEMPTS + " échouée, nouvelle tentative dans " + RETRY_DELAY_MS + "ms");
-                try {
-                    Thread.sleep(RETRY_DELAY_MS);
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    throw new SQLException("Interruption pendant la tentative de reconnexion", e);
+            } catch (SQLException e) {
+                lastException = e;
+                attempts++;
+                if (attempts < MAX_RETRY_ATTEMPTS) {
+                    LOGGER.warning("Tentative " + attempts + "/" + MAX_RETRY_ATTEMPTS + 
+                                 " échouée, nouvelle tentative dans " + RETRY_DELAY_MS + "ms");
+                    try {
+                        Thread.sleep(RETRY_DELAY_MS);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        throw new SQLException("Interruption pendant la tentative de reconnexion", ie);
+                    }
                 }
             }
         }
-        throw new SQLException("Impossible d'obtenir une connexion valide après " + MAX_RETRY_ATTEMPTS + " tentatives");
+
+        if (failureCount.incrementAndGet() > 5) {
+            resetPool();
+            failureCount.set(0);
+        }
+
+        throw new SQLException("Impossible d'obtenir une connexion valide après " + 
+                             MAX_RETRY_ATTEMPTS + " tentatives", lastException);
     }
 
     private static synchronized void resetPool() {
