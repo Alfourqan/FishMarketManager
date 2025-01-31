@@ -5,9 +5,9 @@ PRAGMA cache_size = 2000;
 PRAGMA page_size = 4096;
 PRAGMA temp_store = MEMORY;
 PRAGMA busy_timeout = 30000;
-PRAGMA foreign_keys = ON;
+PRAGMA foreign_keys = OFF;  -- Désactivé temporairement pour la migration
 
--- Tables principales
+-- Tables principales dans l'ordre de dépendance
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
@@ -19,8 +19,7 @@ CREATE TABLE IF NOT EXISTS users (
     CONSTRAINT username_min_length CHECK (length(username) >= 3)
 );
 
--- Migration sécurisée de la table mouvements_caisse
-CREATE TABLE IF NOT EXISTS mouvements_caisse_new (
+CREATE TABLE IF NOT EXISTS mouvements_caisse (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     date TEXT DEFAULT (datetime('now', 'localtime')),
     type TEXT NOT NULL CHECK (type IN ('ENTREE', 'SORTIE', 'OUVERTURE', 'CLOTURE')),
@@ -29,15 +28,6 @@ CREATE TABLE IF NOT EXISTS mouvements_caisse_new (
     user_id INTEGER,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
-
--- Copier les données existantes si la table existe
-INSERT OR IGNORE INTO mouvements_caisse_new (id, date, type, montant, description)
-SELECT id, date, type, montant, description 
-FROM mouvements_caisse;
-
--- Supprimer l'ancienne table et renommer la nouvelle
-DROP TABLE IF EXISTS mouvements_caisse;
-ALTER TABLE mouvements_caisse_new RENAME TO mouvements_caisse;
 
 CREATE TABLE IF NOT EXISTS produits (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -95,7 +85,6 @@ CREATE TABLE IF NOT EXISTS configurations (
     description TEXT
 );
 
--- Nouvelle table pour le journal des actions utilisateurs
 CREATE TABLE IF NOT EXISTS user_actions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     action_type TEXT NOT NULL,
@@ -123,6 +112,9 @@ CREATE INDEX IF NOT EXISTS idx_user_actions_date ON user_actions(date_time);
 CREATE INDEX IF NOT EXISTS idx_user_actions_type ON user_actions(action_type);
 CREATE INDEX IF NOT EXISTS idx_user_actions_entity ON user_actions(entity_type, entity_id);
 CREATE INDEX IF NOT EXISTS idx_user_actions_user ON user_actions(user_id);
+
+-- Réactivation des foreign keys après la création des tables
+PRAGMA foreign_keys = ON;
 
 -- Configurations par défaut
 INSERT OR IGNORE INTO configurations (cle, valeur, description) VALUES
