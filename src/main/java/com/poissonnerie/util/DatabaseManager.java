@@ -13,23 +13,43 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class DatabaseManager {
     private static final Logger LOGGER = Logger.getLogger(DatabaseManager.class.getName());
     private static final AtomicBoolean isInitialized = new AtomicBoolean(false);
-    private static final Object INIT_LOCK = new Object();
-    private static final int INIT_TIMEOUT_SECONDS = 30;
+    private static final ReentrantLock INIT_LOCK = new ReentrantLock();
+    private static final int INIT_TIMEOUT_SECONDS = 10;
 
     public static Connection getConnection() throws SQLException {
         if (!isInitialized.get()) {
-            synchronized (INIT_LOCK) {
-                if (!isInitialized.get()) {
+            boolean locked = INIT_LOCK.tryLock();
+            try {
+                if (locked && !isInitialized.get()) {
                     try {
                         initDatabase();
                     } catch (Exception e) {
                         LOGGER.log(Level.SEVERE, "Échec de l'initialisation de la base de données", e);
                         throw new SQLException("Échec de l'initialisation de la base de données", e);
                     }
+                } else if (!locked) {
+                    // Attendre que l'initialisation soit terminée
+                    long startTime = System.currentTimeMillis();
+                    while (!isInitialized.get()) {
+                        if (System.currentTimeMillis() - startTime > INIT_TIMEOUT_SECONDS * 1000) {
+                            throw new SQLException("Timeout lors de l'attente de l'initialisation de la base de données");
+                        }
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            throw new SQLException("Interruption pendant l'attente de l'initialisation", e);
+                        }
+                    }
+                }
+            } finally {
+                if (locked) {
+                    INIT_LOCK.unlock();
                 }
             }
         }
@@ -38,14 +58,17 @@ public class DatabaseManager {
 
     public static void initDatabase() {
         if (isInitialized.get()) {
+            LOGGER.info("Base de données déjà initialisée");
             return;
         }
 
-        synchronized (INIT_LOCK) {
-            if (isInitialized.get()) {
-                return;
-            }
+        boolean locked = INIT_LOCK.tryLock();
+        if (!locked) {
+            LOGGER.info("Initialisation déjà en cours par un autre thread");
+            return;
+        }
 
+        try {
             LOGGER.info("Initialisation de la base de données...");
             Connection conn = null;
             long startTime = System.nanoTime();
@@ -59,9 +82,9 @@ public class DatabaseManager {
                     stmt.execute("PRAGMA foreign_keys = ON");
                     stmt.execute("PRAGMA journal_mode = WAL");
                     stmt.execute("PRAGMA synchronous = NORMAL");
-                    stmt.execute("PRAGMA cache_size = 2000");
+                    stmt.execute("PRAGMA cache_size = 1000");
                     stmt.execute("PRAGMA page_size = 4096");
-                    stmt.execute("PRAGMA busy_timeout = 30000");
+                    stmt.execute("PRAGMA busy_timeout = 5000");
 
                     // Chargement et exécution du schéma
                     String schema = loadSchemaFromResource();
@@ -112,6 +135,8 @@ public class DatabaseManager {
                     }
                 }
             }
+        } finally {
+            INIT_LOCK.unlock();
         }
     }
 
@@ -126,8 +151,6 @@ public class DatabaseManager {
                            "('Thon rouge', 'Poisson', 20.00, 35.00, 30, 5)," +
                            "('Crevettes', 'Fruits de mer', 12.00, 18.00, 100, 20)");
             }
-
-            // La table users sera initialisée par AuthenticationController
             LOGGER.info("Données de test insérées avec succès");
         }
     }

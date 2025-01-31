@@ -61,7 +61,6 @@ com/poissonnerie/model/MouvementCaisse.class
 com/poissonnerie/util/DatabaseConnectionPool.class
 com/poissonnerie/view/ProduitViewSwing$6.class
 com/poissonnerie/view/InventaireViewSwing$2.class
-com/poissonnerie/Main$2.class
 com/poissonnerie/view/ConfigurationViewSwing$3.class
 com/poissonnerie/view/InventaireViewSwing$ButtonRenderer.class
 com/poissonnerie/model/Produit.class

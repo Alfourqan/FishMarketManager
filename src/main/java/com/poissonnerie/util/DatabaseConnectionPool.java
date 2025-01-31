@@ -13,7 +13,7 @@ public class DatabaseConnectionPool {
     private static volatile HikariDataSource dataSource;
     private static final Object LOCK = new Object();
     private static final int MAX_RETRY_ATTEMPTS = 3;
-    private static final long RETRY_DELAY_MS = 1000;
+    private static final long RETRY_DELAY_MS = 500;
     private static final AtomicInteger failureCount = new AtomicInteger(0);
     private static final String DB_FILE = "poissonnerie.db";
 
@@ -25,32 +25,29 @@ public class DatabaseConnectionPool {
 
                     try {
                         HikariConfig config = new HikariConfig();
-
-                        // Configuration SQLite de base
                         config.setJdbcUrl("jdbc:sqlite:" + DB_FILE);
                         config.setDriverClassName("org.sqlite.JDBC");
                         config.setPoolName("PoissonnerieSQLitePool");
 
-                        // Configuration optimisée pour SQLite avec une seule connexion
+                        // Configuration optimisée pour SQLite en mode single-connection
                         config.setMaximumPoolSize(1);
                         config.setMinimumIdle(1);
-                        config.setConnectionTimeout(60000); // 60 secondes
-                        config.setIdleTimeout(300000); // 5 minutes
-                        config.setMaxLifetime(1200000); // 20 minutes
+                        config.setConnectionTimeout(5000); // 5 secondes
+                        config.setIdleTimeout(60000); // 1 minute
+                        config.setMaxLifetime(300000); // 5 minutes
                         config.setAutoCommit(true);
-                        config.setLeakDetectionThreshold(300000); // 5 minutes
+                        config.setLeakDetectionThreshold(60000); // 1 minute
 
                         // Propriétés SQLite spécifiques
                         config.addDataSourceProperty("journal_mode", "WAL");
                         config.addDataSourceProperty("synchronous", "NORMAL");
                         config.addDataSourceProperty("foreign_keys", "true");
-                        config.addDataSourceProperty("cache_size", "2000");
-                        config.addDataSourceProperty("busy_timeout", "30000");
+                        config.addDataSourceProperty("cache_size", "1000");
+                        config.addDataSourceProperty("busy_timeout", "5000");
 
                         dataSource = new HikariDataSource(config);
                         verifyConnection();
                         failureCount.set(0);
-
                         LOGGER.info("Pool de connexions SQLite initialisé avec succès");
 
                     } catch (Exception e) {
@@ -64,7 +61,7 @@ public class DatabaseConnectionPool {
 
     private static void verifyConnection() throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
-            if (!conn.isValid(10)) { // Augmentation du timeout à 10 secondes
+            if (!conn.isValid(5)) {
                 throw new SQLException("La connexion test n'est pas valide");
             }
             LOGGER.info("Connexion à SQLite vérifiée avec succès");
@@ -83,7 +80,7 @@ public class DatabaseConnectionPool {
         while (attempts < MAX_RETRY_ATTEMPTS) {
             try {
                 conn = dataSource.getConnection();
-                if (conn.isValid(10)) {
+                if (conn.isValid(5)) {
                     return conn;
                 }
                 if (conn != null) {
@@ -96,9 +93,10 @@ public class DatabaseConnectionPool {
             } catch (SQLException e) {
                 lastException = e;
                 attempts++;
+
                 if (attempts < MAX_RETRY_ATTEMPTS) {
-                    LOGGER.warning("Tentative " + attempts + "/" + MAX_RETRY_ATTEMPTS + 
-                                 " échouée, nouvelle tentative dans " + RETRY_DELAY_MS + "ms");
+                    LOGGER.warning(String.format("Tentative %d/%d échouée, nouvelle tentative dans %dms",
+                            attempts, MAX_RETRY_ATTEMPTS, RETRY_DELAY_MS));
                     try {
                         Thread.sleep(RETRY_DELAY_MS);
                     } catch (InterruptedException ie) {
@@ -109,13 +107,13 @@ public class DatabaseConnectionPool {
             }
         }
 
-        if (failureCount.incrementAndGet() > 5) {
+        if (failureCount.incrementAndGet() > 3) {
             resetPool();
             failureCount.set(0);
         }
 
         throw new SQLException("Impossible d'obtenir une connexion valide après " + 
-                             MAX_RETRY_ATTEMPTS + " tentatives", lastException);
+                            MAX_RETRY_ATTEMPTS + " tentatives", lastException);
     }
 
     private static synchronized void resetPool() {
