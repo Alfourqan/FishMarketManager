@@ -22,7 +22,56 @@ CREATE TABLE users (
     created_at INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000),
     last_login INTEGER,
     active BOOLEAN DEFAULT true,
-    CONSTRAINT username_min_length CHECK (length(username) >= 3)
+    CONSTRAINT username_min_length CHECK (length(username) >= 3),
+    CONSTRAINT password_min_length CHECK (length(password) >= 6)
+);
+
+CREATE TABLE IF NOT EXISTS produits (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nom TEXT NOT NULL,
+    categorie TEXT NOT NULL,
+    prix_achat REAL NOT NULL,
+    prix_vente REAL NOT NULL,
+    stock INTEGER NOT NULL,
+    seuil_alerte INTEGER NOT NULL,
+    supprime BOOLEAN DEFAULT false,
+    CONSTRAINT nom_produit_min_length CHECK (length(trim(nom)) >= 2),
+    CONSTRAINT categorie_valide CHECK (trim(categorie) IN ('Frais', 'Surgelé', 'Transformé')),
+    CONSTRAINT prix_achat_positif CHECK (prix_achat > 0),
+    CONSTRAINT prix_vente_positif CHECK (prix_vente > 0),
+    CONSTRAINT prix_vente_superieur CHECK (prix_vente > prix_achat),
+    CONSTRAINT stock_positif CHECK (stock >= 0),
+    CONSTRAINT seuil_alerte_positif CHECK (seuil_alerte >= 0)
+);
+
+CREATE TABLE IF NOT EXISTS clients (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nom TEXT NOT NULL,
+    telephone TEXT,
+    adresse TEXT,
+    solde REAL DEFAULT 0,
+    supprime BOOLEAN DEFAULT false,
+    CONSTRAINT nom_client_min_length CHECK (length(trim(nom)) >= 2),
+    CONSTRAINT telephone_format CHECK (telephone IS NULL OR length(trim(telephone)) >= 8),
+    CONSTRAINT adresse_min_length CHECK (adresse IS NULL OR length(trim(adresse)) >= 5),
+    CONSTRAINT solde_valide CHECK (solde IS NULL OR TYPEOF(solde) = 'real' OR TYPEOF(solde) = 'integer')
+);
+
+CREATE TABLE IF NOT EXISTS fournisseurs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nom TEXT NOT NULL,
+    contact TEXT,
+    telephone TEXT,
+    email TEXT,
+    adresse TEXT,
+    statut TEXT DEFAULT 'Actif',
+    supprime BOOLEAN DEFAULT false,
+    CONSTRAINT nom_fournisseur_min_length CHECK (length(trim(nom)) >= 2),
+    CONSTRAINT contact_min_length CHECK (contact IS NULL OR length(trim(contact)) >= 2),
+    CONSTRAINT telephone_format CHECK (telephone IS NULL OR length(trim(telephone)) >= 8),
+    CONSTRAINT email_format CHECK (email IS NULL OR email LIKE '%@%.%'),
+    CONSTRAINT adresse_min_length CHECK (adresse IS NULL OR length(trim(adresse)) >= 5),
+    CONSTRAINT statut_valide CHECK (statut IN ('Actif', 'Inactif', 'En attente'))
 );
 
 CREATE TABLE mouvements_caisse (
@@ -32,7 +81,8 @@ CREATE TABLE mouvements_caisse (
     montant REAL NOT NULL CHECK (montant > 0),
     description TEXT,
     user_id INTEGER,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT description_min_length CHECK (description IS NULL OR length(trim(description)) >= 3)
 );
 
 CREATE TABLE user_actions (
@@ -44,38 +94,8 @@ CREATE TABLE user_actions (
     entity_type TEXT NOT NULL,
     entity_id INTEGER NOT NULL,
     user_id INTEGER,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
-CREATE TABLE IF NOT EXISTS produits (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nom TEXT NOT NULL,
-    categorie TEXT NOT NULL,
-    prix_achat REAL NOT NULL,
-    prix_vente REAL NOT NULL,
-    stock INTEGER NOT NULL,
-    seuil_alerte INTEGER NOT NULL,
-    supprime BOOLEAN DEFAULT false
-);
-
-CREATE TABLE IF NOT EXISTS clients (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nom TEXT NOT NULL,
-    telephone TEXT,
-    adresse TEXT,
-    solde REAL DEFAULT 0,
-    supprime BOOLEAN DEFAULT false
-);
-
-CREATE TABLE IF NOT EXISTS fournisseurs (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nom TEXT NOT NULL,
-    contact TEXT,
-    telephone TEXT,
-    email TEXT,
-    adresse TEXT,
-    statut TEXT DEFAULT 'Actif',
-    supprime BOOLEAN DEFAULT false
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT description_min_length CHECK (length(trim(description)) >= 3)
 );
 
 CREATE TABLE ventes (
@@ -85,7 +105,9 @@ CREATE TABLE ventes (
     credit INTEGER DEFAULT 0,
     total REAL NOT NULL,
     supprime BOOLEAN DEFAULT false,
-    FOREIGN KEY (client_id) REFERENCES clients(id)
+    FOREIGN KEY (client_id) REFERENCES clients(id),
+    CONSTRAINT total_positif CHECK (total >= 0),
+    CONSTRAINT credit_positif CHECK (credit >= 0)
 );
 
 CREATE TABLE lignes_vente (
@@ -95,14 +117,9 @@ CREATE TABLE lignes_vente (
     quantite INTEGER NOT NULL,
     prix_unitaire REAL NOT NULL,
     FOREIGN KEY (vente_id) REFERENCES ventes(id),
-    FOREIGN KEY (produit_id) REFERENCES produits(id)
-);
-
-CREATE TABLE IF NOT EXISTS configurations (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    cle TEXT NOT NULL UNIQUE,
-    valeur TEXT,
-    description TEXT
+    FOREIGN KEY (produit_id) REFERENCES produits(id),
+    CONSTRAINT quantite_positive CHECK (quantite > 0),
+    CONSTRAINT prix_unitaire_positif CHECK (prix_unitaire > 0)
 );
 
 -- Index optimisés

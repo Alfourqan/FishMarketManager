@@ -24,6 +24,38 @@ public class ProduitController {
         return getProduits();
     }
 
+    private void validateProduit(Produit produit) throws IllegalArgumentException {
+        // Validation du nom
+        if (produit.getNom() == null || produit.getNom().trim().length() < 2) {
+            throw new IllegalArgumentException("Le nom du produit doit contenir au moins 2 caractères");
+        }
+
+        // Validation de la catégorie
+        String categorie = produit.getCategorie();
+        if (categorie == null || !List.of("Frais", "Surgelé", "Transformé").contains(categorie.trim())) {
+            throw new IllegalArgumentException("La catégorie doit être 'Frais', 'Surgelé' ou 'Transformé'");
+        }
+
+        // Validation des prix
+        if (produit.getPrixAchat() <= 0) {
+            throw new IllegalArgumentException("Le prix d'achat doit être positif");
+        }
+        if (produit.getPrixVente() <= 0) {
+            throw new IllegalArgumentException("Le prix de vente doit être positif");
+        }
+        if (produit.getPrixVente() <= produit.getPrixAchat()) {
+            throw new IllegalArgumentException("Le prix de vente doit être supérieur au prix d'achat");
+        }
+
+        // Validation du stock et seuil d'alerte
+        if (produit.getStock() < 0) {
+            throw new IllegalArgumentException("Le stock ne peut pas être négatif");
+        }
+        if (produit.getSeuilAlerte() < 0) {
+            throw new IllegalArgumentException("Le seuil d'alerte ne peut pas être négatif");
+        }
+    }
+
     public void chargerProduits() {
         produits.clear();
         String sql = "SELECT * FROM produits WHERE supprime = false ORDER BY id LIMIT ?";
@@ -49,12 +81,15 @@ public class ProduitController {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Erreur lors du chargement des produits", e);
             throw new RuntimeException("Erreur lors du chargement des produits", e);
         }
     }
 
     public void ajouterProduit(Produit produit) {
+        // Valider le produit avant l'insertion
+        validateProduit(produit);
+
         String sql = "INSERT INTO produits (nom, categorie, prix_achat, prix_vente, stock, seuil_alerte) VALUES (?, ?, ?, ?, ?, ?)";
         String getIdSql = "SELECT last_insert_rowid() as id";
 
@@ -93,7 +128,7 @@ public class ProduitController {
             } catch (SQLException e) {
                 conn.rollback();
                 LOGGER.log(Level.SEVERE, "Erreur lors de l'ajout du produit", e);
-                throw e;
+                throw new RuntimeException("Erreur SQL lors de l'ajout du produit: " + e.getMessage(), e);
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur fatale lors de l'ajout du produit", e);
@@ -102,6 +137,9 @@ public class ProduitController {
     }
 
     public void mettreAJourProduit(Produit produit) {
+        // Valider le produit avant la mise à jour
+        validateProduit(produit);
+
         String sql = "UPDATE produits SET nom = ?, categorie = ?, prix_achat = ?, prix_vente = ?, stock = ?, seuil_alerte = ? " +
                     "WHERE id = ? AND supprime = false";
 
@@ -124,7 +162,6 @@ public class ProduitController {
                         if (produits.get(i).getId() == produit.getId()) {
                             produits.set(i, produit);
 
-                            // Log de l'action de mise à jour
                             UserAction action = new UserAction(
                                 UserAction.ActionType.MODIFICATION,
                                 "SYSTEM", // À remplacer par l'utilisateur connecté
@@ -141,20 +178,20 @@ public class ProduitController {
                     }
                 } else {
                     conn.rollback();
-                    throw new SQLException("Aucun produit trouvé avec l'ID: " + produit.getId());
+                    throw new IllegalArgumentException("Aucun produit trouvé avec l'ID: " + produit.getId());
                 }
             } catch (SQLException e) {
                 conn.rollback();
-                throw e;
+                throw new RuntimeException("Erreur SQL lors de la mise à jour du produit: " + e.getMessage(), e);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Erreur lors de la mise à jour du produit", e);
             throw new RuntimeException("Erreur lors de la mise à jour du produit", e);
         }
     }
 
     public boolean produitUtiliseDansVentes(int produitId) {
-        String sql = "SELECT 1 FROM lignes_vente WHERE produit_id = ? AND supprime = false LIMIT 1";
+        String sql = "SELECT 1 FROM lignes_vente WHERE produit_id = ? LIMIT 1";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -164,7 +201,7 @@ public class ProduitController {
                 return rs.next();
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+             LOGGER.log(Level.SEVERE, "Erreur lors de la vérification de l'utilisation du produit", e);
             throw new RuntimeException("Erreur lors de la vérification de l'utilisation du produit", e);
         }
     }
@@ -186,7 +223,6 @@ public class ProduitController {
                     conn.commit();
                     produits.removeIf(p -> p.getId() == produit.getId());
 
-                    // Log de l'action de suppression
                     UserAction action = new UserAction(
                         UserAction.ActionType.SUPPRESSION,
                         "SYSTEM", // À remplacer par l'utilisateur connecté
@@ -199,14 +235,15 @@ public class ProduitController {
                     userActionController.logAction(action);
                 } else {
                     conn.rollback();
-                    throw new SQLException("Aucun produit trouvé avec l'ID: " + produit.getId());
+                    throw new IllegalArgumentException("Aucun produit trouvé avec l'ID: " + produit.getId());
                 }
             } catch (SQLException e) {
                 conn.rollback();
-                throw e;
+                LOGGER.log(Level.SEVERE, "Erreur lors de la suppression du produit", e);
+                throw new RuntimeException("Erreur SQL lors de la suppression du produit: " + e.getMessage(), e);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+           LOGGER.log(Level.SEVERE, "Erreur fatale lors de la suppression du produit", e);
             throw new RuntimeException("Erreur lors de la suppression du produit", e);
         }
     }
