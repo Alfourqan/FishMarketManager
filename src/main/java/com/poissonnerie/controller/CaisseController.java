@@ -10,8 +10,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class CaisseController {
+    private static final Logger LOGGER = Logger.getLogger(CaisseController.class.getName());
     private final List<MouvementCaisse> mouvements = new ArrayList<>();
     private double soldeCaisse = 0.0;
     private final UserActionController userActionController = UserActionController.getInstance();
@@ -40,7 +43,7 @@ public class CaisseController {
         mouvements.clear();
         soldeCaisse = 0.0;
         String sql = "SELECT * FROM mouvements_caisse ORDER BY date DESC";
-        System.out.println("Chargement des mouvements de caisse...");
+        LOGGER.info("Chargement des mouvements de caisse...");
 
         try (Connection conn = DatabaseManager.getConnection();
              Statement stmt = conn.createStatement();
@@ -61,10 +64,10 @@ public class CaisseController {
 
                 updateSoldeAndState(mouvement);
             }
-            System.out.println("Mouvements de caisse chargés avec succès: " + mouvements.size() + " mouvements");
-            System.out.println("État actuel de la caisse - Solde: " + soldeCaisse + "€, Ouverte: " + isCaisseOuverte());
+            LOGGER.info(String.format("Mouvements de caisse chargés avec succès: %d mouvements", mouvements.size()));
+            LOGGER.info(String.format("État actuel de la caisse - Solde: %.2f€, Ouverte: %b", soldeCaisse, isCaisseOuverte()));
         } catch (SQLException e) {
-            System.err.println("Erreur lors du chargement des mouvements: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Erreur lors du chargement des mouvements", e);
             throw new RuntimeException("Erreur lors du chargement des mouvements", e);
         }
     }
@@ -87,8 +90,9 @@ public class CaisseController {
     }
 
     public void ajouterMouvement(MouvementCaisse mouvement) {
-        System.out.println("Ajout d'un nouveau mouvement: Type=" + mouvement.getType() +
-                          ", Montant=" + mouvement.getMontant() + "€");
+        LOGGER.info(String.format("Ajout d'un nouveau mouvement: Type=%s, Montant=%.2f€",
+            mouvement.getType(),
+            mouvement.getMontant()));
 
         String sql = "INSERT INTO mouvements_caisse (date, type, montant, description) VALUES (datetime('now', 'localtime'), ?, ?, ?)";
         String getIdSql = "SELECT last_insert_rowid() as id";
@@ -101,18 +105,16 @@ public class CaisseController {
                 pstmt.setString(3, mouvement.getDescription());
                 pstmt.executeUpdate();
 
-                // Récupérer l'ID généré
                 try (Statement stmt = conn.createStatement();
                      ResultSet rs = stmt.executeQuery(getIdSql)) {
                     if (rs.next()) {
                         mouvement.setId(rs.getInt("id"));
-                        mouvements.add(0, mouvement); // Ajouter au début de la liste
+                        mouvements.add(0, mouvement);
                         updateSoldeAndState(mouvement);
 
-                        // Journalisation de l'action
                         UserAction action = new UserAction(
                             UserAction.ActionType.CREATION,
-                            "SYSTEM", // À remplacer par l'utilisateur connecté
+                            "", // Sera défini par UserActionController
                             String.format("Mouvement de caisse %s : %.2f€ - %s",
                                 mouvement.getType().getValue(),
                                 mouvement.getMontant(),
@@ -124,15 +126,15 @@ public class CaisseController {
                     }
                 }
                 conn.commit();
-                System.out.println("Mouvement de caisse ajouté avec succès: " + mouvement);
-                System.out.println("Nouvel état de la caisse - Solde: " + soldeCaisse + "€, Ouverte: " + isCaisseOuverte());
+                LOGGER.info(String.format("Mouvement de caisse ajouté avec succès: %s", mouvement));
+                LOGGER.info(String.format("Nouvel état de la caisse - Solde: %.2f€, Ouverte: %b", soldeCaisse, isCaisseOuverte()));
             } catch (SQLException e) {
                 conn.rollback();
-                System.err.println("Erreur lors de l'ajout du mouvement: " + e.getMessage());
+                LOGGER.log(Level.SEVERE, "Erreur lors de l'ajout du mouvement", e);
                 throw e;
             }
         } catch (SQLException e) {
-            System.err.println("Erreur fatale lors de l'ajout du mouvement: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Erreur fatale lors de l'ajout du mouvement", e);
             throw new RuntimeException("Erreur lors de l'ajout du mouvement", e);
         }
     }
@@ -141,17 +143,15 @@ public class CaisseController {
         StringBuilder csv = new StringBuilder();
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
-        // En-tête CSV
         csv.append("Date,Type,Montant,Description\n");
 
-        // Filtrer et formatter les mouvements
         mouvements.stream()
             .filter(m -> !m.getDate().isBefore(debut) && !m.getDate().isAfter(fin))
             .forEach(m -> csv.append(String.format("%s,%s,%.2f,\"%s\"\n",
                 m.getDate().format(dateFormatter),
                 m.getType(),
                 m.getMontant(),
-                m.getDescription().replace("\"", "\"\"") // Échapper les guillemets
+                m.getDescription().replace("\"", "\"\"")
             )));
 
         return csv.toString();
@@ -167,7 +167,7 @@ public class CaisseController {
         return mouvements.stream()
             .filter(m -> !m.getDate().isBefore(dateDebut.toLocalDate().atStartOfDay()) &&
                         !m.getDate().isAfter(dateFin.toLocalDate().atTime(23, 59, 59)))
-            .sorted((m1, m2) -> m2.getDate().compareTo(m1.getDate())) // Tri décroissant par date
+            .sorted((m1, m2) -> m2.getDate().compareTo(m1.getDate()))
             .collect(Collectors.toList());
     }
 }

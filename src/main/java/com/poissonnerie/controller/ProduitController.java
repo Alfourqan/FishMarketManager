@@ -6,8 +6,11 @@ import com.poissonnerie.util.DatabaseManager;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 
 public class ProduitController {
+    private static final Logger LOGGER = Logger.getLogger(ProduitController.class.getName());
     private final List<Produit> produits = new ArrayList<>();
     private static final int BATCH_SIZE = 100;
     private final UserActionController userActionController = UserActionController.getInstance();
@@ -66,17 +69,15 @@ public class ProduitController {
                 pstmt.setInt(6, produit.getSeuilAlerte());
                 pstmt.executeUpdate();
 
-                // Récupérer l'ID généré
                 try (Statement stmt = conn.createStatement();
                      ResultSet rs = stmt.executeQuery(getIdSql)) {
                     if (rs.next()) {
                         produit.setId(rs.getInt("id"));
                         produits.add(produit);
 
-                        // Log de l'action d'ajout
                         UserAction action = new UserAction(
                             UserAction.ActionType.CREATION,
-                            "SYSTEM", // À remplacer par l'utilisateur connecté
+                            "", // Sera défini par UserActionController
                             String.format("Ajout du produit %s (Catégorie: %s, Stock initial: %d)",
                                 produit.getNom(),
                                 produit.getCategorie(),
@@ -88,12 +89,14 @@ public class ProduitController {
                     }
                 }
                 conn.commit();
+                LOGGER.info("Produit ajouté avec succès: " + produit.getNom());
             } catch (SQLException e) {
                 conn.rollback();
+                LOGGER.log(Level.SEVERE, "Erreur lors de l'ajout du produit", e);
                 throw e;
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Erreur fatale lors de l'ajout du produit", e);
             throw new RuntimeException("Erreur lors de l'ajout du produit", e);
         }
     }
