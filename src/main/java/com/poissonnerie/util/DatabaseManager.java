@@ -56,6 +56,20 @@ public class DatabaseManager {
         return DatabaseConnectionPool.getConnection();
     }
 
+    private static void configureSQLiteDatabase(Connection conn) throws SQLException {
+        LOGGER.info("Configuration des paramètres SQLite...");
+        try (Statement stmt = conn.createStatement()) {
+            // Configuration SQLite optimisée hors transaction
+            stmt.execute("PRAGMA journal_mode = WAL");
+            stmt.execute("PRAGMA synchronous = NORMAL");
+            stmt.execute("PRAGMA foreign_keys = ON");
+            stmt.execute("PRAGMA cache_size = 1000");
+            stmt.execute("PRAGMA page_size = 4096");
+            stmt.execute("PRAGMA busy_timeout = 5000");
+            LOGGER.info("Paramètres SQLite configurés avec succès");
+        }
+    }
+
     public static void initDatabase() {
         if (isInitialized.get()) {
             LOGGER.info("Base de données déjà initialisée");
@@ -75,17 +89,14 @@ public class DatabaseManager {
 
             try {
                 conn = DatabaseConnectionPool.getConnection();
+
+                // Configuration SQLite avant toute transaction
+                configureSQLiteDatabase(conn);
+
+                // Début de la transaction pour la création des tables
                 conn.setAutoCommit(false);
 
                 try (Statement stmt = conn.createStatement()) {
-                    // Configuration SQLite optimisée
-                    stmt.execute("PRAGMA foreign_keys = ON");
-                    stmt.execute("PRAGMA journal_mode = WAL");
-                    stmt.execute("PRAGMA synchronous = NORMAL");
-                    stmt.execute("PRAGMA cache_size = 1000");
-                    stmt.execute("PRAGMA page_size = 4096");
-                    stmt.execute("PRAGMA busy_timeout = 5000");
-
                     // Chargement et exécution du schéma
                     String schema = loadSchemaFromResource();
                     if (schema == null || schema.trim().isEmpty()) {
