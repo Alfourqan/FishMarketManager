@@ -1,6 +1,7 @@
 package com.poissonnerie.controller;
 
 import com.poissonnerie.model.Produit;
+import com.poissonnerie.model.UserAction;
 import com.poissonnerie.util.DatabaseManager;
 import java.sql.*;
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.List;
 public class ProduitController {
     private final List<Produit> produits = new ArrayList<>();
     private static final int BATCH_SIZE = 100;
+    private final UserActionController userActionController = UserActionController.getInstance();
 
     public List<Produit> getProduits() {
         return new ArrayList<>(produits);
@@ -70,6 +72,19 @@ public class ProduitController {
                     if (rs.next()) {
                         produit.setId(rs.getInt("id"));
                         produits.add(produit);
+
+                        // Log de l'action d'ajout
+                        UserAction action = new UserAction(
+                            UserAction.ActionType.CREATION,
+                            "SYSTEM", // À remplacer par l'utilisateur connecté
+                            String.format("Ajout du produit %s (Catégorie: %s, Stock initial: %d)",
+                                produit.getNom(),
+                                produit.getCategorie(),
+                                produit.getStock()),
+                            UserAction.EntityType.PRODUIT,
+                            produit.getId()
+                        );
+                        userActionController.logAction(action);
                     }
                 }
                 conn.commit();
@@ -105,6 +120,19 @@ public class ProduitController {
                     for (int i = 0; i < produits.size(); i++) {
                         if (produits.get(i).getId() == produit.getId()) {
                             produits.set(i, produit);
+
+                            // Log de l'action de mise à jour
+                            UserAction action = new UserAction(
+                                UserAction.ActionType.MODIFICATION,
+                                "SYSTEM", // À remplacer par l'utilisateur connecté
+                                String.format("Mise à jour du produit %s (Catégorie: %s, Nouveau stock: %d)",
+                                    produit.getNom(),
+                                    produit.getCategorie(),
+                                    produit.getStock()),
+                                UserAction.EntityType.PRODUIT,
+                                produit.getId()
+                            );
+                            userActionController.logAction(action);
                             break;
                         }
                     }
@@ -154,6 +182,18 @@ public class ProduitController {
                 if (rowsDeleted > 0) {
                     conn.commit();
                     produits.removeIf(p -> p.getId() == produit.getId());
+
+                    // Log de l'action de suppression
+                    UserAction action = new UserAction(
+                        UserAction.ActionType.SUPPRESSION,
+                        "SYSTEM", // À remplacer par l'utilisateur connecté
+                        String.format("Suppression du produit %s (Catégorie: %s)",
+                            produit.getNom(),
+                            produit.getCategorie()),
+                        UserAction.EntityType.PRODUIT,
+                        produit.getId()
+                    );
+                    userActionController.logAction(action);
                 } else {
                     conn.rollback();
                     throw new SQLException("Aucun produit trouvé avec l'ID: " + produit.getId());
