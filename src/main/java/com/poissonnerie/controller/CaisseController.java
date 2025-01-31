@@ -1,6 +1,7 @@
 package com.poissonnerie.controller;
 
 import com.poissonnerie.model.MouvementCaisse;
+import com.poissonnerie.model.UserAction;
 import com.poissonnerie.util.DatabaseManager;
 
 import java.sql.*;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 public class CaisseController {
     private final List<MouvementCaisse> mouvements = new ArrayList<>();
     private double soldeCaisse = 0.0;
+    private final UserActionController userActionController = UserActionController.getInstance();
 
     public List<MouvementCaisse> getMouvements() {
         return new ArrayList<>(mouvements);
@@ -27,7 +29,7 @@ public class CaisseController {
             return false;
         }
         return mouvements.stream()
-            .filter(m -> m.getType() == MouvementCaisse.TypeMouvement.OUVERTURE || 
+            .filter(m -> m.getType() == MouvementCaisse.TypeMouvement.OUVERTURE ||
                         m.getType() == MouvementCaisse.TypeMouvement.CLOTURE)
             .findFirst()
             .map(m -> m.getType() == MouvementCaisse.TypeMouvement.OUVERTURE)
@@ -106,6 +108,19 @@ public class CaisseController {
                         mouvement.setId(rs.getInt("id"));
                         mouvements.add(0, mouvement); // Ajouter au début de la liste
                         updateSoldeAndState(mouvement);
+
+                        // Journalisation de l'action
+                        UserAction action = new UserAction(
+                            UserAction.ActionType.CREATION,
+                            "SYSTEM", // À remplacer par l'utilisateur connecté
+                            String.format("Mouvement de caisse %s : %.2f€ - %s",
+                                mouvement.getType().getValue(),
+                                mouvement.getMontant(),
+                                mouvement.getDescription()),
+                            UserAction.EntityType.CAISSE,
+                            mouvement.getId()
+                        );
+                        userActionController.logAction(action);
                     }
                 }
                 conn.commit();
