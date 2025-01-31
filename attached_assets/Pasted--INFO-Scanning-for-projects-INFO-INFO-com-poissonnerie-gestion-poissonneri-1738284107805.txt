@@ -1,0 +1,1376 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------< com.poissonnerie:gestion-poissonnerie >----------------
+[INFO] Building gestion-poissonnerie 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] --- clean:3.2.0:clean (default-clean) @ gestion-poissonnerie ---
+[INFO] Deleting /home/runner/workspace/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ gestion-poissonnerie ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ gestion-poissonnerie ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 39 source files with javac [debug target 11] to target/classes
+[WARNING] system modules path not set in conjunction with -source 11
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[754,77] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[767,78] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[809,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[812,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[88,41] unchecked cast
+  required: java.util.List<com.poissonnerie.model.Produit>
+  found:    java.util.List<capture#1 of ?>
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[89,78] unchecked cast
+  required: java.util.List<com.poissonnerie.model.Produit>
+  found:    java.util.List<capture#2 of ?>
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ gestion-poissonnerie ---
+Jan 31, 2025 12:36:16 AM com.poissonnerie.Main main
+INFO: Configuration système initialisée
+Jan 31, 2025 12:36:16 AM com.poissonnerie.Main lambda$main$0
+INFO: Démarrage de l'application dans l'EDT...
+Jan 31, 2025 12:36:16 AM com.poissonnerie.Main lambda$initializeApplication$1
+INFO: Thème et UI configurés avec succès
+Jan 31, 2025 12:36:16 AM com.poissonnerie.Main lambda$initializeApplication$2
+INFO: SplashScreen créé et affiché
+Jan 31, 2025 12:36:16 AM com.poissonnerie.Main lambda$startBackgroundInitialization$3
+INFO: Début de l'initialisation en arrière-plan
+Jan 31, 2025 12:36:16 AM com.poissonnerie.Main initializeDatabase
+INFO: Début de l'initialisation de la base de données
+Jan 31, 2025 12:36:16 AM com.poissonnerie.util.DatabaseManager initDatabase
+INFO: Initialisation de la base de données...
+Jan 31, 2025 12:36:16 AM com.poissonnerie.util.DatabaseManager loadSchemaFromResource
+INFO: Chargement du schéma SQL depuis les ressources...
+Jan 31, 2025 12:36:16 AM com.poissonnerie.util.DatabaseManager loadSchemaFromResource
+INFO: Schéma SQL chargé avec succès
+Jan 31, 2025 12:36:16 AM com.poissonnerie.util.DatabaseManager insertTestDataIfEmpty
+INFO: Vérification et insertion des données de test...
+Jan 31, 2025 12:36:16 AM com.poissonnerie.util.DatabaseManager insertTestDataIfEmpty
+INFO: Données de test insérées avec succès
+Jan 31, 2025 12:36:16 AM com.poissonnerie.util.DatabaseManager initDatabase
+INFO: Base de données initialisée avec succès
+Jan 31, 2025 12:36:16 AM com.poissonnerie.Main initializeDatabase
+INFO: Base de données initialisée avec succès
+Jan 31, 2025 12:36:16 AM com.poissonnerie.Main loadInitialData
+INFO: Début du chargement des données initiales
+Jan 31, 2025 12:36:16 AM com.poissonnerie.controller.ClientController ajouterClientTest
+INFO: Ajout d'un client test avec créance...
+Jan 31, 2025 12:36:16 AM com.poissonnerie.controller.ClientController ajouterClient
+INFO: Tentative d'ajout d'un nouveau client: Client Test Créance
+Jan 31, 2025 12:36:16 AM com.poissonnerie.controller.ClientController ajouterClient
+INFO: Client ajouté avec succès, ID: 220
+Jan 31, 2025 12:36:16 AM com.poissonnerie.controller.ClientController ajouterClientTest
+INFO: Client test ajouté avec succès: Client Test Créance, Solde: 150.5
+Jan 31, 2025 12:36:16 AM com.poissonnerie.Main loadInitialData
+INFO: Données initiales chargées avec succès
+Jan 31, 2025 12:36:16 AM com.poissonnerie.Main startBackgroundInitialization
+INFO: Initialisation en arrière-plan terminée avec succès
+Jan 31, 2025 12:36:16 AM com.poissonnerie.controller.AuthenticationController createDefaultAdmin
+INFO: Création de l'utilisateur admin avec mot de passe hashé
+Jan 31, 2025 12:36:16 AM com.poissonnerie.controller.AuthenticationController createDefaultAdmin
+INFO: Utilisateur administrateur par défaut créé avec succès
+Jan 31, 2025 12:36:18 AM com.poissonnerie.Main lambda$showLoginScreen$5
+INFO: Transition vers login effectuée
+Jan 31, 2025 12:36:31 AM com.poissonnerie.controller.AuthenticationController authenticate
+INFO: Tentative d'authentification pour l'utilisateur: admin
+Jan 31, 2025 12:36:31 AM com.poissonnerie.controller.AuthenticationController authenticate
+WARNING: Échec d'authentification pour l'utilisateur: admin (mot de passe incorrect)
+Jan 31, 2025 12:36:40 AM com.poissonnerie.controller.AuthenticationController authenticate
+INFO: Tentative d'authentification pour l'utilisateur: admin
+Jan 31, 2025 12:36:40 AM com.poissonnerie.controller.AuthenticationController updateLastLogin
+INFO: Mise à jour de la dernière connexion pour: admin
+Jan 31, 2025 12:36:40 AM com.poissonnerie.controller.AuthenticationController authenticate
+INFO: Authentification réussie pour l'utilisateur: admin
+Jan 31, 2025 12:36:41 AM com.poissonnerie.Main lambda$createAndShowMainFrame$7
+INFO: Création de la fenêtre principale
+Jan 31, 2025 12:36:41 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Initialisation des tables de la base de données...
+Jan 31, 2025 12:36:41 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Base de données optimisée avec succès
+Jan 31, 2025 12:36:41 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Initialisation des tables de la base de données...
+Jan 31, 2025 12:36:41 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Base de données optimisée avec succès
+Jan 31, 2025 12:36:41 AM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Chargement des fournisseurs...
+Jan 31, 2025 12:36:41 AM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Fournisseurs chargés: 32
+Jan 31, 2025 12:36:41 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Initialisation des tables de la base de données...
+Jan 31, 2025 12:36:41 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Base de données optimisée avec succès
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.VenteViewSwing loadData
+INFO: Chargement des données de vente...
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.VenteViewSwing loadData
+INFO: Produits chargés
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.ClientController chargerClients
+INFO: Chargement des clients...
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.ClientController chargerClients
+INFO: Clients chargés avec succès: 214 clients
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.VenteViewSwing loadData
+INFO: Clients chargés
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 24 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 23 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 22 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 21 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 20 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 19 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 18 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 7: Client 7
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 7, Nom: Client 7
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 17 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 16 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 6, Nom: BABI
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 15 mises à jour: 2 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 14 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 13 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 12 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 11 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 10 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 9 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 7 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 8 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 6 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 5 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 4 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 3 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 2 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 1 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 24 ventes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.VenteViewSwing loadData
+INFO: Ventes chargées: 24 ventes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.VenteViewSwing loadData
+INFO: Données chargées avec succès
+Chargement des clients...
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.ClientController chargerClients
+INFO: Chargement des clients...
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.ClientController chargerClients
+INFO: Clients chargés avec succès: 214 clients
+Clients chargés avec succès
+Chargement des mouvements de caisse...
+Mouvements de caisse chargés avec succès: 31 mouvements
+État actuel de la caisse - Solde: 1000.0€, Ouverte: true
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.CaisseViewSwing updateCaisseState
+INFO: État de la caisse modifié: ouverte
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.InventaireViewSwing <init>
+INFO: Initialisation de InventaireViewSwing
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.InventaireManager ajouterObserver
+INFO: Observer ajouté. Total observers: 1
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.InventaireViewSwing refreshTable
+INFO: Rafraîchissement de la table d'inventaire
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Chargement des fournisseurs...
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Fournisseurs chargés: 32
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Initialisation des tables de la base de données...
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Base de données optimisée avec succès
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Initialisation des tables de la base de données...
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Base de données optimisée avec succès
+Jan 31, 2025 12:36:42 AM com.poissonnerie.Main lambda$createAndShowMainFrame$7
+INFO: Fenêtre principale affichée avec succès
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.AccueilViewSwing loadData
+INFO: Début du chargement des données...
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des ventes...
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 24 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 23 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 22 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 21 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 20 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 19 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 18 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 7: Client 7
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 7, Nom: Client 7
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.VenteViewSwing lambda$refreshVentesTable$7
+INFO: Table des ventes mise à jour avec 24 ventes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 17 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 16 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.InventaireViewSwing lambda$updateStatus$7
+INFO: Status mis à jour: Chargement des données...
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 6, Nom: BABI
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 15 mises à jour: 2 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 14 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 13 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.InventaireViewSwing lambda$refreshTable$9
+INFO: Table rafraîchie avec succès
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 12 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.InventaireViewSwing lambda$updateStatus$7
+INFO: Status mis à jour: Données chargées avec succès
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 11 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 10 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 9 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 7 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 8 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 6 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 5 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 4 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 3 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 2 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 1 mises à jour: 1 lignes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 24 ventes
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de ventes chargées: 24
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des produits...
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de produits chargés: 4
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des mouvements de caisse...
+Chargement des mouvements de caisse...
+Mouvements de caisse chargés avec succès: 31 mouvements
+État actuel de la caisse - Solde: 1000.0€, Ouverte: true
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de mouvements chargés: 31
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Calcul des ventes du jour...
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Total des ventes du jour: $0.00
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Calcul des produits en rupture...
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Nombre de produits en rupture: 0
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Calcul des encaissements du jour...
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Total des encaissements du jour: $0.00
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Calcul du chiffre d'affaires total...
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Chiffre daffaires total: {0,number,currency}
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface avec les nouvelles valeurs...
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Ventes du jour: $0.00
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Produits en rupture: 0
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Encaissements du jour: $0.00
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Chiffre daffaires: {0,number,currency}
+Jan 31, 2025 12:36:42 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface terminée
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.ConfigurationParam decryptValue
+WARNING: Valeur non décryptée car clé de cryptage non configurée ou valeur vide
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.ConfigurationParam setValeur
+WARNING: Erreur lors du traitement de la valeur
+java.lang.IllegalArgumentException: Format de SIRET invalide
+    at com.poissonnerie.model.ConfigurationParam.validateValeur(ConfigurationParam.java:117)
+    at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:185)
+    at com.poissonnerie.model.ConfigurationParam.<init>(ConfigurationParam.java:36)
+    at com.poissonnerie.controller.ConfigurationController.chargerConfigurations(ConfigurationController.java:66)
+    at com.poissonnerie.controller.ConfigurationController.getConfigurations(ConfigurationController.java:40)
+    at com.poissonnerie.view.ConfigurationViewSwing.loadData(ConfigurationViewSwing.java:997)
+    at com.poissonnerie.view.ConfigurationViewSwing$3.doInBackground(ConfigurationViewSwing.java:347)
+    at com.poissonnerie.view.ConfigurationViewSwing$3.doInBackground(ConfigurationViewSwing.java:344)
+    at java.desktop/javax.swing.SwingWorker$1.call(SwingWorker.java:305)
+    at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+    at java.desktop/javax.swing.SwingWorker.run(SwingWorker.java:342)
+    at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+    at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+    at java.base/java.lang.Thread.run(Thread.java:1583)
+
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.ConfigurationController chargerConfigurations
+WARNING: Configuration invalide ignorée: Impossible de traiter la valeur: Format de SIRET invalide
+Jan 31, 2025 12:36:42 AM com.poissonnerie.model.ConfigurationParam setValeur
+WARNING: Erreur lors du traitement de la valeur
+java.lang.IllegalArgumentException: Format de téléphone invalide
+    at com.poissonnerie.model.ConfigurationParam.validateValeur(ConfigurationParam.java:111)
+    at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:185)
+    at com.poissonnerie.model.ConfigurationParam.<init>(ConfigurationParam.java:36)
+    at com.poissonnerie.controller.ConfigurationController.chargerConfigurations(ConfigurationController.java:66)
+    at com.poissonnerie.controller.ConfigurationController.getConfigurations(ConfigurationController.java:40)
+    at com.poissonnerie.view.ConfigurationViewSwing.loadData(ConfigurationViewSwing.java:997)
+    at com.poissonnerie.view.ConfigurationViewSwing$3.doInBackground(ConfigurationViewSwing.java:347)
+    at com.poissonnerie.view.ConfigurationViewSwing$3.doInBackground(ConfigurationViewSwing.java:344)
+    at java.desktop/javax.swing.SwingWorker$1.call(SwingWorker.java:305)
+    at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+    at java.desktop/javax.swing.SwingWorker.run(SwingWorker.java:342)
+    at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+    at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+    at java.base/java.lang.Thread.run(Thread.java:1583)
+
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.ConfigurationController chargerConfigurations
+WARNING: Configuration invalide ignorée: Impossible de traiter la valeur: Format de téléphone invalide
+Jan 31, 2025 12:36:42 AM com.poissonnerie.controller.ConfigurationController chargerConfigurations
+INFO: Configurations chargées: 17 entrées
+Jan 31, 2025 12:37:11 AM com.poissonnerie.view.AccueilViewSwing loadData
+INFO: Début du chargement des données...
+Jan 31, 2025 12:37:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des ventes...
+Jan 31, 2025 12:37:11 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Jan 31, 2025 12:37:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 24 mises à jour: 1 lignes
+Jan 31, 2025 12:37:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 23 mises à jour: 1 lignes
+Jan 31, 2025 12:37:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 22 mises à jour: 1 lignes
+Jan 31, 2025 12:37:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 21 mises à jour: 1 lignes
+Jan 31, 2025 12:37:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 20 mises à jour: 1 lignes
+Jan 31, 2025 12:37:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 19 mises à jour: 1 lignes
+Jan 31, 2025 12:37:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 18 mises à jour: 1 lignes
+Jan 31, 2025 12:37:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 7: Client 7
+Jan 31, 2025 12:37:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 7, Nom: Client 7
+Jan 31, 2025 12:37:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 17 mises à jour: 1 lignes
+Jan 31, 2025 12:37:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 16 mises à jour: 1 lignes
+Jan 31, 2025 12:37:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 6, Nom: BABI
+Jan 31, 2025 12:37:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 15 mises à jour: 2 lignes
+Jan 31, 2025 12:37:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 31, 2025 12:37:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 31, 2025 12:37:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 14 mises à jour: 1 lignes
+Jan 31, 2025 12:37:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 13 mises à jour: 1 lignes
+Jan 31, 2025 12:37:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 31, 2025 12:37:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 12 mises à jour: 1 lignes
+Jan 31, 2025 12:37:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 31, 2025 12:37:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 11 mises à jour: 1 lignes
+Jan 31, 2025 12:37:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 10 mises à jour: 1 lignes
+Jan 31, 2025 12:37:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 9 mises à jour: 1 lignes
+Jan 31, 2025 12:37:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 7 mises à jour: 1 lignes
+Jan 31, 2025 12:37:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 8 mises à jour: 1 lignes
+Jan 31, 2025 12:37:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 6 mises à jour: 1 lignes
+Jan 31, 2025 12:37:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 5 mises à jour: 1 lignes
+Jan 31, 2025 12:37:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 4 mises à jour: 1 lignes
+Jan 31, 2025 12:37:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 3 mises à jour: 1 lignes
+Jan 31, 2025 12:37:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 31, 2025 12:37:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 31, 2025 12:37:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 2 mises à jour: 1 lignes
+Jan 31, 2025 12:37:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 1 mises à jour: 1 lignes
+Jan 31, 2025 12:37:11 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 24 ventes
+Jan 31, 2025 12:37:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de ventes chargées: 24
+Jan 31, 2025 12:37:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des produits...
+Jan 31, 2025 12:37:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de produits chargés: 4
+Jan 31, 2025 12:37:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des mouvements de caisse...
+Chargement des mouvements de caisse...
+Mouvements de caisse chargés avec succès: 31 mouvements
+État actuel de la caisse - Solde: 1000.0€, Ouverte: true
+Jan 31, 2025 12:37:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de mouvements chargés: 31
+Jan 31, 2025 12:37:11 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Calcul des ventes du jour...
+Jan 31, 2025 12:37:11 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Total des ventes du jour: $0.00
+Jan 31, 2025 12:37:11 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Calcul des produits en rupture...
+Jan 31, 2025 12:37:11 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Nombre de produits en rupture: 0
+Jan 31, 2025 12:37:11 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Calcul des encaissements du jour...
+Jan 31, 2025 12:37:11 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Total des encaissements du jour: $0.00
+Jan 31, 2025 12:37:11 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Calcul du chiffre d'affaires total...
+Jan 31, 2025 12:37:11 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Chiffre daffaires total: {0,number,currency}
+Jan 31, 2025 12:37:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface avec les nouvelles valeurs...
+Jan 31, 2025 12:37:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Ventes du jour: $0.00
+Jan 31, 2025 12:37:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Produits en rupture: 0
+Jan 31, 2025 12:37:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Encaissements du jour: $0.00
+Jan 31, 2025 12:37:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Chiffre daffaires: {0,number,currency}
+Jan 31, 2025 12:37:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface terminée
+Jan 31, 2025 12:37:18 AM com.poissonnerie.controller.ClientController supprimerClient
+INFO: Tentative de suppression du client ID: 6
+Jan 31, 2025 12:37:18 AM com.poissonnerie.controller.ClientController supprimerClient
+SEVERE: Erreur lors de la suppression du client
+java.lang.IllegalStateException: Impossible de supprimer le client car il a des ventes associées
+    at com.poissonnerie.controller.ClientController.supprimerClient(ClientController.java:188)
+    at com.poissonnerie.view.ClientViewSwing.lambda$initializeComponents$2(ClientViewSwing.java:181)
+    at java.desktop/javax.swing.AbstractButton.fireActionPerformed(AbstractButton.java:1972)
+    at java.desktop/javax.swing.AbstractButton$Handler.actionPerformed(AbstractButton.java:2314)
+    at java.desktop/javax.swing.DefaultButtonModel.fireActionPerformed(DefaultButtonModel.java:407)
+    at java.desktop/javax.swing.DefaultButtonModel.setPressed(DefaultButtonModel.java:262)
+    at java.desktop/javax.swing.plaf.basic.BasicButtonListener.mouseReleased(BasicButtonListener.java:279)
+    at java.desktop/java.awt.AWTEventMulticaster.mouseReleased(AWTEventMulticaster.java:297)
+    at java.desktop/java.awt.Component.processMouseEvent(Component.java:6621)
+    at java.desktop/javax.swing.JComponent.processMouseEvent(JComponent.java:3398)
+    at java.desktop/java.awt.Component.processEvent(Component.java:6386)
+    at java.desktop/java.awt.Container.processEvent(Container.java:2266)
+    at java.desktop/java.awt.Component.dispatchEventImpl(Component.java:4996)
+    at java.desktop/java.awt.Container.dispatchEventImpl(Container.java:2324)
+    at java.desktop/java.awt.Component.dispatchEvent(Component.java:4828)
+    at java.desktop/java.awt.LightweightDispatcher.retargetMouseEvent(Container.java:4948)
+    at java.desktop/java.awt.LightweightDispatcher.processMouseEvent(Container.java:4575)
+    at java.desktop/java.awt.LightweightDispatcher.dispatchEvent(Container.java:4516)
+    at java.desktop/java.awt.Container.dispatchEventImpl(Container.java:2310)
+    at java.desktop/java.awt.Window.dispatchEventImpl(Window.java:2780)
+    at java.desktop/java.awt.Component.dispatchEvent(Component.java:4828)
+    at java.desktop/java.awt.EventQueue.dispatchEventImpl(EventQueue.java:775)
+    at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:720)
+    at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:714)
+    at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+    at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:87)
+    at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:98)
+    at java.desktop/java.awt.EventQueue$5.run(EventQueue.java:747)
+    at java.desktop/java.awt.EventQueue$5.run(EventQueue.java:745)
+    at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+    at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:87)
+    at java.desktop/java.awt.EventQueue.dispatchEvent(EventQueue.java:744)
+    at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:203)
+    at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:124)
+    at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:113)
+    at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:109)
+    at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
+    at java.desktop/java.awt.EventDispatchThread.run(EventDispatchThread.java:90)
+
+Jan 31, 2025 12:37:41 AM com.poissonnerie.view.AccueilViewSwing loadData
+INFO: Début du chargement des données...
+Jan 31, 2025 12:37:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des ventes...
+Jan 31, 2025 12:37:41 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Jan 31, 2025 12:37:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 24 mises à jour: 1 lignes
+Jan 31, 2025 12:37:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 23 mises à jour: 1 lignes
+Jan 31, 2025 12:37:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 22 mises à jour: 1 lignes
+Jan 31, 2025 12:37:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 21 mises à jour: 1 lignes
+Jan 31, 2025 12:37:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 20 mises à jour: 1 lignes
+Jan 31, 2025 12:37:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 19 mises à jour: 1 lignes
+Jan 31, 2025 12:37:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 18 mises à jour: 1 lignes
+Jan 31, 2025 12:37:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 7: Client 7
+Jan 31, 2025 12:37:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 7, Nom: Client 7
+Jan 31, 2025 12:37:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 17 mises à jour: 1 lignes
+Jan 31, 2025 12:37:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 16 mises à jour: 1 lignes
+Jan 31, 2025 12:37:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 6, Nom: BABI
+Jan 31, 2025 12:37:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 15 mises à jour: 2 lignes
+Jan 31, 2025 12:37:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 31, 2025 12:37:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 31, 2025 12:37:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 14 mises à jour: 1 lignes
+Jan 31, 2025 12:37:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 13 mises à jour: 1 lignes
+Jan 31, 2025 12:37:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 31, 2025 12:37:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 12 mises à jour: 1 lignes
+Jan 31, 2025 12:37:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 31, 2025 12:37:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 11 mises à jour: 1 lignes
+Jan 31, 2025 12:37:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 10 mises à jour: 1 lignes
+Jan 31, 2025 12:37:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 9 mises à jour: 1 lignes
+Jan 31, 2025 12:37:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 7 mises à jour: 1 lignes
+Jan 31, 2025 12:37:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 8 mises à jour: 1 lignes
+Jan 31, 2025 12:37:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 6 mises à jour: 1 lignes
+Jan 31, 2025 12:37:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 5 mises à jour: 1 lignes
+Jan 31, 2025 12:37:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 4 mises à jour: 1 lignes
+Jan 31, 2025 12:37:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 3 mises à jour: 1 lignes
+Jan 31, 2025 12:37:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 31, 2025 12:37:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 31, 2025 12:37:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 2 mises à jour: 1 lignes
+Jan 31, 2025 12:37:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 1 mises à jour: 1 lignes
+Jan 31, 2025 12:37:41 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 24 ventes
+Jan 31, 2025 12:37:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de ventes chargées: 24
+Jan 31, 2025 12:37:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des produits...
+Jan 31, 2025 12:37:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de produits chargés: 4
+Jan 31, 2025 12:37:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des mouvements de caisse...
+Chargement des mouvements de caisse...
+Mouvements de caisse chargés avec succès: 31 mouvements
+État actuel de la caisse - Solde: 1000.0€, Ouverte: true
+Jan 31, 2025 12:37:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de mouvements chargés: 31
+Jan 31, 2025 12:37:41 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Calcul des ventes du jour...
+Jan 31, 2025 12:37:41 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Total des ventes du jour: $0.00
+Jan 31, 2025 12:37:41 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Calcul des produits en rupture...
+Jan 31, 2025 12:37:41 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Nombre de produits en rupture: 0
+Jan 31, 2025 12:37:41 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Calcul des encaissements du jour...
+Jan 31, 2025 12:37:41 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Total des encaissements du jour: $0.00
+Jan 31, 2025 12:37:41 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Calcul du chiffre d'affaires total...
+Jan 31, 2025 12:37:41 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Chiffre daffaires total: {0,number,currency}
+Jan 31, 2025 12:37:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface avec les nouvelles valeurs...
+Jan 31, 2025 12:37:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Ventes du jour: $0.00
+Jan 31, 2025 12:37:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Produits en rupture: 0
+Jan 31, 2025 12:37:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Encaissements du jour: $0.00
+Jan 31, 2025 12:37:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Chiffre daffaires: {0,number,currency}
+Jan 31, 2025 12:37:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface terminée
+Jan 31, 2025 12:38:11 AM com.poissonnerie.view.AccueilViewSwing loadData
+INFO: Début du chargement des données...
+Jan 31, 2025 12:38:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des ventes...
+Jan 31, 2025 12:38:11 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Jan 31, 2025 12:38:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 24 mises à jour: 1 lignes
+Jan 31, 2025 12:38:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 23 mises à jour: 1 lignes
+Jan 31, 2025 12:38:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 22 mises à jour: 1 lignes
+Jan 31, 2025 12:38:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 21 mises à jour: 1 lignes
+Jan 31, 2025 12:38:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 20 mises à jour: 1 lignes
+Jan 31, 2025 12:38:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 19 mises à jour: 1 lignes
+Jan 31, 2025 12:38:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 18 mises à jour: 1 lignes
+Jan 31, 2025 12:38:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 7: Client 7
+Jan 31, 2025 12:38:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 7, Nom: Client 7
+Jan 31, 2025 12:38:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 17 mises à jour: 1 lignes
+Jan 31, 2025 12:38:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 16 mises à jour: 1 lignes
+Jan 31, 2025 12:38:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 6, Nom: BABI
+Jan 31, 2025 12:38:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 15 mises à jour: 2 lignes
+Jan 31, 2025 12:38:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 31, 2025 12:38:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 31, 2025 12:38:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 14 mises à jour: 1 lignes
+Jan 31, 2025 12:38:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 13 mises à jour: 1 lignes
+Jan 31, 2025 12:38:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 31, 2025 12:38:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 12 mises à jour: 1 lignes
+Jan 31, 2025 12:38:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 31, 2025 12:38:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 11 mises à jour: 1 lignes
+Jan 31, 2025 12:38:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 10 mises à jour: 1 lignes
+Jan 31, 2025 12:38:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 9 mises à jour: 1 lignes
+Jan 31, 2025 12:38:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 7 mises à jour: 1 lignes
+Jan 31, 2025 12:38:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 8 mises à jour: 1 lignes
+Jan 31, 2025 12:38:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 6 mises à jour: 1 lignes
+Jan 31, 2025 12:38:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 5 mises à jour: 1 lignes
+Jan 31, 2025 12:38:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 4 mises à jour: 1 lignes
+Jan 31, 2025 12:38:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 3 mises à jour: 1 lignes
+Jan 31, 2025 12:38:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 31, 2025 12:38:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 31, 2025 12:38:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 2 mises à jour: 1 lignes
+Jan 31, 2025 12:38:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 1 mises à jour: 1 lignes
+Jan 31, 2025 12:38:11 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 24 ventes
+Jan 31, 2025 12:38:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de ventes chargées: 24
+Jan 31, 2025 12:38:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des produits...
+Jan 31, 2025 12:38:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de produits chargés: 4
+Jan 31, 2025 12:38:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des mouvements de caisse...
+Chargement des mouvements de caisse...
+Mouvements de caisse chargés avec succès: 31 mouvements
+État actuel de la caisse - Solde: 1000.0€, Ouverte: true
+Jan 31, 2025 12:38:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de mouvements chargés: 31
+Jan 31, 2025 12:38:11 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Calcul des ventes du jour...
+Jan 31, 2025 12:38:11 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Total des ventes du jour: $0.00
+Jan 31, 2025 12:38:11 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Calcul des produits en rupture...
+Jan 31, 2025 12:38:11 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Nombre de produits en rupture: 0
+Jan 31, 2025 12:38:11 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Calcul des encaissements du jour...
+Jan 31, 2025 12:38:11 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Total des encaissements du jour: $0.00
+Jan 31, 2025 12:38:11 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Calcul du chiffre d'affaires total...
+Jan 31, 2025 12:38:11 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Chiffre daffaires total: {0,number,currency}
+Jan 31, 2025 12:38:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface avec les nouvelles valeurs...
+Jan 31, 2025 12:38:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Ventes du jour: $0.00
+Jan 31, 2025 12:38:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Produits en rupture: 0
+Jan 31, 2025 12:38:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Encaissements du jour: $0.00
+Jan 31, 2025 12:38:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Chiffre daffaires: {0,number,currency}
+Jan 31, 2025 12:38:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface terminée
+Jan 31, 2025 12:38:41 AM com.poissonnerie.view.AccueilViewSwing loadData
+INFO: Début du chargement des données...
+Jan 31, 2025 12:38:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des ventes...
+Jan 31, 2025 12:38:41 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Jan 31, 2025 12:38:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 24 mises à jour: 1 lignes
+Jan 31, 2025 12:38:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 23 mises à jour: 1 lignes
+Jan 31, 2025 12:38:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 22 mises à jour: 1 lignes
+Jan 31, 2025 12:38:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 21 mises à jour: 1 lignes
+Jan 31, 2025 12:38:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 20 mises à jour: 1 lignes
+Jan 31, 2025 12:38:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 19 mises à jour: 1 lignes
+Jan 31, 2025 12:38:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 18 mises à jour: 1 lignes
+Jan 31, 2025 12:38:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 7: Client 7
+Jan 31, 2025 12:38:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 7, Nom: Client 7
+Jan 31, 2025 12:38:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 17 mises à jour: 1 lignes
+Jan 31, 2025 12:38:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 16 mises à jour: 1 lignes
+Jan 31, 2025 12:38:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 6, Nom: BABI
+Jan 31, 2025 12:38:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 15 mises à jour: 2 lignes
+Jan 31, 2025 12:38:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 31, 2025 12:38:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 31, 2025 12:38:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 14 mises à jour: 1 lignes
+Jan 31, 2025 12:38:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 13 mises à jour: 1 lignes
+Jan 31, 2025 12:38:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 31, 2025 12:38:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 12 mises à jour: 1 lignes
+Jan 31, 2025 12:38:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 31, 2025 12:38:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 11 mises à jour: 1 lignes
+Jan 31, 2025 12:38:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 10 mises à jour: 1 lignes
+Jan 31, 2025 12:38:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 9 mises à jour: 1 lignes
+Jan 31, 2025 12:38:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 7 mises à jour: 1 lignes
+Jan 31, 2025 12:38:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 8 mises à jour: 1 lignes
+Jan 31, 2025 12:38:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 6 mises à jour: 1 lignes
+Jan 31, 2025 12:38:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 5 mises à jour: 1 lignes
+Jan 31, 2025 12:38:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 4 mises à jour: 1 lignes
+Jan 31, 2025 12:38:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 3 mises à jour: 1 lignes
+Jan 31, 2025 12:38:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 31, 2025 12:38:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 31, 2025 12:38:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 2 mises à jour: 1 lignes
+Jan 31, 2025 12:38:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 1 mises à jour: 1 lignes
+Jan 31, 2025 12:38:41 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 24 ventes
+Jan 31, 2025 12:38:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de ventes chargées: 24
+Jan 31, 2025 12:38:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des produits...
+Jan 31, 2025 12:38:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de produits chargés: 4
+Jan 31, 2025 12:38:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des mouvements de caisse...
+Chargement des mouvements de caisse...
+Mouvements de caisse chargés avec succès: 31 mouvements
+État actuel de la caisse - Solde: 1000.0€, Ouverte: true
+Jan 31, 2025 12:38:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de mouvements chargés: 31
+Jan 31, 2025 12:38:41 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Calcul des ventes du jour...
+Jan 31, 2025 12:38:41 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Total des ventes du jour: $0.00
+Jan 31, 2025 12:38:41 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Calcul des produits en rupture...
+Jan 31, 2025 12:38:41 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Nombre de produits en rupture: 0
+Jan 31, 2025 12:38:41 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Calcul des encaissements du jour...
+Jan 31, 2025 12:38:41 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Total des encaissements du jour: $0.00
+Jan 31, 2025 12:38:41 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Calcul du chiffre d'affaires total...
+Jan 31, 2025 12:38:41 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Chiffre daffaires total: {0,number,currency}
+Jan 31, 2025 12:38:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface avec les nouvelles valeurs...
+Jan 31, 2025 12:38:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Ventes du jour: $0.00
+Jan 31, 2025 12:38:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Produits en rupture: 0
+Jan 31, 2025 12:38:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Encaissements du jour: $0.00
+Jan 31, 2025 12:38:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Chiffre daffaires: {0,number,currency}
+Jan 31, 2025 12:38:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface terminée
+Jan 31, 2025 12:38:55 AM com.poissonnerie.view.VenteViewSwing ajouterAuPanier
+INFO: Produit ajouté au panier: pintade, quantité: 1
+Jan 31, 2025 12:38:58 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 0 mises à jour: 1 lignes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.view.AccueilViewSwing loadData
+INFO: Début du chargement des données...
+Jan 31, 2025 12:39:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des ventes...
+Jan 31, 2025 12:39:11 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Jan 31, 2025 12:39:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 24 mises à jour: 1 lignes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 23 mises à jour: 1 lignes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 22 mises à jour: 1 lignes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 21 mises à jour: 1 lignes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 20 mises à jour: 1 lignes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 19 mises à jour: 1 lignes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 18 mises à jour: 1 lignes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 7: Client 7
+Jan 31, 2025 12:39:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 7, Nom: Client 7
+Jan 31, 2025 12:39:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 17 mises à jour: 1 lignes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 16 mises à jour: 1 lignes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 6, Nom: BABI
+Jan 31, 2025 12:39:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 15 mises à jour: 2 lignes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 31, 2025 12:39:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 31, 2025 12:39:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 14 mises à jour: 1 lignes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 13 mises à jour: 1 lignes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 31, 2025 12:39:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 12 mises à jour: 1 lignes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 31, 2025 12:39:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 11 mises à jour: 1 lignes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 10 mises à jour: 1 lignes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 9 mises à jour: 1 lignes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 7 mises à jour: 1 lignes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 8 mises à jour: 1 lignes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 6 mises à jour: 1 lignes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 5 mises à jour: 1 lignes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 4 mises à jour: 1 lignes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 3 mises à jour: 1 lignes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 31, 2025 12:39:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 31, 2025 12:39:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 2 mises à jour: 1 lignes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 1 mises à jour: 1 lignes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 24 ventes
+Jan 31, 2025 12:39:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de ventes chargées: 24
+Jan 31, 2025 12:39:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des produits...
+Jan 31, 2025 12:39:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de produits chargés: 4
+Jan 31, 2025 12:39:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des mouvements de caisse...
+Chargement des mouvements de caisse...
+Mouvements de caisse chargés avec succès: 31 mouvements
+État actuel de la caisse - Solde: 1000.0€, Ouverte: true
+Jan 31, 2025 12:39:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de mouvements chargés: 31
+Jan 31, 2025 12:39:11 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Calcul des ventes du jour...
+Jan 31, 2025 12:39:11 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Total des ventes du jour: $0.00
+Jan 31, 2025 12:39:11 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Calcul des produits en rupture...
+Jan 31, 2025 12:39:11 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Nombre de produits en rupture: 0
+Jan 31, 2025 12:39:11 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Calcul des encaissements du jour...
+Jan 31, 2025 12:39:11 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Total des encaissements du jour: $0.00
+Jan 31, 2025 12:39:11 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Calcul du chiffre d'affaires total...
+Jan 31, 2025 12:39:11 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Chiffre daffaires total: {0,number,currency}
+Jan 31, 2025 12:39:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface avec les nouvelles valeurs...
+Jan 31, 2025 12:39:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Ventes du jour: $0.00
+Jan 31, 2025 12:39:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Produits en rupture: 0
+Jan 31, 2025 12:39:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Encaissements du jour: $0.00
+Jan 31, 2025 12:39:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Chiffre daffaires: {0,number,currency}
+Jan 31, 2025 12:39:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface terminée
+Jan 31, 2025 12:39:41 AM com.poissonnerie.view.AccueilViewSwing loadData
+INFO: Début du chargement des données...
+Jan 31, 2025 12:39:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des ventes...
+Jan 31, 2025 12:39:41 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Jan 31, 2025 12:39:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 24 mises à jour: 1 lignes
+Jan 31, 2025 12:39:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 23 mises à jour: 1 lignes
+Jan 31, 2025 12:39:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 22 mises à jour: 1 lignes
+Jan 31, 2025 12:39:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 21 mises à jour: 1 lignes
+Jan 31, 2025 12:39:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 20 mises à jour: 1 lignes
+Jan 31, 2025 12:39:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 19 mises à jour: 1 lignes
+Jan 31, 2025 12:39:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 18 mises à jour: 1 lignes
+Jan 31, 2025 12:39:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 7: Client 7
+Jan 31, 2025 12:39:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 7, Nom: Client 7
+Jan 31, 2025 12:39:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 17 mises à jour: 1 lignes
+Jan 31, 2025 12:39:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 16 mises à jour: 1 lignes
+Jan 31, 2025 12:39:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 6, Nom: BABI
+Jan 31, 2025 12:39:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 15 mises à jour: 2 lignes
+Jan 31, 2025 12:39:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 31, 2025 12:39:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 31, 2025 12:39:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 14 mises à jour: 1 lignes
+Jan 31, 2025 12:39:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 13 mises à jour: 1 lignes
+Jan 31, 2025 12:39:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 31, 2025 12:39:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 12 mises à jour: 1 lignes
+Jan 31, 2025 12:39:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 31, 2025 12:39:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 11 mises à jour: 1 lignes
+Jan 31, 2025 12:39:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 10 mises à jour: 1 lignes
+Jan 31, 2025 12:39:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 9 mises à jour: 1 lignes
+Jan 31, 2025 12:39:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 7 mises à jour: 1 lignes
+Jan 31, 2025 12:39:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 8 mises à jour: 1 lignes
+Jan 31, 2025 12:39:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 6 mises à jour: 1 lignes
+Jan 31, 2025 12:39:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 5 mises à jour: 1 lignes
+Jan 31, 2025 12:39:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 4 mises à jour: 1 lignes
+Jan 31, 2025 12:39:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 3 mises à jour: 1 lignes
+Jan 31, 2025 12:39:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 31, 2025 12:39:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 31, 2025 12:39:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 2 mises à jour: 1 lignes
+Jan 31, 2025 12:39:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 1 mises à jour: 1 lignes
+Jan 31, 2025 12:39:41 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 24 ventes
+Jan 31, 2025 12:39:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de ventes chargées: 24
+Jan 31, 2025 12:39:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des produits...
+Jan 31, 2025 12:39:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de produits chargés: 4
+Jan 31, 2025 12:39:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des mouvements de caisse...
+Chargement des mouvements de caisse...
+Mouvements de caisse chargés avec succès: 31 mouvements
+État actuel de la caisse - Solde: 1000.0€, Ouverte: true
+Jan 31, 2025 12:39:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de mouvements chargés: 31
+Jan 31, 2025 12:39:41 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Calcul des ventes du jour...
+Jan 31, 2025 12:39:41 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Total des ventes du jour: $0.00
+Jan 31, 2025 12:39:41 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Calcul des produits en rupture...
+Jan 31, 2025 12:39:41 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Nombre de produits en rupture: 0
+Jan 31, 2025 12:39:41 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Calcul des encaissements du jour...
+Jan 31, 2025 12:39:41 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Total des encaissements du jour: $0.00
+Jan 31, 2025 12:39:41 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Calcul du chiffre d'affaires total...
+Jan 31, 2025 12:39:41 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Chiffre daffaires total: {0,number,currency}
+Jan 31, 2025 12:39:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface avec les nouvelles valeurs...
+Jan 31, 2025 12:39:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Ventes du jour: $0.00
+Jan 31, 2025 12:39:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Produits en rupture: 0
+Jan 31, 2025 12:39:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Encaissements du jour: $0.00
+Jan 31, 2025 12:39:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Chiffre daffaires: {0,number,currency}
+Jan 31, 2025 12:39:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface terminée
+Jan 31, 2025 12:40:11 AM com.poissonnerie.view.AccueilViewSwing loadData
+INFO: Début du chargement des données...
+Jan 31, 2025 12:40:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des ventes...
+Jan 31, 2025 12:40:11 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Jan 31, 2025 12:40:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 24 mises à jour: 1 lignes
+Jan 31, 2025 12:40:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 23 mises à jour: 1 lignes
+Jan 31, 2025 12:40:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 22 mises à jour: 1 lignes
+Jan 31, 2025 12:40:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 21 mises à jour: 1 lignes
+Jan 31, 2025 12:40:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 20 mises à jour: 1 lignes
+Jan 31, 2025 12:40:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 19 mises à jour: 1 lignes
+Jan 31, 2025 12:40:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 18 mises à jour: 1 lignes
+Jan 31, 2025 12:40:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 7: Client 7
+Jan 31, 2025 12:40:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 7, Nom: Client 7
+Jan 31, 2025 12:40:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 17 mises à jour: 1 lignes
+Jan 31, 2025 12:40:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 16 mises à jour: 1 lignes
+Jan 31, 2025 12:40:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 6, Nom: BABI
+Jan 31, 2025 12:40:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 15 mises à jour: 2 lignes
+Jan 31, 2025 12:40:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 31, 2025 12:40:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 31, 2025 12:40:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 14 mises à jour: 1 lignes
+Jan 31, 2025 12:40:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 13 mises à jour: 1 lignes
+Jan 31, 2025 12:40:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 31, 2025 12:40:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 12 mises à jour: 1 lignes
+Jan 31, 2025 12:40:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 31, 2025 12:40:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 11 mises à jour: 1 lignes
+Jan 31, 2025 12:40:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 10 mises à jour: 1 lignes
+Jan 31, 2025 12:40:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 9 mises à jour: 1 lignes
+Jan 31, 2025 12:40:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 7 mises à jour: 1 lignes
+Jan 31, 2025 12:40:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 8 mises à jour: 1 lignes
+Jan 31, 2025 12:40:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 6 mises à jour: 1 lignes
+Jan 31, 2025 12:40:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 5 mises à jour: 1 lignes
+Jan 31, 2025 12:40:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 4 mises à jour: 1 lignes
+Jan 31, 2025 12:40:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 3 mises à jour: 1 lignes
+Jan 31, 2025 12:40:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 31, 2025 12:40:11 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 31, 2025 12:40:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 2 mises à jour: 1 lignes
+Jan 31, 2025 12:40:11 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 1 mises à jour: 1 lignes
+Jan 31, 2025 12:40:11 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 24 ventes
+Jan 31, 2025 12:40:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de ventes chargées: 24
+Jan 31, 2025 12:40:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des produits...
+Jan 31, 2025 12:40:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de produits chargés: 4
+Jan 31, 2025 12:40:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des mouvements de caisse...
+Chargement des mouvements de caisse...
+Mouvements de caisse chargés avec succès: 31 mouvements
+État actuel de la caisse - Solde: 1000.0€, Ouverte: true
+Jan 31, 2025 12:40:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de mouvements chargés: 31
+Jan 31, 2025 12:40:11 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Calcul des ventes du jour...
+Jan 31, 2025 12:40:11 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Total des ventes du jour: $0.00
+Jan 31, 2025 12:40:11 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Calcul des produits en rupture...
+Jan 31, 2025 12:40:11 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Nombre de produits en rupture: 0
+Jan 31, 2025 12:40:11 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Calcul des encaissements du jour...
+Jan 31, 2025 12:40:11 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Total des encaissements du jour: $0.00
+Jan 31, 2025 12:40:11 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Calcul du chiffre d'affaires total...
+Jan 31, 2025 12:40:11 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Chiffre daffaires total: {0,number,currency}
+Jan 31, 2025 12:40:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface avec les nouvelles valeurs...
+Jan 31, 2025 12:40:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Ventes du jour: $0.00
+Jan 31, 2025 12:40:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Produits en rupture: 0
+Jan 31, 2025 12:40:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Encaissements du jour: $0.00
+Jan 31, 2025 12:40:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Chiffre daffaires: {0,number,currency}
+Jan 31, 2025 12:40:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface terminée
+Jan 31, 2025 12:40:29 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 0 mises à jour: 1 lignes
+Jan 31, 2025 12:40:36 AM com.poissonnerie.controller.VenteController enregistrerVente
+INFO: Début de l'enregistrement de la vente...
+Jan 31, 2025 12:40:36 AM com.poissonnerie.controller.VenteController validateVente
+INFO: Validation de la vente...
+Jan 31, 2025 12:40:36 AM com.poissonnerie.controller.VenteController enregistrerVente
+INFO: Vente enregistrée avec succès, ID: 25
+Jan 31, 2025 12:40:41 AM com.poissonnerie.view.AccueilViewSwing loadData
+INFO: Début du chargement des données...
+Jan 31, 2025 12:40:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des ventes...
+Jan 31, 2025 12:40:41 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Jan 31, 2025 12:40:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 6, Nom: BABI
+Jan 31, 2025 12:40:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 25 mises à jour: 1 lignes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 24 mises à jour: 1 lignes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 23 mises à jour: 1 lignes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 22 mises à jour: 1 lignes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 21 mises à jour: 1 lignes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 20 mises à jour: 1 lignes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 19 mises à jour: 1 lignes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 18 mises à jour: 1 lignes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 7: Client 7
+Jan 31, 2025 12:40:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 7, Nom: Client 7
+Jan 31, 2025 12:40:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 17 mises à jour: 1 lignes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 16 mises à jour: 1 lignes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 6, Nom: BABI
+Jan 31, 2025 12:40:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 15 mises à jour: 2 lignes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 31, 2025 12:40:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 31, 2025 12:40:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 14 mises à jour: 1 lignes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 13 mises à jour: 1 lignes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 31, 2025 12:40:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 12 mises à jour: 1 lignes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 2, Nom: djata
+Jan 31, 2025 12:40:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 11 mises à jour: 1 lignes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 10 mises à jour: 1 lignes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 9 mises à jour: 1 lignes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 7 mises à jour: 1 lignes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 8 mises à jour: 1 lignes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 6 mises à jour: 1 lignes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 5 mises à jour: 1 lignes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 4 mises à jour: 1 lignes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 3 mises à jour: 1 lignes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Nom par défaut généré pour le client ID 1: Client 1
+Jan 31, 2025 12:40:41 AM com.poissonnerie.controller.VenteController creerClientDepuisResultSet
+INFO: Client créé avec succès - ID: 1, Nom: Client 1
+Jan 31, 2025 12:40:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 2 mises à jour: 1 lignes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.model.Vente setLignes
+INFO: Lignes de la vente 1 mises à jour: 1 lignes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 25 ventes
+Jan 31, 2025 12:40:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de ventes chargées: 25
+Jan 31, 2025 12:40:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des produits...
+Jan 31, 2025 12:40:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de produits chargés: 4
+Jan 31, 2025 12:40:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des mouvements de caisse...
+Chargement des mouvements de caisse...
+Mouvements de caisse chargés avec succès: 31 mouvements
+État actuel de la caisse - Solde: 1000.0€, Ouverte: true
+Jan 31, 2025 12:40:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de mouvements chargés: 31
+Jan 31, 2025 12:40:41 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Calcul des ventes du jour...
+Jan 31, 2025 12:40:41 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Total des ventes du jour: $12.00
+Jan 31, 2025 12:40:41 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Calcul des produits en rupture...
+Jan 31, 2025 12:40:41 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Nombre de produits en rupture: 0
+Jan 31, 2025 12:40:41 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Calcul des encaissements du jour...
+Jan 31, 2025 12:40:41 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Total des encaissements du jour: $0.00
+Jan 31, 2025 12:40:41 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Calcul du chiffre d'affaires total...
+Jan 31, 2025 12:40:41 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Chiffre daffaires total: {0,number,currency}
+Jan 31, 2025 12:40:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface avec les nouvelles valeurs...
+Jan 31, 2025 12:40:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Ventes du jour: $12.00
+Jan 31, 2025 12:40:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Produits en rupture: 0
+Jan 31, 2025 12:40:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Encaissements du jour: $0.00
+Jan 31, 2025 12:40:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Chiffre daffaires: {0,number,currency}
+Jan 31, 2025 12:40:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface terminée
+Jan 31, 2025 12:40:44 AM com.poissonnerie.view.VenteViewSwing lambda$validerVente$3
+INFO: Vente enregistrée avec succès: ID=25, Total=12.00€
+Jan 31, 2025 12:40:44 AM com.poissonnerie.view.VenteViewSwing lambda$refreshVentesTable$7
+INFO: Table des ventes mise à jour avec 25 ventes
