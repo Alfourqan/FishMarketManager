@@ -1,0 +1,171 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------< com.poissonnerie:gestion-poissonnerie >----------------
+[INFO] Building gestion-poissonnerie 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ gestion-poissonnerie ---
+[INFO] Deleting /home/runner/workspace/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ gestion-poissonnerie ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ gestion-poissonnerie ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 41 source files with javac [debug target 11] to target/classes
+[WARNING] system modules path not set in conjunction with -source 11
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[754,77] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[767,78] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[809,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[812,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[88,41] unchecked cast
+  required: java.util.List<com.poissonnerie.model.Produit>
+  found:    java.util.List<capture#1 of ?>
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[89,78] unchecked cast
+  required: java.util.List<com.poissonnerie.model.Produit>
+  found:    java.util.List<capture#2 of ?>
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ gestion-poissonnerie ---
+[INFO] skip non existing resourceDirectory /home/runner/workspace/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ gestion-poissonnerie ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.2.2:test (default-test) @ gestion-poissonnerie ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jar:3.3.0:jar (default-jar) @ gestion-poissonnerie ---
+[INFO] Building jar: /home/runner/workspace/target/gestion-poissonnerie-1.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- install:3.1.1:install (default-install) @ gestion-poissonnerie ---
+[INFO] Installing /home/runner/workspace/pom.xml to /home/runner/.m2/repository/com/poissonnerie/gestion-poissonnerie/1.0-SNAPSHOT/gestion-poissonnerie-1.0-SNAPSHOT.pom
+[INFO] Installing /home/runner/workspace/target/gestion-poissonnerie-1.0-SNAPSHOT.jar to /home/runner/.m2/repository/com/poissonnerie/gestion-poissonnerie/1.0-SNAPSHOT/gestion-poissonnerie-1.0-SNAPSHOT.jar
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  5.526 s
+[INFO] Finished at: 2025-01-31T19:30:28Z
+[INFO] ------------------------------------------------------------------------
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------< com.poissonnerie:gestion-poissonnerie >----------------
+[INFO] Building gestion-poissonnerie 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ gestion-poissonnerie ---
+Jan 31, 2025 7:30:31 PM com.poissonnerie.Main main
+INFO: Configuration système initialisée
+Jan 31, 2025 7:30:31 PM com.poissonnerie.Main lambda$main$0
+INFO: Démarrage de l'application dans l'EDT...
+Jan 31, 2025 7:30:32 PM com.poissonnerie.Main lambda$initializeApplication$1
+INFO: Thème et UI configurés avec succès
+Jan 31, 2025 7:30:32 PM com.poissonnerie.Main lambda$initializeApplication$2
+INFO: SplashScreen créé et affiché
+Jan 31, 2025 7:30:32 PM com.poissonnerie.Main lambda$startBackgroundInitialization$3
+INFO: Début de l'initialisation en arrière-plan
+Jan 31, 2025 7:30:32 PM com.poissonnerie.Main initializeDatabase
+INFO: Début de l'initialisation de la base de données
+Jan 31, 2025 7:30:32 PM com.poissonnerie.util.DatabaseManager initDatabase
+INFO: Initialisation de la base de données...
+Jan 31, 2025 7:30:32 PM com.poissonnerie.util.DatabaseManager initDatabase
+INFO: Création du fichier de base de données...
+Jan 31, 2025 7:30:32 PM com.poissonnerie.util.DatabaseManager loadSchemaFromResource
+INFO: Chargement du schéma SQL depuis les ressources...
+Jan 31, 2025 7:30:32 PM com.poissonnerie.util.DatabaseManager loadSchemaFromResource
+INFO: Schéma SQL chargé avec succès
+Jan 31, 2025 7:30:32 PM com.poissonnerie.util.DatabaseManager initDatabase
+SEVERE: Erreur fatale lors de l'initialisation
+org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (no such table: mouvements_caisse)
+        at org.sqlite.core.DB.newSQLException(DB.java:1179)
+        at org.sqlite.core.DB.newSQLException(DB.java:1190)
+        at org.sqlite.core.DB.throwex(DB.java:1150)
+        at org.sqlite.core.NativeDB.prepare_utf8(Native Method)
+        at org.sqlite.core.NativeDB.prepare(NativeDB.java:126)
+        at org.sqlite.core.DB.prepare(DB.java:264)
+        at org.sqlite.jdbc3.JDBC3Statement.lambda$execute$0(JDBC3Statement.java:51)
+        at org.sqlite.jdbc3.JDBC3Statement.withConnectionTimeout(JDBC3Statement.java:454)
+        at org.sqlite.jdbc3.JDBC3Statement.execute(JDBC3Statement.java:40)
+        at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:100)
+        at com.poissonnerie.Main.initializeDatabase(Main.java:128)
+        at com.poissonnerie.Main.lambda$startBackgroundInitialization$3(Main.java:101)
+        at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+        at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+        at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+        at java.base/java.lang.Thread.run(Thread.java:1583)
+
+Jan 31, 2025 7:30:32 PM com.poissonnerie.Main lambda$startBackgroundInitialization$3
+SEVERE: Erreur lors de l'initialisation en arrière-plan
+java.lang.RuntimeException: Erreur d'initialisation: [SQLITE_ERROR] SQL error or missing database (no such table: mouvements_caisse)
+        at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:114)
+        at com.poissonnerie.Main.initializeDatabase(Main.java:128)
+        at com.poissonnerie.Main.lambda$startBackgroundInitialization$3(Main.java:101)
+        at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+        at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+        at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+        at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (no such table: mouvements_caisse)
+        at org.sqlite.core.DB.newSQLException(DB.java:1179)
+        at org.sqlite.core.DB.newSQLException(DB.java:1190)
+        at org.sqlite.core.DB.throwex(DB.java:1150)
+        at org.sqlite.core.NativeDB.prepare_utf8(Native Method)
+        at org.sqlite.core.NativeDB.prepare(NativeDB.java:126)
+        at org.sqlite.core.DB.prepare(DB.java:264)
+        at org.sqlite.jdbc3.JDBC3Statement.lambda$execute$0(JDBC3Statement.java:51)
+        at org.sqlite.jdbc3.JDBC3Statement.withConnectionTimeout(JDBC3Statement.java:454)
+        at org.sqlite.jdbc3.JDBC3Statement.execute(JDBC3Statement.java:40)
+        at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:100)
+        ... 6 more
+
+Jan 31, 2025 7:30:32 PM com.poissonnerie.Main handleFatalError
+SEVERE: Erreur lors de l'initialisation: java.util.concurrent.CompletionException: java.lang.RuntimeException: Erreur d'initialisation: [SQLITE_ERROR] SQL error or missing database (no such table: mouvements_caisse)
+java.util.concurrent.ExecutionException: java.util.concurrent.CompletionException: java.lang.RuntimeException: Erreur d'initialisation: [SQLITE_ERROR] SQL error or missing database (no such table: mouvements_caisse)
+        at java.base/java.util.concurrent.FutureTask.report(FutureTask.java:122)
+        at java.base/java.util.concurrent.FutureTask.get(FutureTask.java:205)
+        at com.poissonnerie.Main.startBackgroundInitialization(Main.java:112)
+        at com.poissonnerie.Main.lambda$initializeApplication$2(Main.java:89)
+        at java.desktop/java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:318)
+        at java.desktop/java.awt.EventQueue.dispatchEventImpl(EventQueue.java:773)
+        at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:720)
+        at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:714)
+        at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+        at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:87)
+        at java.desktop/java.awt.EventQueue.dispatchEvent(EventQueue.java:742)
+        at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:203)
+        at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:124)
+        at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:113)
+        at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:109)
+        at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
+        at java.desktop/java.awt.EventDispatchThread.run(EventDispatchThread.java:90)
+Caused by: java.util.concurrent.CompletionException: java.lang.RuntimeException: Erreur d'initialisation: [SQLITE_ERROR] SQL error or missing database (no such table: mouvements_caisse)
+        at com.poissonnerie.Main.lambda$startBackgroundInitialization$3(Main.java:106)
+        at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+        at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+        at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+        at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: java.lang.RuntimeException: Erreur d'initialisation: [SQLITE_ERROR] SQL error or missing database (no such table: mouvements_caisse)
+        at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:114)
+        at com.poissonnerie.Main.initializeDatabase(Main.java:128)
+        at com.poissonnerie.Main.lambda$startBackgroundInitialization$3(Main.java:101)
+        ... 4 more
+Caused by: org.sqlite.SQLiteException: [SQLITE_ERROR] SQL error or missing database (no such table: mouvements_caisse)
+        at org.sqlite.core.DB.newSQLException(DB.java:1179)
+        at org.sqlite.core.DB.newSQLException(DB.java:1190)
+        at org.sqlite.core.DB.throwex(DB.java:1150)
+        at org.sqlite.core.NativeDB.prepare_utf8(Native Method)
+        at org.sqlite.core.NativeDB.prepare(NativeDB.java:126)
+        at org.sqlite.core.DB.prepare(DB.java:264)
+        at org.sqlite.jdbc3.JDBC3Statement.lambda$execute$0(JDBC3Statement.java:51)
+        at org.sqlite.jdbc3.JDBC3Statement.withConnectionTimeout(JDBC3Statement.java:454)
+        at org.sqlite.jdbc3.JDBC3Statement.execute(JDBC3Statement.java:40)
+        at com.poissonnerie.util.DatabaseManager.initDatabase(DatabaseManager.java:100)
+        ... 6 more

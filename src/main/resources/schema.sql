@@ -7,41 +7,6 @@ PRAGMA temp_store = MEMORY;
 PRAGMA busy_timeout = 30000;
 PRAGMA foreign_keys = OFF;  -- Désactivé temporairement pour la migration
 
--- Création d'une table temporaire pour la migration
-DROP TABLE IF EXISTS mouvements_caisse_temp;
-CREATE TABLE mouvements_caisse_temp (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    date TEXT,
-    type TEXT,
-    montant REAL,
-    description TEXT
-);
-
--- Sauvegarde des données existantes si la table existe
-INSERT OR IGNORE INTO mouvements_caisse_temp 
-SELECT id, date, type, montant, description
-FROM mouvements_caisse WHERE EXISTS (SELECT 1 FROM mouvements_caisse LIMIT 1);
-
--- Recréation de la table avec la nouvelle structure
-DROP TABLE IF EXISTS mouvements_caisse;
-CREATE TABLE mouvements_caisse (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    date TEXT DEFAULT (datetime('now', 'localtime')),
-    type TEXT NOT NULL CHECK (type IN ('ENTREE', 'SORTIE', 'OUVERTURE', 'CLOTURE')),
-    montant REAL NOT NULL,
-    description TEXT,
-    user_id INTEGER,
-    FOREIGN KEY (user_id) REFERENCES users(id)
-);
-
--- Restauration des données avec la nouvelle colonne
-INSERT INTO mouvements_caisse (id, date, type, montant, description, user_id)
-SELECT id, date, type, montant, description, NULL
-FROM mouvements_caisse_temp;
-
--- Nettoyage
-DROP TABLE IF EXISTS mouvements_caisse_temp;
-
 -- Tables principales dans l'ordre de dépendance
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,6 +17,17 @@ CREATE TABLE IF NOT EXISTS users (
     last_login INTEGER,
     active BOOLEAN DEFAULT true,
     CONSTRAINT username_min_length CHECK (length(username) >= 3)
+);
+
+-- Création de la table mouvements_caisse
+CREATE TABLE IF NOT EXISTS mouvements_caisse (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT DEFAULT (datetime('now', 'localtime')),
+    type TEXT NOT NULL CHECK (type IN ('ENTREE', 'SORTIE', 'OUVERTURE', 'CLOTURE')),
+    montant REAL NOT NULL,
+    description TEXT,
+    user_id INTEGER,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 CREATE TABLE IF NOT EXISTS produits (
