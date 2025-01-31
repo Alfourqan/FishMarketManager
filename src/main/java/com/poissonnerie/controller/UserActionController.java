@@ -16,6 +16,8 @@ public class UserActionController {
     private static UserActionController instance;
     private Integer currentUserId;
     private String currentUsername;
+    private static final int MAX_RETRIES = 3;
+    private static final long RETRY_DELAY_MS = 100;
 
     private UserActionController() {
         try {
@@ -29,7 +31,11 @@ public class UserActionController {
 
     public static UserActionController getInstance() {
         if (instance == null) {
-            instance = new UserActionController();
+            synchronized (UserActionController.class) {
+                if (instance == null) {
+                    instance = new UserActionController();
+                }
+            }
         }
         return instance;
     }
@@ -44,65 +50,10 @@ public class UserActionController {
         try (Connection conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(false);
             try {
-                // Vérifier si la table existe
                 DatabaseMetaData md = conn.getMetaData();
                 ResultSet rs = md.getTables(null, null, TABLE_NAME, null);
 
-                if (rs.next()) {
-                    // La table existe, vérifier si la colonne user_id existe
-                    ResultSet columns = md.getColumns(null, null, TABLE_NAME, "user_id");
-                    if (!columns.next()) {
-                        // Sauvegarder les données existantes
-                        List<UserAction> existingActions = new ArrayList<>();
-                        try (Statement stmt = conn.createStatement();
-                             ResultSet data = stmt.executeQuery("SELECT * FROM " + TABLE_NAME)) {
-                            while (data.next()) {
-                                UserAction action = new UserAction(
-                                    UserAction.ActionType.valueOf(data.getString("action_type")),
-                                    data.getString("username"),
-                                    data.getString("description"),
-                                    UserAction.EntityType.valueOf(data.getString("entity_type")),
-                                    data.getInt("entity_id")
-                                );
-                                action.setId(data.getInt("id"));
-                                action.setDateTime(LocalDateTime.parse(
-                                    data.getString("date_time"),
-                                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-                                ));
-                                action.setUserId(1); // Set default user ID for existing records
-                                existingActions.add(action);
-                            }
-                        }
-
-                        // Supprimer l'ancienne table
-                        try (Statement stmt = conn.createStatement()) {
-                            stmt.execute("DROP TABLE IF EXISTS " + TABLE_NAME);
-                        }
-
-                        // Créer la nouvelle table
-                        createTable(conn);
-
-                        // Restaurer les données
-                        String insertSql = "INSERT INTO " + TABLE_NAME +
-                            " (id, action_type, username, date_time, description, entity_type, entity_id, user_id) " +
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-                        try (PreparedStatement pstmt = conn.prepareStatement(insertSql)) {
-                            for (UserAction action : existingActions) {
-                                pstmt.setInt(1, action.getId());
-                                pstmt.setString(2, action.getType().name());
-                                pstmt.setString(3, action.getUsername());
-                                pstmt.setString(4, action.getDateTime().format(
-                                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-                                ));
-                                pstmt.setString(5, action.getDescription());
-                                pstmt.setString(6, action.getEntityType().name());
-                                pstmt.setInt(7, action.getEntityId());
-                                pstmt.setObject(8, 1); // user_id=1 pour les anciennes entrées
-                            }
-                        }
-                    }
-                } else {
-                    // La table n'existe pas, la créer
+                if (!rs.next()) {
                     createTable(conn);
                 }
                 conn.commit();
@@ -120,7 +71,7 @@ public class UserActionController {
 
     private void createTable(Connection conn) throws SQLException {
         try (Statement stmt = conn.createStatement()) {
-            stmt.execute("CREATE TABLE " + TABLE_NAME + " (" +
+            stmt.execute("CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "action_type TEXT NOT NULL," +
                 "username TEXT NOT NULL," +
@@ -128,8 +79,8 @@ public class UserActionController {
                 "description TEXT NOT NULL," +
                 "entity_type TEXT NOT NULL," +
                 "entity_id INTEGER NOT NULL," +
-                "user_id INTEGER"  // Allowing NULL values
-            );
+                "user_id INTEGER" +
+                ")");
 
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_user_actions_date ON " + TABLE_NAME + "(date_time)");
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_user_actions_type ON " + TABLE_NAME + "(action_type)");
@@ -149,40 +100,67 @@ public class UserActionController {
             action.setUsername("SYSTEM");
         } else {
             action.setUsername(currentUsername);
-            action.setUserId(currentUserId);  // Using Integer type for userId
+            action.setUserId(currentUserId);
         }
 
         String sql = "INSERT INTO " + TABLE_NAME +
             " (action_type, username, date_time, description, entity_type, entity_id, user_id) " +
             "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        int retries = 0;
+        while (retries < MAX_RETRIES) {
+            try (Connection conn = DatabaseManager.getConnection()) {
+                conn.setAutoCommit(false);
+                try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                    pstmt.setString(1, action.getType().name());
+                    pstmt.setString(2, action.getUsername());
+                    pstmt.setString(3, action.getDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                    pstmt.setString(4, action.getDescription());
+                    pstmt.setString(5, action.getEntityType().name());
+                    pstmt.setInt(6, action.getEntityId());
 
-            LOGGER.fine("Préparation de l'enregistrement de l'action: " + action);
+                    if (currentUserId != null) {
+                        pstmt.setInt(7, currentUserId);
+                    } else {
+                        pstmt.setNull(7, Types.INTEGER);
+                    }
 
-            pstmt.setString(1, action.getType().name());
-            pstmt.setString(2, action.getUsername());
-            pstmt.setString(3, action.getDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-            pstmt.setString(4, action.getDescription());
-            pstmt.setString(5, action.getEntityType().name());
-            pstmt.setInt(6, action.getEntityId());
+                    int result = pstmt.executeUpdate();
+                    conn.commit();
 
-            if (currentUserId != null) {
-                pstmt.setInt(7, currentUserId);
-            } else {
-                pstmt.setNull(7, Types.INTEGER);
+                    if (result > 0) {
+                        LOGGER.info("Action utilisateur enregistrée avec succès: " + action);
+                        return;
+                    } else {
+                        LOGGER.warning("Aucune ligne insérée pour l'action: " + action);
+                    }
+                } catch (SQLException e) {
+                    try {
+                        conn.rollback();
+                    } catch (SQLException rollbackEx) {
+                        LOGGER.log(Level.SEVERE, "Erreur lors du rollback", rollbackEx);
+                    }
+
+                    if (e.getMessage().contains("database is locked") && retries < MAX_RETRIES - 1) {
+                        retries++;
+                        LOGGER.info("Tentative de réessai " + retries + "/" + MAX_RETRIES + " après verrouillage de la base");
+                        try {
+                            Thread.sleep(RETRY_DELAY_MS * retries);
+                        } catch (InterruptedException ie) {
+                            Thread.currentThread().interrupt();
+                            throw new RuntimeException("Interruption pendant l'attente entre les tentatives", ie);
+                        }
+                        continue;
+                    }
+                    throw e;
+                }
+            } catch (SQLException e) {
+                LOGGER.log(Level.SEVERE, "Erreur lors de l'enregistrement de l'action utilisateur: " + action, e);
+                if (retries >= MAX_RETRIES - 1) {
+                    throw new RuntimeException("Erreur lors de l'enregistrement de l'action utilisateur après " + MAX_RETRIES + " tentatives", e);
+                }
+                retries++;
             }
-
-            int result = pstmt.executeUpdate();
-            if (result > 0) {
-                LOGGER.info("Action utilisateur enregistrée avec succès: " + action);
-            } else {
-                LOGGER.warning("Aucune ligne insérée pour l'action: " + action);
-            }
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de l'enregistrement de l'action utilisateur: " + action, e);
-            throw new RuntimeException("Erreur lors de l'enregistrement de l'action utilisateur", e);
         }
     }
 
@@ -212,7 +190,6 @@ public class UserActionController {
                     action.setId(rs.getInt("id"));
                     action.setDateTime(LocalDateTime.parse(rs.getString("date_time"), formatter));
 
-                    // Handle potential NULL values for user_id
                     Object userId = rs.getObject("user_id");
                     if (userId != null) {
                         action.setUserId((Integer) userId);
@@ -228,7 +205,6 @@ public class UserActionController {
             throw new RuntimeException("Erreur lors de la récupération des actions utilisateur", e);
         }
     }
-
     public void purgerActions(LocalDateTime dateLimite) {
         String sql = "DELETE FROM " + TABLE_NAME + " WHERE date_time < ?";
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
