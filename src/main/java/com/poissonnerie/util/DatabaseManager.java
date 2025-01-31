@@ -11,86 +11,65 @@ import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
 import java.io.File;
+import org.sqlite.SQLiteConfig;
+import org.sqlite.SQLiteConnection;
+import org.sqlite.SQLiteOpenMode;
 
 public class DatabaseManager {
     private static final Logger LOGGER = Logger.getLogger(DatabaseManager.class.getName());
-    private static final AtomicBoolean isInitialized = new AtomicBoolean(false);
-    private static final ReentrantLock INIT_LOCK = new ReentrantLock();
-    private static final int INIT_TIMEOUT_SECONDS = 10;
+    private static volatile boolean isInitialized = false;
+    private static final Object LOCK = new Object();
     private static final String DB_FILE = "poissonnerie.db";
+    private static SQLiteConfig config;
+
+    static {
+        config = new SQLiteConfig();
+        config.setOpenMode(SQLiteOpenMode.READWRITE);
+        config.setJournalMode(SQLiteConfig.JournalMode.DELETE);
+        config.setSynchronous(SQLiteConfig.SynchronousMode.OFF);
+        config.setBusyTimeout(30000);
+        config.setCacheSize(2000);
+        config.setPageSize(4096);
+        config.enforceForeignKeys(true);
+    }
 
     public static Connection getConnection() throws SQLException {
-        if (!isInitialized.get()) {
-            boolean locked = INIT_LOCK.tryLock();
-            try {
-                if (locked && !isInitialized.get()) {
+        if (!isInitialized) {
+            synchronized (LOCK) {
+                if (!isInitialized) {
                     try {
                         initDatabase();
                     } catch (Exception e) {
                         LOGGER.log(Level.SEVERE, "Échec de l'initialisation de la base de données", e);
                         throw new SQLException("Échec de l'initialisation de la base de données", e);
                     }
-                } else if (!locked) {
-                    // Attendre que l'initialisation soit terminée
-                    long startTime = System.currentTimeMillis();
-                    while (!isInitialized.get()) {
-                        if (System.currentTimeMillis() - startTime > INIT_TIMEOUT_SECONDS * 1000) {
-                            throw new SQLException("Timeout lors de l'attente de l'initialisation de la base de données");
-                        }
-                        try {
-                            Thread.sleep(100);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            throw new SQLException("Interruption pendant l'attente de l'initialisation", e);
-                        }
-                    }
-                }
-            } finally {
-                if (locked) {
-                    INIT_LOCK.unlock();
                 }
             }
         }
-        return DatabaseConnectionPool.getConnection();
-    }
 
-    private static void configureSQLiteDatabase(Connection conn) throws SQLException {
-        LOGGER.info("Configuration des paramètres SQLite...");
-        try (Statement stmt = conn.createStatement()) {
-            stmt.execute("PRAGMA foreign_keys = ON");
-            stmt.execute("PRAGMA page_size = 4096");
-            stmt.execute("PRAGMA cache_size = 2000");
-            stmt.execute("PRAGMA busy_timeout = 30000");
-            stmt.execute("PRAGMA journal_mode = DELETE");
-            stmt.execute("PRAGMA synchronous = OFF");
-            LOGGER.info("Paramètres SQLite configurés avec succès");
+        try {
+            return config.createConnection("jdbc:sqlite:" + DB_FILE);
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la configuration SQLite", e);
+            LOGGER.log(Level.SEVERE, "Erreur lors de la création de la connexion", e);
             throw e;
         }
     }
 
     public static void initDatabase() {
-        if (isInitialized.get()) {
+        if (isInitialized) {
             LOGGER.info("Base de données déjà initialisée");
             return;
         }
 
-        boolean locked = INIT_LOCK.tryLock();
-        if (!locked) {
-            LOGGER.info("Initialisation déjà en cours par un autre thread");
-            return;
-        }
+        synchronized (LOCK) {
+            if (isInitialized) {
+                return;
+            }
 
-        try {
             LOGGER.info("Initialisation de la base de données...");
-
-            // Vérifier si le fichier de base de données existe
             File dbFile = new File(DB_FILE);
+
             if (!dbFile.exists()) {
                 LOGGER.info("Création du fichier de base de données...");
                 try {
@@ -102,26 +81,19 @@ public class DatabaseManager {
                 }
             }
 
-            Connection conn = null;
-            long startTime = System.nanoTime();
-
-            try {
-                conn = DatabaseConnectionPool.getConnection();
-                configureSQLiteDatabase(conn);
+            try (Connection conn = getConnection()) {
+                String schema = loadSchemaFromResource();
+                if (schema == null || schema.trim().isEmpty()) {
+                    throw new IllegalStateException("Schema SQL vide ou introuvable");
+                }
 
                 try (Statement stmt = conn.createStatement()) {
-                    String schema = loadSchemaFromResource();
-                    if (schema == null || schema.trim().isEmpty()) {
-                        throw new IllegalStateException("Schema SQL vide ou introuvable");
-                    }
-
                     String[] statements = schema.split(";");
                     for (String sql : statements) {
                         sql = sql.trim();
                         if (!sql.isEmpty()) {
                             try {
                                 stmt.execute(sql);
-                                LOGGER.fine("Exécution SQL réussie: " + sql.substring(0, Math.min(sql.length(), 50)) + "...");
                             } catch (SQLException e) {
                                 if (!e.getMessage().contains("table already exists")) {
                                     throw e;
@@ -129,27 +101,31 @@ public class DatabaseManager {
                             }
                         }
                     }
-
                     insertTestDataIfEmpty(conn);
-
-                    long duration = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
-                    LOGGER.info("Base de données initialisée avec succès en " + duration + " ms");
-                    isInitialized.set(true);
                 }
+                isInitialized = true;
+                LOGGER.info("Base de données initialisée avec succès");
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Erreur fatale lors de l'initialisation", e);
                 throw new RuntimeException("Erreur d'initialisation: " + e.getMessage(), e);
-            } finally {
-                if (conn != null) {
-                    try {
-                        conn.close();
-                    } catch (SQLException e) {
-                        LOGGER.log(Level.WARNING, "Erreur lors de la fermeture de la connexion", e);
-                    }
-                }
             }
-        } finally {
-            INIT_LOCK.unlock();
+        }
+    }
+
+    private static String loadSchemaFromResource() {
+        LOGGER.info("Chargement du schéma SQL depuis les ressources...");
+        try (InputStream is = DatabaseManager.class.getClassLoader().getResourceAsStream("schema.sql")) {
+            if (is == null) {
+                throw new IllegalStateException("Fichier schema.sql introuvable dans les ressources");
+            }
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+                String schema = reader.lines().collect(Collectors.joining("\n"));
+                LOGGER.info("Schéma SQL chargé avec succès");
+                return schema;
+            }
+        } catch (IOException e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la lecture du fichier schema.sql", e);
+            throw new RuntimeException("Erreur lors de la lecture du schéma: " + e.getMessage(), e);
         }
     }
 
@@ -164,27 +140,6 @@ public class DatabaseManager {
                            "('Crevettes', 'Fruits de mer', 12.00, 18.00, 100, 20)");
             }
             LOGGER.info("Données de test insérées avec succès");
-        }
-    }
-
-    private static String loadSchemaFromResource() {
-        LOGGER.info("Chargement du schéma SQL depuis les ressources...");
-        try (InputStream is = DatabaseManager.class.getClassLoader().getResourceAsStream("schema.sql")) {
-            if (is == null) {
-                throw new IllegalStateException("Fichier schema.sql introuvable dans les ressources");
-            }
-
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
-                String schema = reader.lines().collect(Collectors.joining("\n"));
-                if (schema.trim().isEmpty()) {
-                    throw new IllegalStateException("Le fichier schema.sql est vide");
-                }
-                LOGGER.info("Schéma SQL chargé avec succès");
-                return schema;
-            }
-        } catch (IOException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la lecture du fichier schema.sql", e);
-            throw new RuntimeException("Erreur lors de la lecture du schéma: " + e.getMessage(), e);
         }
     }
 
