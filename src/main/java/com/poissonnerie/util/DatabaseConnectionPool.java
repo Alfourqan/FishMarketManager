@@ -32,18 +32,18 @@ public class DatabaseConnectionPool {
                         // Configuration optimisée pour SQLite en mode single-connection
                         config.setMaximumPoolSize(1);
                         config.setMinimumIdle(1);
-                        config.setConnectionTimeout(5000); // 5 secondes
-                        config.setIdleTimeout(60000); // 1 minute
-                        config.setMaxLifetime(300000); // 5 minutes
+                        config.setConnectionTimeout(30000); // 30 secondes
+                        config.setIdleTimeout(300000); // 5 minutes
+                        config.setMaxLifetime(1800000); // 30 minutes
                         config.setAutoCommit(true);
-                        config.setLeakDetectionThreshold(60000); // 1 minute
+                        config.setLeakDetectionThreshold(300000); // 5 minutes
 
                         // Propriétés SQLite spécifiques
-                        config.addDataSourceProperty("journal_mode", "WAL");
-                        config.addDataSourceProperty("synchronous", "NORMAL");
+                        config.addDataSourceProperty("journal_mode", "DELETE");
+                        config.addDataSourceProperty("synchronous", "OFF");
                         config.addDataSourceProperty("foreign_keys", "true");
-                        config.addDataSourceProperty("cache_size", "1000");
-                        config.addDataSourceProperty("busy_timeout", "5000");
+                        config.addDataSourceProperty("cache_size", "2000");
+                        config.addDataSourceProperty("busy_timeout", "30000");
 
                         dataSource = new HikariDataSource(config);
                         verifyConnection();
@@ -61,7 +61,7 @@ public class DatabaseConnectionPool {
 
     private static void verifyConnection() throws SQLException {
         try (Connection conn = dataSource.getConnection()) {
-            if (!conn.isValid(5)) {
+            if (!conn.isValid(10)) {
                 throw new SQLException("La connexion test n'est pas valide");
             }
             LOGGER.info("Connexion à SQLite vérifiée avec succès");
@@ -80,7 +80,7 @@ public class DatabaseConnectionPool {
         while (attempts < MAX_RETRY_ATTEMPTS) {
             try {
                 conn = dataSource.getConnection();
-                if (conn.isValid(5)) {
+                if (conn.isValid(10)) {
                     return conn;
                 }
                 if (conn != null) {

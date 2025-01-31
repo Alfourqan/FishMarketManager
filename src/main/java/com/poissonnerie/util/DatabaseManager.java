@@ -61,13 +61,16 @@ public class DatabaseManager {
     private static void configureSQLiteDatabase(Connection conn) throws SQLException {
         LOGGER.info("Configuration des paramètres SQLite...");
         try (Statement stmt = conn.createStatement()) {
+            stmt.execute("PRAGMA foreign_keys = ON");
+            stmt.execute("PRAGMA page_size = 4096");
+            stmt.execute("PRAGMA cache_size = 2000");
+            stmt.execute("PRAGMA busy_timeout = 30000");
             stmt.execute("PRAGMA journal_mode = DELETE");
             stmt.execute("PRAGMA synchronous = OFF");
-            stmt.execute("PRAGMA foreign_keys = ON");
-            stmt.execute("PRAGMA cache_size = 1000");
-            stmt.execute("PRAGMA page_size = 4096");
-            stmt.execute("PRAGMA busy_timeout = 5000");
             LOGGER.info("Paramètres SQLite configurés avec succès");
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la configuration SQLite", e);
+            throw e;
         }
     }
 
@@ -106,9 +109,6 @@ public class DatabaseManager {
                 conn = DatabaseConnectionPool.getConnection();
                 configureSQLiteDatabase(conn);
 
-                // Création des tables dans une transaction séparée
-                conn.setAutoCommit(false);
-
                 try (Statement stmt = conn.createStatement()) {
                     String schema = loadSchemaFromResource();
                     if (schema == null || schema.trim().isEmpty()) {
@@ -131,7 +131,6 @@ public class DatabaseManager {
                     }
 
                     insertTestDataIfEmpty(conn);
-                    conn.commit();
 
                     long duration = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
                     LOGGER.info("Base de données initialisée avec succès en " + duration + " ms");
@@ -139,18 +138,10 @@ public class DatabaseManager {
                 }
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Erreur fatale lors de l'initialisation", e);
-                if (conn != null) {
-                    try {
-                        conn.rollback();
-                    } catch (SQLException re) {
-                        LOGGER.log(Level.SEVERE, "Erreur lors du rollback", re);
-                    }
-                }
                 throw new RuntimeException("Erreur d'initialisation: " + e.getMessage(), e);
             } finally {
                 if (conn != null) {
                     try {
-                        conn.setAutoCommit(true);
                         conn.close();
                     } catch (SQLException e) {
                         LOGGER.log(Level.WARNING, "Erreur lors de la fermeture de la connexion", e);
