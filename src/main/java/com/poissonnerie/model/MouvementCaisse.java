@@ -8,6 +8,7 @@ public class MouvementCaisse {
     private TypeMouvement type;
     private double montant;
     private String description;
+    private Integer userId; // Nouveau champ pour stocker l'ID de l'utilisateur
 
     public enum TypeMouvement {
         ENTREE("ENTREE"),
@@ -44,9 +45,16 @@ public class MouvementCaisse {
         this.type = type;
         this.montant = montant;
         this.description = description;
+        this.userId = null; // Par défaut, pas d'utilisateur associé
     }
 
-    // Getters et setters
+    // Constructeur surchargé avec userId
+    public MouvementCaisse(int id, LocalDateTime date, TypeMouvement type, double montant, String description, Integer userId) {
+        this(id, date, type, montant, description);
+        this.userId = userId;
+    }
+
+    // Getters et setters existants
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
@@ -67,12 +75,17 @@ public class MouvementCaisse {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
+    // Nouveaux getters et setters pour userId
+    public Integer getUserId() { return userId; }
+    public void setUserId(Integer userId) { this.userId = userId; }
+
     @Override
     public String toString() {
-        return String.format("%s - %s: %.2f € - %s",
+        return String.format("%s - %s: %.2f € - %s (User: %s)",
             date.toString(),
             type.getValue(),
             montant,
-            description);
+            description,
+            userId != null ? userId : "N/A");
     }
 }

@@ -19,6 +19,26 @@ CREATE TABLE IF NOT EXISTS users (
     CONSTRAINT username_min_length CHECK (length(username) >= 3)
 );
 
+-- Migration sécurisée de la table mouvements_caisse
+CREATE TABLE IF NOT EXISTS mouvements_caisse_new (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT DEFAULT (datetime('now', 'localtime')),
+    type TEXT NOT NULL CHECK (type IN ('ENTREE', 'SORTIE', 'OUVERTURE', 'CLOTURE')),
+    montant REAL NOT NULL,
+    description TEXT,
+    user_id INTEGER,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- Copier les données existantes si la table existe
+INSERT OR IGNORE INTO mouvements_caisse_new (id, date, type, montant, description)
+SELECT id, date, type, montant, description 
+FROM mouvements_caisse;
+
+-- Supprimer l'ancienne table et renommer la nouvelle
+DROP TABLE IF EXISTS mouvements_caisse;
+ALTER TABLE mouvements_caisse_new RENAME TO mouvements_caisse;
+
 CREATE TABLE IF NOT EXISTS produits (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nom TEXT NOT NULL,
@@ -68,14 +88,6 @@ CREATE TABLE IF NOT EXISTS lignes_vente (
     FOREIGN KEY (produit_id) REFERENCES produits(id)
 );
 
-CREATE TABLE IF NOT EXISTS mouvements_caisse (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    date TEXT DEFAULT (datetime('now', 'localtime')),
-    type TEXT NOT NULL CHECK (type IN ('ENTREE', 'SORTIE', 'OUVERTURE', 'CLOTURE')),
-    montant REAL NOT NULL,
-    description TEXT
-);
-
 CREATE TABLE IF NOT EXISTS configurations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     cle TEXT NOT NULL UNIQUE,
@@ -91,7 +103,8 @@ CREATE TABLE IF NOT EXISTS user_actions (
     date_time TEXT NOT NULL,
     description TEXT NOT NULL,
     entity_type TEXT NOT NULL,
-    entity_id INTEGER NOT NULL
+    entity_id INTEGER NOT NULL,
+    user_id INTEGER  -- Permettre les valeurs NULL
 );
 
 -- Index optimisés
@@ -105,9 +118,11 @@ CREATE INDEX IF NOT EXISTS idx_lignes_vente_vente ON lignes_vente(vente_id);
 CREATE INDEX IF NOT EXISTS idx_lignes_vente_produit ON lignes_vente(produit_id);
 CREATE INDEX IF NOT EXISTS idx_mouvements_caisse_date ON mouvements_caisse(date);
 CREATE INDEX IF NOT EXISTS idx_mouvements_caisse_type ON mouvements_caisse(type);
+CREATE INDEX IF NOT EXISTS idx_mouvements_caisse_user ON mouvements_caisse(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_actions_date ON user_actions(date_time);
 CREATE INDEX IF NOT EXISTS idx_user_actions_type ON user_actions(action_type);
 CREATE INDEX IF NOT EXISTS idx_user_actions_entity ON user_actions(entity_type, entity_id);
+CREATE INDEX IF NOT EXISTS idx_user_actions_user ON user_actions(user_id);
 
 -- Configurations par défaut
 INSERT OR IGNORE INTO configurations (cle, valeur, description) VALUES

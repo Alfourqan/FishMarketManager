@@ -10,7 +10,7 @@ public class UserAction {
     private String description;
     private EntityType entityType;
     private int entityId;
-    private int userId;
+    private Integer userId;  // Changed to Integer to allow null values
 
     public enum ActionType {
         CREATION("Création"),
@@ -56,6 +56,7 @@ public class UserAction {
         this.description = description;
         this.entityType = entityType;
         this.entityId = entityId;
+        this.userId = null;  // Initialize as null by default
     }
 
     // Getters and setters
@@ -115,22 +116,23 @@ public class UserAction {
         this.entityId = entityId;
     }
 
-    public int getUserId() {
+    public Integer getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(Integer userId) {
         this.userId = userId;
     }
 
     @Override
     public String toString() {
-        return String.format("[%s] %s - %s: %s (ID: %d) - %s",
+        return String.format("[%s] %s - %s: %s (ID: %d) - %s User: %s",
             dateTime.toString(),
             username,
             type.getValue(),
             entityType.getValue(),
             entityId,
-            description);
+            description,
+            userId != null ? userId : "N/A");
     }
 }

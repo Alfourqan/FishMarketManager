@@ -58,7 +58,8 @@ public class CaisseController {
                     date,
                     MouvementCaisse.TypeMouvement.fromString(rs.getString("type")),
                     rs.getDouble("montant"),
-                    rs.getString("description")
+                    rs.getString("description"),
+                    rs.getObject("user_id") != null ? rs.getInt("user_id") : null
                 );
                 mouvements.add(mouvement);
 
@@ -94,7 +95,7 @@ public class CaisseController {
             mouvement.getType(),
             mouvement.getMontant()));
 
-        String sql = "INSERT INTO mouvements_caisse (date, type, montant, description) VALUES (datetime('now', 'localtime'), ?, ?, ?)";
+        String sql = "INSERT INTO mouvements_caisse (date, type, montant, description, user_id) VALUES (datetime('now', 'localtime'), ?, ?, ?, ?)";
         String getIdSql = "SELECT last_insert_rowid() as id";
 
         try (Connection conn = DatabaseManager.getConnection()) {
@@ -103,6 +104,11 @@ public class CaisseController {
                 pstmt.setString(1, mouvement.getType().getValue());
                 pstmt.setDouble(2, mouvement.getMontant());
                 pstmt.setString(3, mouvement.getDescription());
+                if (mouvement.getUserId() != null) {
+                    pstmt.setInt(4, mouvement.getUserId());
+                } else {
+                    pstmt.setNull(4, Types.INTEGER);
+                }
                 pstmt.executeUpdate();
 
                 try (Statement stmt = conn.createStatement();
@@ -122,6 +128,7 @@ public class CaisseController {
                             UserAction.EntityType.CAISSE,
                             mouvement.getId()
                         );
+                        action.setUserId(mouvement.getUserId());
                         userActionController.logAction(action);
                     }
                 }
@@ -143,15 +150,16 @@ public class CaisseController {
         StringBuilder csv = new StringBuilder();
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
 
-        csv.append("Date,Type,Montant,Description\n");
+        csv.append("Date,Type,Montant,Description,Utilisateur\n");
 
         mouvements.stream()
             .filter(m -> !m.getDate().isBefore(debut) && !m.getDate().isAfter(fin))
-            .forEach(m -> csv.append(String.format("%s,%s,%.2f,\"%s\"\n",
+            .forEach(m -> csv.append(String.format("%s,%s,%.2f,\"%s\",%s\n",
                 m.getDate().format(dateFormatter),
                 m.getType(),
                 m.getMontant(),
-                m.getDescription().replace("\"", "\"\"")
+                m.getDescription().replace("\"", "\"\""),
+                m.getUserId() != null ? m.getUserId() : "N/A"
             )));
 
         return csv.toString();

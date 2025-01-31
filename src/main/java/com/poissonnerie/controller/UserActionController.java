@@ -69,6 +69,7 @@ public class UserActionController {
                                     data.getString("date_time"),
                                     DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
                                 ));
+                                action.setUserId(1); // Set default user ID for existing records
                                 existingActions.add(action);
                             }
                         }
@@ -84,7 +85,7 @@ public class UserActionController {
                         // Restaurer les données
                         String insertSql = "INSERT INTO " + TABLE_NAME +
                             " (id, action_type, username, date_time, description, entity_type, entity_id, user_id) " +
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, 1)"; // user_id=1 pour les anciennes entrées
+                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
                         try (PreparedStatement pstmt = conn.prepareStatement(insertSql)) {
                             for (UserAction action : existingActions) {
                                 pstmt.setInt(1, action.getId());
@@ -96,7 +97,7 @@ public class UserActionController {
                                 pstmt.setString(5, action.getDescription());
                                 pstmt.setString(6, action.getEntityType().name());
                                 pstmt.setInt(7, action.getEntityId());
-                                pstmt.executeUpdate();
+                                pstmt.setObject(8, 1); // user_id=1 pour les anciennes entrées
                             }
                         }
                     }
@@ -127,8 +128,8 @@ public class UserActionController {
                 "description TEXT NOT NULL," +
                 "entity_type TEXT NOT NULL," +
                 "entity_id INTEGER NOT NULL," +
-                "user_id INTEGER NOT NULL" +
-                ")");
+                "user_id INTEGER"  // Allowing NULL values
+            );
 
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_user_actions_date ON " + TABLE_NAME + "(date_time)");
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_user_actions_type ON " + TABLE_NAME + "(action_type)");
@@ -148,7 +149,7 @@ public class UserActionController {
             action.setUsername("SYSTEM");
         } else {
             action.setUsername(currentUsername);
-            action.setUserId(currentUserId);
+            action.setUserId(currentUserId);  // Using Integer type for userId
         }
 
         String sql = "INSERT INTO " + TABLE_NAME +
@@ -166,7 +167,12 @@ public class UserActionController {
             pstmt.setString(4, action.getDescription());
             pstmt.setString(5, action.getEntityType().name());
             pstmt.setInt(6, action.getEntityId());
-            pstmt.setInt(7, currentUserId != null ? currentUserId : 1);
+
+            if (currentUserId != null) {
+                pstmt.setInt(7, currentUserId);
+            } else {
+                pstmt.setNull(7, Types.INTEGER);
+            }
 
             int result = pstmt.executeUpdate();
             if (result > 0) {
@@ -205,7 +211,13 @@ public class UserActionController {
                     );
                     action.setId(rs.getInt("id"));
                     action.setDateTime(LocalDateTime.parse(rs.getString("date_time"), formatter));
-                    action.setUserId(rs.getInt("user_id"));
+
+                    // Handle potential NULL values for user_id
+                    Object userId = rs.getObject("user_id");
+                    if (userId != null) {
+                        action.setUserId((Integer) userId);
+                    }
+
                     actions.add(action);
                 }
             }
@@ -216,6 +228,7 @@ public class UserActionController {
             throw new RuntimeException("Erreur lors de la récupération des actions utilisateur", e);
         }
     }
+
     public void purgerActions(LocalDateTime dateLimite) {
         String sql = "DELETE FROM " + TABLE_NAME + " WHERE date_time < ?";
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
