@@ -13,7 +13,6 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.io.File;
 import org.sqlite.SQLiteConfig;
-import org.sqlite.SQLiteConnection;
 import org.sqlite.SQLiteOpenMode;
 
 public class DatabaseManager {
@@ -26,34 +25,39 @@ public class DatabaseManager {
     static {
         config = new SQLiteConfig();
         config.setOpenMode(SQLiteOpenMode.READWRITE);
-        config.setJournalMode(SQLiteConfig.JournalMode.DELETE);
-        config.setSynchronous(SQLiteConfig.SynchronousMode.OFF);
+        config.setJournalMode(SQLiteConfig.JournalMode.WAL);
+        config.setSynchronous(SQLiteConfig.SynchronousMode.NORMAL);
         config.setBusyTimeout(30000);
         config.setCacheSize(2000);
         config.setPageSize(4096);
         config.enforceForeignKeys(true);
     }
 
-    public static Connection getConnection() throws SQLException {
-        if (!isInitialized) {
-            synchronized (LOCK) {
-                if (!isInitialized) {
-                    try {
-                        initDatabase();
-                    } catch (Exception e) {
-                        LOGGER.log(Level.SEVERE, "Échec de l'initialisation de la base de données", e);
-                        throw new SQLException("Échec de l'initialisation de la base de données", e);
-                    }
-                }
-            }
-        }
-
+    private static Connection createConnection() throws SQLException {
         try {
             return config.createConnection("jdbc:sqlite:" + DB_FILE);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la création de la connexion", e);
             throw e;
         }
+    }
+
+    public static Connection getConnection() throws SQLException {
+        if (!isInitialized) {
+            synchronized (LOCK) {
+                if (!isInitialized) {
+                    initDatabase();
+                }
+            }
+        }
+        return createConnection();
+    }
+
+    private static Connection getInitConnection() throws SQLException {
+        SQLiteConfig initConfig = new SQLiteConfig();
+        initConfig.setOpenMode(SQLiteOpenMode.READWRITE);
+        initConfig.enforceForeignKeys(true);
+        return initConfig.createConnection("jdbc:sqlite:" + DB_FILE);
     }
 
     public static void initDatabase() {
@@ -81,7 +85,7 @@ public class DatabaseManager {
                 }
             }
 
-            try (Connection conn = getConnection()) {
+            try (Connection conn = getInitConnection()) {
                 String schema = loadSchemaFromResource();
                 if (schema == null || schema.trim().isEmpty()) {
                     throw new IllegalStateException("Schema SQL vide ou introuvable");
