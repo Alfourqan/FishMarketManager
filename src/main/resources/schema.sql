@@ -9,36 +9,6 @@ CREATE INDEX IF NOT EXISTS idx_lignes_vente_produit ON lignes_vente(produit_id);
 CREATE INDEX IF NOT EXISTS idx_mouvements_caisse_date ON mouvements_caisse(date);
 CREATE INDEX IF NOT EXISTS idx_mouvements_caisse_type ON mouvements_caisse(type);
 
-CREATE TABLE IF NOT EXISTS historique_stock (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    produit_id INTEGER NOT NULL,
-    date INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000),
-    ancien_stock INTEGER NOT NULL,
-    nouveau_stock INTEGER NOT NULL,
-    type_mouvement TEXT NOT NULL CHECK (type_mouvement IN ('VENTE', 'AJUSTEMENT', 'RECEPTION')),
-    utilisateur_id INTEGER,
-    reference_operation TEXT,
-    commentaire TEXT,
-    FOREIGN KEY (produit_id) REFERENCES produits(id),
-    FOREIGN KEY (utilisateur_id) REFERENCES users(id)
-);
-
-CREATE TABLE IF NOT EXISTS journal_actions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    date INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000),
-    utilisateur_id INTEGER,
-    type_action TEXT NOT NULL,
-    entite TEXT NOT NULL,
-    description TEXT,
-    details TEXT,
-    FOREIGN KEY (utilisateur_id) REFERENCES users(id)
-);
-
-CREATE INDEX IF NOT EXISTS idx_historique_stock_date ON historique_stock(date);
-CREATE INDEX IF NOT EXISTS idx_historique_stock_produit ON historique_stock(produit_id);
-CREATE INDEX IF NOT EXISTS idx_journal_actions_date ON journal_actions(date);
-CREATE INDEX IF NOT EXISTS idx_journal_actions_utilisateur ON journal_actions(utilisateur_id);
-
 PRAGMA journal_mode = WAL;
 PRAGMA synchronous = NORMAL;
 PRAGMA cache_size = 20000;

@@ -66,6 +66,11 @@ public class DatabaseManager {
                         sql = sql.trim();
                         if (!sql.isEmpty()) {
                             try {
+                                stmt.execute("PRAGMA foreign_keys = ON");
+                                stmt.execute("PRAGMA journal_mode = WAL");
+                                stmt.execute("PRAGMA synchronous = NORMAL");
+                                stmt.execute("PRAGMA cache_size = 2000");
+                                stmt.execute("PRAGMA page_size = 4096");
                                 stmt.execute(sql);
                                 LOGGER.fine("Exécution SQL réussie: " + sql.substring(0, Math.min(sql.length(), 50)) + "...");
                             } catch (SQLException e) {
@@ -77,7 +82,7 @@ public class DatabaseManager {
                     }
                     LOGGER.info("Schéma de base de données appliqué avec succès");
 
-                    // Insertion des données de test
+                    // Insertion des données de test si nécessaire
                     insertTestDataIfEmpty(conn);
                 }
 
@@ -111,14 +116,14 @@ public class DatabaseManager {
                            "('Crevettes', 'Fruits de mer', 12.00, 18.00, 100, 20)");
             }
 
-            // Vérifier si la table clients est vide
-            rs = stmt.executeQuery("SELECT COUNT(*) FROM clients");
+            // Vérifier si la table utilisateurs est vide
+            rs = stmt.executeQuery("SELECT COUNT(*) FROM users");
             if (rs.next() && rs.getInt(1) == 0) {
-                // Insérer quelques clients de test
-                stmt.execute("INSERT INTO clients (nom, telephone, adresse) VALUES " +
-                           "('Jean Dupont', '0123456789', '1 rue de la Mer')," +
-                           "('Marie Martin', '0987654321', '15 avenue des Poissons')");
+                // Insérer un utilisateur admin par défaut
+                stmt.execute("INSERT INTO users (username, password, role) VALUES " +
+                           "('admin', '$2a$12$1234567890123456789012uuuu', 'ADMIN')");
             }
+
             LOGGER.info("Données de test insérées avec succès");
         }
     }
