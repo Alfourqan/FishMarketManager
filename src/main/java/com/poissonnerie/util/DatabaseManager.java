@@ -14,12 +14,14 @@ import java.util.logging.Level;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import java.io.File;
 
 public class DatabaseManager {
     private static final Logger LOGGER = Logger.getLogger(DatabaseManager.class.getName());
     private static final AtomicBoolean isInitialized = new AtomicBoolean(false);
     private static final ReentrantLock INIT_LOCK = new ReentrantLock();
     private static final int INIT_TIMEOUT_SECONDS = 10;
+    private static final String DB_FILE = "poissonnerie.db";
 
     public static Connection getConnection() throws SQLException {
         if (!isInitialized.get()) {
@@ -59,9 +61,8 @@ public class DatabaseManager {
     private static void configureSQLiteDatabase(Connection conn) throws SQLException {
         LOGGER.info("Configuration des paramètres SQLite...");
         try (Statement stmt = conn.createStatement()) {
-            // Configuration SQLite optimisée hors transaction
-            stmt.execute("PRAGMA journal_mode = WAL");
-            stmt.execute("PRAGMA synchronous = NORMAL");
+            stmt.execute("PRAGMA journal_mode = DELETE");
+            stmt.execute("PRAGMA synchronous = OFF");
             stmt.execute("PRAGMA foreign_keys = ON");
             stmt.execute("PRAGMA cache_size = 1000");
             stmt.execute("PRAGMA page_size = 4096");
@@ -84,20 +85,31 @@ public class DatabaseManager {
 
         try {
             LOGGER.info("Initialisation de la base de données...");
+
+            // Vérifier si le fichier de base de données existe
+            File dbFile = new File(DB_FILE);
+            if (!dbFile.exists()) {
+                LOGGER.info("Création du fichier de base de données...");
+                try {
+                    if (!dbFile.createNewFile()) {
+                        throw new IOException("Impossible de créer le fichier de base de données");
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException("Erreur lors de la création du fichier de base de données", e);
+                }
+            }
+
             Connection conn = null;
             long startTime = System.nanoTime();
 
             try {
                 conn = DatabaseConnectionPool.getConnection();
-
-                // Configuration SQLite avant toute transaction
                 configureSQLiteDatabase(conn);
 
-                // Début de la transaction pour la création des tables
+                // Création des tables dans une transaction séparée
                 conn.setAutoCommit(false);
 
                 try (Statement stmt = conn.createStatement()) {
-                    // Chargement et exécution du schéma
                     String schema = loadSchemaFromResource();
                     if (schema == null || schema.trim().isEmpty()) {
                         throw new IllegalStateException("Schema SQL vide ou introuvable");
@@ -118,12 +130,11 @@ public class DatabaseManager {
                         }
                     }
 
-                    // Insertion des données de test si nécessaire
                     insertTestDataIfEmpty(conn);
                     conn.commit();
 
-                    long duration = TimeUnit.NANOSECONDS.toSeconds(System.nanoTime() - startTime);
-                    LOGGER.info("Base de données initialisée avec succès en " + duration + " secondes");
+                    long duration = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
+                    LOGGER.info("Base de données initialisée avec succès en " + duration + " ms");
                     isInitialized.set(true);
                 }
             } catch (Exception e) {
@@ -154,7 +165,6 @@ public class DatabaseManager {
     private static void insertTestDataIfEmpty(Connection conn) throws SQLException {
         LOGGER.info("Vérification et insertion des données de test...");
         try (Statement stmt = conn.createStatement()) {
-            // Vérification table produits
             var rs = stmt.executeQuery("SELECT COUNT(*) FROM produits");
             if (rs.next() && rs.getInt(1) == 0) {
                 stmt.execute("INSERT INTO produits (nom, categorie, prix_achat, prix_vente, stock, seuil_alerte) VALUES " +
