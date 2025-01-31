@@ -1,0 +1,213 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------< com.poissonnerie:gestion-poissonnerie >----------------
+[INFO] Building gestion-poissonnerie 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ gestion-poissonnerie ---
+[INFO] Deleting /home/runner/workspace/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ gestion-poissonnerie ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ gestion-poissonnerie ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 39 source files with javac [debug target 11] to target/classes
+[WARNING] system modules path not set in conjunction with -source 11
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[754,77] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[767,78] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[809,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[812,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[88,41] unchecked cast
+  required: java.util.List<com.poissonnerie.model.Produit>
+  found:    java.util.List<capture#1 of ?>
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[89,78] unchecked cast
+  required: java.util.List<com.poissonnerie.model.Produit>
+  found:    java.util.List<capture#2 of ?>
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ gestion-poissonnerie ---
+Jan 31, 2025 12:24:54 AM com.poissonnerie.Main main
+INFO: Configuration système initialisée
+Jan 31, 2025 12:24:54 AM com.poissonnerie.Main lambda$main$0
+INFO: Démarrage de l'application dans l'EDT...
+Jan 31, 2025 12:24:54 AM com.poissonnerie.Main lambda$initializeApplication$1
+INFO: Thème et UI configurés avec succès
+Jan 31, 2025 12:24:54 AM com.poissonnerie.Main lambda$initializeApplication$2
+INFO: SplashScreen créé et affiché
+Jan 31, 2025 12:24:54 AM com.poissonnerie.Main lambda$startBackgroundInitialization$3
+INFO: Début de l'initialisation en arrière-plan
+Jan 31, 2025 12:24:54 AM com.poissonnerie.Main initializeDatabase
+INFO: Début de l'initialisation de la base de données
+Jan 31, 2025 12:24:54 AM com.poissonnerie.util.DatabaseManager initDatabase
+INFO: Initialisation de la base de données...
+Jan 31, 2025 12:24:54 AM com.poissonnerie.util.DatabaseConnectionPool initializeDataSource
+INFO: Initialisation du pool de connexions à la base de données SQLite
+00:24:54.637 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- Driver class org.sqlite.JDBC found in Thread context class loader org.codehaus.mojo.exec.URLClassLoaderBuilder$ExecJavaClassLoader@4e60caa4
+00:24:54.641 [pool-1-thread-1] WARN com.zaxxer.hikari.HikariConfig -- PoissonnerieSQLitePool - idleTimeout has been set but has no effect because the pool is operating as a fixed size pool.
+00:24:54.641 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- PoissonnerieSQLitePool - configuration:
+00:24:54.646 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- allowPoolSuspension.............false
+00:24:54.646 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- autoCommit......................true
+00:24:54.647 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- catalog.........................none
+00:24:54.647 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- connectionInitSql...............none
+00:24:54.647 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- connectionTestQuery.............none
+00:24:54.647 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- connectionTimeout...............30000
+00:24:54.647 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- dataSource......................none
+00:24:54.648 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- dataSourceClassName.............none
+00:24:54.648 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- dataSourceJNDI..................none
+00:24:54.648 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- dataSourceProperties............{journal_mode=DELETE, password=<masked>, cache_size=2000, synchronous=OFF, busy_timeout=30000, foreign_keys=true}
+00:24:54.648 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- driverClassName................."org.sqlite.JDBC"
+00:24:54.648 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- exceptionOverrideClassName......none
+00:24:54.649 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- healthCheckProperties...........{}
+00:24:54.649 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- healthCheckRegistry.............none
+00:24:54.649 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- idleTimeout.....................300000
+00:24:54.649 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- initializationFailTimeout.......1
+00:24:54.649 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- isolateInternalQueries..........false
+00:24:54.649 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- jdbcUrl.........................jdbc:sqlite:poissonnerie.db
+00:24:54.649 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- keepaliveTime...................0
+00:24:54.649 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- leakDetectionThreshold..........300000
+00:24:54.649 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- maxLifetime.....................1800000
+00:24:54.650 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- maximumPoolSize.................1
+00:24:54.651 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- metricRegistry..................none
+00:24:54.651 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- metricsTrackerFactory...........none
+00:24:54.651 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- minimumIdle.....................1
+00:24:54.651 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- password........................<masked>
+00:24:54.651 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- poolName........................"PoissonnerieSQLitePool"
+00:24:54.651 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- readOnly........................false
+00:24:54.651 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- registerMbeans..................false
+00:24:54.651 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- scheduledExecutor...............none
+00:24:54.651 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- schema..........................none
+00:24:54.652 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- threadFactory...................internal
+00:24:54.652 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- transactionIsolation............default
+00:24:54.652 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- username........................none
+00:24:54.652 [pool-1-thread-1] DEBUG com.zaxxer.hikari.HikariConfig -- validationTimeout...............5000
+00:24:54.655 [pool-1-thread-1] INFO com.zaxxer.hikari.HikariDataSource -- PoissonnerieSQLitePool - Starting...
+00:24:54.807 [pool-1-thread-1] INFO com.zaxxer.hikari.pool.HikariPool -- PoissonnerieSQLitePool - Added connection org.sqlite.jdbc4.JDBC4Connection@20e88e11
+00:24:54.809 [pool-1-thread-1] INFO com.zaxxer.hikari.HikariDataSource -- PoissonnerieSQLitePool - Start completed.
+Jan 31, 2025 12:24:54 AM com.poissonnerie.util.DatabaseConnectionPool verifyConnection
+INFO: Connexion à SQLite vérifiée avec succès
+Jan 31, 2025 12:24:54 AM com.poissonnerie.util.DatabaseConnectionPool initializeDataSource
+INFO: Pool de connexions SQLite initialisé avec succès
+Jan 31, 2025 12:24:54 AM com.poissonnerie.util.DatabaseManager configureSQLiteDatabase
+INFO: Configuration des paramètres SQLite...
+Jan 31, 2025 12:24:54 AM com.poissonnerie.util.DatabaseManager configureSQLiteDatabase
+INFO: Paramètres SQLite configurés avec succès
+Jan 31, 2025 12:24:54 AM com.poissonnerie.util.DatabaseManager loadSchemaFromResource
+INFO: Chargement du schéma SQL depuis les ressources...
+Jan 31, 2025 12:24:54 AM com.poissonnerie.util.DatabaseManager loadSchemaFromResource
+INFO: Schéma SQL chargé avec succès
+Jan 31, 2025 12:24:54 AM com.poissonnerie.util.DatabaseManager insertTestDataIfEmpty
+INFO: Vérification et insertion des données de test...
+Jan 31, 2025 12:24:54 AM com.poissonnerie.util.DatabaseManager insertTestDataIfEmpty
+INFO: Données de test insérées avec succès
+Jan 31, 2025 12:24:54 AM com.poissonnerie.util.DatabaseManager initDatabase
+INFO: Base de données initialisée avec succès en 243 ms
+Jan 31, 2025 12:24:54 AM com.poissonnerie.Main initializeDatabase
+INFO: Base de données initialisée avec succès
+Jan 31, 2025 12:24:54 AM com.poissonnerie.Main loadInitialData
+INFO: Début du chargement des données initiales
+Jan 31, 2025 12:24:54 AM com.poissonnerie.controller.ClientController ajouterClientTest
+INFO: Ajout d'un client test avec créance...
+Jan 31, 2025 12:24:54 AM com.poissonnerie.controller.ClientController ajouterClient
+INFO: Tentative d'ajout d'un nouveau client: Client Test Créance
+Jan 31, 2025 12:24:54 AM com.poissonnerie.controller.ClientController ajouterClient
+INFO: Client ajouté avec succès, ID: 219
+00:24:54.853 [pool-1-thread-1] DEBUG com.zaxxer.hikari.pool.PoolBase -- PoissonnerieSQLitePool - Reset (autoCommit) on connection org.sqlite.jdbc4.JDBC4Connection@20e88e11
+Jan 31, 2025 12:24:54 AM com.poissonnerie.controller.ClientController ajouterClientTest
+INFO: Client test ajouté avec succès: Client Test Créance, Solde: 150.5
+Jan 31, 2025 12:24:54 AM com.poissonnerie.Main loadInitialData
+INFO: Données initiales chargées avec succès
+Jan 31, 2025 12:24:54 AM com.poissonnerie.Main startBackgroundInitialization
+INFO: Initialisation en arrière-plan terminée avec succès
+00:24:54.909 [PoissonnerieSQLitePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonnerieSQLitePool - Pool stats (total=1, active=0, idle=1, waiting=0)
+00:24:54.909 [PoissonnerieSQLitePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonnerieSQLitePool - Fill pool skipped, pool has sufficient level or currently being filled.
+00:24:54.930 [PoissonnerieSQLitePool connection adder] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonnerieSQLitePool - Connection not added, stats (total=1, active=1, idle=0, waiting=1)
+00:25:24.909 [PoissonnerieSQLitePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonnerieSQLitePool - Pool stats (total=1, active=1, idle=0, waiting=1)
+00:25:24.909 [PoissonnerieSQLitePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonnerieSQLitePool - Fill pool skipped, pool has sufficient level or currently being filled.
+00:25:24.930 [AWT-EventQueue-0] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonnerieSQLitePool - Timeout failure stats (total=1, active=1, idle=0, waiting=0)
+Jan 31, 2025 12:25:24 AM com.poissonnerie.util.DatabaseConnectionPool getConnection
+WARNING: Tentative 1/3 échouée, nouvelle tentative dans 500ms
+00:25:25.435 [PoissonnerieSQLitePool connection adder] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonnerieSQLitePool - Connection not added, stats (total=1, active=1, idle=0, waiting=1)
+00:25:54.910 [PoissonnerieSQLitePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonnerieSQLitePool - Pool stats (total=1, active=1, idle=0, waiting=1)
+00:25:54.910 [PoissonnerieSQLitePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonnerieSQLitePool - Fill pool skipped, pool has sufficient level or currently being filled.
+00:25:55.435 [AWT-EventQueue-0] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonnerieSQLitePool - Timeout failure stats (total=1, active=1, idle=0, waiting=0)
+Jan 31, 2025 12:25:55 AM com.poissonnerie.util.DatabaseConnectionPool getConnection
+WARNING: Tentative 2/3 échouée, nouvelle tentative dans 500ms
+00:25:55.936 [PoissonnerieSQLitePool connection adder] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonnerieSQLitePool - Connection not added, stats (total=1, active=1, idle=0, waiting=1)
+00:26:24.910 [PoissonnerieSQLitePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonnerieSQLitePool - Pool stats (total=1, active=1, idle=0, waiting=1)
+00:26:24.910 [PoissonnerieSQLitePool housekeeper] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonnerieSQLitePool - Fill pool skipped, pool has sufficient level or currently being filled.
+00:26:25.936 [AWT-EventQueue-0] DEBUG com.zaxxer.hikari.pool.HikariPool -- PoissonnerieSQLitePool - Timeout failure stats (total=1, active=1, idle=0, waiting=0)
+Jan 31, 2025 12:26:25 AM com.poissonnerie.controller.AuthenticationController createDefaultAdmin
+SEVERE: Erreur lors de la création de l'admin par défaut
+java.sql.SQLException: Impossible d'obtenir une connexion valide après 3 tentatives
+    at com.poissonnerie.util.DatabaseConnectionPool.getConnection(DatabaseConnectionPool.java:115)
+    at com.poissonnerie.util.DatabaseManager.getConnection(DatabaseManager.java:58)
+    at com.poissonnerie.controller.AuthenticationController.createDefaultAdmin(AuthenticationController.java:45)
+    at com.poissonnerie.controller.AuthenticationController.initializeDatabase(AuthenticationController.java:36)
+    at com.poissonnerie.controller.AuthenticationController.<init>(AuthenticationController.java:18)
+    at com.poissonnerie.controller.AuthenticationController.getInstance(AuthenticationController.java:23)
+    at com.poissonnerie.view.LoginView.<init>(LoginView.java:25)
+    at com.poissonnerie.Main.lambda$showLoginScreen$6(Main.java:144)
+    at java.desktop/java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:318)
+    at java.desktop/java.awt.EventQueue.dispatchEventImpl(EventQueue.java:773)
+    at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:720)
+    at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:714)
+    at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+    at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:87)
+    at java.desktop/java.awt.EventQueue.dispatchEvent(EventQueue.java:742)
+    at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:203)
+    at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:124)
+    at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:113)
+    at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:109)
+    at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
+    at java.desktop/java.awt.EventDispatchThread.run(EventDispatchThread.java:90)
+Caused by: java.sql.SQLTransientConnectionException: PoissonnerieSQLitePool - Connection is not available, request timed out after 30000ms (total=1, active=1, idle=0, waiting=0)
+    at com.zaxxer.hikari.pool.HikariPool.createTimeoutException(HikariPool.java:686)
+    at com.zaxxer.hikari.pool.HikariPool.getConnection(HikariPool.java:179)
+    at com.zaxxer.hikari.pool.HikariPool.getConnection(HikariPool.java:144)
+    at com.zaxxer.hikari.HikariDataSource.getConnection(HikariDataSource.java:99)
+    at com.poissonnerie.util.DatabaseConnectionPool.getConnection(DatabaseConnectionPool.java:82)
+    ... 20 more
+
+Jan 31, 2025 12:26:25 AM com.poissonnerie.Main handleFatalError
+SEVERE: Erreur lors de l'initialisation du login: Erreur lors de la création de l'admin par défaut
+java.lang.RuntimeException: Erreur lors de la création de l'admin par défaut
+    at com.poissonnerie.controller.AuthenticationController.createDefaultAdmin(AuthenticationController.java:60)
+    at com.poissonnerie.controller.AuthenticationController.initializeDatabase(AuthenticationController.java:36)
+    at com.poissonnerie.controller.AuthenticationController.<init>(AuthenticationController.java:18)
+    at com.poissonnerie.controller.AuthenticationController.getInstance(AuthenticationController.java:23)
+    at com.poissonnerie.view.LoginView.<init>(LoginView.java:25)
+    at com.poissonnerie.Main.lambda$showLoginScreen$6(Main.java:144)
+    at java.desktop/java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:318)
+    at java.desktop/java.awt.EventQueue.dispatchEventImpl(EventQueue.java:773)
+    at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:720)
+    at java.desktop/java.awt.EventQueue$4.run(EventQueue.java:714)
+    at java.base/java.security.AccessController.doPrivileged(AccessController.java:400)
+    at java.base/java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:87)
+    at java.desktop/java.awt.EventQueue.dispatchEvent(EventQueue.java:742)
+    at java.desktop/java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:203)
+    at java.desktop/java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:124)
+    at java.desktop/java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:113)
+    at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:109)
+    at java.desktop/java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
+    at java.desktop/java.awt.EventDispatchThread.run(EventDispatchThread.java:90)
+Caused by: java.sql.SQLException: Impossible d'obtenir une connexion valide après 3 tentatives
+    at com.poissonnerie.util.DatabaseConnectionPool.getConnection(DatabaseConnectionPool.java:115)
+    at com.poissonnerie.util.DatabaseManager.getConnection(DatabaseManager.java:58)
+    at com.poissonnerie.controller.AuthenticationController.createDefaultAdmin(AuthenticationController.java:45)
+    ... 18 more
+Caused by: java.sql.SQLTransientConnectionException: PoissonnerieSQLitePool - Connection is not available, request timed out after 30000ms (total=1, active=1, idle=0, waiting=0)
+    at com.zaxxer.hikari.pool.HikariPool.createTimeoutException(HikariPool.java:686)
+    at com.zaxxer.hikari.pool.HikariPool.getConnection(HikariPool.java:179)
+    at com.zaxxer.hikari.pool.HikariPool.getConnection(HikariPool.java:144)
+    at com.zaxxer.hikari.HikariDataSource.getConnection(HikariDataSource.java:99)
+    at com.poissonnerie.util.DatabaseConnectionPool.getConnection(DatabaseConnectionPool.java:82)
+    ... 20 more
