@@ -19,7 +19,7 @@ public class UserActionController {
 
     private UserActionController() {
         try {
-            createTableIfNotExists();
+            migrateTable();
             LOGGER.info("UserActionController initialisé avec succès");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de UserActionController", e);
@@ -40,32 +40,100 @@ public class UserActionController {
         LOGGER.info("Utilisateur courant défini: " + username + " (ID: " + userId + ")");
     }
 
-    private void createTableIfNotExists() {
-        String sql = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (" +
-            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-            "action_type TEXT NOT NULL," +
-            "username TEXT NOT NULL," +
-            "date_time TEXT NOT NULL," +
-            "description TEXT NOT NULL," +
-            "entity_type TEXT NOT NULL," +
-            "entity_id INTEGER NOT NULL," +
-            "user_id INTEGER NOT NULL" +
-            ")";
+    private void migrateTable() {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                // Vérifier si la table existe
+                DatabaseMetaData md = conn.getMetaData();
+                ResultSet rs = md.getTables(null, null, TABLE_NAME, null);
 
-        try (Connection conn = DatabaseManager.getConnection();
-             Statement stmt = conn.createStatement()) {
-            stmt.execute(sql);
+                if (rs.next()) {
+                    // La table existe, vérifier si la colonne user_id existe
+                    ResultSet columns = md.getColumns(null, null, TABLE_NAME, "user_id");
+                    if (!columns.next()) {
+                        // Sauvegarder les données existantes
+                        List<UserAction> existingActions = new ArrayList<>();
+                        try (Statement stmt = conn.createStatement();
+                             ResultSet data = stmt.executeQuery("SELECT * FROM " + TABLE_NAME)) {
+                            while (data.next()) {
+                                UserAction action = new UserAction(
+                                    UserAction.ActionType.valueOf(data.getString("action_type")),
+                                    data.getString("username"),
+                                    data.getString("description"),
+                                    UserAction.EntityType.valueOf(data.getString("entity_type")),
+                                    data.getInt("entity_id")
+                                );
+                                action.setId(data.getInt("id"));
+                                action.setDateTime(LocalDateTime.parse(
+                                    data.getString("date_time"),
+                                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                                ));
+                                existingActions.add(action);
+                            }
+                        }
 
-            // Création des index si nécessaire
+                        // Supprimer l'ancienne table
+                        try (Statement stmt = conn.createStatement()) {
+                            stmt.execute("DROP TABLE IF EXISTS " + TABLE_NAME);
+                        }
+
+                        // Créer la nouvelle table
+                        createTable(conn);
+
+                        // Restaurer les données
+                        String insertSql = "INSERT INTO " + TABLE_NAME +
+                            " (id, action_type, username, date_time, description, entity_type, entity_id, user_id) " +
+                            "VALUES (?, ?, ?, ?, ?, ?, ?, 1)"; // user_id=1 pour les anciennes entrées
+                        try (PreparedStatement pstmt = conn.prepareStatement(insertSql)) {
+                            for (UserAction action : existingActions) {
+                                pstmt.setInt(1, action.getId());
+                                pstmt.setString(2, action.getType().name());
+                                pstmt.setString(3, action.getUsername());
+                                pstmt.setString(4, action.getDateTime().format(
+                                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                                ));
+                                pstmt.setString(5, action.getDescription());
+                                pstmt.setString(6, action.getEntityType().name());
+                                pstmt.setInt(7, action.getEntityId());
+                                pstmt.executeUpdate();
+                            }
+                        }
+                    }
+                } else {
+                    // La table n'existe pas, la créer
+                    createTable(conn);
+                }
+                conn.commit();
+                LOGGER.info("Migration de la table " + TABLE_NAME + " effectuée avec succès");
+            } catch (SQLException e) {
+                conn.rollback();
+                LOGGER.log(Level.SEVERE, "Erreur lors de la migration de la table " + TABLE_NAME, e);
+                throw e;
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erreur fatale lors de la migration de la table " + TABLE_NAME, e);
+            throw new RuntimeException("Erreur lors de la migration de la table " + TABLE_NAME, e);
+        }
+    }
+
+    private void createTable(Connection conn) throws SQLException {
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute("CREATE TABLE " + TABLE_NAME + " (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "action_type TEXT NOT NULL," +
+                "username TEXT NOT NULL," +
+                "date_time TEXT NOT NULL," +
+                "description TEXT NOT NULL," +
+                "entity_type TEXT NOT NULL," +
+                "entity_id INTEGER NOT NULL," +
+                "user_id INTEGER NOT NULL" +
+                ")");
+
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_user_actions_date ON " + TABLE_NAME + "(date_time)");
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_user_actions_type ON " + TABLE_NAME + "(action_type)");
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_user_actions_entity ON " + TABLE_NAME + "(entity_type, entity_id)");
             stmt.execute("CREATE INDEX IF NOT EXISTS idx_user_actions_user ON " + TABLE_NAME + "(user_id)");
-
-            LOGGER.info("Table " + TABLE_NAME + " et index créés ou déjà existants");
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la création de la table " + TABLE_NAME, e);
-            throw new RuntimeException("Erreur lors de la création de la table " + TABLE_NAME, e);
         }
     }
 
@@ -80,6 +148,7 @@ public class UserActionController {
             action.setUsername("SYSTEM");
         } else {
             action.setUsername(currentUsername);
+            action.setUserId(currentUserId);
         }
 
         String sql = "INSERT INTO " + TABLE_NAME +
@@ -97,7 +166,7 @@ public class UserActionController {
             pstmt.setString(4, action.getDescription());
             pstmt.setString(5, action.getEntityType().name());
             pstmt.setInt(6, action.getEntityId());
-            pstmt.setObject(7, currentUserId);
+            pstmt.setInt(7, currentUserId != null ? currentUserId : 1);
 
             int result = pstmt.executeUpdate();
             if (result > 0) {
@@ -136,7 +205,7 @@ public class UserActionController {
                     );
                     action.setId(rs.getInt("id"));
                     action.setDateTime(LocalDateTime.parse(rs.getString("date_time"), formatter));
-                    action.setUserId(rs.getInt("user_id")); //Added to handle new column
+                    action.setUserId(rs.getInt("user_id"));
                     actions.add(action);
                 }
             }
@@ -147,7 +216,6 @@ public class UserActionController {
             throw new RuntimeException("Erreur lors de la récupération des actions utilisateur", e);
         }
     }
-
     public void purgerActions(LocalDateTime dateLimite) {
         String sql = "DELETE FROM " + TABLE_NAME + " WHERE date_time < ?";
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
