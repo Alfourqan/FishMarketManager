@@ -26,6 +26,14 @@ CREATE TABLE users (
     CONSTRAINT password_min_length CHECK (length(password) >= 6)
 );
 
+CREATE TABLE IF NOT EXISTS configurations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cle TEXT NOT NULL UNIQUE,
+    valeur TEXT,
+    description TEXT,
+    CONSTRAINT cle_not_empty CHECK (length(trim(cle)) > 0)
+);
+
 CREATE TABLE IF NOT EXISTS produits (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nom TEXT NOT NULL,
