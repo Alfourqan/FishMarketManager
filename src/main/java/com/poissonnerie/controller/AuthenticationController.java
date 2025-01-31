@@ -2,17 +2,17 @@ package com.poissonnerie.controller;
 
 import com.poissonnerie.util.DatabaseManager;
 import java.sql.*;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.time.Instant;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class AuthenticationController {
     private static final Logger LOGGER = Logger.getLogger(AuthenticationController.class.getName());
     private static AuthenticationController instance;
     private static final int MAX_LOGIN_ATTEMPTS = 3;
     private static final long LOCKOUT_DURATION_MS = 300000; // 5 minutes
+    private static final String DEFAULT_ADMIN_PASSWORD = "admin123";
 
     private AuthenticationController() {
         initializeDatabase();
@@ -42,38 +42,22 @@ public class AuthenticationController {
     }
 
     private void createDefaultAdmin() {
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        try {
-            conn = DatabaseManager.getConnection();
-            conn.setAutoCommit(false);
-            stmt = conn.prepareStatement(
-                "INSERT INTO users (username, password, role) VALUES (?, ?, 'ADMIN')");
-            String hashedPassword = hashPassword("admin"); // Hash le mot de passe par défaut
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(
+                 "INSERT INTO users (username, password, role, active) VALUES (?, ?, 'ADMIN', true)")) {
+
+            String hashedPassword = BCrypt.hashpw(DEFAULT_ADMIN_PASSWORD, BCrypt.gensalt());
             LOGGER.info("Création de l'utilisateur admin avec mot de passe hashé");
+
             stmt.setString(1, "admin");
             stmt.setString(2, hashedPassword);
             stmt.executeUpdate();
-            conn.commit();
+
             LOGGER.info("Utilisateur administrateur par défaut créé avec succès");
-            
-        } catch (SQLException | NoSuchAlgorithmException e) {
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    LOGGER.log(Level.SEVERE, "Erreur lors du rollback", ex);
-                }
-            }
+
+        } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la création de l'admin par défaut", e);
-            
-        } finally {
-            try {
-                if (stmt != null) stmt.close();
-                if (conn != null) conn.close();
-            } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "Erreur lors de la fermeture des ressources", e);
-            }
+            throw new RuntimeException("Erreur lors de la création de l'admin par défaut", e);
         }
     }
 
@@ -97,13 +81,8 @@ public class AuthenticationController {
                     return false;
                 }
 
-                String storedHashedPassword = rs.getString("password");
-                String providedHashedPassword = hashPassword(password);
-                boolean authenticated = storedHashedPassword.equals(providedHashedPassword);
-
-                LOGGER.info("Comparaison des mots de passe pour " + username + 
-                          "\nStored hash: " + storedHashedPassword.substring(0, 10) + "..." +
-                          "\nProvided hash: " + providedHashedPassword.substring(0, 10) + "...");
+                String storedPassword = rs.getString("password");
+                boolean authenticated = BCrypt.checkpw(password, storedPassword);
 
                 if (authenticated) {
                     updateLastLogin(conn, username);
@@ -117,7 +96,7 @@ public class AuthenticationController {
                 LOGGER.warning("Utilisateur non trouvé: " + username);
                 return false;
             }
-        } catch (SQLException | NoSuchAlgorithmException e) {
+        } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de l'authentification", e);
             return false;
         }
@@ -133,20 +112,6 @@ public class AuthenticationController {
         }
     }
 
-    private String hashPassword(String password) throws NoSuchAlgorithmException {
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] hash = digest.digest(password.getBytes());
-        StringBuilder hexString = new StringBuilder();
-
-        for (byte b : hash) {
-            String hex = Integer.toHexString(0xff & b);
-            if (hex.length() == 1) hexString.append('0');
-            hexString.append(hex);
-        }
-
-        return hexString.toString();
-    }
-
     public boolean changePassword(String username, String currentPassword, String newPassword) {
         if (!authenticate(username, currentPassword)) {
             LOGGER.warning("Tentative de changement de mot de passe avec mauvais mot de passe actuel");
@@ -156,7 +121,8 @@ public class AuthenticationController {
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(
                  "UPDATE users SET password = ? WHERE username = ?")) {
-            stmt.setString(1, hashPassword(newPassword));
+            String hashedPassword = BCrypt.hashpw(newPassword, BCrypt.gensalt());
+            stmt.setString(1, hashedPassword);
             stmt.setString(2, username);
 
             int updated = stmt.executeUpdate();
@@ -169,7 +135,7 @@ public class AuthenticationController {
             }
 
             return success;
-        } catch (SQLException | NoSuchAlgorithmException e) {
+        } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors du changement de mot de passe", e);
             return false;
         }

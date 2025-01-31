@@ -119,9 +119,8 @@ public class DatabaseManager {
             // Vérifier si la table utilisateurs est vide
             rs = stmt.executeQuery("SELECT COUNT(*) FROM users");
             if (rs.next() && rs.getInt(1) == 0) {
-                // Insérer un utilisateur admin par défaut
-                stmt.execute("INSERT INTO users (username, password, role) VALUES " +
-                           "('admin', '$2a$12$1234567890123456789012uuuu', 'ADMIN')");
+                // L'utilisateur admin sera créé par AuthenticationController
+                LOGGER.info("La table users est vide, l'utilisateur admin sera créé par AuthenticationController");
             }
 
             LOGGER.info("Données de test insérées avec succès");
