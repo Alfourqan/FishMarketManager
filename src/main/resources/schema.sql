@@ -1,27 +1,22 @@
--- Ajout des index pour optimiser les performances
-CREATE INDEX IF NOT EXISTS idx_produits_nom ON produits(nom);
-CREATE INDEX IF NOT EXISTS idx_produits_categorie ON produits(categorie);
-CREATE INDEX IF NOT EXISTS idx_clients_nom ON clients(nom);
-CREATE INDEX IF NOT EXISTS idx_ventes_date ON ventes(date);
-CREATE INDEX IF NOT EXISTS idx_ventes_client ON ventes(client_id);
-CREATE INDEX IF NOT EXISTS idx_lignes_vente_vente ON lignes_vente(vente_id);
-CREATE INDEX IF NOT EXISTS idx_lignes_vente_produit ON lignes_vente(produit_id);
-CREATE INDEX IF NOT EXISTS idx_mouvements_caisse_date ON mouvements_caisse(date);
-CREATE INDEX IF NOT EXISTS idx_mouvements_caisse_type ON mouvements_caisse(type);
-
+-- Configuration optimisée SQLite
 PRAGMA journal_mode = WAL;
 PRAGMA synchronous = NORMAL;
-PRAGMA cache_size = 20000;
+PRAGMA cache_size = 2000;
 PRAGMA page_size = 4096;
 PRAGMA temp_store = MEMORY;
-PRAGMA mmap_size = 30000000000;
+PRAGMA busy_timeout = 30000;
 PRAGMA foreign_keys = ON;
 
-CREATE TABLE IF NOT EXISTS configurations (
+-- Tables principales
+CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    cle TEXT NOT NULL UNIQUE,
-    valeur TEXT,
-    description TEXT
+    username TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'USER',
+    created_at INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000),
+    last_login INTEGER,
+    active BOOLEAN DEFAULT true,
+    CONSTRAINT username_min_length CHECK (length(username) >= 3)
 );
 
 CREATE TABLE IF NOT EXISTS produits (
@@ -80,7 +75,26 @@ CREATE TABLE IF NOT EXISTS mouvements_caisse (
     description TEXT
 );
 
--- Insertion des configurations par défaut si elles n'existent pas
+CREATE TABLE IF NOT EXISTS configurations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cle TEXT NOT NULL UNIQUE,
+    valeur TEXT,
+    description TEXT
+);
+
+-- Index optimisés
+CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+CREATE INDEX IF NOT EXISTS idx_produits_nom ON produits(nom);
+CREATE INDEX IF NOT EXISTS idx_produits_categorie ON produits(categorie);
+CREATE INDEX IF NOT EXISTS idx_clients_nom ON clients(nom);
+CREATE INDEX IF NOT EXISTS idx_ventes_date ON ventes(date);
+CREATE INDEX IF NOT EXISTS idx_ventes_client ON ventes(client_id);
+CREATE INDEX IF NOT EXISTS idx_lignes_vente_vente ON lignes_vente(vente_id);
+CREATE INDEX IF NOT EXISTS idx_lignes_vente_produit ON lignes_vente(produit_id);
+CREATE INDEX IF NOT EXISTS idx_mouvements_caisse_date ON mouvements_caisse(date);
+CREATE INDEX IF NOT EXISTS idx_mouvements_caisse_type ON mouvements_caisse(type);
+
+-- Configurations par défaut
 INSERT OR IGNORE INTO configurations (cle, valeur, description) VALUES
 ('TAUX_TVA', '20.0', 'Taux de TVA en pourcentage'),
 ('TVA_ENABLED', 'true', 'Activation/désactivation de la TVA'),
@@ -101,19 +115,3 @@ INSERT OR IGNORE INTO configurations (cle, valeur, description) VALUES
 ('MESSAGE_COMMERCIAL_RECU', '', 'Message commercial ou promotionnel sur le reçu'),
 ('AFFICHER_TVA_DETAILS', 'true', 'Afficher les détails de TVA sur le reçu'),
 ('INFO_SUPPLEMENTAIRE_RECU', '', 'Informations supplémentaires sur le reçu');
-
--- Ajout de la table pour la gestion des utilisateurs
-DROP TABLE IF EXISTS users;
-CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL UNIQUE,
-    password TEXT NOT NULL,
-    role TEXT NOT NULL DEFAULT 'USER',
-    created_at INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000),
-    last_login INTEGER,
-    active BOOLEAN DEFAULT true,
-    CONSTRAINT username_min_length CHECK (length(username) >= 3)
-);
-
--- Index pour optimiser les recherches sur le nom d'utilisateur
-CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
