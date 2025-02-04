@@ -7,6 +7,7 @@ import java.util.logging.Level;
 import java.time.LocalDateTime;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.poissonnerie.util.DatabaseManager;
 
@@ -82,41 +83,78 @@ public class InventaireManager {
 
         int ancienStock = produit.getStock();
         try {
-            produit.ajusterStock(quantite);
-            int nouveauStock = produit.getStock();
+            Connection conn = null;
+            try {
+                conn = DatabaseManager.getConnection();
+                conn.setAutoCommit(false);
 
-            // Enregistrer l'ajustement dans l'historique
-            historique.add(new AjustementStock(produit, ancienStock, nouveauStock, raison));
-
-            // Enregistrer dans la base de données
-            try (Connection conn = DatabaseManager.getConnection();
-                 PreparedStatement stmt = conn.prepareStatement(
-                     "INSERT INTO historique_stock (produit_id, ancien_stock, nouveau_stock, type_mouvement, commentaire) " +
-                     "VALUES (?, ?, ?, ?, ?)")) {
-                stmt.setInt(1, produit.getId());
-                stmt.setInt(2, ancienStock);
-                stmt.setInt(3, nouveauStock);
-                stmt.setString(4, "AJUSTEMENT");
-                stmt.setString(5, raison);
-                stmt.executeUpdate();
-            } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "Erreur lors de l'enregistrement de l'historique", e);
-            }
-
-            // Notifier les observateurs
-            for (InventaireObserver observer : observers) {
-                try {
-                    observer.onStockAjuste(produit, ancienStock, nouveauStock);
-
-                    if (nouveauStock == 0) {
-                        LOGGER.warning("Rupture de stock pour " + produit.getNom());
-                        observer.onRuptureStock(produit);
-                    } else if (nouveauStock <= produit.getSeuilAlerte()) {
-                        LOGGER.warning("Stock bas pour " + produit.getNom());
-                        observer.onStockBas(produit);
+                // Vérifier si le fournisseur existe
+                try (PreparedStatement checkStmt = conn.prepareStatement(
+                        "SELECT id FROM fournisseurs WHERE id = ? AND supprime = false")) {
+                    checkStmt.setInt(1, produit.getFournisseurId());
+                    ResultSet rs = checkStmt.executeQuery();
+                    if (!rs.next()) {
+                        LOGGER.severe("Fournisseur invalide pour le produit: " + produit.getNom());
+                        throw new IllegalArgumentException("Fournisseur invalide");
                     }
-                } catch (Exception e) {
-                    LOGGER.log(Level.SEVERE, "Erreur lors de la notification de l'observer", e);
+                }
+
+                // Mettre à jour le stock
+                produit.ajusterStock(quantite);
+                int nouveauStock = produit.getStock();
+
+                // Enregistrer l'ajustement dans l'historique
+                historique.add(new AjustementStock(produit, ancienStock, nouveauStock, raison));
+
+                // Enregistrer dans la base de données
+                try (PreparedStatement stmt = conn.prepareStatement(
+                        "INSERT INTO historique_stock (produit_id, ancien_stock, nouveau_stock, type_mouvement, commentaire) " +
+                        "VALUES (?, ?, ?, ?, ?)")) {
+                    stmt.setInt(1, produit.getId());
+                    stmt.setInt(2, ancienStock);
+                    stmt.setInt(3, nouveauStock);
+                    stmt.setString(4, "AJUSTEMENT");
+                    stmt.setString(5, raison);
+                    stmt.executeUpdate();
+                }
+
+                conn.commit();
+                LOGGER.info("Ajustement de stock enregistré avec succès");
+
+                // Notifier les observateurs
+                for (InventaireObserver observer : observers) {
+                    try {
+                        observer.onStockAjuste(produit, ancienStock, nouveauStock);
+
+                        if (nouveauStock == 0) {
+                            LOGGER.warning("Rupture de stock pour " + produit.getNom());
+                            observer.onRuptureStock(produit);
+                        } else if (nouveauStock <= produit.getSeuilAlerte()) {
+                            LOGGER.warning("Stock bas pour " + produit.getNom());
+                            observer.onStockBas(produit);
+                        }
+                    } catch (Exception e) {
+                        LOGGER.log(Level.SEVERE, "Erreur lors de la notification de l'observer", e);
+                    }
+                }
+            } catch (SQLException e) {
+                if (conn != null) {
+                    try {
+                        conn.rollback();
+                    } catch (SQLException rollbackEx) {
+                        LOGGER.log(Level.SEVERE, "Erreur lors du rollback", rollbackEx);
+                    }
+                }
+                LOGGER.log(Level.SEVERE, "Erreur SQL lors de l'ajustement du stock", e);
+                throw new RuntimeException("Erreur lors de l'ajustement du stock: " + e.getMessage(), e);
+            } finally {
+                if (conn != null) {
+                    try {
+                        conn.setAutoCommit(true);
+                        conn.close();
+                    } catch (SQLException e) {
+                        LOGGER.log(Level.SEVERE, "Erreur lors de la fermeture de la connexion", e);
+                    }
                 }
             }
         } catch (IllegalArgumentException e) {
