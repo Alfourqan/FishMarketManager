@@ -274,18 +274,25 @@ public class ProduitViewSwing {
         // Remplir la liste des fournisseurs
         List<Fournisseur> listeFournisseurs = fournisseurController.getFournisseurs();
         if (listeFournisseurs.isEmpty()) {
-            // Si la liste est vide, essayer de recharger
-            try {
-                fournisseurController.chargerFournisseurs();
-                listeFournisseurs = fournisseurController.getFournisseurs();
-            } catch (Exception e) {
-                e.printStackTrace();
-                showErrorMessage("Erreur lors du chargement des fournisseurs: " + e.getMessage());
-            }
+            // Si la liste est vide, afficher un message d'erreur
+            showErrorMessage("Aucun fournisseur n'est disponible. Veuillez d'abord ajouter un fournisseur.");
+            dialog.dispose();
+            return;
         }
 
         for (Fournisseur f : listeFournisseurs) {
             fournisseurCombo.addItem(f);
+        }
+
+        // Si on modifie un produit existant, sélectionner son fournisseur
+        if (produit != null && produit.getFournisseur() != null) {
+            for (int i = 0; i < fournisseurCombo.getItemCount(); i++) {
+                Fournisseur f = (Fournisseur) fournisseurCombo.getItemAt(i);
+                if (f.getId() == produit.getFournisseur().getId()) {
+                    fournisseurCombo.setSelectedIndex(i);
+                    break;
+                }
+            }
         }
 
         // Configuration du rendu du ComboBox des fournisseurs
