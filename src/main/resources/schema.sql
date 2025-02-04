@@ -16,6 +16,8 @@ DROP TABLE IF EXISTS mouvements_caisse;
 DROP TABLE IF EXISTS user_actions;
 DROP TABLE IF EXISTS ventes;
 DROP TABLE IF EXISTS lignes_vente;
+DROP TABLE IF EXISTS produits;
+DROP TABLE IF EXISTS fournisseurs;
 DROP TABLE IF EXISTS users;
 
 CREATE TABLE users (
@@ -37,6 +39,27 @@ CREATE TABLE IF NOT EXISTS configurations (
     description TEXT,
     CONSTRAINT cle_not_empty CHECK (length(trim(cle)) > 0)
 );
+
+CREATE TABLE IF NOT EXISTS fournisseurs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nom TEXT NOT NULL,
+    contact TEXT,
+    telephone TEXT,
+    email TEXT,
+    adresse TEXT,
+    statut TEXT DEFAULT 'Actif',
+    supprime BOOLEAN DEFAULT false,
+    CONSTRAINT nom_fournisseur_min_length CHECK (length(trim(nom)) >= 2),
+    CONSTRAINT contact_min_length CHECK (contact IS NULL OR length(trim(contact)) >= 2),
+    CONSTRAINT telephone_format CHECK (telephone IS NULL OR length(trim(telephone)) >= 8),
+    CONSTRAINT email_format CHECK (email IS NULL OR email LIKE '%@%.%'),
+    CONSTRAINT adresse_min_length CHECK (adresse IS NULL OR length(trim(adresse)) >= 5),
+    CONSTRAINT statut_valide CHECK (statut IN ('Actif', 'Inactif', 'En attente'))
+);
+
+-- Créer un fournisseur par défaut
+INSERT INTO fournisseurs (nom, contact, telephone, email, statut) 
+VALUES ('Fournisseur par défaut', 'Contact', '0123456789', 'contact@default.com', 'Actif');
 
 CREATE TABLE IF NOT EXISTS produits (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -69,23 +92,6 @@ CREATE TABLE IF NOT EXISTS clients (
     CONSTRAINT telephone_format CHECK (telephone IS NULL OR length(trim(telephone)) >= 8),
     CONSTRAINT adresse_min_length CHECK (adresse IS NULL OR length(trim(adresse)) >= 5),
     CONSTRAINT solde_valide CHECK (solde IS NULL OR TYPEOF(solde) = 'real' OR TYPEOF(solde) = 'integer')
-);
-
-CREATE TABLE IF NOT EXISTS fournisseurs (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nom TEXT NOT NULL,
-    contact TEXT,
-    telephone TEXT,
-    email TEXT,
-    adresse TEXT,
-    statut TEXT DEFAULT 'Actif',
-    supprime BOOLEAN DEFAULT false,
-    CONSTRAINT nom_fournisseur_min_length CHECK (length(trim(nom)) >= 2),
-    CONSTRAINT contact_min_length CHECK (contact IS NULL OR length(trim(contact)) >= 2),
-    CONSTRAINT telephone_format CHECK (telephone IS NULL OR length(trim(telephone)) >= 8),
-    CONSTRAINT email_format CHECK (email IS NULL OR email LIKE '%@%.%'),
-    CONSTRAINT adresse_min_length CHECK (adresse IS NULL OR length(trim(adresse)) >= 5),
-    CONSTRAINT statut_valide CHECK (statut IN ('Actif', 'Inactif', 'En attente'))
 );
 
 CREATE TABLE mouvements_caisse (
