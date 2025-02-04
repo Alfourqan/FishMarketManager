@@ -42,8 +42,20 @@ public class DatabaseManager {
     private static synchronized Connection getSingletonConnection() throws SQLException {
         if (singletonConnection == null || singletonConnection.isClosed()) {
             singletonConnection = createNewConnection();
+            initializePragmas(singletonConnection);
         }
         return singletonConnection;
+    }
+
+    private static void initializePragmas(Connection conn) throws SQLException {
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute("PRAGMA journal_mode = WAL");
+            stmt.execute("PRAGMA synchronous = NORMAL");
+            stmt.execute("PRAGMA busy_timeout = " + BUSY_TIMEOUT_MS);
+            stmt.execute("PRAGMA cache_size = 2000");
+            stmt.execute("PRAGMA page_size = 4096");
+            stmt.execute("PRAGMA foreign_keys = ON");
+        }
     }
 
     private static Connection createNewConnection() throws SQLException {
@@ -54,17 +66,6 @@ public class DatabaseManager {
             try {
                 Connection conn = config.createConnection("jdbc:sqlite:" + DB_FILE);
                 conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
-
-                // Configuration initiale de la connexion (hors transaction)
-                try (Statement stmt = conn.createStatement()) {
-                    stmt.execute("PRAGMA journal_mode = WAL");
-                    stmt.execute("PRAGMA synchronous = NORMAL");
-                    stmt.execute("PRAGMA busy_timeout = " + BUSY_TIMEOUT_MS);
-                    stmt.execute("PRAGMA cache_size = 2000");
-                    stmt.execute("PRAGMA page_size = 4096");
-                    stmt.execute("PRAGMA foreign_keys = ON");
-                }
-
                 return conn;
             } catch (SQLException e) {
                 lastException = e;
@@ -130,32 +131,36 @@ public class DatabaseManager {
                 }
             }
 
-            Connection conn = getSingletonConnection();
             try {
+                Connection conn = getSingletonConnection();
                 boolean originalAutoCommit = conn.getAutoCommit();
                 conn.setAutoCommit(false);
 
-                String schema = loadSchemaFromResource();
-                if (schema == null || schema.trim().isEmpty()) {
-                    throw new IllegalStateException("Schema SQL vide ou introuvable");
-                }
+                try {
+                    String schema = loadSchemaFromResource();
+                    if (schema == null || schema.trim().isEmpty()) {
+                        throw new IllegalStateException("Schema SQL vide ou introuvable");
+                    }
 
-                try (Statement stmt = conn.createStatement()) {
-                    String[] statements = schema.split(";");
-                    for (String sql : statements) {
-                        sql = sql.trim();
-                        if (!sql.isEmpty()) {
-                            try {
-                                stmt.execute(sql);
-                            } catch (SQLException e) {
-                                if (!e.getMessage().contains("table already exists")) {
-                                    throw e;
+                    try (Statement stmt = conn.createStatement()) {
+                        String[] statements = schema.split(";");
+                        for (String sql : statements) {
+                            sql = sql.trim();
+                            if (!sql.isEmpty()) {
+                                try {
+                                    stmt.execute(sql);
+                                } catch (SQLException e) {
+                                    if (!e.getMessage().contains("table already exists")) {
+                                        throw e;
+                                    }
                                 }
                             }
                         }
+                        insertTestDataIfEmpty(conn);
                     }
-                    insertTestDataIfEmpty(conn);
                     conn.commit();
+                    isInitialized = true;
+                    LOGGER.info("Base de données initialisée avec succès");
                 } catch (SQLException e) {
                     try {
                         conn.rollback();
@@ -164,10 +169,12 @@ public class DatabaseManager {
                     }
                     throw e;
                 } finally {
-                    conn.setAutoCommit(originalAutoCommit);
+                    try {
+                        conn.setAutoCommit(originalAutoCommit);
+                    } catch (SQLException e) {
+                        LOGGER.log(Level.WARNING, "Erreur lors de la restauration de l'autocommit", e);
+                    }
                 }
-                isInitialized = true;
-                LOGGER.info("Base de données initialisée avec succès");
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Erreur fatale lors de l'initialisation", e);
                 throw new RuntimeException("Erreur d'initialisation: " + e.getMessage(), e);
