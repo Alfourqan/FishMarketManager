@@ -45,15 +45,15 @@ com/poissonnerie/controller/ReportController.class
 com/poissonnerie/view/ProduitViewSwing$3.class
 com/poissonnerie/view/ReportViewSwing$1.class
 com/poissonnerie/model/Vente$ModePaiement.class
-com/poissonnerie/view/InventaireViewSwing$1.class
 com/poissonnerie/model/Vente$LigneVente.class
+com/poissonnerie/view/InventaireViewSwing$1.class
 com/poissonnerie/view/SplashScreen$1.class
 com/poissonnerie/model/Client$StatutCreances.class
 com/poissonnerie/view/LoginView$1.class
 com/poissonnerie/view/CaisseViewSwing$1.class
 com/poissonnerie/view/ConfigurationViewSwing$4.class
-com/poissonnerie/view/CaisseViewSwing.class
 com/poissonnerie/model/UserAction$ActionType.class
+com/poissonnerie/view/CaisseViewSwing.class
 com/poissonnerie/controller/CaisseController$1.class
 com/poissonnerie/controller/AuthenticationController.class
 com/poissonnerie/model/InventaireManager$AjustementStock.class
@@ -79,8 +79,8 @@ com/poissonnerie/view/MainViewSwing.class
 com/poissonnerie/controller/VenteController.class
 com/poissonnerie/view/ReportViewSwing$3.class
 com/poissonnerie/model/InventaireManager$InventaireObserver.class
-com/poissonnerie/view/ReportViewSwing$5.class
 com/poissonnerie/model/UserAction.class
+com/poissonnerie/view/ReportViewSwing$5.class
 com/poissonnerie/view/InventaireViewSwing$3.class
 com/poissonnerie/view/MainViewSwing$1.class
 com/poissonnerie/model/Vente.class

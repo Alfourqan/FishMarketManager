@@ -14,6 +14,7 @@ import java.util.logging.Level;
 import java.io.File;
 import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteOpenMode;
+import java.util.concurrent.TimeUnit;
 
 public class DatabaseManager {
     private static final Logger LOGGER = Logger.getLogger(DatabaseManager.class.getName());
@@ -21,25 +22,59 @@ public class DatabaseManager {
     private static final Object LOCK = new Object();
     private static final String DB_FILE = "poissonnerie.db";
     private static SQLiteConfig config;
+    private static final int MAX_RETRIES = 3;
+    private static final long RETRY_DELAY_MS = 1000;
+    private static final int BUSY_TIMEOUT_MS = 30000;
 
     static {
         config = new SQLiteConfig();
         config.setOpenMode(SQLiteOpenMode.READWRITE);
         config.setJournalMode(SQLiteConfig.JournalMode.WAL);
         config.setSynchronous(SQLiteConfig.SynchronousMode.NORMAL);
-        config.setBusyTimeout(30000);
+        config.setBusyTimeout(BUSY_TIMEOUT_MS);
         config.setCacheSize(2000);
         config.setPageSize(4096);
         config.enforceForeignKeys(true);
+        config.setLockingMode(SQLiteConfig.LockingMode.EXCLUSIVE);
+        config.setTransactionMode(SQLiteConfig.TransactionMode.IMMEDIATE);
     }
 
     private static Connection createConnection() throws SQLException {
-        try {
-            return config.createConnection("jdbc:sqlite:" + DB_FILE);
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la création de la connexion", e);
-            throw e;
+        int retries = 0;
+        SQLException lastException = null;
+
+        while (retries < MAX_RETRIES) {
+            try {
+                Connection conn = config.createConnection("jdbc:sqlite:" + DB_FILE);
+                conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+
+                try (Statement stmt = conn.createStatement()) {
+                    stmt.execute("PRAGMA busy_timeout = " + BUSY_TIMEOUT_MS);
+                    stmt.execute("PRAGMA journal_mode = WAL");
+                    stmt.execute("PRAGMA synchronous = NORMAL");
+                    stmt.execute("PRAGMA locking_mode = EXCLUSIVE");
+                    stmt.execute("PRAGMA cache_size = 2000");
+                }
+
+                return conn;
+            } catch (SQLException e) {
+                lastException = e;
+                if (e.getMessage().contains("database is locked") && retries < MAX_RETRIES - 1) {
+                    LOGGER.warning("Database locked, retrying... (attempt " + (retries + 1) + "/" + MAX_RETRIES + ")");
+                    try {
+                        Thread.sleep(RETRY_DELAY_MS * (retries + 1));
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        throw new SQLException("Interrupted while waiting for retry", ie);
+                    }
+                    retries++;
+                } else {
+                    throw e;
+                }
+            }
         }
+
+        throw new SQLException("Failed to create connection after " + MAX_RETRIES + " attempts", lastException);
     }
 
     public static Connection getConnection() throws SQLException {
@@ -57,6 +92,7 @@ public class DatabaseManager {
         SQLiteConfig initConfig = new SQLiteConfig();
         initConfig.setOpenMode(SQLiteOpenMode.READWRITE);
         initConfig.enforceForeignKeys(true);
+        initConfig.setBusyTimeout(BUSY_TIMEOUT_MS);
         return initConfig.createConnection("jdbc:sqlite:" + DB_FILE);
     }
 
