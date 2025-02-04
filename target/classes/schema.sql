@@ -29,14 +29,10 @@ CREATE TABLE users (
     created_at INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000),
     last_login INTEGER,
     active BOOLEAN DEFAULT true,
-    force_password_reset BOOLEAN DEFAULT true,
+    force_password_reset BOOLEAN DEFAULT false,
     CONSTRAINT username_min_length CHECK (length(username) >= 3),
     CONSTRAINT password_min_length CHECK (length(password) >= 6)
 );
-
--- Création de l'utilisateur admin par défaut
-INSERT INTO users (username, password, role, active, force_password_reset) 
-VALUES ('admin', '$2a$12$8BHi1zeXvFT9LgzHSWTJ2.Y7UkE8FSiGGD5jZRQPH9G4bJNWlFKJS', 'ADMIN', true, true);
 
 CREATE TABLE IF NOT EXISTS configurations (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

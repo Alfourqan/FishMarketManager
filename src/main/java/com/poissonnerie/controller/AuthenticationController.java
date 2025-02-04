@@ -10,12 +10,8 @@ import org.mindrot.jbcrypt.BCrypt;
 public class AuthenticationController {
     private static final Logger LOGGER = Logger.getLogger(AuthenticationController.class.getName());
     private static AuthenticationController instance;
-    private static final int MAX_LOGIN_ATTEMPTS = 3;
-    private static final long LOCKOUT_DURATION_MS = 300000; // 5 minutes
     private static final String DEFAULT_ADMIN_PASSWORD = "admin123";
     private static final Object INSTANCE_LOCK = new Object();
-    private static final int MAX_RETRIES = 3;
-    private static final long RETRY_DELAY_MS = 1000;
 
     private AuthenticationController() {
         initializeDatabase();
@@ -34,27 +30,32 @@ public class AuthenticationController {
 
     private void initializeDatabase() {
         try (Connection conn = DatabaseManager.getConnection()) {
-            // Vérifie si l'utilisateur admin existe déjà
-            try (PreparedStatement checkStmt = conn.prepareStatement(
-                "SELECT COUNT(*) FROM users WHERE username = ?")) {
-                checkStmt.setString(1, "admin");
-                ResultSet rs = checkStmt.executeQuery();
-                if (rs.next() && rs.getInt(1) == 0) {
-                    // Crée l'utilisateur admin s'il n'existe pas
-                    try (PreparedStatement insertStmt = conn.prepareStatement(
-                        "INSERT INTO users (username, password, role, active, force_password_reset) VALUES (?, ?, ?, ?, ?)")) {
-                        String salt = BCrypt.gensalt(12);
-                        String hashedPassword = BCrypt.hashpw(DEFAULT_ADMIN_PASSWORD, salt);
-                        LOGGER.info("Création de l'utilisateur admin avec nouveau mot de passe hashé");
+            String salt = BCrypt.gensalt(12);
+            String hashedPassword = BCrypt.hashpw(DEFAULT_ADMIN_PASSWORD, salt);
+            LOGGER.info("Création du compte admin avec mot de passe hashé");
 
-                        insertStmt.setString(1, "admin");
-                        insertStmt.setString(2, hashedPassword);
-                        insertStmt.setString(3, "ADMIN");
-                        insertStmt.setBoolean(4, true);
-                        insertStmt.setBoolean(5, false);
-                        insertStmt.executeUpdate();
-                        LOGGER.info("Utilisateur admin créé avec succès");
-                    }
+            // Supprime l'ancien compte admin s'il existe
+            try (PreparedStatement deleteStmt = conn.prepareStatement(
+                "DELETE FROM users WHERE username = ?")) {
+                deleteStmt.setString(1, "admin");
+                deleteStmt.executeUpdate();
+            }
+
+            // Crée le nouveau compte admin
+            try (PreparedStatement insertStmt = conn.prepareStatement(
+                "INSERT INTO users (username, password, role, active, force_password_reset) VALUES (?, ?, ?, ?, ?)")) {
+                insertStmt.setString(1, "admin");
+                insertStmt.setString(2, hashedPassword);
+                insertStmt.setString(3, "ADMIN");
+                insertStmt.setBoolean(4, true);
+                insertStmt.setBoolean(5, false);
+                insertStmt.executeUpdate();
+
+                // Vérifie que le mot de passe peut être vérifié
+                if (BCrypt.checkpw(DEFAULT_ADMIN_PASSWORD, hashedPassword)) {
+                    LOGGER.info("Compte admin créé avec succès, vérification du hash réussie");
+                } else {
+                    LOGGER.severe("Erreur de vérification du hash du mot de passe admin");
                 }
             }
         } catch (SQLException e) {
@@ -70,7 +71,7 @@ public class AuthenticationController {
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(
-                 "SELECT password, active, force_password_reset FROM users WHERE username = ?")) {
+                 "SELECT password, active FROM users WHERE username = ?")) {
             stmt.setString(1, username.trim());
             LOGGER.info("Tentative d'authentification pour l'utilisateur: " + username);
 
@@ -78,7 +79,6 @@ public class AuthenticationController {
             if (rs.next()) {
                 String storedPassword = rs.getString("password");
                 boolean isActive = rs.getBoolean("active");
-                boolean forceReset = rs.getBoolean("force_password_reset");
 
                 if (!isActive) {
                     LOGGER.warning("Tentative de connexion sur un compte désactivé: " + username);
@@ -86,13 +86,15 @@ public class AuthenticationController {
                 }
 
                 boolean authenticated = BCrypt.checkpw(password, storedPassword);
-                LOGGER.info("Vérification du mot de passe pour " + username + ": " + (authenticated ? "réussie" : "échouée"));
+                LOGGER.info("Vérification du mot de passe pour " + username + 
+                          " - Hash stocké: " + storedPassword + 
+                          " - Authentification: " + (authenticated ? "réussie" : "échouée"));
 
                 if (authenticated) {
                     updateLastLogin(conn, username);
                     LOGGER.info("Authentification réussie pour l'utilisateur: " + username);
                 } else {
-                    LOGGER.warning("Échec d'authentification pour l'utilisateur: " + username + " (mot de passe incorrect)");
+                    LOGGER.warning("Échec d'authentification pour l'utilisateur: " + username);
                 }
 
                 return authenticated;
@@ -115,7 +117,6 @@ public class AuthenticationController {
             LOGGER.info("Mise à jour de la dernière connexion pour: " + username);
         }
     }
-
     public boolean changePassword(String username, String currentPassword, String newPassword) {
         if (!authenticate(username, currentPassword)) {
             LOGGER.warning("Tentative de changement de mot de passe avec mauvais mot de passe actuel");
