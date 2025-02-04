@@ -142,7 +142,7 @@ public class Main {
             try {
                 splash.setProgress(100, "Prêt !");
                 loginView = new LoginView();
-                loginView.addLoginSuccessListener(() -> createAndShowMainFrame());
+                loginView.addLoginSuccessListener(username -> createAndShowMainFrame(username));
 
                 // Transition SplashScreen -> Login
                 Timer timer = new Timer(1500, e -> {
@@ -163,16 +163,16 @@ public class Main {
         });
     }
 
-    private static void createAndShowMainFrame() {
+    private static void createAndShowMainFrame(String username) {
         SwingUtilities.invokeLater(() -> {
             try {
-                LOGGER.info("Création de la fenêtre principale");
+                LOGGER.info("Création de la fenêtre principale pour l'utilisateur: " + username);
                 mainFrame = new JFrame("Gestion Poissonnerie");
                 mainFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
                 configureMainFrameSize();
                 mainFrame.setLocationRelativeTo(null);
-                mainFrame.setContentPane(new MainViewSwing().getMainPanel());
+                mainFrame.setContentPane(new MainViewSwing(username).getMainPanel());
                 configureMainFrameClose();
 
                 mainFrame.setVisible(true);

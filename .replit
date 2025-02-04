@@ -51,6 +51,10 @@ args = "Java VNC App"
 task = "workflow.run"
 args = "Java VNC App Final"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Java Application Test"
+
 [[workflows.workflow]]
 name = "Java Application"
 author = "agent"
@@ -190,6 +194,20 @@ task = "packager.installForAll"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "DISPLAY=:0 mvn clean install && mvn exec:java -Dexec.mainClass='com.poissonnerie.Main' -Dexec.systemProperties.SKIP_SIRET_VALIDATION=true -Djava.awt.headless=false -Dexec.cleanupDaemonThreads=false"
+
+[[workflows.workflow]]
+name = "Java Application Test"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "mvn clean compile exec:java -Dexec.mainClass='com.poissonnerie.Main' -Dexec.systemProperties.SKIP_SIRET_VALIDATION=true -Djava.awt.headless=false -Dexec.cleanupDaemonThreads=false"
 
 [deployment]
 run = ["sh", "-c", "mvn clean compile && mvn exec:java -Dexec.mainClass=\"com.poissonnerie.Main\" -Dexec.systemProperties.SKIP_SIRET_VALIDATION=true -Djava.awt.headless=false -Dexec.cleanupDaemonThreads=false"]

@@ -6,14 +6,19 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.time.Instant;
 import org.mindrot.jbcrypt.BCrypt;
+import com.poissonnerie.model.Role;
+import com.poissonnerie.model.Permission;
+import java.util.Set;
 
 public class AuthenticationController {
     private static final Logger LOGGER = Logger.getLogger(AuthenticationController.class.getName());
     private static AuthenticationController instance;
     private static final String DEFAULT_ADMIN_PASSWORD = "admin123";
     private static final Object INSTANCE_LOCK = new Object();
+    private RoleController roleController;
 
     private AuthenticationController() {
+        this.roleController = RoleController.getInstance();
         initializeDatabase();
     }
 
@@ -30,57 +35,46 @@ public class AuthenticationController {
 
     private void initializeDatabase() {
         try (Connection conn = DatabaseManager.getConnection()) {
-            // Supprime l'ancien compte admin s'il existe
-            try (PreparedStatement deleteStmt = conn.prepareStatement(
-                "DELETE FROM users WHERE username = ?")) {
-                deleteStmt.setString(1, "admin");
-                deleteStmt.executeUpdate();
-                LOGGER.info("Ancien compte admin supprimé");
-            }
+            conn.setAutoCommit(false);
+            try {
+                // Supprime l'ancien compte admin s'il existe
+                try (PreparedStatement deleteStmt = conn.prepareStatement(
+                    "DELETE FROM users WHERE username = ?")) {
+                    deleteStmt.setString(1, "admin");
+                    deleteStmt.executeUpdate();
+                    LOGGER.info("Ancien compte admin supprimé");
+                }
 
-            // Hash avec un coût moins élevé pour le debug
-            String salt = BCrypt.gensalt(10); // Coût réduit pour le debug
-            String hashedPassword = BCrypt.hashpw(DEFAULT_ADMIN_PASSWORD, salt);
+                // Hash avec un coût moins élevé pour le debug
+                String salt = BCrypt.gensalt(10);
+                String hashedPassword = BCrypt.hashpw(DEFAULT_ADMIN_PASSWORD, salt);
 
-            // Log détaillé pour le debug
-            LOGGER.info("Création du compte admin:");
-            LOGGER.info("Mot de passe: " + DEFAULT_ADMIN_PASSWORD);
-            LOGGER.info("Salt: " + salt);
-            LOGGER.info("Hash: " + hashedPassword);
+                // Crée le nouveau compte admin
+                try (PreparedStatement insertStmt = conn.prepareStatement(
+                    "INSERT INTO users (username, password, active) VALUES (?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS)) {
+                    insertStmt.setString(1, "admin");
+                    insertStmt.setString(2, hashedPassword);
+                    insertStmt.setBoolean(3, true);
+                    insertStmt.executeUpdate();
 
-            // Test de vérification avant insertion
-            boolean preTest = BCrypt.checkpw(DEFAULT_ADMIN_PASSWORD, hashedPassword);
-            LOGGER.info("Test pré-insertion: " + preTest);
+                    ResultSet rs = insertStmt.getGeneratedKeys();
+                    if (rs.next()) {
+                        int userId = rs.getInt(1);
+                        LOGGER.info("Compte admin créé avec ID: " + userId);
 
-            // Crée le nouveau compte admin
-            try (PreparedStatement insertStmt = conn.prepareStatement(
-                "INSERT INTO users (username, password, role, active) VALUES (?, ?, ?, ?)",
-                Statement.RETURN_GENERATED_KEYS)) {
-                insertStmt.setString(1, "admin");
-                insertStmt.setString(2, hashedPassword);
-                insertStmt.setString(3, "ADMIN");
-                insertStmt.setBoolean(4, true);
-                insertStmt.executeUpdate();
+                        // Crée et attribue le rôle admin
+                        Role adminRole = new Role("ADMIN", "Administrateur système");
+                        adminRole = roleController.creerRole(adminRole);
+                        roleController.attribuerRoleUtilisateur(userId, adminRole.getId());
 
-                // Vérifie l'insertion
-                ResultSet rs = insertStmt.getGeneratedKeys();
-                if (rs.next()) {
-                    int userId = rs.getInt(1);
-                    LOGGER.info("Compte admin créé avec ID: " + userId);
-
-                    // Test de vérification post-insertion
-                    try (PreparedStatement checkStmt = conn.prepareStatement(
-                        "SELECT password FROM users WHERE id = ?")) {
-                        checkStmt.setInt(1, userId);
-                        ResultSet checkRs = checkStmt.executeQuery();
-                        if (checkRs.next()) {
-                            String storedHash = checkRs.getString("password");
-                            boolean postTest = BCrypt.checkpw(DEFAULT_ADMIN_PASSWORD, storedHash);
-                            LOGGER.info("Test post-insertion - Hash stocké: " + storedHash);
-                            LOGGER.info("Test post-insertion - Résultat: " + postTest);
-                        }
+                        conn.commit();
+                        LOGGER.info("Rôle admin attribué avec succès");
                     }
                 }
+            } catch (SQLException e) {
+                conn.rollback();
+                throw e;
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de la base de données", e);
@@ -96,18 +90,15 @@ public class AuthenticationController {
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(
-                 "SELECT password, active FROM users WHERE username = ?")) {
+                 "SELECT id, password, active FROM users WHERE username = ?")) {
 
             stmt.setString(1, username.trim());
-            LOGGER.info("Tentative d'authentification pour l'utilisateur: " + username);
-            LOGGER.info("Mot de passe fourni: " + password);
-
             ResultSet rs = stmt.executeQuery();
+
             if (rs.next()) {
                 String storedHash = rs.getString("password");
                 boolean isActive = rs.getBoolean("active");
-
-                LOGGER.info("Hash stocké pour " + username + ": " + storedHash);
+                int userId = rs.getInt("id");
 
                 if (!isActive) {
                     LOGGER.warning("Compte désactivé: " + username);
@@ -115,8 +106,6 @@ public class AuthenticationController {
                 }
 
                 boolean authenticated = BCrypt.checkpw(password, storedHash);
-                LOGGER.info("Résultat authentification pour " + username + ": " + authenticated);
-
                 if (authenticated) {
                     updateLastLogin(conn, username);
                 }
@@ -142,19 +131,26 @@ public class AuthenticationController {
         }
     }
 
-    public String getUserRole(String username) {
+    public Set<Role> getUserRoles(String username) {
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(
-                 "SELECT role FROM users WHERE username = ?")) {
+                 "SELECT id FROM users WHERE username = ?")) {
             stmt.setString(1, username);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                return rs.getString("role");
+                int userId = rs.getInt("id");
+                return roleController.getRolesUtilisateur(userId);
             }
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la récupération du rôle", e);
+            LOGGER.log(Level.SEVERE, "Erreur lors de la récupération des rôles", e);
         }
-        return null;
+        return Set.of();
+    }
+
+    public boolean hasPermission(String username, String permissionCode) {
+        Set<Role> roles = getUserRoles(username);
+        return roles.stream()
+            .anyMatch(role -> role.hasPermission(permissionCode));
     }
 
     public boolean isUserActive(String username) {

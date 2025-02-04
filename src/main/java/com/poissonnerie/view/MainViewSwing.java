@@ -18,8 +18,10 @@ public class MainViewSwing {
     private final CaisseController caisseController;
     private JLabel titleLabel;
     private String currentTitle = "ACCUEIL";
+    private final String username;
 
-    public MainViewSwing() {
+    public MainViewSwing(String username) {
+        this.username = username;
         mainPanel = new JPanel(new BorderLayout());
         cardLayout = new CardLayout();
         contentPanel = new JPanel(cardLayout);
@@ -75,7 +77,6 @@ public class MainViewSwing {
             {"Produits", MaterialDesign.MDI_PACKAGE},
             {"Ventes", MaterialDesign.MDI_CART},
             {"Clients", MaterialDesign.MDI_ACCOUNT},
-            //{"Factures", MaterialDesign.MDI_FILE},
             {"Fournisseurs", MaterialDesign.MDI_TRUCK},
             {"Inventaire", MaterialDesign.MDI_CLIPBOARD},
             {"Caisse", MaterialDesign.MDI_CASH},
@@ -163,9 +164,8 @@ public class MainViewSwing {
         contentPanel.add(new CaisseViewSwing().getMainPanel(), "Caisse");
         contentPanel.add(new InventaireViewSwing().getMainPanel(), "Inventaire");
         contentPanel.add(new FournisseurViewSwing().getMainPanel(), "Fournisseurs");
-        contentPanel.add(new ReportViewSwing().getMainPanel(), "Rapport");
+        contentPanel.add(new ReportViewSwing(username).getMainPanel(), "Rapport");
         contentPanel.add(new ConfigurationViewSwing().getMainPanel(), "Réglages");
-        contentPanel.add(createTemporaryPanel("Factures"), "Factures");
     }
 
     private void handleLogout() {
@@ -184,15 +184,6 @@ public class MainViewSwing {
             }
             System.exit(0);
         }
-    }
-
-    private JPanel createTemporaryPanel(String name) {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.WHITE);
-        JLabel label = new JLabel("Vue " + name + " en construction", SwingConstants.CENTER);
-        label.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        panel.add(label, BorderLayout.CENTER);
-        return panel;
     }
 
     public JPanel getMainPanel() {

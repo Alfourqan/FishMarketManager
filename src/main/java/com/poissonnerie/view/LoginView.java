@@ -42,9 +42,9 @@ public class LoginView extends JFrame {
         loginSuccessListeners.remove(listener);
     }
 
-    private void fireLoginSuccess() {
+    private void fireLoginSuccess(String username) {
         for (LoginSuccessListener listener : loginSuccessListeners) {
-            listener.onLoginSuccess();
+            listener.onLoginSuccess(username);
         }
     }
 
@@ -187,7 +187,7 @@ public class LoginView extends JFrame {
             // Ouvrir la fenêtre principale après un court délai
             Timer timer = new Timer(1000, e -> {
                 dispose(); // Ferme la fenêtre de login
-                fireLoginSuccess(); // Notifie les listeners
+                fireLoginSuccess(username); // Notifie les listeners avec le nom d'utilisateur
             });
             timer.setRepeats(false);
             timer.start();

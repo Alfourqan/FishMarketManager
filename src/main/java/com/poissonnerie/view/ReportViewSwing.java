@@ -55,8 +55,10 @@ public class ReportViewSwing {
     private JComboBox<String> categorieCombo;
     private JComboBox<String> periodeCombo;
     private JComboBox<String> modePaiementCombo;
+    private final String username;
 
-    public ReportViewSwing() {
+    public ReportViewSwing(String username) {
+        this.username = username;
         mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
@@ -80,23 +82,23 @@ public class ReportViewSwing {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             switch (type.toLowerCase()) {
                 case "ventes":
-                    reportController.genererRapportVentesPDF(dateDebut.atStartOfDay(),
+                    reportController.genererRapportVentesPDF(username, dateDebut.atStartOfDay(),
                         dateFin.atTime(23, 59, 59), outputStream);
                     break;
                 case "stocks":
                     Map<String, Double> statsStocks = reportController.calculerStatistiquesStocks(
                         (List<Produit>) donnees);
-                    reportController.genererRapportStocksPDF((List<Produit>) donnees,
+                    reportController.genererRapportStocksPDF(username,(List<Produit>) donnees,
                         statsStocks, outputStream);
                     break;
                 case "fournisseurs":
-                    reportController.genererRapportFournisseursPDF(outputStream);
+                    reportController.genererRapportFournisseursPDF(username, outputStream);
                     break;
                 case "creances":
-                    reportController.genererRapportCreancesPDF(outputStream);
+                    reportController.genererRapportCreancesPDF(username, outputStream);
                     break;
                 case "chiffre_affaires":
-                    reportController.genererRapportFinancierPDF(dateDebut.atStartOfDay(),
+                    reportController.genererRapportFinancierPDF(username, dateDebut.atStartOfDay(),
                         dateFin.atTime(23, 59, 59), outputStream);
                     break;
             }
@@ -421,28 +423,43 @@ public class ReportViewSwing {
         try {
             String nomFichier = "rapport_" + type.toLowerCase() + "_" + LocalDate.now() + ".xlsx";
 
-            switch (type) {
-                case "Ventes":
-                    reportController.genererRapportVentesExcel(
-                        dateDebut.atStartOfDay(), dateFin.atTime(23, 59, 59), nomFichier);
-                    break;
-                case "Chiffre d'affaires":
-                    reportController.genererRapportFinancierExcel(
-                        dateDebut.atStartOfDay(), dateFin.atTime(23, 59, 59), nomFichier);
-                    break;
-                case "Stocks":
-                    reportController.genererRapportStocksExcel(nomFichier);
-                    break;
-                case "Fournisseurs":
-                    reportController.genererRapportFournisseursExcel(nomFichier);
-                    break;
-                case "Créances":
-                    reportController.genererRapportCreancesExcel(nomFichier);
-                    break;
-            }
+            try {
+                switch (type) {
+                    case "Ventes":
+                        reportController.genererRapportVentesExcel(
+                            username,
+                            dateDebut.atStartOfDay(),
+                            dateFin.atTime(23, 59, 59),
+                            nomFichier
+                        );
+                        break;
+                    case "Chiffre d'affaires":
+                        reportController.genererRapportFinancierExcel(
+                            username,
+                            dateDebut.atStartOfDay(),
+                            dateFin.atTime(23, 59, 59),
+                            nomFichier
+                        );
+                        break;
+                    case "Stocks":
+                        reportController.genererRapportStocksExcel(username, nomFichier);
+                        break;
+                    case "Fournisseurs":
+                        reportController.genererRapportFournisseursExcel(username, nomFichier);
+                        break;
+                    case "Créances":
+                        reportController.genererRapportCreancesExcel(username, nomFichier);
+                        break;
+                }
 
-            showSuccessMessage("Succès", MSG_SUCCES_GENERATION + nomFichier);
-            ouvrirFichier(nomFichier);
+                showSuccessMessage("Succès", MSG_SUCCES_GENERATION + nomFichier);
+                ouvrirFichier(nomFichier);
+
+            } catch (SecurityException e) {
+                LOGGER.warning("Accès refusé pour l'utilisateur " + username + " au rapport " + type);
+                showErrorMessage("Accès refusé", 
+                    "Vous n'avez pas les permissions nécessaires pour générer ce rapport. Contactez votre administrateur.");
+            }
 
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport Excel", e);
@@ -871,7 +888,7 @@ public class ReportViewSwing {
         JButton rapportGlobalBtn = createStyledButton("Rapport global des créances",
             MaterialDesign.MDI_FILE_DOCUMENT, PRIMARY_COLOR);
         rapportGlobalBtn.addActionListener(e -> {
-            genererRapport("creances", clientsAvecCreances,
+            genererRapportCreances(clientsAvecCreances,
                 "rapport_creances_global_" + LocalDate.now() + ".pdf");
             dialog.dispose();
         });
