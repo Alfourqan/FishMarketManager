@@ -34,6 +34,14 @@ public class DatabaseManager {
         config.setCacheSize(2000);
         config.setPageSize(4096);
         config.enforceForeignKeys(true);
+        // Force le mode WAL pour une meilleure gestion des transactions concurrentes
+        try (Connection conn = createNewConnection()) {
+            try (Statement stmt = conn.createStatement()) {
+                stmt.execute("PRAGMA journal_mode = WAL");
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation du mode WAL", e);
+        }
     }
 
     private static synchronized Connection getSingletonConnection() throws SQLException {
@@ -41,8 +49,39 @@ public class DatabaseManager {
             if (singletonConnection == null || singletonConnection.isClosed()) {
                 singletonConnection = createNewConnection();
                 initializePragmas(singletonConnection);
+                LOGGER.info("Nouvelle connexion créée");
             }
             return singletonConnection;
+        }
+    }
+
+    public static void reinitializeDatabase() {
+        LOGGER.info("Réinitialisation forcée de la base de données...");
+        synchronized (CONNECTION_LOCK) {
+            try {
+                if (singletonConnection != null && !singletonConnection.isClosed()) {
+                    singletonConnection.close();
+                }
+                singletonConnection = null;
+                isInitialized = false;
+
+                // Suppression du fichier de base de données existant
+                File dbFile = new File(DB_FILE);
+                if (dbFile.exists()) {
+                    if (dbFile.delete()) {
+                        LOGGER.info("Ancien fichier de base de données supprimé");
+                    } else {
+                        LOGGER.warning("Impossible de supprimer l'ancien fichier de base de données");
+                    }
+                }
+
+                // Réinitialisation complète
+                initDatabase();
+                LOGGER.info("Base de données réinitialisée avec succès");
+            } catch (SQLException e) {
+                LOGGER.log(Level.SEVERE, "Erreur lors de la réinitialisation de la base de données", e);
+                throw new RuntimeException("Erreur lors de la réinitialisation de la base de données", e);
+            }
         }
     }
 
@@ -56,6 +95,7 @@ public class DatabaseManager {
             stmt.execute("PRAGMA foreign_keys = ON");
             stmt.execute("PRAGMA locking_mode = NORMAL");
             stmt.execute("PRAGMA temp_store = MEMORY");
+            LOGGER.info("PRAGMAs initialisés avec succès");
         }
     }
 
@@ -67,6 +107,7 @@ public class DatabaseManager {
             try {
                 Connection conn = config.createConnection("jdbc:sqlite:" + DB_FILE);
                 conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+                LOGGER.info("Nouvelle connexion créée avec succès");
                 return conn;
             } catch (SQLException e) {
                 lastException = e;
@@ -134,7 +175,6 @@ public class DatabaseManager {
 
             try {
                 Connection conn = getSingletonConnection();
-                // Exécuter les PRAGMA avant toute transaction
                 initializePragmas(conn);
 
                 boolean originalAutoCommit = conn.getAutoCommit();
@@ -152,6 +192,7 @@ public class DatabaseManager {
                             sql = sql.trim();
                             if (!sql.isEmpty() && !sql.toUpperCase().startsWith("PRAGMA")) {
                                 try {
+                                    LOGGER.info("Exécution de la requête: " + sql);
                                     stmt.execute(sql);
                                 } catch (SQLException e) {
                                     if (!e.getMessage().contains("table already exists")) {
@@ -160,8 +201,8 @@ public class DatabaseManager {
                                 }
                             }
                         }
-                        insertTestDataIfEmpty(conn);
                     }
+
                     conn.commit();
                     isInitialized = true;
                     LOGGER.info("Base de données initialisée avec succès");
@@ -205,20 +246,6 @@ public class DatabaseManager {
         }
     }
 
-    private static void insertTestDataIfEmpty(Connection conn) throws SQLException {
-        LOGGER.info("Vérification et insertion des données de test...");
-        try (Statement stmt = conn.createStatement()) {
-            ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM produits");
-            if (rs.next() && rs.getInt(1) == 0) {
-                stmt.execute("INSERT INTO produits (nom, categorie, prix_achat, prix_vente, stock, seuil_alerte) VALUES " +
-                           "('Saumon frais', 'Frais', 15.00, 25.00, 50, 10)," +
-                           "('Thon rouge', 'Frais', 20.00, 35.00, 30, 5)," +
-                           "('Crevettes', 'Frais', 12.00, 18.00, 100, 20)");
-            }
-            LOGGER.info("Données de test insérées avec succès");
-        }
-    }
-
     public static void checkDatabaseHealth() throws SQLException {
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement()) {
@@ -226,6 +253,22 @@ public class DatabaseManager {
             stmt.execute("PRAGMA integrity_check");
             stmt.execute("PRAGMA foreign_key_check");
             LOGGER.info("Vérification de la santé de la base de données réussie");
+        }
+    }
+
+    public static void main(String[] args) {
+        if (args.length > 0 && args[0].equals("init")) {
+            LOGGER.info("Initialisation forcée de la base de données...");
+            reinitializeDatabase();
+        } else {
+            LOGGER.info("Vérification de la base de données...");
+            try {
+                initDatabase();
+                checkDatabaseHealth();
+            } catch (SQLException e) {
+                LOGGER.log(Level.SEVERE, "Erreur lors de la vérification de la base de données", e);
+                System.exit(1);
+            }
         }
     }
 }
