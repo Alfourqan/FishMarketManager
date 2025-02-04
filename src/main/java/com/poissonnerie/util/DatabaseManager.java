@@ -55,12 +55,14 @@ public class DatabaseManager {
                 Connection conn = config.createConnection("jdbc:sqlite:" + DB_FILE);
                 conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 
+                // Configuration initiale de la connexion (hors transaction)
                 try (Statement stmt = conn.createStatement()) {
-                    stmt.execute("PRAGMA busy_timeout = " + BUSY_TIMEOUT_MS);
                     stmt.execute("PRAGMA journal_mode = WAL");
                     stmt.execute("PRAGMA synchronous = NORMAL");
-                    stmt.execute("PRAGMA locking_mode = EXCLUSIVE");
+                    stmt.execute("PRAGMA busy_timeout = " + BUSY_TIMEOUT_MS);
                     stmt.execute("PRAGMA cache_size = 2000");
+                    stmt.execute("PRAGMA page_size = 4096");
+                    stmt.execute("PRAGMA foreign_keys = ON");
                 }
 
                 return conn;
@@ -86,7 +88,7 @@ public class DatabaseManager {
 
     public static Connection getConnection() throws SQLException {
         ensureInitialized();
-        return getSingletonConnection(); // Use singleton connection
+        return getSingletonConnection();
     }
 
     private static void ensureInitialized() {
@@ -128,8 +130,11 @@ public class DatabaseManager {
                 }
             }
 
-            try (Connection conn = getSingletonConnection()) {
+            Connection conn = getSingletonConnection();
+            try {
+                boolean originalAutoCommit = conn.getAutoCommit();
                 conn.setAutoCommit(false);
+
                 String schema = loadSchemaFromResource();
                 if (schema == null || schema.trim().isEmpty()) {
                     throw new IllegalStateException("Schema SQL vide ou introuvable");
@@ -151,6 +156,15 @@ public class DatabaseManager {
                     }
                     insertTestDataIfEmpty(conn);
                     conn.commit();
+                } catch (SQLException e) {
+                    try {
+                        conn.rollback();
+                    } catch (SQLException re) {
+                        LOGGER.log(Level.WARNING, "Erreur lors du rollback", re);
+                    }
+                    throw e;
+                } finally {
+                    conn.setAutoCommit(originalAutoCommit);
                 }
                 isInitialized = true;
                 LOGGER.info("Base de données initialisée avec succès");
