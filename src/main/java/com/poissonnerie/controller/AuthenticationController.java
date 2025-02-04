@@ -30,32 +30,57 @@ public class AuthenticationController {
 
     private void initializeDatabase() {
         try (Connection conn = DatabaseManager.getConnection()) {
-            String salt = BCrypt.gensalt();
-            String hashedPassword = BCrypt.hashpw(DEFAULT_ADMIN_PASSWORD, salt);
-
-            // Log le mot de passe hashé pour debug
-            LOGGER.info("Création du compte admin avec hash: " + hashedPassword);
-
             // Supprime l'ancien compte admin s'il existe
             try (PreparedStatement deleteStmt = conn.prepareStatement(
                 "DELETE FROM users WHERE username = ?")) {
                 deleteStmt.setString(1, "admin");
                 deleteStmt.executeUpdate();
+                LOGGER.info("Ancien compte admin supprimé");
             }
+
+            // Hash avec un coût moins élevé pour le debug
+            String salt = BCrypt.gensalt(10); // Coût réduit pour le debug
+            String hashedPassword = BCrypt.hashpw(DEFAULT_ADMIN_PASSWORD, salt);
+
+            // Log détaillé pour le debug
+            LOGGER.info("Création du compte admin:");
+            LOGGER.info("Mot de passe: " + DEFAULT_ADMIN_PASSWORD);
+            LOGGER.info("Salt: " + salt);
+            LOGGER.info("Hash: " + hashedPassword);
+
+            // Test de vérification avant insertion
+            boolean preTest = BCrypt.checkpw(DEFAULT_ADMIN_PASSWORD, hashedPassword);
+            LOGGER.info("Test pré-insertion: " + preTest);
 
             // Crée le nouveau compte admin
             try (PreparedStatement insertStmt = conn.prepareStatement(
-                "INSERT INTO users (username, password, role, active) VALUES (?, ?, ?, ?)")) {
+                "INSERT INTO users (username, password, role, active) VALUES (?, ?, ?, ?)",
+                Statement.RETURN_GENERATED_KEYS)) {
                 insertStmt.setString(1, "admin");
                 insertStmt.setString(2, hashedPassword);
                 insertStmt.setString(3, "ADMIN");
                 insertStmt.setBoolean(4, true);
                 insertStmt.executeUpdate();
 
-                // Test de vérification immédiate
-                String testPass = DEFAULT_ADMIN_PASSWORD;
-                boolean verified = BCrypt.checkpw(testPass, hashedPassword);
-                LOGGER.info("Test de vérification immédiate - Password: " + testPass + ", Hash: " + hashedPassword + ", Résultat: " + verified);
+                // Vérifie l'insertion
+                ResultSet rs = insertStmt.getGeneratedKeys();
+                if (rs.next()) {
+                    int userId = rs.getInt(1);
+                    LOGGER.info("Compte admin créé avec ID: " + userId);
+
+                    // Test de vérification post-insertion
+                    try (PreparedStatement checkStmt = conn.prepareStatement(
+                        "SELECT password FROM users WHERE id = ?")) {
+                        checkStmt.setInt(1, userId);
+                        ResultSet checkRs = checkStmt.executeQuery();
+                        if (checkRs.next()) {
+                            String storedHash = checkRs.getString("password");
+                            boolean postTest = BCrypt.checkpw(DEFAULT_ADMIN_PASSWORD, storedHash);
+                            LOGGER.info("Test post-insertion - Hash stocké: " + storedHash);
+                            LOGGER.info("Test post-insertion - Résultat: " + postTest);
+                        }
+                    }
+                }
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de la base de données", e);
@@ -75,19 +100,20 @@ public class AuthenticationController {
 
             stmt.setString(1, username.trim());
             LOGGER.info("Tentative d'authentification pour l'utilisateur: " + username);
+            LOGGER.info("Mot de passe fourni: " + password);
 
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 String storedHash = rs.getString("password");
                 boolean isActive = rs.getBoolean("active");
 
+                LOGGER.info("Hash stocké pour " + username + ": " + storedHash);
+
                 if (!isActive) {
-                    LOGGER.warning("Tentative de connexion sur un compte désactivé: " + username);
+                    LOGGER.warning("Compte désactivé: " + username);
                     return false;
                 }
 
-                // Log détaillé de la comparaison
-                LOGGER.info("Comparaison - Mot de passe fourni: " + password + ", Hash stocké: " + storedHash);
                 boolean authenticated = BCrypt.checkpw(password, storedHash);
                 LOGGER.info("Résultat authentification pour " + username + ": " + authenticated);
 
