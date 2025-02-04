@@ -90,7 +90,13 @@ public class ProduitController {
         // Valider le produit avant l'insertion
         validateProduit(produit);
 
-        String sql = "INSERT INTO produits (nom, categorie, prix_achat, prix_vente, stock, seuil_alerte) VALUES (?, ?, ?, ?, ?, ?)";
+        // Vérifier que le fournisseur est défini
+        if (produit.getFournisseur() == null) {
+            throw new IllegalArgumentException("Un fournisseur doit être sélectionné pour le produit");
+        }
+
+        String sql = "INSERT INTO produits (nom, categorie, prix_achat, prix_vente, stock, seuil_alerte, fournisseur_id) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
         String getIdSql = "SELECT last_insert_rowid() as id";
 
         try (Connection conn = DatabaseManager.getConnection()) {
@@ -102,6 +108,8 @@ public class ProduitController {
                 pstmt.setDouble(4, produit.getPrixVente());
                 pstmt.setInt(5, produit.getStock());
                 pstmt.setInt(6, produit.getSeuilAlerte());
+                pstmt.setInt(7, produit.getFournisseur().getId());
+
                 pstmt.executeUpdate();
 
                 try (Statement stmt = conn.createStatement();
@@ -113,10 +121,11 @@ public class ProduitController {
                         UserAction action = new UserAction(
                             UserAction.ActionType.CREATION,
                             "", // Sera défini par UserActionController
-                            String.format("Ajout du produit %s (Catégorie: %s, Stock initial: %d)",
+                            String.format("Ajout du produit %s (Catégorie: %s, Stock initial: %d, Fournisseur: %s)",
                                 produit.getNom(),
                                 produit.getCategorie(),
-                                produit.getStock()),
+                                produit.getStock(),
+                                produit.getFournisseur().getNom()),
                             UserAction.EntityType.PRODUIT,
                             produit.getId()
                         );
@@ -128,6 +137,9 @@ public class ProduitController {
             } catch (SQLException e) {
                 conn.rollback();
                 LOGGER.log(Level.SEVERE, "Erreur lors de l'ajout du produit", e);
+                if (e.getMessage().contains("FOREIGN KEY")) {
+                    throw new RuntimeException("Le fournisseur sélectionné n'existe pas ou n'est pas valide", e);
+                }
                 throw new RuntimeException("Erreur SQL lors de l'ajout du produit: " + e.getMessage(), e);
             }
         } catch (SQLException e) {
@@ -201,7 +213,7 @@ public class ProduitController {
                 return rs.next();
             }
         } catch (SQLException e) {
-             LOGGER.log(Level.SEVERE, "Erreur lors de la vérification de l'utilisation du produit", e);
+            LOGGER.log(Level.SEVERE, "Erreur lors de la vérification de l'utilisation du produit", e);
             throw new RuntimeException("Erreur lors de la vérification de l'utilisation du produit", e);
         }
     }
@@ -243,7 +255,7 @@ public class ProduitController {
                 throw new RuntimeException("Erreur SQL lors de la suppression du produit: " + e.getMessage(), e);
             }
         } catch (SQLException e) {
-           LOGGER.log(Level.SEVERE, "Erreur fatale lors de la suppression du produit", e);
+            LOGGER.log(Level.SEVERE, "Erreur fatale lors de la suppression du produit", e);
             throw new RuntimeException("Erreur lors de la suppression du produit", e);
         }
     }

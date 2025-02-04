@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS produits (
     prix_vente REAL NOT NULL,
     stock INTEGER NOT NULL,
     seuil_alerte INTEGER NOT NULL,
+    fournisseur_id INTEGER,
     supprime BOOLEAN DEFAULT false,
     CONSTRAINT nom_produit_min_length CHECK (length(trim(nom)) >= 2),
     CONSTRAINT categorie_valide CHECK (trim(categorie) IN ('Frais', 'Surgelé', 'Transformé')),
@@ -53,7 +54,8 @@ CREATE TABLE IF NOT EXISTS produits (
     CONSTRAINT prix_vente_positif CHECK (prix_vente > 0),
     CONSTRAINT prix_vente_superieur CHECK (prix_vente > prix_achat),
     CONSTRAINT stock_positif CHECK (stock >= 0),
-    CONSTRAINT seuil_alerte_positif CHECK (seuil_alerte >= 0)
+    CONSTRAINT seuil_alerte_positif CHECK (seuil_alerte >= 0),
+    FOREIGN KEY (fournisseur_id) REFERENCES fournisseurs(id)
 );
 
 CREATE TABLE IF NOT EXISTS clients (
