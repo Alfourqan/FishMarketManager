@@ -54,31 +54,25 @@ public class ProduitController {
 
     public void ajouterProduit(Produit produit) {
         LOGGER.info("Début de l'ajout du produit: " + produit.getNom());
-
-        // Valider le produit avant l'insertion
-        validateProduit(produit);
-
-        // Vérifier que le fournisseur est défini
-        if (produit.getFournisseur() == null) {
-            LOGGER.severe("Tentative d'ajout d'un produit sans fournisseur");
-            throw new IllegalArgumentException("Un fournisseur doit être sélectionné pour le produit");
-        }
-
         Connection conn = null;
+
         try {
-            conn = DatabaseManager.getConnection();
+            validateProduit(produit);
+
+            if (produit.getFournisseur() == null) {
+                throw new IllegalArgumentException("Un fournisseur doit être sélectionné pour le produit");
+            }
+
+            // Obtenir une connexion de l'instance singleton
+            conn = DatabaseManager.getSingletonConnection();
             conn.setAutoCommit(false);
-            LOGGER.info("Connexion à la base de données établie");
 
             // Vérifier l'existence du fournisseur
-            try (PreparedStatement checkStmt = conn.prepareStatement(
-                    "SELECT id FROM fournisseurs WHERE id = ? AND supprime = false")) {
+            String checkFournisseurSql = "SELECT id FROM fournisseurs WHERE id = ? AND supprime = false";
+            try (PreparedStatement checkStmt = conn.prepareStatement(checkFournisseurSql)) {
                 checkStmt.setInt(1, produit.getFournisseur().getId());
-                LOGGER.info("Vérification du fournisseur ID: " + produit.getFournisseur().getId());
-
                 try (ResultSet rs = checkStmt.executeQuery()) {
                     if (!rs.next()) {
-                        LOGGER.severe("Fournisseur non trouvé: " + produit.getFournisseur().getId());
                         throw new IllegalArgumentException("Le fournisseur sélectionné n'existe pas ou a été supprimé");
                     }
                 }
@@ -86,7 +80,7 @@ public class ProduitController {
 
             // Insérer le produit
             String sql = "INSERT INTO produits (nom, categorie, prix_achat, prix_vente, stock, seuil_alerte, fournisseur_id, supprime) " +
-                         "VALUES (?, ?, ?, ?, ?, ?, ?, false)";
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, false)";
 
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, produit.getNom());
@@ -97,7 +91,6 @@ public class ProduitController {
                 pstmt.setInt(6, produit.getSeuilAlerte());
                 pstmt.setInt(7, produit.getFournisseur().getId());
 
-                LOGGER.info("Exécution de la requête d'insertion");
                 pstmt.executeUpdate();
 
                 // Récupérer l'ID généré
@@ -119,43 +112,39 @@ public class ProduitController {
                             produit.getId()
                         );
                         userActionController.logAction(action);
-                        LOGGER.info("Produit ajouté avec succès, ID: " + produit.getId());
                     }
                 }
-
-                conn.commit();
-                LOGGER.info("Transaction validée avec succès");
             }
+
+            conn.commit();
+            LOGGER.info("Produit ajouté avec succès: " + produit.getNom());
+
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur SQL lors de l'ajout du produit", e);
             if (conn != null) {
                 try {
                     conn.rollback();
-                    LOGGER.info("Transaction annulée suite à une erreur");
-                } catch (SQLException rollbackEx) {
-                    LOGGER.log(Level.SEVERE, "Erreur lors du rollback", rollbackEx);
+                } catch (SQLException ex) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors du rollback", ex);
                 }
             }
-            throw new RuntimeException("Erreur lors de l'ajout du produit: " + e.getMessage(), e);
+            throw new RuntimeException("Erreur lors de l'ajout du produit: " + e.getMessage());
         } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur inattendue lors de l'ajout du produit", e);
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'ajout du produit", e);
             if (conn != null) {
                 try {
                     conn.rollback();
-                    LOGGER.info("Transaction annulée suite à une erreur");
-                } catch (SQLException rollbackEx) {
-                    LOGGER.log(Level.SEVERE, "Erreur lors du rollback", rollbackEx);
+                } catch (SQLException ex) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors du rollback", ex);
                 }
             }
-            throw new RuntimeException("Erreur inattendue lors de l'ajout du produit: " + e.getMessage(), e);
+            throw new RuntimeException(e.getMessage());
         } finally {
             if (conn != null) {
                 try {
                     conn.setAutoCommit(true);
-                    conn.close();
-                    LOGGER.info("Connexion fermée");
                 } catch (SQLException e) {
-                    LOGGER.log(Level.SEVERE, "Erreur lors de la fermeture de la connexion", e);
+                    LOGGER.log(Level.SEVERE, "Erreur lors de la restauration de l'autocommit", e);
                 }
             }
         }
