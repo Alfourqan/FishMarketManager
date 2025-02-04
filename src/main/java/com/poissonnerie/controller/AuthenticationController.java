@@ -77,7 +77,7 @@ public class AuthenticationController {
                 }
 
                 try (PreparedStatement stmt = conn.prepareStatement(
-                    "INSERT INTO users (username, password, role, active) VALUES (?, ?, 'ADMIN', true)")) {
+                    "INSERT INTO users (username, password, role, active, force_password_reset) VALUES (?, ?, 'ADMIN', true, true)")) {
 
                     String hashedPassword = BCrypt.hashpw(DEFAULT_ADMIN_PASSWORD, BCrypt.gensalt());
                     LOGGER.info("Création de l'utilisateur admin avec mot de passe hashé");
