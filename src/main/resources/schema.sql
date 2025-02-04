@@ -1,46 +1,53 @@
--- Configuration de la base de données PostgreSQL
-SET client_encoding = 'UTF8';
+-- Configuration optimisée SQLite avec verrouillage robuste
+PRAGMA journal_mode = WAL;
+PRAGMA synchronous = NORMAL;
+PRAGMA cache_size = 2000;
+PRAGMA page_size = 4096;
+PRAGMA temp_store = MEMORY;
+PRAGMA busy_timeout = 30000;
+PRAGMA locking_mode = EXCLUSIVE;  -- Mode de verrouillage exclusif
+PRAGMA journal_size_limit = 67108864;  -- Limite de 64MB pour le journal WAL
+PRAGMA mmap_size = 268435456;  -- Utilisation de 256MB pour le mapping mémoire
+PRAGMA foreign_keys = OFF;  -- Désactivé temporairement pour la migration
 
 -- Tables principales dans l'ordre de dépendance
-DROP TABLE IF EXISTS reglements_clients CASCADE;
-DROP TABLE IF EXISTS mouvements_caisse CASCADE;
-DROP TABLE IF EXISTS user_actions CASCADE;
-DROP TABLE IF EXISTS ventes CASCADE;
-DROP TABLE IF EXISTS lignes_vente CASCADE;
-DROP TABLE IF EXISTS produits CASCADE;
-DROP TABLE IF EXISTS fournisseurs CASCADE;
-DROP TABLE IF EXISTS users CASCADE;
-DROP TABLE IF EXISTS configurations CASCADE;
+DROP TABLE IF EXISTS reglements_clients;
+DROP TABLE IF EXISTS mouvements_caisse;
+DROP TABLE IF EXISTS user_actions;
+DROP TABLE IF EXISTS ventes;
+DROP TABLE IF EXISTS lignes_vente;
+DROP TABLE IF EXISTS produits;
+DROP TABLE IF EXISTS fournisseurs;
+DROP TABLE IF EXISTS users;
 
 CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    password VARCHAR(100) NOT NULL,
-    role VARCHAR(20) NOT NULL DEFAULT 'USER',
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    last_login TIMESTAMP,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'USER',
+    created_at INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000),
+    last_login INTEGER,
     active BOOLEAN DEFAULT true,
-    force_password_reset BOOLEAN DEFAULT false,
     CONSTRAINT username_min_length CHECK (length(username) >= 3),
     CONSTRAINT password_min_length CHECK (length(password) >= 6)
 );
 
-CREATE TABLE configurations (
-    id SERIAL PRIMARY KEY,
-    cle VARCHAR(50) NOT NULL UNIQUE,
+CREATE TABLE IF NOT EXISTS configurations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cle TEXT NOT NULL UNIQUE,
     valeur TEXT,
     description TEXT,
     CONSTRAINT cle_not_empty CHECK (length(trim(cle)) > 0)
 );
 
-CREATE TABLE fournisseurs (
-    id SERIAL PRIMARY KEY,
-    nom VARCHAR(100) NOT NULL,
-    contact VARCHAR(100),
-    telephone VARCHAR(20),
-    email VARCHAR(100),
+CREATE TABLE IF NOT EXISTS fournisseurs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nom TEXT NOT NULL,
+    contact TEXT,
+    telephone TEXT,
+    email TEXT,
     adresse TEXT,
-    statut VARCHAR(20) DEFAULT 'Actif',
+    statut TEXT DEFAULT 'Actif',
     supprime BOOLEAN DEFAULT false,
     CONSTRAINT nom_fournisseur_min_length CHECK (length(trim(nom)) >= 2),
     CONSTRAINT contact_min_length CHECK (contact IS NULL OR length(trim(contact)) >= 2),
@@ -54,12 +61,12 @@ CREATE TABLE fournisseurs (
 INSERT INTO fournisseurs (nom, contact, telephone, email, statut) 
 VALUES ('Fournisseur par défaut', 'Contact', '0123456789', 'contact@default.com', 'Actif');
 
-CREATE TABLE produits (
-    id SERIAL PRIMARY KEY,
-    nom VARCHAR(100) NOT NULL,
-    categorie VARCHAR(50) NOT NULL,
-    prix_achat NUMERIC(10,2) NOT NULL,
-    prix_vente NUMERIC(10,2) NOT NULL,
+CREATE TABLE IF NOT EXISTS produits (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nom TEXT NOT NULL,
+    categorie TEXT NOT NULL,
+    prix_achat REAL NOT NULL,
+    prix_vente REAL NOT NULL,
     stock INTEGER NOT NULL,
     seuil_alerte INTEGER NOT NULL,
     fournisseur_id INTEGER,
@@ -74,23 +81,24 @@ CREATE TABLE produits (
     FOREIGN KEY (fournisseur_id) REFERENCES fournisseurs(id)
 );
 
-CREATE TABLE clients (
-    id SERIAL PRIMARY KEY,
-    nom VARCHAR(100) NOT NULL,
-    telephone VARCHAR(20),
+CREATE TABLE IF NOT EXISTS clients (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nom TEXT NOT NULL,
+    telephone TEXT,
     adresse TEXT,
-    solde NUMERIC(10,2) DEFAULT 0,
+    solde REAL DEFAULT 0,
     supprime BOOLEAN DEFAULT false,
     CONSTRAINT nom_client_min_length CHECK (length(trim(nom)) >= 2),
     CONSTRAINT telephone_format CHECK (telephone IS NULL OR length(trim(telephone)) >= 8),
-    CONSTRAINT adresse_min_length CHECK (adresse IS NULL OR length(trim(adresse)) >= 5)
+    CONSTRAINT adresse_min_length CHECK (adresse IS NULL OR length(trim(adresse)) >= 5),
+    CONSTRAINT solde_valide CHECK (solde IS NULL OR TYPEOF(solde) = 'real' OR TYPEOF(solde) = 'integer')
 );
 
 CREATE TABLE mouvements_caisse (
-    id SERIAL PRIMARY KEY,
-    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    type VARCHAR(20) NOT NULL CHECK (type IN ('ENTREE', 'SORTIE', 'OUVERTURE', 'CLOTURE')),
-    montant NUMERIC(10,2) NOT NULL CHECK (montant > 0),
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT DEFAULT (datetime('now', 'localtime')),
+    type TEXT NOT NULL CHECK (type IN ('ENTREE', 'SORTIE', 'OUVERTURE', 'CLOTURE')),
+    montant REAL NOT NULL CHECK (montant > 0),
     description TEXT,
     user_id INTEGER,
     FOREIGN KEY (user_id) REFERENCES users(id),
@@ -98,12 +106,12 @@ CREATE TABLE mouvements_caisse (
 );
 
 CREATE TABLE user_actions (
-    id SERIAL PRIMARY KEY,
-    action_type VARCHAR(50) NOT NULL,
-    username VARCHAR(50) NOT NULL,
-    date_time TIMESTAMP NOT NULL,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    action_type TEXT NOT NULL,
+    username TEXT NOT NULL,
+    date_time TEXT NOT NULL,
     description TEXT NOT NULL,
-    entity_type VARCHAR(50) NOT NULL,
+    entity_type TEXT NOT NULL,
     entity_id INTEGER NOT NULL,
     user_id INTEGER,
     FOREIGN KEY (user_id) REFERENCES users(id),
@@ -111,11 +119,11 @@ CREATE TABLE user_actions (
 );
 
 CREATE TABLE ventes (
-    id SERIAL PRIMARY KEY,
-    date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000),
     client_id INTEGER,
     credit INTEGER DEFAULT 0,
-    total NUMERIC(10,2) NOT NULL,
+    total REAL NOT NULL,
     supprime BOOLEAN DEFAULT false,
     FOREIGN KEY (client_id) REFERENCES clients(id),
     CONSTRAINT total_positif CHECK (total >= 0),
@@ -123,11 +131,11 @@ CREATE TABLE ventes (
 );
 
 CREATE TABLE lignes_vente (
-    id SERIAL PRIMARY KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     vente_id INTEGER,
     produit_id INTEGER,
     quantite INTEGER NOT NULL,
-    prix_unitaire NUMERIC(10,2) NOT NULL,
+    prix_unitaire REAL NOT NULL,
     FOREIGN KEY (vente_id) REFERENCES ventes(id),
     FOREIGN KEY (produit_id) REFERENCES produits(id),
     CONSTRAINT quantite_positive CHECK (quantite > 0),
@@ -135,12 +143,12 @@ CREATE TABLE lignes_vente (
 );
 
 -- Nouvelle table pour les règlements clients
-CREATE TABLE reglements_clients (
-    id SERIAL PRIMARY KEY,
+CREATE TABLE IF NOT EXISTS reglements_clients (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     client_id INTEGER NOT NULL,
-    date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    montant NUMERIC(10,2) NOT NULL,
-    type_paiement VARCHAR(20) NOT NULL,
+    date INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000),
+    montant REAL NOT NULL,
+    type_paiement TEXT NOT NULL,
     commentaire TEXT,
     vente_id INTEGER,
     user_id INTEGER,
@@ -177,7 +185,7 @@ CREATE INDEX IF NOT EXISTS idx_user_actions_entity ON user_actions(entity_type, 
 CREATE INDEX IF NOT EXISTS idx_user_actions_user ON user_actions(user_id);
 
 -- Configurations par défaut
-INSERT INTO configurations (cle, valeur, description) VALUES
+INSERT OR IGNORE INTO configurations (cle, valeur, description) VALUES
 ('TAUX_TVA', '20.0', 'Taux de TVA en pourcentage'),
 ('TVA_ENABLED', 'true', 'Activation/désactivation de la TVA'),
 ('NOM_ENTREPRISE', '', 'Nom de l''entreprise'),
@@ -185,3 +193,6 @@ INSERT INTO configurations (cle, valeur, description) VALUES
 ('TELEPHONE_ENTREPRISE', '', 'Numéro de téléphone de l''entreprise'),
 ('EMAIL_ENTREPRISE', '', 'Adresse email de l''entreprise'),
 ('SIRET_ENTREPRISE', '12345678901234', 'Numéro SIRET de l''entreprise');
+
+-- Réactivation des foreign keys après la migration
+PRAGMA foreign_keys = ON;
