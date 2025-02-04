@@ -25,26 +25,25 @@ public class DatabaseManager {
     private static final long RETRY_DELAY_MS = 1000;
     private static final int BUSY_TIMEOUT_MS = 30000;
     private static Connection singletonConnection = null;
+    private static final Object CONNECTION_LOCK = new Object();
 
     static {
         config = new SQLiteConfig();
         config.setOpenMode(SQLiteOpenMode.READWRITE);
-        config.setJournalMode(SQLiteConfig.JournalMode.WAL);
-        config.setSynchronous(SQLiteConfig.SynchronousMode.NORMAL);
         config.setBusyTimeout(BUSY_TIMEOUT_MS);
         config.setCacheSize(2000);
         config.setPageSize(4096);
         config.enforceForeignKeys(true);
-        config.setLockingMode(SQLiteConfig.LockingMode.EXCLUSIVE);
-        config.setTransactionMode(SQLiteConfig.TransactionMode.IMMEDIATE);
     }
 
     private static synchronized Connection getSingletonConnection() throws SQLException {
-        if (singletonConnection == null || singletonConnection.isClosed()) {
-            singletonConnection = createNewConnection();
-            initializePragmas(singletonConnection);
+        synchronized (CONNECTION_LOCK) {
+            if (singletonConnection == null || singletonConnection.isClosed()) {
+                singletonConnection = createNewConnection();
+                initializePragmas(singletonConnection);
+            }
+            return singletonConnection;
         }
-        return singletonConnection;
     }
 
     private static void initializePragmas(Connection conn) throws SQLException {
@@ -55,6 +54,8 @@ public class DatabaseManager {
             stmt.execute("PRAGMA cache_size = 2000");
             stmt.execute("PRAGMA page_size = 4096");
             stmt.execute("PRAGMA foreign_keys = ON");
+            stmt.execute("PRAGMA locking_mode = NORMAL");
+            stmt.execute("PRAGMA temp_store = MEMORY");
         }
     }
 
@@ -133,6 +134,9 @@ public class DatabaseManager {
 
             try {
                 Connection conn = getSingletonConnection();
+                // Exécuter les PRAGMA avant toute transaction
+                initializePragmas(conn);
+
                 boolean originalAutoCommit = conn.getAutoCommit();
                 conn.setAutoCommit(false);
 
@@ -146,7 +150,7 @@ public class DatabaseManager {
                         String[] statements = schema.split(";");
                         for (String sql : statements) {
                             sql = sql.trim();
-                            if (!sql.isEmpty()) {
+                            if (!sql.isEmpty() && !sql.toUpperCase().startsWith("PRAGMA")) {
                                 try {
                                     stmt.execute(sql);
                                 } catch (SQLException e) {
@@ -204,12 +208,12 @@ public class DatabaseManager {
     private static void insertTestDataIfEmpty(Connection conn) throws SQLException {
         LOGGER.info("Vérification et insertion des données de test...");
         try (Statement stmt = conn.createStatement()) {
-            var rs = stmt.executeQuery("SELECT COUNT(*) FROM produits");
+            ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM produits");
             if (rs.next() && rs.getInt(1) == 0) {
                 stmt.execute("INSERT INTO produits (nom, categorie, prix_achat, prix_vente, stock, seuil_alerte) VALUES " +
-                           "('Saumon frais', 'Poisson', 15.00, 25.00, 50, 10)," +
-                           "('Thon rouge', 'Poisson', 20.00, 35.00, 30, 5)," +
-                           "('Crevettes', 'Fruits de mer', 12.00, 18.00, 100, 20)");
+                           "('Saumon frais', 'Frais', 15.00, 25.00, 50, 10)," +
+                           "('Thon rouge', 'Frais', 20.00, 35.00, 30, 5)," +
+                           "('Crevettes', 'Frais', 12.00, 18.00, 100, 20)");
             }
             LOGGER.info("Données de test insérées avec succès");
         }
