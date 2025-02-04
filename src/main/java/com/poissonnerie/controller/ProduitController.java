@@ -3,11 +3,12 @@ package com.poissonnerie.controller;
 import com.poissonnerie.model.Produit;
 import com.poissonnerie.model.UserAction;
 import com.poissonnerie.util.DatabaseManager;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ProduitController {
     private static final Logger LOGGER = Logger.getLogger(ProduitController.class.getName());
@@ -95,52 +96,73 @@ public class ProduitController {
             throw new IllegalArgumentException("Un fournisseur doit être sélectionné pour le produit");
         }
 
-        String sql = "INSERT INTO produits (nom, categorie, prix_achat, prix_vente, stock, seuil_alerte, fournisseur_id) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO produits (nom, categorie, prix_achat, prix_vente, stock, seuil_alerte, fournisseur_id, supprime) " +
+                     "VALUES (?, ?, ?, ?, ?, ?, ?, false)";
         String getIdSql = "SELECT last_insert_rowid() as id";
+        String checkFournisseurSql = "SELECT id FROM fournisseurs WHERE id = ? AND supprime = false";
 
         try (Connection conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(false);
-            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                pstmt.setString(1, produit.getNom());
-                pstmt.setString(2, produit.getCategorie());
-                pstmt.setDouble(3, produit.getPrixAchat());
-                pstmt.setDouble(4, produit.getPrixVente());
-                pstmt.setInt(5, produit.getStock());
-                pstmt.setInt(6, produit.getSeuilAlerte());
-                pstmt.setInt(7, produit.getFournisseur().getId());
-
-                pstmt.executeUpdate();
-
-                try (Statement stmt = conn.createStatement();
-                     ResultSet rs = stmt.executeQuery(getIdSql)) {
-                    if (rs.next()) {
-                        produit.setId(rs.getInt("id"));
-                        produits.add(produit);
-
-                        UserAction action = new UserAction(
-                            UserAction.ActionType.CREATION,
-                            "", // Sera défini par UserActionController
-                            String.format("Ajout du produit %s (Catégorie: %s, Stock initial: %d, Fournisseur: %s)",
-                                produit.getNom(),
-                                produit.getCategorie(),
-                                produit.getStock(),
-                                produit.getFournisseur().getNom()),
-                            UserAction.EntityType.PRODUIT,
-                            produit.getId()
-                        );
-                        userActionController.logAction(action);
+            try {
+                // Vérifier l'existence du fournisseur
+                try (PreparedStatement checkStmt = conn.prepareStatement(checkFournisseurSql)) {
+                    checkStmt.setInt(1, produit.getFournisseur().getId());
+                    try (ResultSet rs = checkStmt.executeQuery()) {
+                        if (!rs.next()) {
+                            throw new IllegalArgumentException("Le fournisseur sélectionné n'existe pas ou a été supprimé");
+                        }
                     }
                 }
+
+                // Insérer le produit
+                try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                    pstmt.setString(1, produit.getNom());
+                    pstmt.setString(2, produit.getCategorie());
+                    pstmt.setDouble(3, produit.getPrixAchat());
+                    pstmt.setDouble(4, produit.getPrixVente());
+                    pstmt.setInt(5, produit.getStock());
+                    pstmt.setInt(6, produit.getSeuilAlerte());
+                    pstmt.setInt(7, produit.getFournisseur().getId());
+
+                    pstmt.executeUpdate();
+
+                    // Récupérer l'ID généré
+                    try (Statement stmt = conn.createStatement();
+                         ResultSet rs = stmt.executeQuery(getIdSql)) {
+                        if (rs.next()) {
+                            produit.setId(rs.getInt("id"));
+                            produits.add(produit);
+
+                            // Logger l'action
+                            UserAction action = new UserAction(
+                                UserAction.ActionType.CREATION,
+                                "",
+                                String.format("Ajout du produit %s (Catégorie: %s, Stock initial: %d, Fournisseur: %s)",
+                                    produit.getNom(),
+                                    produit.getCategorie(),
+                                    produit.getStock(),
+                                    produit.getFournisseur().getNom()),
+                                UserAction.EntityType.PRODUIT,
+                                produit.getId()
+                            );
+                            userActionController.logAction(action);
+                        }
+                    }
+                }
+
                 conn.commit();
                 LOGGER.info("Produit ajouté avec succès: " + produit.getNom());
+
             } catch (SQLException e) {
                 conn.rollback();
                 LOGGER.log(Level.SEVERE, "Erreur lors de l'ajout du produit", e);
-                if (e.getMessage().contains("FOREIGN KEY")) {
-                    throw new RuntimeException("Le fournisseur sélectionné n'existe pas ou n'est pas valide", e);
+                String errorMessage = e.getMessage();
+                if (errorMessage.contains("FOREIGN KEY")) {
+                    throw new IllegalArgumentException("Le fournisseur sélectionné n'est pas valide");
+                } else if (errorMessage.contains("UNIQUE")) {
+                    throw new IllegalArgumentException("Un produit avec ce nom existe déjà");
                 }
-                throw new RuntimeException("Erreur SQL lors de l'ajout du produit: " + e.getMessage(), e);
+                throw new RuntimeException("Erreur lors de l'ajout du produit: " + errorMessage, e);
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur fatale lors de l'ajout du produit", e);
