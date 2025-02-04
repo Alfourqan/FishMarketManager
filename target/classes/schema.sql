@@ -28,6 +28,7 @@ CREATE TABLE users (
     created_at INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000),
     last_login INTEGER,
     active BOOLEAN DEFAULT true,
+    force_password_reset BOOLEAN DEFAULT false,
     CONSTRAINT username_min_length CHECK (length(username) >= 3),
     CONSTRAINT password_min_length CHECK (length(password) >= 6)
 );
