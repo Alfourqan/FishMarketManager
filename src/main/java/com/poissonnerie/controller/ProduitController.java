@@ -63,8 +63,8 @@ public class ProduitController {
                 throw new IllegalArgumentException("Un fournisseur doit être sélectionné pour le produit");
             }
 
-            // Obtenir une connexion de l'instance singleton
-            conn = DatabaseManager.getSingletonConnection();
+            // Obtenir une connexion
+            conn = DatabaseManager.getConnection();
             conn.setAutoCommit(false);
 
             // Vérifier l'existence du fournisseur
