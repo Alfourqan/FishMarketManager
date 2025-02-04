@@ -33,106 +33,32 @@ public class AuthenticationController {
     }
 
     private void initializeDatabase() {
-        int retries = 0;
-        while (retries < MAX_RETRIES) {
-            try (Connection conn = DatabaseManager.getConnection()) {
-                conn.setAutoCommit(true); // Pour cette vérification simple
-                try (PreparedStatement stmt = conn.prepareStatement(
-                    "SELECT COUNT(*) FROM users WHERE username = ? AND role = 'ADMIN'")) {
-                    stmt.setString(1, "admin");
-                    ResultSet rs = stmt.executeQuery();
-                    if (rs.next() && rs.getInt(1) == 0) {
-                        createDefaultAdmin(conn);
-                    }
-                    return;
-                }
-            } catch (SQLException e) {
-                if (e.getMessage().contains("database is locked") && retries < MAX_RETRIES - 1) {
-                    retries++;
-                    LOGGER.warning("Database locked, retrying admin check... (attempt " + retries + "/" + MAX_RETRIES + ")");
-                    try {
-                        Thread.sleep(RETRY_DELAY_MS * retries);
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                        LOGGER.warning("Interrupted while waiting for retry");
-                    }
-                    continue;
-                }
-                LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de la base de données", e);
-                throw new RuntimeException("Erreur d'initialisation de la base de données", e);
-            }
-        }
-    }
+        try (Connection conn = DatabaseManager.getConnection()) {
+            // Vérifie si l'utilisateur admin existe déjà
+            try (PreparedStatement checkStmt = conn.prepareStatement(
+                "SELECT COUNT(*) FROM users WHERE username = ?")) {
+                checkStmt.setString(1, "admin");
+                ResultSet rs = checkStmt.executeQuery();
+                if (rs.next() && rs.getInt(1) == 0) {
+                    // Crée l'utilisateur admin s'il n'existe pas
+                    try (PreparedStatement insertStmt = conn.prepareStatement(
+                        "INSERT INTO users (username, password, role, active, force_password_reset) VALUES (?, ?, ?, ?, ?)")) {
+                        String salt = BCrypt.gensalt(12);
+                        String hashedPassword = BCrypt.hashpw(DEFAULT_ADMIN_PASSWORD, salt);
+                        LOGGER.info("Création de l'utilisateur admin avec nouveau mot de passe hashé");
 
-    private void createDefaultAdmin(Connection existingConn) {
-        int retries = 0;
-        while (retries < MAX_RETRIES) {
-            Connection conn = null;
-            try {
-                conn = (existingConn != null) ? existingConn : DatabaseManager.getConnection();
-                boolean shouldCommit = existingConn == null;
-
-                if (shouldCommit) {
-                    conn.setAutoCommit(false);
-                }
-
-                try (PreparedStatement stmt = conn.prepareStatement(
-                    "INSERT INTO users (username, password, role, active, force_password_reset) VALUES (?, ?, 'ADMIN', true, true)")) {
-
-                    String hashedPassword = BCrypt.hashpw(DEFAULT_ADMIN_PASSWORD, BCrypt.gensalt(12));
-                    LOGGER.info("Création de l'utilisateur admin avec mot de passe hashé");
-
-                    stmt.setString(1, "admin");
-                    stmt.setString(2, hashedPassword);
-                    stmt.executeUpdate();
-
-                    if (shouldCommit) {
-                        conn.commit();
-                    }
-                    LOGGER.info("Utilisateur administrateur par défaut créé avec succès");
-                    return;
-
-                } catch (SQLException e) {
-                    if (shouldCommit) {
-                        try {
-                            conn.rollback();
-                        } catch (SQLException re) {
-                            LOGGER.log(Level.WARNING, "Erreur lors du rollback", re);
-                        }
-                    }
-                    throw e;
-                } finally {
-                    if (shouldCommit && conn != null) {
-                        try {
-                            conn.setAutoCommit(true);
-                        } catch (SQLException e) {
-                            LOGGER.log(Level.WARNING, "Erreur lors de la restauration de l'autocommit", e);
-                        }
-                    }
-                }
-            } catch (SQLException e) {
-                if (e.getMessage().contains("database is locked") && retries < MAX_RETRIES - 1) {
-                    retries++;
-                    LOGGER.warning("Database locked, retrying admin creation... (attempt " + retries + "/" + MAX_RETRIES + ")");
-                    try {
-                        Thread.sleep(RETRY_DELAY_MS * retries);
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                        LOGGER.warning("Interrupted while waiting for retry");
-                    }
-                    continue;
-                }
-                LOGGER.log(Level.SEVERE, "Erreur lors de la création de l'admin par défaut", e);
-                throw new RuntimeException("Erreur lors de la création de l'admin par défaut", e);
-            } finally {
-                if (existingConn == null && conn != null) {
-                    try {
-                        conn.close();
-                    } catch (SQLException e) {
-                        LOGGER.log(Level.WARNING, "Erreur lors de la fermeture de la connexion", e);
+                        insertStmt.setString(1, "admin");
+                        insertStmt.setString(2, hashedPassword);
+                        insertStmt.setString(3, "ADMIN");
+                        insertStmt.setBoolean(4, true);
+                        insertStmt.setBoolean(5, false);
+                        insertStmt.executeUpdate();
+                        LOGGER.info("Utilisateur admin créé avec succès");
                     }
                 }
             }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de la base de données", e);
         }
     }
 
@@ -150,19 +76,17 @@ public class AuthenticationController {
 
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
+                String storedPassword = rs.getString("password");
                 boolean isActive = rs.getBoolean("active");
                 boolean forceReset = rs.getBoolean("force_password_reset");
+
                 if (!isActive) {
                     LOGGER.warning("Tentative de connexion sur un compte désactivé: " + username);
                     return false;
                 }
-                if (forceReset) {
-                    LOGGER.warning("Réinitialisation du mot de passe obligatoire pour l'utilisateur : " + username);
-                    return false;
-                }
 
-                String storedPassword = rs.getString("password");
                 boolean authenticated = BCrypt.checkpw(password, storedPassword);
+                LOGGER.info("Vérification du mot de passe pour " + username + ": " + (authenticated ? "réussie" : "échouée"));
 
                 if (authenticated) {
                     updateLastLogin(conn, username);
