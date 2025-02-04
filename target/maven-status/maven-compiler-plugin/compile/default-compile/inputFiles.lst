@@ -8,8 +8,8 @@
 /home/runner/workspace/src/main/java/com/poissonnerie/view/LoginView.java
 /home/runner/workspace/src/main/java/com/poissonnerie/model/Produit.java
 /home/runner/workspace/src/main/java/com/poissonnerie/view/InventaireViewSwing.java
-/home/runner/workspace/src/main/java/com/poissonnerie/model/InventaireManager.java
 /home/runner/workspace/src/main/java/com/poissonnerie/model/UserAction.java
+/home/runner/workspace/src/main/java/com/poissonnerie/model/InventaireManager.java
 /home/runner/workspace/src/main/java/com/poissonnerie/view/FournisseurViewSwing.java
 /home/runner/workspace/src/main/java/com/poissonnerie/view/MainViewSwing.java
 /home/runner/workspace/src/main/java/com/poissonnerie/model/Client.java

@@ -10,6 +10,7 @@ public class Produit {
     private int seuilAlerte;
     private String reference;
     private Fournisseur fournisseur;
+    private int fournisseurId; // Ajout du fournisseur_id
 
     public Produit(int id, String nom, String categorie, double prixAchat, double prixVente, int stock, int seuilAlerte) {
         this.id = id;
@@ -20,6 +21,7 @@ public class Produit {
         this.stock = stock;
         this.seuilAlerte = seuilAlerte;
         this.reference = generateReference();
+        this.fournisseurId = 1; // Fournisseur par défaut
     }
 
     // Getters et setters essentiels
@@ -47,7 +49,16 @@ public class Produit {
     public String getReference() { return reference; }
 
     public Fournisseur getFournisseur() { return fournisseur; }
-    public void setFournisseur(Fournisseur fournisseur) { this.fournisseur = fournisseur; }
+    public void setFournisseur(Fournisseur fournisseur) { 
+        this.fournisseur = fournisseur;
+        if (fournisseur != null) {
+            this.fournisseurId = fournisseur.getId();
+        }
+    }
+
+    // Nouveau getter et setter pour fournisseurId
+    public int getFournisseurId() { return fournisseurId; }
+    public void setFournisseurId(int fournisseurId) { this.fournisseurId = fournisseurId; }
 
     // Méthodes de calcul optimisées
     public double getMarge() { return prixVente - prixAchat; }
