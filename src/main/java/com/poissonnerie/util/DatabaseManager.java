@@ -3,28 +3,28 @@ package com.poissonnerie.util;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.IOException;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import java.io.File;
 import org.sqlite.SQLiteConfig;
 import org.sqlite.SQLiteOpenMode;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class DatabaseManager {
     private static final Logger LOGGER = Logger.getLogger(DatabaseManager.class.getName());
     private static volatile boolean isInitialized = false;
-    private static final Object LOCK = new Object();
+    private static final ReentrantLock INIT_LOCK = new ReentrantLock();
     private static final String DB_FILE = "poissonnerie.db";
     private static SQLiteConfig config;
     private static final int MAX_RETRIES = 3;
     private static final long RETRY_DELAY_MS = 1000;
     private static final int BUSY_TIMEOUT_MS = 30000;
+    private static Connection singletonConnection = null;
 
     static {
         config = new SQLiteConfig();
@@ -39,7 +39,14 @@ public class DatabaseManager {
         config.setTransactionMode(SQLiteConfig.TransactionMode.IMMEDIATE);
     }
 
-    private static Connection createConnection() throws SQLException {
+    private static synchronized Connection getSingletonConnection() throws SQLException {
+        if (singletonConnection == null || singletonConnection.isClosed()) {
+            singletonConnection = createNewConnection();
+        }
+        return singletonConnection;
+    }
+
+    private static Connection createNewConnection() throws SQLException {
         int retries = 0;
         SQLException lastException = null;
 
@@ -78,22 +85,21 @@ public class DatabaseManager {
     }
 
     public static Connection getConnection() throws SQLException {
+        ensureInitialized();
+        return getSingletonConnection(); // Use singleton connection
+    }
+
+    private static void ensureInitialized() {
         if (!isInitialized) {
-            synchronized (LOCK) {
+            INIT_LOCK.lock();
+            try {
                 if (!isInitialized) {
                     initDatabase();
                 }
+            } finally {
+                INIT_LOCK.unlock();
             }
         }
-        return createConnection();
-    }
-
-    private static Connection getInitConnection() throws SQLException {
-        SQLiteConfig initConfig = new SQLiteConfig();
-        initConfig.setOpenMode(SQLiteOpenMode.READWRITE);
-        initConfig.enforceForeignKeys(true);
-        initConfig.setBusyTimeout(BUSY_TIMEOUT_MS);
-        return initConfig.createConnection("jdbc:sqlite:" + DB_FILE);
     }
 
     public static void initDatabase() {
@@ -102,7 +108,8 @@ public class DatabaseManager {
             return;
         }
 
-        synchronized (LOCK) {
+        INIT_LOCK.lock();
+        try {
             if (isInitialized) {
                 return;
             }
@@ -121,7 +128,8 @@ public class DatabaseManager {
                 }
             }
 
-            try (Connection conn = getInitConnection()) {
+            try (Connection conn = getSingletonConnection()) {
+                conn.setAutoCommit(false);
                 String schema = loadSchemaFromResource();
                 if (schema == null || schema.trim().isEmpty()) {
                     throw new IllegalStateException("Schema SQL vide ou introuvable");
@@ -142,6 +150,7 @@ public class DatabaseManager {
                         }
                     }
                     insertTestDataIfEmpty(conn);
+                    conn.commit();
                 }
                 isInitialized = true;
                 LOGGER.info("Base de données initialisée avec succès");
@@ -149,6 +158,8 @@ public class DatabaseManager {
                 LOGGER.log(Level.SEVERE, "Erreur fatale lors de l'initialisation", e);
                 throw new RuntimeException("Erreur d'initialisation: " + e.getMessage(), e);
             }
+        } finally {
+            INIT_LOCK.unlock();
         }
     }
 
