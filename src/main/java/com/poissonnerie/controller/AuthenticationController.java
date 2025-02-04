@@ -60,6 +60,7 @@ public class AuthenticationController {
             }
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de la base de données", e);
+            throw new RuntimeException("Erreur lors de l'initialisation de la base de données", e);
         }
     }
 
@@ -117,34 +118,6 @@ public class AuthenticationController {
             LOGGER.info("Mise à jour de la dernière connexion pour: " + username);
         }
     }
-    public boolean changePassword(String username, String currentPassword, String newPassword) {
-        if (!authenticate(username, currentPassword)) {
-            LOGGER.warning("Tentative de changement de mot de passe avec mauvais mot de passe actuel");
-            return false;
-        }
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(
-                 "UPDATE users SET password = ? WHERE username = ?")) {
-            String hashedPassword = BCrypt.hashpw(newPassword, BCrypt.gensalt());
-            stmt.setString(1, hashedPassword);
-            stmt.setString(2, username);
-
-            int updated = stmt.executeUpdate();
-            boolean success = updated > 0;
-
-            if (success) {
-                LOGGER.info("Mot de passe changé avec succès pour l'utilisateur: " + username);
-            } else {
-                LOGGER.warning("Échec du changement de mot de passe pour l'utilisateur: " + username);
-            }
-
-            return success;
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors du changement de mot de passe", e);
-            return false;
-        }
-    }
 
     public String getUserRole(String username) {
         try (Connection conn = DatabaseManager.getConnection();
@@ -172,53 +145,6 @@ public class AuthenticationController {
             return rs.next() && rs.getBoolean("active");
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la vérification du statut utilisateur", e);
-            return false;
-        }
-    }
-
-    public boolean isPasswordResetRequired(String username) {
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(
-                 "SELECT force_password_reset FROM users WHERE username = ?")) {
-            stmt.setString(1, username);
-            ResultSet rs = stmt.executeQuery();
-            return rs.next() && rs.getBoolean("force_password_reset");
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la vérification du reset de mot de passe", e);
-            return false;
-        }
-    }
-
-    public boolean markPasswordResetComplete(String username) {
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(
-                 "UPDATE users SET force_password_reset = false WHERE username = ?")) {
-            stmt.setString(1, username);
-            int updated = stmt.executeUpdate();
-            if (updated > 0) {
-                LOGGER.info("Reset de mot de passe marqué comme complété pour: " + username);
-                return true;
-            }
-            return false;
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la mise à jour du statut de reset", e);
-            return false;
-        }
-    }
-    public boolean setForcePasswordReset(String username, boolean forceReset) {
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(
-                 "UPDATE users SET force_password_reset = ? WHERE username = ?")) {
-            stmt.setBoolean(1, forceReset);
-            stmt.setString(2, username);
-            int updated = stmt.executeUpdate();
-            if (updated > 0) {
-                LOGGER.info("Force password reset " + (forceReset ? "activé" : "désactivé") + " pour: " + username);
-                return true;
-            }
-            return false;
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la mise à jour du force password reset", e);
             return false;
         }
     }
