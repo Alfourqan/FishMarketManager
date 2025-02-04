@@ -20,24 +20,20 @@ public class ProduitController {
         return new ArrayList<>(produits);
     }
 
-    // Alias de getProduits() pour maintenir la compatibilité avec ReportController
     public List<Produit> getTousProduits() {
         return getProduits();
     }
 
     private void validateProduit(Produit produit) throws IllegalArgumentException {
-        // Validation du nom
         if (produit.getNom() == null || produit.getNom().trim().length() < 2) {
             throw new IllegalArgumentException("Le nom du produit doit contenir au moins 2 caractères");
         }
 
-        // Validation de la catégorie
         String categorie = produit.getCategorie();
         if (categorie == null || !List.of("Frais", "Surgelé", "Transformé").contains(categorie.trim())) {
             throw new IllegalArgumentException("La catégorie doit être 'Frais', 'Surgelé' ou 'Transformé'");
         }
 
-        // Validation des prix
         if (produit.getPrixAchat() <= 0) {
             throw new IllegalArgumentException("Le prix d'achat doit être positif");
         }
@@ -48,12 +44,120 @@ public class ProduitController {
             throw new IllegalArgumentException("Le prix de vente doit être supérieur au prix d'achat");
         }
 
-        // Validation du stock et seuil d'alerte
         if (produit.getStock() < 0) {
             throw new IllegalArgumentException("Le stock ne peut pas être négatif");
         }
         if (produit.getSeuilAlerte() < 0) {
             throw new IllegalArgumentException("Le seuil d'alerte ne peut pas être négatif");
+        }
+    }
+
+    public void ajouterProduit(Produit produit) {
+        LOGGER.info("Début de l'ajout du produit: " + produit.getNom());
+
+        // Valider le produit avant l'insertion
+        validateProduit(produit);
+
+        // Vérifier que le fournisseur est défini
+        if (produit.getFournisseur() == null) {
+            LOGGER.severe("Tentative d'ajout d'un produit sans fournisseur");
+            throw new IllegalArgumentException("Un fournisseur doit être sélectionné pour le produit");
+        }
+
+        Connection conn = null;
+        try {
+            conn = DatabaseManager.getConnection();
+            conn.setAutoCommit(false);
+            LOGGER.info("Connexion à la base de données établie");
+
+            // Vérifier l'existence du fournisseur
+            try (PreparedStatement checkStmt = conn.prepareStatement(
+                    "SELECT id FROM fournisseurs WHERE id = ? AND supprime = false")) {
+                checkStmt.setInt(1, produit.getFournisseur().getId());
+                LOGGER.info("Vérification du fournisseur ID: " + produit.getFournisseur().getId());
+
+                try (ResultSet rs = checkStmt.executeQuery()) {
+                    if (!rs.next()) {
+                        LOGGER.severe("Fournisseur non trouvé: " + produit.getFournisseur().getId());
+                        throw new IllegalArgumentException("Le fournisseur sélectionné n'existe pas ou a été supprimé");
+                    }
+                }
+            }
+
+            // Insérer le produit
+            String sql = "INSERT INTO produits (nom, categorie, prix_achat, prix_vente, stock, seuil_alerte, fournisseur_id, supprime) " +
+                         "VALUES (?, ?, ?, ?, ?, ?, ?, false)";
+
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, produit.getNom());
+                pstmt.setString(2, produit.getCategorie());
+                pstmt.setDouble(3, produit.getPrixAchat());
+                pstmt.setDouble(4, produit.getPrixVente());
+                pstmt.setInt(5, produit.getStock());
+                pstmt.setInt(6, produit.getSeuilAlerte());
+                pstmt.setInt(7, produit.getFournisseur().getId());
+
+                LOGGER.info("Exécution de la requête d'insertion");
+                pstmt.executeUpdate();
+
+                // Récupérer l'ID généré
+                try (Statement stmt = conn.createStatement();
+                     ResultSet rs = stmt.executeQuery("SELECT last_insert_rowid() as id")) {
+                    if (rs.next()) {
+                        produit.setId(rs.getInt("id"));
+                        produits.add(produit);
+
+                        UserAction action = new UserAction(
+                            UserAction.ActionType.CREATION,
+                            "",
+                            String.format("Ajout du produit %s (Catégorie: %s, Stock initial: %d, Fournisseur: %s)",
+                                produit.getNom(),
+                                produit.getCategorie(),
+                                produit.getStock(),
+                                produit.getFournisseur().getNom()),
+                            UserAction.EntityType.PRODUIT,
+                            produit.getId()
+                        );
+                        userActionController.logAction(action);
+                        LOGGER.info("Produit ajouté avec succès, ID: " + produit.getId());
+                    }
+                }
+
+                conn.commit();
+                LOGGER.info("Transaction validée avec succès");
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erreur SQL lors de l'ajout du produit", e);
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                    LOGGER.info("Transaction annulée suite à une erreur");
+                } catch (SQLException rollbackEx) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors du rollback", rollbackEx);
+                }
+            }
+            throw new RuntimeException("Erreur lors de l'ajout du produit: " + e.getMessage(), e);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur inattendue lors de l'ajout du produit", e);
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                    LOGGER.info("Transaction annulée suite à une erreur");
+                } catch (SQLException rollbackEx) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors du rollback", rollbackEx);
+                }
+            }
+            throw new RuntimeException("Erreur inattendue lors de l'ajout du produit: " + e.getMessage(), e);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                    LOGGER.info("Connexion fermée");
+                } catch (SQLException e) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors de la fermeture de la connexion", e);
+                }
+            }
         }
     }
 
@@ -84,89 +188,6 @@ public class ProduitController {
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors du chargement des produits", e);
             throw new RuntimeException("Erreur lors du chargement des produits", e);
-        }
-    }
-
-    public void ajouterProduit(Produit produit) {
-        // Valider le produit avant l'insertion
-        validateProduit(produit);
-
-        // Vérifier que le fournisseur est défini
-        if (produit.getFournisseur() == null) {
-            throw new IllegalArgumentException("Un fournisseur doit être sélectionné pour le produit");
-        }
-
-        String sql = "INSERT INTO produits (nom, categorie, prix_achat, prix_vente, stock, seuil_alerte, fournisseur_id, supprime) " +
-                     "VALUES (?, ?, ?, ?, ?, ?, ?, false)";
-        String getIdSql = "SELECT last_insert_rowid() as id";
-        String checkFournisseurSql = "SELECT id FROM fournisseurs WHERE id = ? AND supprime = false";
-
-        try (Connection conn = DatabaseManager.getConnection()) {
-            conn.setAutoCommit(false);
-            try {
-                // Vérifier l'existence du fournisseur
-                try (PreparedStatement checkStmt = conn.prepareStatement(checkFournisseurSql)) {
-                    checkStmt.setInt(1, produit.getFournisseur().getId());
-                    try (ResultSet rs = checkStmt.executeQuery()) {
-                        if (!rs.next()) {
-                            throw new IllegalArgumentException("Le fournisseur sélectionné n'existe pas ou a été supprimé");
-                        }
-                    }
-                }
-
-                // Insérer le produit
-                try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                    pstmt.setString(1, produit.getNom());
-                    pstmt.setString(2, produit.getCategorie());
-                    pstmt.setDouble(3, produit.getPrixAchat());
-                    pstmt.setDouble(4, produit.getPrixVente());
-                    pstmt.setInt(5, produit.getStock());
-                    pstmt.setInt(6, produit.getSeuilAlerte());
-                    pstmt.setInt(7, produit.getFournisseur().getId());
-
-                    pstmt.executeUpdate();
-
-                    // Récupérer l'ID généré
-                    try (Statement stmt = conn.createStatement();
-                         ResultSet rs = stmt.executeQuery(getIdSql)) {
-                        if (rs.next()) {
-                            produit.setId(rs.getInt("id"));
-                            produits.add(produit);
-
-                            // Logger l'action
-                            UserAction action = new UserAction(
-                                UserAction.ActionType.CREATION,
-                                "",
-                                String.format("Ajout du produit %s (Catégorie: %s, Stock initial: %d, Fournisseur: %s)",
-                                    produit.getNom(),
-                                    produit.getCategorie(),
-                                    produit.getStock(),
-                                    produit.getFournisseur().getNom()),
-                                UserAction.EntityType.PRODUIT,
-                                produit.getId()
-                            );
-                            userActionController.logAction(action);
-                        }
-                    }
-                }
-
-                conn.commit();
-                LOGGER.info("Produit ajouté avec succès: " + produit.getNom());
-
-            } catch (SQLException e) {
-                conn.rollback();
-                LOGGER.log(Level.SEVERE, "Erreur lors de l'ajout du produit", e);
-                String errorMessage = e.getMessage();
-                if (errorMessage.contains("FOREIGN KEY")) {
-                    throw new IllegalArgumentException("Le fournisseur sélectionné n'est pas valide");
-                } else if (errorMessage.contains("UNIQUE")) {
-                    throw new IllegalArgumentException("Un produit avec ce nom existe déjà");
-                }
-                throw new RuntimeException("Erreur lors de l'ajout du produit: " + errorMessage, e);
-            }
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur fatale lors de l'ajout du produit", e);
-            throw new RuntimeException("Erreur lors de l'ajout du produit", e);
         }
     }
 
