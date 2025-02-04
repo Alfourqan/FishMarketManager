@@ -144,15 +144,20 @@ public class AuthenticationController {
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(
-                 "SELECT password, active FROM users WHERE username = ?")) {
+                 "SELECT password, active, force_password_reset FROM users WHERE username = ?")) {
             stmt.setString(1, username.trim());
             LOGGER.info("Tentative d'authentification pour l'utilisateur: " + username);
 
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 boolean isActive = rs.getBoolean("active");
+                boolean forceReset = rs.getBoolean("force_password_reset");
                 if (!isActive) {
                     LOGGER.warning("Tentative de connexion sur un compte désactivé: " + username);
+                    return false;
+                }
+                if (forceReset) {
+                    LOGGER.warning("Réinitialisation du mot de passe obligatoire pour l'utilisateur : " + username);
                     return false;
                 }
 
@@ -242,6 +247,53 @@ public class AuthenticationController {
             return rs.next() && rs.getBoolean("active");
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la vérification du statut utilisateur", e);
+            return false;
+        }
+    }
+
+    public boolean isPasswordResetRequired(String username) {
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(
+                 "SELECT force_password_reset FROM users WHERE username = ?")) {
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next() && rs.getBoolean("force_password_reset");
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la vérification du reset de mot de passe", e);
+            return false;
+        }
+    }
+
+    public boolean markPasswordResetComplete(String username) {
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(
+                 "UPDATE users SET force_password_reset = false WHERE username = ?")) {
+            stmt.setString(1, username);
+            int updated = stmt.executeUpdate();
+            if (updated > 0) {
+                LOGGER.info("Reset de mot de passe marqué comme complété pour: " + username);
+                return true;
+            }
+            return false;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la mise à jour du statut de reset", e);
+            return false;
+        }
+    }
+    public boolean setForcePasswordReset(String username, boolean forceReset) {
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(
+                 "UPDATE users SET force_password_reset = ? WHERE username = ?")) {
+            stmt.setBoolean(1, forceReset);
+            stmt.setString(2, username);
+            int updated = stmt.executeUpdate();
+            if (updated > 0) {
+                LOGGER.info("Force password reset " + (forceReset ? "activé" : "désactivé") + " pour: " + username);
+                return true;
+            }
+            return false;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la mise à jour du force password reset", e);
             return false;
         }
     }
