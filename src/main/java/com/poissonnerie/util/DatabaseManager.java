@@ -50,6 +50,20 @@ public class DatabaseManager {
                 singletonConnection = createNewConnection();
                 initializePragmas(singletonConnection);
                 LOGGER.info("Nouvelle connexion créée");
+            } else {
+                try {
+                    // Vérifier si la connexion est vraiment valide
+                    if (!singletonConnection.isValid(5)) {
+                        singletonConnection.close();
+                        singletonConnection = createNewConnection();
+                        initializePragmas(singletonConnection);
+                        LOGGER.info("Connexion recréée car invalide");
+                    }
+                } catch (SQLException e) {
+                    LOGGER.warning("Erreur lors de la vérification de la validité de la connexion: " + e.getMessage());
+                    singletonConnection = createNewConnection();
+                    initializePragmas(singletonConnection);
+                }
             }
             return singletonConnection;
         }
@@ -59,10 +73,7 @@ public class DatabaseManager {
         LOGGER.info("Réinitialisation forcée de la base de données...");
         synchronized (CONNECTION_LOCK) {
             try {
-                if (singletonConnection != null && !singletonConnection.isClosed()) {
-                    singletonConnection.close();
-                }
-                singletonConnection = null;
+                closeConnection();
                 isInitialized = false;
 
                 // Suppression du fichier de base de données existant
@@ -86,6 +97,10 @@ public class DatabaseManager {
     }
 
     private static void initializePragmas(Connection conn) throws SQLException {
+        if (conn == null || conn.isClosed()) {
+            throw new SQLException("La connexion est null ou fermée");
+        }
+
         try (Statement stmt = conn.createStatement()) {
             stmt.execute("PRAGMA journal_mode = WAL");
             stmt.execute("PRAGMA synchronous = NORMAL");
@@ -96,6 +111,9 @@ public class DatabaseManager {
             stmt.execute("PRAGMA locking_mode = NORMAL");
             stmt.execute("PRAGMA temp_store = MEMORY");
             LOGGER.info("PRAGMAs initialisés avec succès");
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation des PRAGMAs", e);
+            throw e;
         }
     }
 
@@ -253,6 +271,21 @@ public class DatabaseManager {
             stmt.execute("PRAGMA integrity_check");
             stmt.execute("PRAGMA foreign_key_check");
             LOGGER.info("Vérification de la santé de la base de données réussie");
+        }
+    }
+
+    private static void closeConnection() {
+        if (singletonConnection != null) {
+            try {
+                if (!singletonConnection.isClosed()) {
+                    singletonConnection.close();
+                    LOGGER.info("Connexion fermée avec succès");
+                }
+            } catch (SQLException e) {
+                LOGGER.log(Level.WARNING, "Erreur lors de la fermeture de la connexion", e);
+            } finally {
+                singletonConnection = null;
+            }
         }
     }
 
