@@ -15,6 +15,8 @@ public class RoleController {
     private static final String PERMISSIONS_TABLE = "permissions";
     private static final String ROLES_PERMISSIONS_TABLE = "roles_permissions";
     private static final String USERS_ROLES_TABLE = "users_roles";
+    private static final int MAX_RETRIES = 3;
+    private static final long RETRY_DELAY_MS = 1000;
 
     private RoleController() {
         try {
@@ -41,17 +43,14 @@ public class RoleController {
         try (Connection conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(false);
             try (Statement stmt = conn.createStatement()) {
-                // Désactiver temporairement les contraintes de clé étrangère
                 stmt.execute("PRAGMA foreign_keys = OFF");
 
-                // Table des rôles
                 stmt.execute("CREATE TABLE IF NOT EXISTS " + ROLES_TABLE + " (" +
                     "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "nom TEXT NOT NULL UNIQUE," +
                     "description TEXT" +
                     ")");
 
-                // Table des permissions
                 stmt.execute("CREATE TABLE IF NOT EXISTS " + PERMISSIONS_TABLE + " (" +
                     "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                     "code TEXT NOT NULL UNIQUE," +
@@ -59,7 +58,6 @@ public class RoleController {
                     "module TEXT NOT NULL" +
                     ")");
 
-                // Table de liaison users-roles
                 stmt.execute("CREATE TABLE IF NOT EXISTS " + USERS_ROLES_TABLE + " (" +
                     "user_id INTEGER," +
                     "role_id INTEGER," +
@@ -68,7 +66,6 @@ public class RoleController {
                     "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE" +
                     ")");
 
-                // Table de liaison roles-permissions
                 stmt.execute("CREATE TABLE IF NOT EXISTS " + ROLES_PERMISSIONS_TABLE + " (" +
                     "role_id INTEGER," +
                     "permission_id INTEGER," +
@@ -77,7 +74,6 @@ public class RoleController {
                     "FOREIGN KEY (permission_id) REFERENCES " + PERMISSIONS_TABLE + "(id) ON DELETE CASCADE" +
                     ")");
 
-                // Réactiver les contraintes de clé étrangère
                 stmt.execute("PRAGMA foreign_keys = ON");
 
                 conn.commit();
@@ -91,37 +87,71 @@ public class RoleController {
     }
 
     public Role creerRole(Role role) throws SQLException {
-        String sql = "INSERT INTO " + ROLES_TABLE + " (nom, description) VALUES (?, ?)";
+        // First try to find if the role already exists
+        String selectSql = "SELECT id FROM " + ROLES_TABLE + " WHERE nom = ?";
+        String insertSql = "INSERT INTO " + ROLES_TABLE + " (nom, description) VALUES (?, ?)";
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        int retries = 0;
+        while (retries < MAX_RETRIES) {
+            try (Connection conn = DatabaseManager.getConnection()) {
+                conn.setAutoCommit(false);
 
-            conn.setAutoCommit(false);
-            try {
-                pstmt.setString(1, role.getNom());
-                pstmt.setString(2, role.getDescription());
-
-                int affectedRows = pstmt.executeUpdate();
-                if (affectedRows == 0) {
-                    throw new SQLException("La création du rôle a échoué");
-                }
-
-                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        role.setId(generatedKeys.getInt(1));
-                    } else {
-                        throw new SQLException("La création du rôle a échoué, aucun ID obtenu");
+                try {
+                    // Check if role exists
+                    try (PreparedStatement pstmt = conn.prepareStatement(selectSql)) {
+                        pstmt.setString(1, role.getNom());
+                        ResultSet rs = pstmt.executeQuery();
+                        if (rs.next()) {
+                            role.setId(rs.getInt("id"));
+                            LOGGER.info("Rôle existant trouvé: " + role.getNom());
+                            return role;
+                        }
                     }
-                }
 
-                conn.commit();
-                LOGGER.info("Rôle créé avec succès: " + role);
-                return role;
-            } catch (SQLException e) {
-                conn.rollback();
-                throw e;
+                    // If not exists, create new role
+                    try (PreparedStatement pstmt = conn.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS)) {
+                        pstmt.setString(1, role.getNom());
+                        pstmt.setString(2, role.getDescription());
+
+                        int affectedRows = pstmt.executeUpdate();
+                        if (affectedRows == 0) {
+                            throw new SQLException("La création du rôle a échoué");
+                        }
+
+                        try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                            if (generatedKeys.next()) {
+                                role.setId(generatedKeys.getInt(1));
+                            } else {
+                                throw new SQLException("La création du rôle a échoué, aucun ID obtenu");
+                            }
+                        }
+                    }
+
+                    conn.commit();
+                    LOGGER.info("Rôle créé avec succès: " + role);
+                    return role;
+
+                } catch (SQLException e) {
+                    try {
+                        conn.rollback();
+                    } catch (SQLException re) {
+                        LOGGER.log(Level.SEVERE, "Erreur lors du rollback", re);
+                    }
+
+                    if (e.getMessage().contains("UNIQUE constraint failed") && retries < MAX_RETRIES - 1) {
+                        LOGGER.warning("Conflit de création de rôle, nouvelle tentative " + (retries + 1));
+                        retries++;
+                        Thread.sleep(RETRY_DELAY_MS);
+                        continue;
+                    }
+                    throw e;
+                }
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                throw new SQLException("Interruption pendant la création du rôle", ie);
             }
         }
+        throw new SQLException("Échec de la création du rôle après " + MAX_RETRIES + " tentatives");
     }
 
     public void attribuerRoleUtilisateur(Integer userId, Integer roleId) throws SQLException {
