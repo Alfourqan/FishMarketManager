@@ -16,13 +16,11 @@ public class AuthenticationController {
     private static final String DEFAULT_ADMIN_PASSWORD = "admin123";
     private static final Object INSTANCE_LOCK = new Object();
     private RoleController roleController;
-    private static final int MAX_RETRIES = 3;
-    private static final long RETRY_DELAY_MS = 1000;
 
     private AuthenticationController() {
         try {
             this.roleController = RoleController.getInstance();
-            initializeDatabase();
+            createAdminIfNeeded();
             LOGGER.info("AuthenticationController initialized successfully");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to initialize AuthenticationController", e);
@@ -41,35 +39,12 @@ public class AuthenticationController {
         return instance;
     }
 
-    private void initializeDatabase() {
-        int retries = 0;
-        Exception lastException = null;
-
-        while (retries < MAX_RETRIES) {
-            Connection conn = null;
-            boolean originalAutoCommit = true;
-
-            try {
-                conn = DatabaseManager.getConnection();
-                if (conn == null) {
-                    throw new SQLException("Impossible d'obtenir une connexion à la base de données");
-                }
-
-                originalAutoCommit = conn.getAutoCommit();
-                conn.setAutoCommit(false);
-
-                // Vérifier si l'utilisateur admin existe déjà
-                try (PreparedStatement checkStmt = conn.prepareStatement(
-                    "SELECT id FROM users WHERE username = ?")) {
-                    checkStmt.setString(1, "admin");
-                    ResultSet rs = checkStmt.executeQuery();
-                    if (rs.next()) {
-                        LOGGER.info("L'utilisateur admin existe déjà avec l'ID: " + rs.getInt("id"));
-                        conn.commit();
-                        return;
-                    }
-                }
-
+    private void createAdminIfNeeded() throws SQLException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            // Vérifier si la table existe
+            DatabaseMetaData meta = conn.getMetaData();
+            ResultSet tables = meta.getTables(null, null, "users", null);
+            if (!tables.next()) {
                 // Créer la table users si elle n'existe pas
                 try (Statement stmt = conn.createStatement()) {
                     stmt.execute("CREATE TABLE IF NOT EXISTS users (" +
@@ -81,80 +56,42 @@ public class AuthenticationController {
                         "last_login INTEGER," +
                         "force_password_reset BOOLEAN DEFAULT false)");
                 }
+            }
 
-                String salt = BCrypt.gensalt(10);
-                String hashedPassword = BCrypt.hashpw(DEFAULT_ADMIN_PASSWORD, salt);
-
-                // Créer l'utilisateur admin
-                int userId;
-                try (PreparedStatement insertStmt = conn.prepareStatement(
-                    "INSERT INTO users (username, password, active) VALUES (?, ?, ?)",
-                    Statement.RETURN_GENERATED_KEYS)) {
-                    insertStmt.setString(1, "admin");
-                    insertStmt.setString(2, hashedPassword);
-                    insertStmt.setBoolean(3, true);
-                    insertStmt.executeUpdate();
-
-                    ResultSet rs = insertStmt.getGeneratedKeys();
-                    if (rs.next()) {
-                        userId = rs.getInt(1);
-                        LOGGER.info("Compte admin créé avec ID: " + userId);
-
-                        // Créer et attribuer le rôle admin
-                        Role adminRole = new Role("ADMIN", "Administrateur système");
-                        adminRole = roleController.creerRole(adminRole);
-
-                        // Vérifier si le rôle est déjà attribué
-                        try (PreparedStatement checkRoleStmt = conn.prepareStatement(
-                            "SELECT COUNT(*) FROM users_roles WHERE user_id = ? AND role_id = ?")) {
-                            checkRoleStmt.setInt(1, userId);
-                            checkRoleStmt.setInt(2, adminRole.getId());
-                            ResultSet roleRs = checkRoleStmt.executeQuery();
-                            if (!roleRs.next() || roleRs.getInt(1) == 0) {
-                                roleController.attribuerRoleUtilisateur(userId, adminRole.getId());
-                            }
-                        }
-                    }
-                }
-
-                conn.commit();
-                return;
-
-            } catch (Exception e) {
-                lastException = e;
-                LOGGER.log(Level.WARNING, "Tentative " + (retries + 1) + " échouée: " + e.getMessage());
-
-                if (conn != null) {
-                    try {
-                        conn.rollback();
-                    } catch (SQLException re) {
-                        LOGGER.log(Level.WARNING, "Erreur lors du rollback", re);
-                    }
-                }
-
-                retries++;
-                if (retries < MAX_RETRIES) {
-                    try {
-                        Thread.sleep(RETRY_DELAY_MS * retries);
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                    }
-                }
-            } finally {
-                if (conn != null) {
-                    try {
-                        conn.setAutoCommit(originalAutoCommit);
-                        conn.close();
-                    } catch (SQLException e) {
-                        LOGGER.log(Level.WARNING, "Erreur lors de la restauration de l'autocommit", e);
-                    }
+            // Vérifier si l'admin existe
+            try (PreparedStatement checkStmt = conn.prepareStatement(
+                "SELECT id FROM users WHERE username = ?")) {
+                checkStmt.setString(1, "admin");
+                ResultSet rs = checkStmt.executeQuery();
+                if (!rs.next()) {
+                    createAdmin(conn);
                 }
             }
         }
+    }
 
-        if (lastException != null) {
-            LOGGER.log(Level.SEVERE, "Échec de l'initialisation après " + MAX_RETRIES + " tentatives");
-            throw new RuntimeException("Échec de l'initialisation de la base de données", lastException);
+    private void createAdmin(Connection conn) throws SQLException {
+        String salt = BCrypt.gensalt(10);
+        String hashedPassword = BCrypt.hashpw(DEFAULT_ADMIN_PASSWORD, salt);
+
+        try (PreparedStatement insertStmt = conn.prepareStatement(
+            "INSERT INTO users (username, password, active) VALUES (?, ?, ?)",
+            Statement.RETURN_GENERATED_KEYS)) {
+
+            insertStmt.setString(1, "admin");
+            insertStmt.setString(2, hashedPassword);
+            insertStmt.setBoolean(3, true);
+            insertStmt.executeUpdate();
+
+            ResultSet rs = insertStmt.getGeneratedKeys();
+            if (rs.next()) {
+                int userId = rs.getInt(1);
+                LOGGER.info("Admin account created with ID: " + userId);
+
+                // Créer et attribuer le rôle admin dans une nouvelle connexion
+                Role adminRole = roleController.creerRole(new Role("ADMIN", "Administrateur système"));
+                roleController.attribuerRoleUtilisateur(userId, adminRole.getId());
+            }
         }
     }
 
@@ -207,7 +144,6 @@ public class AuthenticationController {
             stmt.setLong(1, Instant.now().toEpochMilli());
             stmt.setInt(2, userId);
             stmt.executeUpdate();
-            LOGGER.info("Mise à jour de la dernière connexion pour l'utilisateur: " + userId);
         } catch (SQLException e) {
             LOGGER.log(Level.WARNING, "Erreur lors de la mise à jour de la dernière connexion", e);
         }
