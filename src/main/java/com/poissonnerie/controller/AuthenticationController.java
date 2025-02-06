@@ -16,6 +16,8 @@ public class AuthenticationController {
     private static final String DEFAULT_ADMIN_PASSWORD = "admin123";
     private static final Object INSTANCE_LOCK = new Object();
     private RoleController roleController;
+    private static final int MAX_RETRIES = 3;
+    private static final long RETRY_DELAY_MS = 1000;
 
     private AuthenticationController() {
         try {
@@ -40,24 +42,26 @@ public class AuthenticationController {
     }
 
     private void initializeDatabase() {
-        Connection conn = null;
-        try {
-            conn = DatabaseManager.getConnection();
-            if (conn == null) {
-                throw new SQLException("Impossible d'obtenir une connexion à la base de données");
-            }
+        int retries = 0;
+        Exception lastException = null;
 
-            // Désactiver l'autocommit pour la transaction
-            boolean originalAutoCommit = conn.getAutoCommit();
-            conn.setAutoCommit(false);
+        while (retries < MAX_RETRIES) {
+            Connection conn = null;
+            boolean originalAutoCommit = true;
 
             try {
-                // Vérifier si la table users existe déjà
+                conn = DatabaseManager.getConnection();
+                if (conn == null) {
+                    throw new SQLException("Impossible d'obtenir une connexion à la base de données");
+                }
+
+                originalAutoCommit = conn.getAutoCommit();
+                conn.setAutoCommit(false);
+
                 DatabaseMetaData dbm = conn.getMetaData();
                 ResultSet tables = dbm.getTables(null, null, "users", null);
 
                 if (!tables.next()) {
-                    // Créer la table users si elle n'existe pas
                     try (Statement stmt = conn.createStatement()) {
                         stmt.execute("CREATE TABLE IF NOT EXISTS users (" +
                             "id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -70,7 +74,6 @@ public class AuthenticationController {
                     }
                 }
 
-                // Supprimer l'ancien compte admin s'il existe
                 try (PreparedStatement deleteStmt = conn.prepareStatement(
                     "DELETE FROM users WHERE username = ?")) {
                     deleteStmt.setString(1, "admin");
@@ -78,11 +81,9 @@ public class AuthenticationController {
                     LOGGER.info("Ancien compte admin supprimé");
                 }
 
-                // Hash avec un coût moins élevé pour le debug
                 String salt = BCrypt.gensalt(10);
                 String hashedPassword = BCrypt.hashpw(DEFAULT_ADMIN_PASSWORD, salt);
 
-                // Créer le nouveau compte admin
                 try (PreparedStatement insertStmt = conn.prepareStatement(
                     "INSERT INTO users (username, password, active) VALUES (?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS)) {
@@ -96,27 +97,36 @@ public class AuthenticationController {
                         int userId = rs.getInt(1);
                         LOGGER.info("Compte admin créé avec ID: " + userId);
 
-                        // Créer et attribuer le rôle admin
                         Role adminRole = new Role("ADMIN", "Administrateur système");
                         adminRole = roleController.creerRole(adminRole);
                         roleController.attribuerRoleUtilisateur(userId, adminRole.getId());
                     }
                 }
 
-                // Commit de la transaction
                 conn.commit();
-                LOGGER.info("Base de données initialisée avec succès");
-            } catch (SQLException e) {
+                return;
+
+            } catch (Exception e) {
+                lastException = e;
+                LOGGER.log(Level.WARNING, "Tentative " + (retries + 1) + " échouée: " + e.getMessage());
+
                 if (conn != null) {
                     try {
                         conn.rollback();
-                    } catch (SQLException ex) {
-                        LOGGER.log(Level.SEVERE, "Erreur lors du rollback", ex);
+                    } catch (SQLException re) {
+                        LOGGER.log(Level.WARNING, "Erreur lors du rollback", re);
                     }
                 }
-                throw e;
+
+                retries++;
+                if (retries < MAX_RETRIES) {
+                    try {
+                        Thread.sleep(RETRY_DELAY_MS * retries);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
             } finally {
-                // Restaurer l'autocommit à sa valeur d'origine
                 if (conn != null) {
                     try {
                         conn.setAutoCommit(originalAutoCommit);
@@ -125,18 +135,11 @@ public class AuthenticationController {
                     }
                 }
             }
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de la base de données", e);
-            throw new RuntimeException("Erreur lors de l'initialisation de la base de données", e);
-        } finally {
-            // On ne ferme pas la connexion ici car elle est gérée par le DatabaseManager
-            if (conn != null) {
-                try {
-                    conn.setAutoCommit(true);
-                } catch (SQLException e) {
-                    LOGGER.log(Level.SEVERE, "Erreur lors de la réinitialisation de l'autocommit", e);
-                }
-            }
+        }
+
+        if (lastException != null) {
+            LOGGER.log(Level.SEVERE, "Échec de l'initialisation après " + MAX_RETRIES + " tentatives");
+            throw new RuntimeException("Échec de l'initialisation de la base de données", lastException);
         }
     }
 
