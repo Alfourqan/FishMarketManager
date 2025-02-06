@@ -68,6 +68,10 @@ public class DatabaseManager {
         return getSingletonConnection();
     }
 
+    public static void initializeDatabase() throws SQLException { // New public method
+        ensureInitialized();
+    }
+
     private static void ensureInitialized() throws SQLException {
         if (!isInitialized) {
             INIT_LOCK.lock();

@@ -125,7 +125,7 @@ public class Main {
     private static void initializeDatabase() throws Exception {
         splash.setProgress(30, "Initialisation de la base de données...");
         LOGGER.info("Début de l'initialisation de la base de données");
-        DatabaseManager.initDatabase();
+        DatabaseManager.ensureInitialized();
         LOGGER.info("Base de données initialisée avec succès");
     }
 
