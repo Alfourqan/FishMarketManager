@@ -82,14 +82,22 @@ public class ReportViewSwing {
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             switch (type.toLowerCase()) {
                 case "ventes":
-                    reportController.genererRapportVentesPDF(username, dateDebut.atStartOfDay(),
-                        dateFin.atTime(23, 59, 59), outputStream);
+                    reportController.genererRapportVentesPDF(
+                        username,
+                        dateDebut.atStartOfDay(),
+                        dateFin.atTime(23, 59, 59),
+                        outputStream
+                    );
                     break;
                 case "stocks":
                     Map<String, Double> statsStocks = reportController.calculerStatistiquesStocks(
                         (List<Produit>) donnees);
-                    reportController.genererRapportStocksPDF(username,(List<Produit>) donnees,
-                        statsStocks, outputStream);
+                    reportController.genererRapportStocksPDF(
+                        username,
+                        (List<Produit>) donnees,
+                        statsStocks,
+                        outputStream
+                    );
                     break;
                 case "fournisseurs":
                     reportController.genererRapportFournisseursPDF(username, outputStream);
@@ -98,15 +106,18 @@ public class ReportViewSwing {
                     reportController.genererRapportCreancesPDF(username, outputStream);
                     break;
                 case "chiffre_affaires":
-                    reportController.genererRapportFinancierPDF(username, dateDebut.atStartOfDay(),
-                        dateFin.atTime(23, 59, 59), outputStream);
+                    reportController.genererRapportFinancierPDF(
+                        username,
+                        dateDebut.atStartOfDay(),
+                        dateFin.atTime(23, 59, 59),
+                        outputStream
+                    );
                     break;
             }
 
             try (FileOutputStream fos = new FileOutputStream(nomFichier)) {
                 fos.write(outputStream.toByteArray());
             }
-
 
             showSuccessMessage("Succès", MSG_SUCCES_GENERATION + nomFichier);
             ouvrirFichier(nomFichier);
