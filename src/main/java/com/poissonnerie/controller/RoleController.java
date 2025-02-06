@@ -223,27 +223,6 @@ public class RoleController {
             }
         }
     }
-    public void attribuerRoleUtilisateur(Integer userId, Integer roleId) throws SQLException {
-        String sql = "INSERT INTO " + USERS_ROLES_TABLE + " (user_id, role_id) VALUES (?, ?)";
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            conn.setAutoCommit(false);
-            try {
-                pstmt.setInt(1, userId);
-                pstmt.setInt(2, roleId);
-
-                pstmt.executeUpdate();
-                conn.commit();
-                LOGGER.info("Rôle " + roleId + " attribué à l'utilisateur " + userId);
-            } catch (SQLException e) {
-                conn.rollback();
-                LOGGER.log(Level.SEVERE, "Erreur lors de l'attribution du rôle: " + e.getMessage(), e);
-                throw e;
-            }
-        }
-    }
 
     public Set<Role> getRolesUtilisateur(Integer userId) throws SQLException {
         String sql = "SELECT r.* FROM " + ROLES_TABLE + " r " +
