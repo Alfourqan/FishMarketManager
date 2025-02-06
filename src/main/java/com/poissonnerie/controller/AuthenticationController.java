@@ -40,33 +40,68 @@ public class AuthenticationController {
     }
 
     private void createAdminIfNeeded() throws SQLException {
-        try (Connection conn = DatabaseManager.getConnection()) {
-            // Vérifier si la table existe
-            DatabaseMetaData meta = conn.getMetaData();
-            ResultSet tables = meta.getTables(null, null, "users", null);
-            if (!tables.next()) {
-                // Créer la table users si elle n'existe pas
-                try (Statement stmt = conn.createStatement()) {
-                    stmt.execute("CREATE TABLE IF NOT EXISTS users (" +
-                        "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                        "username TEXT NOT NULL UNIQUE," +
-                        "password TEXT NOT NULL," +
-                        "active BOOLEAN DEFAULT true," +
-                        "created_at INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000)," +
-                        "last_login INTEGER," +
-                        "force_password_reset BOOLEAN DEFAULT false)");
-                }
-            }
+        int maxRetries = 3;
+        int retryCount = 0;
+        boolean success = false;
+        SQLException lastException = null;
 
-            // Vérifier si l'admin existe
-            try (PreparedStatement checkStmt = conn.prepareStatement(
-                "SELECT id FROM users WHERE username = ?")) {
-                checkStmt.setString(1, "admin");
-                ResultSet rs = checkStmt.executeQuery();
-                if (!rs.next()) {
-                    createAdmin(conn);
+        while (!success && retryCount < maxRetries) {
+            try (Connection conn = DatabaseManager.getConnection()) {
+                conn.setAutoCommit(false);
+                try {
+                    // Vérifier si la table existe
+                    DatabaseMetaData meta = conn.getMetaData();
+                    ResultSet tables = meta.getTables(null, null, "users", null);
+                    if (!tables.next()) {
+                        // Créer la table users si elle n'existe pas
+                        try (Statement stmt = conn.createStatement()) {
+                            stmt.execute("CREATE TABLE IF NOT EXISTS users (" +
+                                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                                "username TEXT NOT NULL UNIQUE," +
+                                "password TEXT NOT NULL," +
+                                "active BOOLEAN DEFAULT true," +
+                                "created_at INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000)," +
+                                "last_login INTEGER," +
+                                "force_password_reset BOOLEAN DEFAULT false)");
+                        }
+                    }
+
+                    // Vérifier si l'admin existe
+                    try (PreparedStatement checkStmt = conn.prepareStatement(
+                        "SELECT id FROM users WHERE username = ?")) {
+                        checkStmt.setString(1, "admin");
+                        ResultSet rs = checkStmt.executeQuery();
+                        if (!rs.next()) {
+                            createAdmin(conn);
+                        }
+                    }
+
+                    conn.commit();
+                    success = true;
+                    LOGGER.info("Admin initialization completed successfully");
+                } catch (SQLException e) {
+                    try {
+                        conn.rollback();
+                    } catch (SQLException re) {
+                        LOGGER.log(Level.WARNING, "Error during rollback", re);
+                    }
+                    if (e.getMessage().contains("database is locked") && retryCount < maxRetries - 1) {
+                        LOGGER.log(Level.WARNING, "Database locked, retrying... Attempt " + (retryCount + 1));
+                        retryCount++;
+                        Thread.sleep(1000 * (retryCount + 1)); // Exponential backoff
+                        lastException = e;
+                    } else {
+                        throw e;
+                    }
                 }
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                throw new SQLException("Interrupted while waiting for retry", ie);
             }
+        }
+
+        if (!success && lastException != null) {
+            throw new SQLException("Failed to initialize admin after " + maxRetries + " attempts", lastException);
         }
     }
 
@@ -88,7 +123,7 @@ public class AuthenticationController {
                 int userId = rs.getInt(1);
                 LOGGER.info("Admin account created with ID: " + userId);
 
-                // Créer et attribuer le rôle admin dans une nouvelle connexion
+                // Créer et attribuer le rôle admin
                 Role adminRole = roleController.creerRole(new Role("ADMIN", "Administrateur système"));
                 roleController.attribuerRoleUtilisateur(userId, adminRole.getId());
             }
