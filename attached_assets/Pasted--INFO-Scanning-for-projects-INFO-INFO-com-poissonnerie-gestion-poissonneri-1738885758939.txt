@@ -1,0 +1,81 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------< com.poissonnerie:gestion-poissonnerie >----------------
+[INFO] Building gestion-poissonnerie 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ gestion-poissonnerie ---
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ gestion-poissonnerie ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ gestion-poissonnerie ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 45 source files with javac [debug target 11] to target/classes
+[WARNING] system modules path not set in conjunction with -source 11
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[754,77] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[767,78] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[809,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[812,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[102,41] unchecked cast
+  required: java.util.List<com.poissonnerie.model.Produit>
+  found:    java.util.List<capture#1 of ?>
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[105,41] unchecked cast
+  required: java.util.List<com.poissonnerie.model.Produit>
+  found:    java.util.List<capture#2 of ?>
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ gestion-poissonnerie ---
+Feb 06, 2025 11:47:37 PM com.poissonnerie.Main main
+INFO: Configuration système initialisée
+Feb 06, 2025 11:47:38 PM com.poissonnerie.Main lambda$main$0
+INFO: Démarrage de l'application dans l'EDT...
+Feb 06, 2025 11:47:39 PM com.poissonnerie.Main lambda$initializeApplication$1
+INFO: Thème et UI configurés avec succès
+[WARNING] 
+java.lang.ClassFormatError: Truncated class file
+    at java.lang.ClassLoader.defineClass1 (Native Method)
+    at java.lang.ClassLoader.defineClass (ClassLoader.java:1027)
+    at java.security.SecureClassLoader.defineClass (SecureClassLoader.java:150)
+    at java.net.URLClassLoader.defineClass (URLClassLoader.java:524)
+    at java.net.URLClassLoader$1.run (URLClassLoader.java:427)
+    at java.net.URLClassLoader$1.run (URLClassLoader.java:421)
+    at java.security.AccessController.doPrivileged (AccessController.java:714)
+    at java.net.URLClassLoader.findClass (URLClassLoader.java:420)
+    at org.codehaus.mojo.exec.URLClassLoaderBuilder$ExecJavaClassLoader.loadClass (URLClassLoaderBuilder.java:165)
+    at java.lang.ClassLoader.loadClass (ClassLoader.java:526)
+    at com.poissonnerie.Main.lambda$initializeApplication$2 (Main.java:81)
+    at java.awt.event.InvocationEvent.dispatch (InvocationEvent.java:318)
+    at java.awt.EventQueue.dispatchEventImpl (EventQueue.java:773)
+    at java.awt.EventQueue$4.run (EventQueue.java:720)
+    at java.awt.EventQueue$4.run (EventQueue.java:714)
+    at java.security.AccessController.doPrivileged (AccessController.java:400)
+    at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege (ProtectionDomain.java:87)
+    at java.awt.EventQueue.dispatchEvent (EventQueue.java:742)
+    at java.awt.EventDispatchThread.pumpOneEventForFilters (EventDispatchThread.java:203)
+    at java.awt.EventDispatchThread.pumpEventsForFilter (EventDispatchThread.java:124)
+    at java.awt.EventDispatchThread.pumpEventsForHierarchy (EventDispatchThread.java:113)
+    at java.awt.EventDispatchThread.pumpEvents (EventDispatchThread.java:109)
+    at java.awt.EventDispatchThread.pumpEvents (EventDispatchThread.java:101)
+    at java.awt.EventDispatchThread.run (EventDispatchThread.java:90)
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  50.457 s
+[INFO] Finished at: 2025-02-06T23:47:40Z
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.codehaus.mojo:exec-maven-plugin:3.1.0:java (default-cli) on project gestion-poissonnerie: An exception occurred while executing the Java class. Truncated class file -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException

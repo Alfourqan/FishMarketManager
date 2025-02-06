@@ -20,7 +20,7 @@ public class AuthenticationController {
     private AuthenticationController() {
         try {
             this.roleController = RoleController.getInstance();
-            createAdminIfNeeded();
+            initializeDatabase();
             LOGGER.info("AuthenticationController initialized successfully");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to initialize AuthenticationController", e);
@@ -39,7 +39,7 @@ public class AuthenticationController {
         return instance;
     }
 
-    private void createAdminIfNeeded() throws SQLException {
+    private void initializeDatabase() throws SQLException {
         int maxRetries = 3;
         int retryCount = 0;
         boolean success = false;
@@ -49,46 +49,23 @@ public class AuthenticationController {
             try (Connection conn = DatabaseManager.getConnection()) {
                 conn.setAutoCommit(false);
                 try {
-                    // Vérifier si la table existe
-                    DatabaseMetaData meta = conn.getMetaData();
-                    ResultSet tables = meta.getTables(null, null, "users", null);
-                    if (!tables.next()) {
-                        // Créer la table users si elle n'existe pas
-                        try (Statement stmt = conn.createStatement()) {
-                            stmt.execute("CREATE TABLE IF NOT EXISTS users (" +
-                                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                                "username TEXT NOT NULL UNIQUE," +
-                                "password TEXT NOT NULL," +
-                                "active BOOLEAN DEFAULT true," +
-                                "created_at INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000)," +
-                                "last_login INTEGER," +
-                                "force_password_reset BOOLEAN DEFAULT false)");
-                        }
-                    }
-
-                    // Vérifier si l'admin existe
-                    try (PreparedStatement checkStmt = conn.prepareStatement(
-                        "SELECT id FROM users WHERE username = ?")) {
-                        checkStmt.setString(1, "admin");
-                        ResultSet rs = checkStmt.executeQuery();
-                        if (!rs.next()) {
-                            createAdmin(conn);
-                        }
-                    }
-
+                    createTablesIfNeeded(conn);
+                    createAdminIfNeeded(conn);
                     conn.commit();
                     success = true;
-                    LOGGER.info("Admin initialization completed successfully");
+                    LOGGER.info("Database initialization completed successfully");
                 } catch (SQLException e) {
-                    try {
-                        conn.rollback();
-                    } catch (SQLException re) {
-                        LOGGER.log(Level.WARNING, "Error during rollback", re);
+                    if (conn != null) {
+                        try {
+                            conn.rollback();
+                        } catch (SQLException re) {
+                            LOGGER.log(Level.WARNING, "Error during rollback", re);
+                        }
                     }
                     if (e.getMessage().contains("database is locked") && retryCount < maxRetries - 1) {
                         LOGGER.log(Level.WARNING, "Database locked, retrying... Attempt " + (retryCount + 1));
                         retryCount++;
-                        Thread.sleep(1000 * (retryCount + 1)); // Exponential backoff
+                        Thread.sleep(1000 * (retryCount + 1));
                         lastException = e;
                     } else {
                         throw e;
@@ -101,7 +78,32 @@ public class AuthenticationController {
         }
 
         if (!success && lastException != null) {
-            throw new SQLException("Failed to initialize admin after " + maxRetries + " attempts", lastException);
+            throw new SQLException("Failed to initialize database after " + maxRetries + " attempts", lastException);
+        }
+    }
+
+    private void createTablesIfNeeded(Connection conn) throws SQLException {
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute("PRAGMA foreign_keys = ON");
+            stmt.execute("CREATE TABLE IF NOT EXISTS users (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                "username TEXT NOT NULL UNIQUE," +
+                "password TEXT NOT NULL," +
+                "active BOOLEAN DEFAULT true," +
+                "created_at INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000)," +
+                "last_login INTEGER," +
+                "force_password_reset BOOLEAN DEFAULT false)");
+        }
+    }
+
+    private void createAdminIfNeeded(Connection conn) throws SQLException {
+        try (PreparedStatement checkStmt = conn.prepareStatement(
+            "SELECT id FROM users WHERE username = ?")) {
+            checkStmt.setString(1, "admin");
+            ResultSet rs = checkStmt.executeQuery();
+            if (!rs.next()) {
+                createAdmin(conn);
+            }
         }
     }
 
@@ -123,7 +125,6 @@ public class AuthenticationController {
                 int userId = rs.getInt(1);
                 LOGGER.info("Admin account created with ID: " + userId);
 
-                // Créer et attribuer le rôle admin
                 Role adminRole = roleController.creerRole(new Role("ADMIN", "Administrateur système"));
                 roleController.attribuerRoleUtilisateur(userId, adminRole.getId());
             }
