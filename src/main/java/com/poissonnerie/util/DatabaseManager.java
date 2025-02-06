@@ -58,6 +58,7 @@ public class DatabaseManager {
             stmt.execute("PRAGMA page_size = 4096");
             stmt.execute("PRAGMA foreign_keys = ON");
             stmt.execute("PRAGMA locking_mode = NORMAL");
+            stmt.execute("PRAGMA busy_timeout = 30000");
             stmt.execute("PRAGMA temp_store = MEMORY");
             LOGGER.info("PRAGMAs initialisés avec succès");
         }
@@ -68,7 +69,7 @@ public class DatabaseManager {
         return getSingletonConnection();
     }
 
-    public static void initializeDatabase() throws SQLException { // New public method
+    public static void initializeDatabase() throws SQLException {
         ensureInitialized();
     }
 
@@ -104,31 +105,54 @@ public class DatabaseManager {
             }
         }
 
-        try (Connection conn = getSingletonConnection()) {
+        Connection conn = null;
+        boolean previousAutoCommit = true;
+
+        try {
+            conn = getSingletonConnection();
+            previousAutoCommit = conn.getAutoCommit();
             conn.setAutoCommit(false);
-            try {
-                String schema = loadSchemaFromResource();
-                try (Statement stmt = conn.createStatement()) {
-                    String[] statements = schema.split(";");
-                    for (String sql : statements) {
-                        sql = sql.trim();
-                        if (!sql.isEmpty() && !sql.toUpperCase().startsWith("PRAGMA")) {
+
+            String schema = loadSchemaFromResource();
+            try (Statement stmt = conn.createStatement()) {
+                String[] statements = schema.split(";");
+                for (String sql : statements) {
+                    sql = sql.trim();
+                    if (!sql.isEmpty() && !sql.toUpperCase().startsWith("PRAGMA")) {
+                        try {
                             stmt.execute(sql);
+                        } catch (SQLException e) {
+                            // Ignore "table already exists" errors
+                            if (!e.getMessage().contains("table already exists") && 
+                                !e.getMessage().contains("UNIQUE constraint failed")) {
+                                throw e;
+                            }
                         }
                     }
                 }
-                conn.commit();
-                isInitialized = true;
-                LOGGER.info("Base de données initialisée avec succès");
-            } catch (SQLException e) {
+            }
+
+            conn.commit();
+            isInitialized = true;
+            LOGGER.info("Base de données initialisée avec succès");
+
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de la base de données", e);
+            if (conn != null) {
                 try {
                     conn.rollback();
                 } catch (SQLException re) {
                     LOGGER.log(Level.SEVERE, "Erreur lors du rollback", re);
                 }
-                throw e;
-            } finally {
-                conn.setAutoCommit(true);
+            }
+            throw e;
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(previousAutoCommit);
+                } catch (SQLException e) {
+                    LOGGER.log(Level.WARNING, "Erreur lors de la restauration de l'autocommit", e);
+                }
             }
         }
     }
@@ -140,11 +164,9 @@ public class DatabaseManager {
             }
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
                 return reader.lines().collect(Collectors.joining("\n"));
-            } catch (IOException e) {
-                throw new SQLException("Erreur lors de la lecture du schéma", e);
             }
         } catch (IOException e) {
-            throw new SQLException("Erreur lors de la lecture du fichier schema.sql", e);
+            throw new SQLException("Erreur lors de la lecture du schéma", e);
         }
     }
 
@@ -155,23 +177,6 @@ public class DatabaseManager {
             stmt.execute("PRAGMA integrity_check");
             stmt.execute("PRAGMA foreign_key_check");
             LOGGER.info("Vérification de la santé de la base de données réussie");
-        }
-    }
-
-    private static void closeConnection() {
-        synchronized (CONNECTION_LOCK) {
-            if (singletonConnection != null) {
-                try {
-                    if (!singletonConnection.isClosed()) {
-                        singletonConnection.close();
-                        LOGGER.info("Connexion fermée avec succès");
-                    }
-                } catch (SQLException e) {
-                    LOGGER.log(Level.WARNING, "Erreur lors de la fermeture de la connexion", e);
-                } finally {
-                    singletonConnection = null;
-                }
-            }
         }
     }
 

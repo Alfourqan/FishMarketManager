@@ -4,6 +4,7 @@ modules = ["java", "java-17", "java-21", "postgresql-16", "maven", "java-11", "p
 channel = "stable-24_05"
 
 [workflows]
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "Project"
