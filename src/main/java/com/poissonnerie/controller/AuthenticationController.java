@@ -18,8 +18,14 @@ public class AuthenticationController {
     private RoleController roleController;
 
     private AuthenticationController() {
-        this.roleController = RoleController.getInstance();
-        initializeDatabase();
+        try {
+            this.roleController = RoleController.getInstance();
+            initializeDatabase();
+            LOGGER.info("AuthenticationController initialized successfully");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Failed to initialize AuthenticationController", e);
+            throw new RuntimeException("Failed to initialize AuthenticationController", e);
+        }
     }
 
     public static AuthenticationController getInstance() {
@@ -34,51 +40,65 @@ public class AuthenticationController {
     }
 
     private void initializeDatabase() {
-        try (Connection conn = DatabaseManager.getConnection()) {
+        Connection conn = null;
+        try {
+            conn = DatabaseManager.getConnection();
             conn.setAutoCommit(false);
-            try {
-                // Supprime l'ancien compte admin s'il existe
-                try (PreparedStatement deleteStmt = conn.prepareStatement(
-                    "DELETE FROM users WHERE username = ?")) {
-                    deleteStmt.setString(1, "admin");
-                    deleteStmt.executeUpdate();
-                    LOGGER.info("Ancien compte admin supprimé");
+
+            // Supprime l'ancien compte admin s'il existe
+            try (PreparedStatement deleteStmt = conn.prepareStatement(
+                "DELETE FROM users WHERE username = ?")) {
+                deleteStmt.setString(1, "admin");
+                deleteStmt.executeUpdate();
+                LOGGER.info("Ancien compte admin supprimé");
+            }
+
+            // Hash avec un coût moins élevé pour le debug
+            String salt = BCrypt.gensalt(10);
+            String hashedPassword = BCrypt.hashpw(DEFAULT_ADMIN_PASSWORD, salt);
+
+            // Crée le nouveau compte admin
+            try (PreparedStatement insertStmt = conn.prepareStatement(
+                "INSERT INTO users (username, password, active) VALUES (?, ?, ?)",
+                Statement.RETURN_GENERATED_KEYS)) {
+                insertStmt.setString(1, "admin");
+                insertStmt.setString(2, hashedPassword);
+                insertStmt.setBoolean(3, true);
+                insertStmt.executeUpdate();
+
+                ResultSet rs = insertStmt.getGeneratedKeys();
+                if (rs.next()) {
+                    int userId = rs.getInt(1);
+                    LOGGER.info("Compte admin créé avec ID: " + userId);
+
+                    // Crée et attribue le rôle admin
+                    Role adminRole = new Role("ADMIN", "Administrateur système");
+                    adminRole = roleController.creerRole(adminRole);
+                    roleController.attribuerRoleUtilisateur(userId, adminRole.getId());
+
+                    conn.commit();
+                    LOGGER.info("Rôle admin attribué avec succès");
                 }
-
-                // Hash avec un coût moins élevé pour le debug
-                String salt = BCrypt.gensalt(10);
-                String hashedPassword = BCrypt.hashpw(DEFAULT_ADMIN_PASSWORD, salt);
-
-                // Crée le nouveau compte admin
-                try (PreparedStatement insertStmt = conn.prepareStatement(
-                    "INSERT INTO users (username, password, active) VALUES (?, ?, ?)",
-                    Statement.RETURN_GENERATED_KEYS)) {
-                    insertStmt.setString(1, "admin");
-                    insertStmt.setString(2, hashedPassword);
-                    insertStmt.setBoolean(3, true);
-                    insertStmt.executeUpdate();
-
-                    ResultSet rs = insertStmt.getGeneratedKeys();
-                    if (rs.next()) {
-                        int userId = rs.getInt(1);
-                        LOGGER.info("Compte admin créé avec ID: " + userId);
-
-                        // Crée et attribue le rôle admin
-                        Role adminRole = new Role("ADMIN", "Administrateur système");
-                        adminRole = roleController.creerRole(adminRole);
-                        roleController.attribuerRoleUtilisateur(userId, adminRole.getId());
-
-                        conn.commit();
-                        LOGGER.info("Rôle admin attribué avec succès");
-                    }
-                }
-            } catch (SQLException e) {
-                conn.rollback();
-                throw e;
             }
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de la base de données", e);
-            throw new RuntimeException("Erreur lors de l'initialisation de la base de données", e);
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    LOGGER.log(Level.SEVERE, "Failed to rollback transaction", ex);
+                }
+            }
+            LOGGER.log(Level.SEVERE, "Database initialization error", e);
+            throw new RuntimeException("Failed to initialize database", e);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException e) {
+                    LOGGER.log(Level.SEVERE, "Failed to close database connection", e);
+                }
+            }
         }
     }
 
@@ -107,7 +127,10 @@ public class AuthenticationController {
 
                 boolean authenticated = BCrypt.checkpw(password, storedHash);
                 if (authenticated) {
-                    updateLastLogin(conn, username);
+                    updateLastLogin(userId);
+                    LOGGER.info("Authentification réussie pour: " + username);
+                } else {
+                    LOGGER.warning("Échec d'authentification pour: " + username);
                 }
 
                 return authenticated;
@@ -121,13 +144,16 @@ public class AuthenticationController {
         }
     }
 
-    private void updateLastLogin(Connection conn, String username) throws SQLException {
-        try (PreparedStatement stmt = conn.prepareStatement(
-                "UPDATE users SET last_login = ? WHERE username = ?")) {
+    private void updateLastLogin(int userId) {
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(
+                 "UPDATE users SET last_login = ? WHERE id = ?")) {
             stmt.setLong(1, Instant.now().toEpochMilli());
-            stmt.setString(2, username);
+            stmt.setInt(2, userId);
             stmt.executeUpdate();
-            LOGGER.info("Mise à jour de la dernière connexion pour: " + username);
+            LOGGER.info("Mise à jour de la dernière connexion pour l'utilisateur: " + userId);
+        } catch (SQLException e) {
+            LOGGER.log(Level.WARNING, "Erreur lors de la mise à jour de la dernière connexion", e);
         }
     }
 

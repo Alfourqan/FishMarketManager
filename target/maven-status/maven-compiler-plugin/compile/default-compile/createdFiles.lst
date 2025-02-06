@@ -2,6 +2,7 @@ com/poissonnerie/view/VenteViewSwing$3.class
 com/poissonnerie/controller/ClientController.class
 com/poissonnerie/view/SplashScreen.class
 com/poissonnerie/util/AuditLogger.class
+com/poissonnerie/view/ReportViewSwing$ChartType.class
 com/poissonnerie/view/LoginView$2.class
 com/poissonnerie/model/Client.class
 com/poissonnerie/controller/ConfigurationController.class
@@ -33,6 +34,7 @@ com/poissonnerie/view/InventaireViewSwing.class
 com/poissonnerie/view/ProduitViewSwing$4.class
 com/poissonnerie/view/InventaireViewSwing$7.class
 com/poissonnerie/controller/ConfigurationController$1.class
+com/poissonnerie/view/ReportViewSwing$2.class
 com/poissonnerie/view/ProduitViewSwing.class
 com/poissonnerie/view/SplashScreen$2.class
 com/poissonnerie/view/ConfigurationViewSwing.class
@@ -40,7 +42,9 @@ com/poissonnerie/view/FournisseurViewSwing.class
 com/poissonnerie/view/VenteViewSwing$2.class
 com/poissonnerie/model/Fournisseur.class
 com/poissonnerie/view/ClientViewSwing$2.class
+com/poissonnerie/controller/ReportController.class
 com/poissonnerie/view/ProduitViewSwing$3.class
+com/poissonnerie/view/ReportViewSwing$1.class
 com/poissonnerie/model/Vente$ModePaiement.class
 com/poissonnerie/model/Vente$LigneVente.class
 com/poissonnerie/view/InventaireViewSwing$1.class
@@ -74,6 +78,7 @@ com/poissonnerie/Main.class
 com/poissonnerie/view/AccueilViewSwing.class
 com/poissonnerie/view/MainViewSwing.class
 com/poissonnerie/controller/VenteController.class
+com/poissonnerie/view/ReportViewSwing$3.class
 com/poissonnerie/model/InventaireManager$InventaireObserver.class
 com/poissonnerie/model/UserAction.class
 com/poissonnerie/view/InventaireViewSwing$3.class
@@ -87,7 +92,9 @@ com/poissonnerie/view/VenteViewSwing$4.class
 com/poissonnerie/view/ProduitViewSwing$1.class
 com/poissonnerie/model/Role.class
 com/poissonnerie/util/ExcelGenerator.class
+com/poissonnerie/view/ReportViewSwing$4.class
 com/poissonnerie/controller/RoleController.class
+com/poissonnerie/view/ReportViewSwing.class
 com/poissonnerie/view/ConfigurationViewSwing$1.class
 com/poissonnerie/view/InventaireViewSwing$4.class
 com/poissonnerie/view/NotificationStockView$NotificationCellRenderer.class
@@ -96,4 +103,5 @@ com/poissonnerie/Main$1.class
 com/poissonnerie/view/AccueilViewSwing$3.class
 com/poissonnerie/view/VenteViewSwing.class
 com/poissonnerie/view/CaisseViewSwing$4.class
+com/poissonnerie/util/PDFGenerator.class
 com/poissonnerie/view/FournisseurViewSwing$4.class
