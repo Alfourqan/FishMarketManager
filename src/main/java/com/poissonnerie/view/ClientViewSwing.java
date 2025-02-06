@@ -3,7 +3,7 @@ package com.poissonnerie.view;
 import com.poissonnerie.controller.ClientController;
 import com.poissonnerie.model.Client;
 import com.poissonnerie.util.PDFGenerator;
-import com.poissonnerie.util.TextBillPrinter; // Assuming this import is needed
+import com.poissonnerie.util.TextBillPrinter;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
@@ -13,16 +13,28 @@ import org.kordamp.ikonli.materialdesign.MaterialDesign;
 import org.kordamp.ikonli.swing.FontIcon;
 
 public class ClientViewSwing {
+    // Palette de couleurs moderne
+    private static final Color PRIMARY_COLOR = new Color(15, 23, 42);      // Bleu foncé
+    private static final Color SECONDARY_COLOR = new Color(51, 65, 85);    // Bleu gris
+    private static final Color ACCENT_COLOR = new Color(56, 189, 248);     // Bleu ciel
+    private static final Color SUCCESS_COLOR = new Color(34, 197, 94);     // Vert
+    private static final Color WARNING_COLOR = new Color(234, 179, 8);     // Jaune
+    private static final Color DANGER_COLOR = new Color(239, 68, 68);      // Rouge
+    private static final Color BACKGROUND_COLOR = new Color(248, 250, 252); // Gris très clair
+    private static final Font TITLE_FONT = new Font("Inter", Font.BOLD, 16);
+    private static final Font REGULAR_FONT = new Font("Inter", Font.PLAIN, 14);
+    private static final Font SMALL_FONT = new Font("Inter", Font.PLAIN, 12);
+
     private final JPanel mainPanel;
     private final ClientController controller;
     private final JTable tableClients;
     private final DefaultTableModel tableModel;
 
     public ClientViewSwing() {
-        mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel = new JPanel(new BorderLayout(15, 15));
         controller = new ClientController();
 
-        // Création du modèle de table
+        // Configuration du modèle de table
         String[] columnNames = {"Nom", "Téléphone", "Adresse", "Solde"};
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
@@ -30,9 +42,17 @@ public class ClientViewSwing {
                 return false;
             }
         };
+
+        // Configuration de la table avec style moderne
         tableClients = new JTable(tableModel);
-        tableClients.setRowHeight(30);
-        tableClients.setFont(new Font(tableClients.getFont().getName(), Font.PLAIN, 13));
+        tableClients.setRowHeight(45);
+        tableClients.setFont(REGULAR_FONT);
+        tableClients.setShowGrid(true);
+        tableClients.setGridColor(new Color(226, 232, 240));
+        tableClients.setBackground(Color.WHITE);
+        tableClients.setSelectionBackground(new Color(219, 234, 254));
+        tableClients.setSelectionForeground(PRIMARY_COLOR);
+        tableClients.setIntercellSpacing(new Dimension(1, 1));
 
         initializeComponents();
         loadData();
@@ -40,21 +60,30 @@ public class ClientViewSwing {
 
     private JButton createStyledButton(String text, Color color) {
         JButton button = new JButton(text);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        button.setFont(new Font("Inter", Font.SEMIBOLD, 13));
         button.setBackground(color);
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
         button.setBorderPainted(false);
-        button.setMargin(new Insets(8, 16, 8, 16));
+        button.setMargin(new Insets(10, 20, 10, 20));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // Effet de survol
+        // Effet de survol amélioré
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(color.darker());
+                // Animation subtile d'échelle
+                button.setBorder(BorderFactory.createEmptyBorder(9, 19, 9, 19));
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 button.setBackground(color);
+                button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+            }
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                button.setBackground(color.darker().darker());
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                button.setBackground(color.darker());
             }
         });
 
@@ -62,45 +91,49 @@ public class ClientViewSwing {
     }
 
     private void initializeComponents() {
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-        mainPanel.setBackground(new Color(236, 239, 241));
+        // Configuration du panel principal
+        mainPanel.setBackground(BACKGROUND_COLOR);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         // Panel des boutons avec style moderne
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 12));
+        buttonPanel.setBackground(BACKGROUND_COLOR);
         buttonPanel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(200, 200, 200)),
-            BorderFactory.createEmptyBorder(5, 5, 15, 5)
+            BorderFactory.createMatteBorder(0, 0, 2, 0, new Color(226, 232, 240)),
+            BorderFactory.createEmptyBorder(0, 0, 15, 0)
         ));
-        buttonPanel.setBackground(new Color(236, 239, 241));
 
-        // Style moderne pour la table et ses en-têtes
-        tableClients.setShowGrid(true);
-        tableClients.setGridColor(new Color(226, 232, 240));
-        tableClients.setBackground(new Color(255, 255, 255));
-        tableClients.setSelectionBackground(new Color(219, 234, 254));
-        tableClients.setSelectionForeground(new Color(15, 23, 42));
-        tableClients.setRowHeight(45);
-        tableClients.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        tableClients.setIntercellSpacing(new Dimension(1, 1));
-
-        // Style des lignes alternées
+        // Style moderne pour la table
         tableClients.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value,
                     boolean isSelected, boolean hasFocus, int row, int column) {
                 Component c = super.getTableCellRendererComponent(table, value,
                         isSelected, hasFocus, row, column);
+
                 if (!isSelected) {
-                    c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(245, 245, 245));
+                    c.setBackground(row % 2 == 0 ? Color.WHITE : new Color(249, 250, 251));
                 }
-                // Padding des cellules ajusté
+
+                // Style spécial pour la colonne solde
+                if (column == 3 && value != null) {
+                    String soldeStr = value.toString();
+                    double solde = Double.parseDouble(soldeStr.replace("€", "").trim());
+                    if (solde > 0) {
+                        c.setForeground(new Color(220, 38, 38)); // Rouge pour les soldes positifs
+                    } else {
+                        c.setForeground(new Color(21, 128, 61)); // Vert pour les soldes nuls
+                    }
+                } else {
+                    c.setForeground(SECONDARY_COLOR);
+                }
+
                 ((JLabel) c).setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 16));
-                ((JLabel) c).setHorizontalAlignment(JLabel.LEFT);
                 return c;
             }
         });
 
-        // Style amélioré des en-têtes
+        // En-têtes de table améliorés
         JTableHeader header = tableClients.getTableHeader();
         header.setDefaultRenderer(new DefaultTableCellRenderer() {
             @Override
@@ -109,34 +142,42 @@ public class ClientViewSwing {
                 JLabel label = (JLabel) super.getTableCellRendererComponent(table, value,
                         isSelected, hasFocus, row, column);
 
-                // Configuration du style amélioré
-                label.setHorizontalAlignment(JLabel.LEFT);
-                label.setBorder(BorderFactory.createEmptyBorder(0, 16, 0, 16));
-                label.setFont(new Font("Segoe UI", Font.BOLD, 14));
-                label.setBackground(new Color(33, 33, 33));
+                label.setFont(new Font("Inter", Font.BOLD, 14));
+                label.setBackground(PRIMARY_COLOR);
                 label.setForeground(Color.WHITE);
-                label.setOpaque(true);
+                label.setBorder(BorderFactory.createEmptyBorder(12, 16, 12, 16));
+                label.setHorizontalAlignment(JLabel.LEFT);
 
                 return label;
             }
         });
-
-        // Ajustement de la hauteur de l'en-tête
-        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 40));
-
-
-        // Configuration du scroll pane avec style moderne
-        JScrollPane scrollPane = new JScrollPane(tableClients);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.getViewport().setBackground(Color.WHITE);
-        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        header.setPreferredSize(new Dimension(header.getPreferredSize().width, 48));
 
         // Création des boutons avec style moderne
-        JButton ajouterBtn = createStyledButton("Ajouter", new Color(76, 175, 80));
-        JButton modifierBtn = createStyledButton("Modifier", new Color(33, 150, 243));
-        JButton supprimerBtn = createStyledButton("Supprimer", new Color(244, 67, 54));
-        JButton reglerCreanceBtn = createStyledButton("Régler créance", new Color(255, 152, 0));
-        JButton actualiserBtn = createStyledButton("Actualiser", new Color(156, 39, 176));
+        JButton ajouterBtn = createStyledButton("Ajouter", SUCCESS_COLOR);
+        JButton modifierBtn = createStyledButton("Modifier", ACCENT_COLOR);
+        JButton supprimerBtn = createStyledButton("Supprimer", DANGER_COLOR);
+        JButton reglerCreanceBtn = createStyledButton("Régler créance", WARNING_COLOR);
+        JButton actualiserBtn = createStyledButton("Actualiser", SECONDARY_COLOR);
+
+        // Ajout des icônes aux boutons
+        FontIcon addIcon = FontIcon.of(MaterialDesign.MDI_ACCOUNT_PLUS);
+        FontIcon editIcon = FontIcon.of(MaterialDesign.MDI_ACCOUNT_EDIT);
+        FontIcon deleteIcon = FontIcon.of(MaterialDesign.MDI_ACCOUNT_REMOVE);
+        FontIcon paymentIcon = FontIcon.of(MaterialDesign.MDI_CASH);
+        FontIcon refreshIcon = FontIcon.of(MaterialDesign.MDI_REFRESH);
+
+        addIcon.setIconSize(18);
+        editIcon.setIconSize(18);
+        deleteIcon.setIconSize(18);
+        paymentIcon.setIconSize(18);
+        refreshIcon.setIconSize(18);
+
+        ajouterBtn.setIcon(addIcon);
+        modifierBtn.setIcon(editIcon);
+        supprimerBtn.setIcon(deleteIcon);
+        reglerCreanceBtn.setIcon(paymentIcon);
+        actualiserBtn.setIcon(refreshIcon);
 
         buttonPanel.add(ajouterBtn);
         buttonPanel.add(modifierBtn);
@@ -144,6 +185,13 @@ public class ClientViewSwing {
         buttonPanel.add(reglerCreanceBtn);
         buttonPanel.add(actualiserBtn);
 
+        // Configuration du scroll pane
+        JScrollPane scrollPane = new JScrollPane(tableClients);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getViewport().setBackground(Color.WHITE);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+        // Ajout des composants au panel principal
         mainPanel.add(buttonPanel, BorderLayout.NORTH);
         mainPanel.add(scrollPane, BorderLayout.CENTER);
 
