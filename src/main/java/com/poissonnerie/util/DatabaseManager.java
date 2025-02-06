@@ -13,31 +13,30 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class DatabaseManager {
     private static final Logger LOGGER = Logger.getLogger(DatabaseManager.class.getName());
+    private static final String DB_FILE = "poissonnerie.db";
     private static final AtomicBoolean isInitialized = new AtomicBoolean(false);
     private static final ReentrantLock INIT_LOCK = new ReentrantLock();
-    private static final String DB_FILE = "poissonnerie.db";
     private static SQLiteConfig config;
     private static volatile Connection singletonConnection = null;
     private static final Object CONNECTION_LOCK = new Object();
-    private static final int MAX_RETRIES = 3;
-    private static final long RETRY_DELAY_MS = 1000;
 
     static {
         try {
+            // Configuration de base de SQLite
             config = new SQLiteConfig();
             config.setOpenMode(SQLiteOpenMode.READWRITE);
             config.setBusyTimeout(30000);
-            config.setSharedCache(true);
-            config.enableLoadExtension(true);
-            config.setJournalMode(SQLiteConfig.JournalMode.WAL);
-            config.setSynchronous(SQLiteConfig.SynchronousMode.NORMAL);
+
+            // Configuration de sécurité
+            config.enforceForeignKeys(true);
             config.setTempStore(SQLiteConfig.TempStore.MEMORY);
             config.setCacheSize(2000);
             config.setPageSize(4096);
+
             LOGGER.info("Configuration SQLite initialisée");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de la configuration SQLite", e);
-            throw new RuntimeException(e);
+            throw new RuntimeException("Échec de l'initialisation de la configuration SQLite", e);
         }
     }
 
@@ -54,14 +53,17 @@ public class DatabaseManager {
 
     private static Connection createNewConnection() throws SQLException {
         try {
-            Connection conn = config.createConnection("jdbc:sqlite:" + DB_FILE);
+            String url = "jdbc:sqlite:" + DB_FILE;
+            Connection conn = DriverManager.getConnection(url, config.toProperties());
+
             if (conn == null) {
                 throw new SQLException("Impossible de créer une connexion à la base de données");
             }
 
+            // Configuration des paramètres après la connexion
             try (Statement stmt = conn.createStatement()) {
-                stmt.execute("PRAGMA foreign_keys = ON");
-                stmt.execute("PRAGMA busy_timeout = 30000");
+                stmt.execute("PRAGMA journal_mode=WAL");
+                stmt.execute("PRAGMA synchronous=NORMAL");
             }
 
             LOGGER.info("Nouvelle connexion créée avec succès");
@@ -114,55 +116,27 @@ public class DatabaseManager {
     }
 
     private static void setupDatabase() throws SQLException {
-        Connection conn = null;
-        boolean originalAutoCommit = true;
-
-        try {
-            // Créer une nouvelle connexion spécifique pour l'initialisation
-            conn = createNewConnection();
-            originalAutoCommit = conn.getAutoCommit();
-            conn.setAutoCommit(false);
-
+        try (Connection conn = createNewConnection()) {
             String schema = loadSchemaFromResource();
             String[] statements = schema.split(";");
 
-            try (Statement stmt = conn.createStatement()) {
-                for (String sql : statements) {
-                    sql = sql.trim();
-                    if (!sql.isEmpty()) {
-                        try {
-                            stmt.execute(sql);
-                        } catch (SQLException e) {
-                            if (!e.getMessage().contains("table already exists")) {
-                                throw e;
-                            }
+            for (String sql : statements) {
+                sql = sql.trim();
+                if (!sql.isEmpty()) {
+                    try (Statement stmt = conn.createStatement()) {
+                        stmt.execute(sql);
+                    } catch (SQLException e) {
+                        if (!e.getMessage().contains("table already exists")) {
+                            throw e;
                         }
                     }
                 }
             }
 
-            conn.commit();
             LOGGER.info("Schéma de base de données créé avec succès");
-
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de la base de données", e);
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException re) {
-                    LOGGER.log(Level.SEVERE, "Erreur lors du rollback", re);
-                }
-            }
             throw e;
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.setAutoCommit(originalAutoCommit);
-                    conn.close();
-                } catch (SQLException e) {
-                    LOGGER.log(Level.WARNING, "Erreur lors de la fermeture de la connexion", e);
-                }
-            }
         }
     }
 
