@@ -60,7 +60,7 @@ public class ClientViewSwing {
 
     private JButton createStyledButton(String text, Color color) {
         JButton button = new JButton(text);
-        button.setFont(new Font("Inter", Font.SEMIBOLD, 13));
+        button.setFont(new Font("Inter", Font.BOLD, 13));
         button.setBackground(color);
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
@@ -160,11 +160,11 @@ public class ClientViewSwing {
         JButton reglerCreanceBtn = createStyledButton("Régler créance", WARNING_COLOR);
         JButton actualiserBtn = createStyledButton("Actualiser", SECONDARY_COLOR);
 
-        // Ajout des icônes aux boutons
-        FontIcon addIcon = FontIcon.of(MaterialDesign.MDI_ACCOUNT_PLUS);
-        FontIcon editIcon = FontIcon.of(MaterialDesign.MDI_ACCOUNT_EDIT);
-        FontIcon deleteIcon = FontIcon.of(MaterialDesign.MDI_ACCOUNT_REMOVE);
-        FontIcon paymentIcon = FontIcon.of(MaterialDesign.MDI_CASH);
+        // Ajout des icônes aux boutons avec les bonnes constantes
+        FontIcon addIcon = FontIcon.of(MaterialDesign.MDI_PLUS);
+        FontIcon editIcon = FontIcon.of(MaterialDesign.MDI_PENCIL);
+        FontIcon deleteIcon = FontIcon.of(MaterialDesign.MDI_DELETE);
+        FontIcon paymentIcon = FontIcon.of(MaterialDesign.MDI_CURRENCY_USD);
         FontIcon refreshIcon = FontIcon.of(MaterialDesign.MDI_REFRESH);
 
         addIcon.setIconSize(18);
