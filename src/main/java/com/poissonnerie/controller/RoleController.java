@@ -155,25 +155,57 @@ public class RoleController {
     }
 
     public void attribuerRoleUtilisateur(Integer userId, Integer roleId) throws SQLException {
-        String sql = "INSERT INTO " + USERS_ROLES_TABLE + " (user_id, role_id) VALUES (?, ?)";
+        String checkSql = "SELECT COUNT(*) FROM " + USERS_ROLES_TABLE + " WHERE user_id = ? AND role_id = ?";
+        String insertSql = "INSERT INTO " + USERS_ROLES_TABLE + " (user_id, role_id) VALUES (?, ?)";
+        int retries = 0;
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        while (retries < MAX_RETRIES) {
+            try (Connection conn = DatabaseManager.getConnection()) {
+                conn.setAutoCommit(false);
+                try {
+                    // Vérifier si l'association existe déjà
+                    try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+                        checkStmt.setInt(1, userId);
+                        checkStmt.setInt(2, roleId);
+                        ResultSet rs = checkStmt.executeQuery();
+                        if (rs.next() && rs.getInt(1) > 0) {
+                            LOGGER.info("L'association user_id=" + userId + " et role_id=" + roleId + " existe déjà");
+                            conn.commit();
+                            return;
+                        }
+                    }
 
-            conn.setAutoCommit(false);
-            try {
-                pstmt.setInt(1, userId);
-                pstmt.setInt(2, roleId);
+                    // Si l'association n'existe pas, la créer
+                    try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
+                        insertStmt.setInt(1, userId);
+                        insertStmt.setInt(2, roleId);
+                        insertStmt.executeUpdate();
+                        conn.commit();
+                        LOGGER.info("Rôle " + roleId + " attribué à l'utilisateur " + userId);
+                        return;
+                    }
 
-                pstmt.executeUpdate();
-                conn.commit();
-                LOGGER.info("Rôle " + roleId + " attribué à l'utilisateur " + userId);
-            } catch (SQLException e) {
-                conn.rollback();
-                LOGGER.log(Level.SEVERE, "Erreur lors de l'attribution du rôle: " + e.getMessage(), e);
-                throw e;
+                } catch (SQLException e) {
+                    try {
+                        conn.rollback();
+                    } catch (SQLException re) {
+                        LOGGER.log(Level.SEVERE, "Erreur lors du rollback", re);
+                    }
+
+                    if (e.getMessage().contains("UNIQUE constraint failed") && retries < MAX_RETRIES - 1) {
+                        LOGGER.warning("Conflit lors de l'attribution du rôle, nouvelle tentative " + (retries + 1));
+                        retries++;
+                        Thread.sleep(RETRY_DELAY_MS);
+                        continue;
+                    }
+                    throw e;
+                }
+            } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
+                throw new SQLException("Interruption pendant l'attribution du rôle", ie);
             }
         }
+        throw new SQLException("Échec de l'attribution du rôle après " + MAX_RETRIES + " tentatives");
     }
 
     public List<Role> getRoles() throws SQLException {
