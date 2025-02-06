@@ -210,7 +210,7 @@ public class DatabaseManager {
         if (args.length > 0 && args[0].equals("init")) {
             LOGGER.info("Initialisation forcée de la base de données...");
             try {
-                initDatabase();
+                initializeDatabase();
             } catch (SQLException e) {
                 LOGGER.log(Level.SEVERE, "Erreur lors de la réinitialisation forcée", e);
                 System.exit(1);
