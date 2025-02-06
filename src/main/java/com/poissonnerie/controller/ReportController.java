@@ -138,6 +138,7 @@ public class ReportController {
     }
 
 
+
     public void genererRapportCreancesExcel(String username, String cheminFichier) {
         try {
             List<Client> clients = clientController.getClients().stream()
@@ -216,8 +217,8 @@ public class ReportController {
             List<Vente> ventes = venteController.getVentes().stream()
                 .filter(v -> !v.getDate().isBefore(debut) && !v.getDate().isAfter(fin))
                 .collect(Collectors.toList());
-            PDFGenerator.genererRapportVentes(username, ventes, outputStream); //Added username parameter
-            LOGGER.info("Rapport des ventes PDF généré avec succès");
+            PDFGenerator.genererRapportVentes(ventes, outputStream);
+            LOGGER.info("Rapport des ventes PDF généré avec succès pour " + username);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport PDF des ventes", e);
             throw new RuntimeException("Erreur lors de la génération du rapport PDF des ventes", e);
@@ -231,8 +232,8 @@ public class ReportController {
             Map<String, Double> benefices = calculerBenefices(chiffreAffaires, couts);
             Map<String, Double> marges = calculerMarges(chiffreAffaires, couts);
 
-            PDFGenerator.genererRapportFinancier(username, chiffreAffaires, couts, benefices, marges, outputStream); //Added username parameter
-            LOGGER.info("Rapport financier PDF généré avec succès");
+            PDFGenerator.genererRapportFinancier(chiffreAffaires, couts, benefices, marges, outputStream);
+            LOGGER.info("Rapport financier PDF généré avec succès pour " + username);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport financier PDF", e);
             throw new RuntimeException("Erreur lors de la génération du rapport financier PDF", e);
@@ -543,7 +544,7 @@ public class ReportController {
         try {
             Map<String, Double> achatsFournisseurs = analyserAchatsFournisseurs(debut, fin);
             ExcelGenerator.genererRapportAchatsFournisseurs(username, achatsFournisseurs, cheminFichier);
-            LOGGER.info("Rapport des achats fournisseurs Excel généré avec succès");
+            LOGGER.info("Rapport des achats fournisseurs Excel généré avec succès pour " + username);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport des achats fournisseurs Excel", e);
             throw new RuntimeException("Erreur lors de la génération du rapport des achats fournisseurs Excel", e);
@@ -718,20 +719,20 @@ public class ReportController {
             kpis.put("Marge moyenne", marges.getOrDefault("Marge brute (%)", 0.0));
 
             return kpis;
-        } catch (Exception e) {
+        } catch(Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors du calcul des KPIs", e);
             return kpis;
         }
     }
+
     public void genererRapportAchatsFournisseursExcel(String username, LocalDateTime debut, LocalDateTime fin, String cheminFichier) {
         try {
             Map<String, Double> achatsFournisseurs = analyserAchatsFournisseurs(debut, fin);
             ExcelGenerator.genererRapportAchatsFournisseurs(username, achatsFournisseurs, cheminFichier);
-            LOGGER.info("Rapport des achats fournisseurs Excel généré avec succès");
+            LOGGER.info("Rapport des achats fournisseurs Excel généré avec succès pour " + username);
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport des achats fournisseurs Excel", e);
             throw new RuntimeException("Erreur lors de la génération du rapport des achats fournisseurs Excel", e);
         }
     }
-
 }
