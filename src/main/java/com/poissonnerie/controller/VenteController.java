@@ -114,7 +114,7 @@ public class VenteController {
     private void chargerLignesVente(Connection conn, Vente vente) throws SQLException {
         String sql = "SELECT l.*, p.* FROM lignes_vente l " +
                     "JOIN produits p ON l.produit_id = p.id " +
-                    "WHERE l.vente_id = ? AND l.supprime = false";
+                    "WHERE l.vente_id = ?";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, vente.getId());
