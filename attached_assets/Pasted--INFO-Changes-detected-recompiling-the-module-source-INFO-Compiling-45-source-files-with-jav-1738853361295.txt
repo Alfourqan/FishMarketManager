@@ -1,0 +1,79 @@
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 45 source files with javac [debug target 11] to target/classes
+[INFO] -------------------------------------------------------------
+[WARNING] COMPILATION WARNING : 
+[INFO] -------------------------------------------------------------
+[WARNING] system modules path not set in conjunction with -source 11
+[INFO] 1 warning
+[INFO] -------------------------------------------------------------
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[727,12] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[729,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[735,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[736,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[739,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[742,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[743,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[746,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[750,21] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[751,21] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[752,17] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[755,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[758,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[765,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[771,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[772,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[774,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[775,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[777,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[778,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[780,12] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[783,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[784,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[785,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[787,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[788,9] class, interface, or enum expected
+[INFO] 26 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  7.010 s
+[INFO] Finished at: 2025-02-06T14:48:09Z
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project gestion-poissonnerie: Compilation failure: Compilation failure: 
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[727,12] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[729,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[735,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[736,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[739,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[742,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[743,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[746,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[750,21] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[751,21] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[752,17] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[755,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[758,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[765,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[771,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[772,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[774,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[775,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[777,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[778,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[780,12] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[783,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[784,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[785,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[787,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/ReportController.java:[788,9] class, interface, or enum expected
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

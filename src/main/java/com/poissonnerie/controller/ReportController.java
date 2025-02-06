@@ -138,28 +138,6 @@ public class ReportController {
     }
 
 
-    public void genererRapportFinancierExcel(String username, LocalDateTime debut, LocalDateTime fin, String cheminFichier) {
-        try {
-            Map<String, Double> chiffreAffaires = calculerChiffreAffaires(debut, fin);
-            Map<String, Double> couts = calculerCouts(debut, fin);
-            Map<String, Double> benefices = calculerBenefices(chiffreAffaires, couts);
-            Map<String, Double> marges = calculerMarges(chiffreAffaires, couts);
-
-            ExcelGenerator.genererRapportFinancier(
-                username,
-                chiffreAffaires,
-                couts,
-                benefices,
-                marges,
-                cheminFichier
-            );
-            LOGGER.info("Rapport financier généré avec succès");
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport financier", e);
-            throw new RuntimeException("Erreur lors de la génération du rapport financier", e);
-        }
-    }
-
     public void genererRapportCreancesExcel(String username, String cheminFichier) {
         try {
             List<Client> clients = clientController.getClients().stream()
@@ -344,7 +322,6 @@ public class ReportController {
 
         return marges;
     }
-
 
     public void genererRapportStocksPDF(List<Produit> produits, Map<String, Double> statistiques, ByteArrayOutputStream outputStream) {
         try {
@@ -657,7 +634,6 @@ public class ReportController {
     }
 
 
-
     public Map<String, Double> analyserComparaisonPeriodes(LocalDateTime debutPeriode1, LocalDateTime finPeriode1,
             LocalDateTime debutPeriode2, LocalDateTime finPeriode2) {
         Map<String, Double> comparaisons = new HashMap<>();
@@ -716,60 +692,30 @@ public class ReportController {
                 .flatMap(v -> v.getLignes().stream())
                 .collect(Collectors.groupingBy(
                     ligne -> ligne.getProduit().getCategorie(),
-                    Collectors.summingDouble(ligne -> ligne.getPrixUnitaire() * ligne.getQuantite())
+                    Collectors.summingDouble(ligne -> ligne.getQuantite() * ligne.getPrixUnitaire())
                 ));
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de l'analyse des ventes par catégorie", e);
             return new HashMap<>();
-        }        }
+        }
     }
 
     public Map<String, Double> calculerKPIs(LocalDateTime debut, LocalDateTime fin) {
         Map<String, Double> kpis = new HashMap<>();
         try {
-            List<Vente> ventes = venteController.getVentes().stream()
-                .filter(v -> !v.getDate().isBefore(debut) && !v.getDate().isAfter(fin))
-                .collect(Collectors.toList());
-
             // Chiffre d'affaires
-            double ca = ventes.stream().mapToDouble(Vente::getTotal).sum();
-            kpis.put("Chiffre d'affaires", ca);
+            Map<String, Double> ca = calculerChiffreAffaires(debut, fin);
+            kpis.put("CA Total", ca.getOrDefault("Total période", 0.0));
 
-            // Nombre de ventes
-            kpis.put("Nombre de ventes", (double) ventes.size());
+            // Taux de rotation des stocks
+            List<Produit> produits = produitController.getProduits();
+            double tauxRotation = calculerTauxRotationStock(produits);
+            kpis.put("Taux de rotation stock", tauxRotation);
 
-            // Panier moyen
-            double panierMoyen = ventes.isEmpty() ? 0 : ca / ventes.size();
-            kpis.put("Panier moyen", panierMoyen);
-
-            // Taux de marge moyen
-            double margeMoyenne = ventes.stream()
-                .flatMap(v -> v.getLignes().stream())
-                .mapToDouble(ligne -> {
-                    double prixVente = ligne.getPrixUnitaire() * ligne.getQuantite();
-                    double coutAchat = ligne.getProduit().getPrixAchat() * ligne.getQuantite();
-                    return ((prixVente - coutAchat) / prixVente) * 100;
-                })
-                .average()
-                .orElse(0.0);
-            kpis.put("Taux de marge moyen (%)", margeMoyenne);
-
-            // Top produits
-            Map<String, Long> ventesParProduit = ventes.stream()
-                .flatMap(v -> v.getLignes().stream())
-                .collect(Collectors.groupingBy(
-                    ligne -> ligne.getProduit().getNom(),
-                    Collectors.summingLong(Vente.LigneVente::getQuantite)
-                ));
-
-            ventesParProduit.entrySet().stream()
-                .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
-                .limit(5)
-                .forEach(entry -> kpis.put("Ventes " + entry.getKey(), entry.getValue().doubleValue()));
-
-            // Rotation du stock
-            Map<String, Double> performanceStock = analyserPerformanceStock();
-            kpis.putAll(performanceStock);
+            // Marge moyenne
+            Map<String, Double> couts = calculerCouts(debut, fin);
+            Map<String, Double> marges = calculerMarges(ca, couts);
+            kpis.put("Marge moyenne", marges.getOrDefault("Marge brute (%)", 0.0));
 
             return kpis;
         } catch (Exception e) {
