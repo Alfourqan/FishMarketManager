@@ -58,32 +58,35 @@ public class AuthenticationController {
                 originalAutoCommit = conn.getAutoCommit();
                 conn.setAutoCommit(false);
 
-                DatabaseMetaData dbm = conn.getMetaData();
-                ResultSet tables = dbm.getTables(null, null, "users", null);
-
-                if (!tables.next()) {
-                    try (Statement stmt = conn.createStatement()) {
-                        stmt.execute("CREATE TABLE IF NOT EXISTS users (" +
-                            "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                            "username TEXT NOT NULL UNIQUE," +
-                            "password TEXT NOT NULL," +
-                            "active BOOLEAN DEFAULT true," +
-                            "created_at INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000)," +
-                            "last_login INTEGER," +
-                            "force_password_reset BOOLEAN DEFAULT false)");
+                // Vérifier si l'utilisateur admin existe déjà
+                try (PreparedStatement checkStmt = conn.prepareStatement(
+                    "SELECT id FROM users WHERE username = ?")) {
+                    checkStmt.setString(1, "admin");
+                    ResultSet rs = checkStmt.executeQuery();
+                    if (rs.next()) {
+                        LOGGER.info("L'utilisateur admin existe déjà avec l'ID: " + rs.getInt("id"));
+                        conn.commit();
+                        return;
                     }
                 }
 
-                try (PreparedStatement deleteStmt = conn.prepareStatement(
-                    "DELETE FROM users WHERE username = ?")) {
-                    deleteStmt.setString(1, "admin");
-                    deleteStmt.executeUpdate();
-                    LOGGER.info("Ancien compte admin supprimé");
+                // Créer la table users si elle n'existe pas
+                try (Statement stmt = conn.createStatement()) {
+                    stmt.execute("CREATE TABLE IF NOT EXISTS users (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                        "username TEXT NOT NULL UNIQUE," +
+                        "password TEXT NOT NULL," +
+                        "active BOOLEAN DEFAULT true," +
+                        "created_at INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000)," +
+                        "last_login INTEGER," +
+                        "force_password_reset BOOLEAN DEFAULT false)");
                 }
 
                 String salt = BCrypt.gensalt(10);
                 String hashedPassword = BCrypt.hashpw(DEFAULT_ADMIN_PASSWORD, salt);
 
+                // Créer l'utilisateur admin
+                int userId;
                 try (PreparedStatement insertStmt = conn.prepareStatement(
                     "INSERT INTO users (username, password, active) VALUES (?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS)) {
@@ -94,12 +97,23 @@ public class AuthenticationController {
 
                     ResultSet rs = insertStmt.getGeneratedKeys();
                     if (rs.next()) {
-                        int userId = rs.getInt(1);
+                        userId = rs.getInt(1);
                         LOGGER.info("Compte admin créé avec ID: " + userId);
 
+                        // Créer et attribuer le rôle admin
                         Role adminRole = new Role("ADMIN", "Administrateur système");
                         adminRole = roleController.creerRole(adminRole);
-                        roleController.attribuerRoleUtilisateur(userId, adminRole.getId());
+
+                        // Vérifier si le rôle est déjà attribué
+                        try (PreparedStatement checkRoleStmt = conn.prepareStatement(
+                            "SELECT COUNT(*) FROM users_roles WHERE user_id = ? AND role_id = ?")) {
+                            checkRoleStmt.setInt(1, userId);
+                            checkRoleStmt.setInt(2, adminRole.getId());
+                            ResultSet roleRs = checkRoleStmt.executeQuery();
+                            if (!roleRs.next() || roleRs.getInt(1) == 0) {
+                                roleController.attribuerRoleUtilisateur(userId, adminRole.getId());
+                            }
+                        }
                     }
                 }
 
@@ -130,6 +144,7 @@ public class AuthenticationController {
                 if (conn != null) {
                     try {
                         conn.setAutoCommit(originalAutoCommit);
+                        conn.close();
                     } catch (SQLException e) {
                         LOGGER.log(Level.WARNING, "Erreur lors de la restauration de l'autocommit", e);
                     }
