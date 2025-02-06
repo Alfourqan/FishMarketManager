@@ -29,7 +29,8 @@ import java.awt.event.ItemEvent;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import javax.imageio.ImageIO;
-
+import java.util.LinkedHashMap;
+import java.util.stream.Collectors;
 
 public class ReportViewSwing {
     private static final Logger LOGGER = Logger.getLogger(ReportViewSwing.class.getName());
@@ -206,34 +207,32 @@ public class ReportViewSwing {
                 break;
             case PIE:
                 DefaultPieDataset<String> pieDataset = new DefaultPieDataset<>();
-                data.forEach(pieDataset::setValue);
+                data.forEach((key, value) -> {
+                    if (value != null && !Double.isNaN(value)) {
+                        pieDataset.setValue(key, value);
+                    }
+                });
                 chart = ChartFactory.createPieChart(title, pieDataset, true, true, false);
                 break;
             default:
                 return;
         }
 
+        customizeChartAppearance(chart);
         ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new Dimension(300, 200));
         addStyledChartPanel(chartPanel, title);
     }
 
-    private void addStyledChartPanel(ChartPanel chartPanel, String title) {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBackground(Color.WHITE);
-        panel.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(220, 220, 220)),
-            BorderFactory.createEmptyBorder(10, 10, 10, 10)
-        ));
+    private void customizeChartAppearance(JFreeChart chart) {
+        chart.setBackgroundPaint(Color.WHITE);
+        chart.getPlot().setBackgroundPaint(Color.WHITE);
 
-        JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(SUBTITLE_FONT);
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
-
-        panel.add(titleLabel, BorderLayout.NORTH);
-        panel.add(chartPanel, BorderLayout.CENTER);
-
-        statistiquesPanel.add(panel);
+        if (chart.getPlot() instanceof CategoryPlot) {
+            CategoryPlot plot = (CategoryPlot) chart.getPlot();
+            plot.setRangeGridlinePaint(new Color(220, 220, 220));
+            plot.setDomainGridlinePaint(new Color(220, 220, 220));
+        }
     }
 
     private void showSuccessMessage(String titre, String message) {
@@ -468,7 +467,7 @@ public class ReportViewSwing {
 
             } catch (SecurityException e) {
                 LOGGER.warning("Accès refusé pour l'utilisateur " + username + " au rapport " + type);
-                showErrorMessage("Accès refusé", 
+                showErrorMessage("Accès refusé",
                     "Vous n'avez pas les permissions nécessaires pour générer ce rapport. Contactez votre administrateur.");
             }
 
@@ -834,7 +833,7 @@ public class ReportViewSwing {
         TableRowSorter<javax.swing.table.TableModel> sorter = new TableRowSorter<>(table.getModel());
         table.setRowSorter(sorter);
 
-        searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+        searchField.getDocument().addDocumentListener(new javax`.swing.event.DocumentListener() {
             public void changedUpdate(javax.swing.event.DocumentEvent e) { filter(); }
             public void removeUpdate(javax.swing.event.DocumentEvent e) { filter(); }
             public void insertUpdate(javax.swing.event.DocumentEvent e) { filter(); }

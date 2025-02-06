@@ -168,39 +168,13 @@ public class ReportController {
 
     // Analysis Methods
     private Map<String, Double> calculerChiffreAffaires(LocalDateTime debut, LocalDateTime fin) {
+        Map<String, Double> caParPeriode = new HashMap<>();
         List<Vente> ventes = venteController.getVentes().stream()
             .filter(v -> !v.getDate().isBefore(debut) && !v.getDate().isAfter(fin))
             .collect(Collectors.toList());
-        Map<String, Double> caParPeriode = new HashMap<>();
 
-        // Calcul par mois
-        Map<String, Double> caParMois = ventes.stream()
-            .collect(Collectors.groupingBy(
-                v -> v.getDate().format(java.time.format.DateTimeFormatter.ofPattern("MM/yyyy")),
-                Collectors.summingDouble(Vente::getTotal)
-            ));
-
-        // Calcul des variations mensuelles
-        List<String> mois = new ArrayList<>(caParMois.keySet());
-        Collections.sort(mois);
-        for (int i = 1; i < mois.size(); i++) {
-            double moisPrecedent = caParMois.get(mois.get(i-1));
-            double moisActuel = caParMois.get(mois.get(i));
-            if (moisPrecedent > 0) {
-                double variation = ((moisActuel - moisPrecedent) / moisPrecedent) * 100;
-                caParPeriode.put("Variation " + mois.get(i), variation);
-            }
-        }
-
-        caParPeriode.putAll(caParMois);
-        double total = caParMois.values().stream().mapToDouble(Double::doubleValue).sum();
+        double total = ventes.stream().mapToDouble(Vente::getTotal).sum();
         caParPeriode.put("Total période", total);
-
-        double moyenneMensuelle = caParMois.values().stream()
-            .mapToDouble(Double::doubleValue)
-            .average()
-            .orElse(0.0);
-        caParPeriode.put("Moyenne mensuelle", moyenneMensuelle);
 
         return caParPeriode;
     }
@@ -220,12 +194,7 @@ public class ReportController {
         Map<String, Double> benefices = new HashMap<>();
         double totalCA = chiffreAffaires.getOrDefault("Total période", 0.0);
         double totalCouts = couts.getOrDefault("Total achats", 0.0);
-        double beneficeNet = totalCA - totalCouts;
-
-        benefices.put("Chiffre d'affaires", totalCA);
-        benefices.put("Coûts totaux", totalCouts);
-        benefices.put("Bénéfice net", beneficeNet);
-
+        benefices.put("Bénéfice net", totalCA - totalCouts);
         return benefices;
     }
 
@@ -390,21 +359,18 @@ public class ReportController {
                 .filter(v -> !v.getDate().isBefore(debut) && !v.getDate().isAfter(fin))
                 .collect(Collectors.toList());
 
-            // Évolution journalière
             Map<String, Double> ventesParJour = ventes.stream()
                 .collect(Collectors.groupingBy(
                     v -> v.getDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
                     Collectors.summingDouble(Vente::getTotal)
                 ));
 
-            // Calcul des moyennes
             double moyenneJournaliere = ventesParJour.values().stream()
                 .mapToDouble(Double::doubleValue)
                 .average()
                 .orElse(0.0);
             tendances.put("Moyenne journalière", moyenneJournaliere);
 
-            // Analyse des tendances par produit
             Map<String, Double> ventesParProduit = ventes.stream()
                 .flatMap(v -> v.getLignes().stream())
                 .collect(Collectors.groupingBy(
@@ -427,10 +393,19 @@ public class ReportController {
     public Map<String, Double> analyserStocksParCategorie() {
         try {
             List<Produit> produits = produitController.getProduits();
-            return produits.stream()
+            Map<String, Double> stocksParCategorie = produits.stream()
                 .collect(Collectors.groupingBy(
                     Produit::getCategorie,
                     Collectors.summingDouble(p -> p.getStock() * p.getPrixVente())
+                ));
+
+            return stocksParCategorie.entrySet().stream()
+                .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
+                .collect(Collectors.toMap(
+                    Map.Entry::getKey,
+                    Map.Entry::getValue,
+                    (e1, e2) -> e1,
+                    LinkedHashMap::new
                 ));
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Erreur lors de l'analyse des stocks par catégorie", e);
