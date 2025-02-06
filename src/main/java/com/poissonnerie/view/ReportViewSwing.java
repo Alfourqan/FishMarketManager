@@ -23,6 +23,9 @@ import javax.swing.border.TitledBorder;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import org.jfree.chart.*;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PiePlot;
+import org.jfree.chart.plot.Plot;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
 import java.awt.event.ItemEvent;
@@ -30,11 +33,9 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import javax.imageio.ImageIO;
 import java.util.LinkedHashMap;
-import java.util.stream.Collectors;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.TableModel;
-import java.time.format.DateTimeFormatter;
 import javax.swing.ListSelectionModel;
 
 
@@ -238,6 +239,11 @@ public class ReportViewSwing {
             CategoryPlot plot = (CategoryPlot) chart.getPlot();
             plot.setRangeGridlinePaint(new Color(220, 220, 220));
             plot.setDomainGridlinePaint(new Color(220, 220, 220));
+        }
+        if (chart.getPlot() instanceof PiePlot) {
+            PiePlot plot = (PiePlot) chart.getPlot();
+            plot.setBackgroundPaint(Color.WHITE);
+            plot.setOutlineVisible(false);
         }
     }
 
