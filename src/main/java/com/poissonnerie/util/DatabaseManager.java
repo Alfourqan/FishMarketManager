@@ -91,8 +91,11 @@ public class DatabaseManager {
         }
 
         try (Statement stmt = conn.createStatement()) {
-            stmt.execute("PRAGMA synchronous = NORMAL");
+            // Execute WAL and synchronous mode settings before other PRAGMAs
             stmt.execute("PRAGMA journal_mode = WAL");
+            stmt.execute("PRAGMA synchronous = NORMAL");
+
+            // Now execute other PRAGMAs
             stmt.execute("PRAGMA cache_size = 2000");
             stmt.execute("PRAGMA page_size = 4096");
             stmt.execute("PRAGMA foreign_keys = ON");
@@ -131,35 +134,43 @@ public class DatabaseManager {
         }
 
         Connection conn = null;
-        boolean originalAutoCommit = true;
-
         try {
             conn = getOrCreateConnection();
-            originalAutoCommit = conn.getAutoCommit();
+
+            // Initialize PRAGMAs first, outside of any transaction
+            initializePragmas(conn);
+
+            // Now start transaction for schema creation
             conn.setAutoCommit(false);
-
-            String schema = loadSchemaFromResource();
-            executeSchema(conn, schema);
-
-            conn.commit();
-            LOGGER.info("Base de données initialisée avec succès");
-
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de la base de données", e);
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException re) {
-                    LOGGER.log(Level.SEVERE, "Erreur lors du rollback", re);
+            try {
+                String schema = loadSchemaFromResource();
+                executeSchema(conn, schema);
+                conn.commit();
+                LOGGER.info("Base de données initialisée avec succès");
+            } catch (SQLException e) {
+                if (conn != null) {
+                    try {
+                        conn.rollback();
+                    } catch (SQLException re) {
+                        LOGGER.log(Level.SEVERE, "Erreur lors du rollback", re);
+                    }
+                }
+                throw e;
+            } finally {
+                if (conn != null) {
+                    try {
+                        conn.setAutoCommit(true);
+                    } catch (SQLException e) {
+                        LOGGER.log(Level.WARNING, "Erreur lors de la restauration de l'autocommit", e);
+                    }
                 }
             }
-            throw e;
         } finally {
             if (conn != null) {
                 try {
-                    conn.setAutoCommit(originalAutoCommit);
+                    conn.close();
                 } catch (SQLException e) {
-                    LOGGER.log(Level.WARNING, "Erreur lors de la restauration de l'autocommit", e);
+                    LOGGER.log(Level.WARNING, "Erreur lors de la fermeture de la connexion", e);
                 }
             }
         }
