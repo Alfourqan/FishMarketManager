@@ -23,11 +23,22 @@ public class DatabaseManager {
     private static final long RETRY_DELAY_MS = 1000;
 
     static {
-        config = new SQLiteConfig();
-        config.setOpenMode(SQLiteOpenMode.READWRITE);
-        config.setBusyTimeout(30000);
-        config.setJournalMode(SQLiteConfig.JournalMode.WAL);
-        config.setSynchronous(SQLiteConfig.SynchronousMode.NORMAL);
+        try {
+            config = new SQLiteConfig();
+            config.setOpenMode(SQLiteOpenMode.READWRITE);
+            config.setBusyTimeout(30000);
+            config.setSharedCache(true);
+            config.enableLoadExtension(true);
+            config.setJournalMode(SQLiteConfig.JournalMode.WAL);
+            config.setSynchronous(SQLiteConfig.SynchronousMode.NORMAL);
+            config.setTempStore(SQLiteConfig.TempStore.MEMORY);
+            config.setCacheSize(2000);
+            config.setPageSize(4096);
+            LOGGER.info("Configuration SQLite initialisée");
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de la configuration SQLite", e);
+            throw new RuntimeException(e);
+        }
     }
 
     private DatabaseManager() {
@@ -42,10 +53,23 @@ public class DatabaseManager {
     }
 
     private static Connection createNewConnection() throws SQLException {
-        Connection conn = config.createConnection("jdbc:sqlite:" + DB_FILE);
-        setupPragmas(conn);
-        LOGGER.info("Nouvelle connexion créée");
-        return conn;
+        try {
+            Connection conn = config.createConnection("jdbc:sqlite:" + DB_FILE);
+            if (conn == null) {
+                throw new SQLException("Impossible de créer une connexion à la base de données");
+            }
+
+            try (Statement stmt = conn.createStatement()) {
+                stmt.execute("PRAGMA foreign_keys = ON");
+                stmt.execute("PRAGMA busy_timeout = 30000");
+            }
+
+            LOGGER.info("Nouvelle connexion créée avec succès");
+            return conn;
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la création de la connexion", e);
+            throw e;
+        }
     }
 
     private static Connection getOrCreateConnection() throws SQLException {
@@ -54,22 +78,6 @@ public class DatabaseManager {
                 singletonConnection = createNewConnection();
             }
             return singletonConnection;
-        }
-    }
-
-    private static void setupPragmas(Connection conn) throws SQLException {
-        if (conn == null || conn.isClosed()) {
-            throw new SQLException("La connexion est null ou fermée");
-        }
-
-        try (Statement stmt = conn.createStatement()) {
-            // Configuration de base
-            stmt.execute("PRAGMA foreign_keys = ON");
-            stmt.execute("PRAGMA cache_size = 2000");
-            stmt.execute("PRAGMA page_size = 4096");
-            stmt.execute("PRAGMA busy_timeout = 30000");
-            stmt.execute("PRAGMA temp_store = MEMORY");
-            LOGGER.info("PRAGMAs initialisés avec succès");
         }
     }
 
@@ -107,15 +115,37 @@ public class DatabaseManager {
 
     private static void setupDatabase() throws SQLException {
         Connection conn = null;
+        boolean originalAutoCommit = true;
+
         try {
+            // Créer une nouvelle connexion spécifique pour l'initialisation
             conn = createNewConnection();
+            originalAutoCommit = conn.getAutoCommit();
             conn.setAutoCommit(false);
 
             String schema = loadSchemaFromResource();
-            executeSchema(conn, schema);
+            String[] statements = schema.split(";");
+
+            try (Statement stmt = conn.createStatement()) {
+                for (String sql : statements) {
+                    sql = sql.trim();
+                    if (!sql.isEmpty()) {
+                        try {
+                            stmt.execute(sql);
+                        } catch (SQLException e) {
+                            if (!e.getMessage().contains("table already exists")) {
+                                throw e;
+                            }
+                        }
+                    }
+                }
+            }
 
             conn.commit();
+            LOGGER.info("Schéma de base de données créé avec succès");
+
         } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de la base de données", e);
             if (conn != null) {
                 try {
                     conn.rollback();
@@ -123,10 +153,11 @@ public class DatabaseManager {
                     LOGGER.log(Level.SEVERE, "Erreur lors du rollback", re);
                 }
             }
-            throw new SQLException("Erreur lors de l'initialisation de la base de données", e);
+            throw e;
         } finally {
             if (conn != null) {
                 try {
+                    conn.setAutoCommit(originalAutoCommit);
                     conn.close();
                 } catch (SQLException e) {
                     LOGGER.log(Level.WARNING, "Erreur lors de la fermeture de la connexion", e);
@@ -145,25 +176,6 @@ public class DatabaseManager {
             }
         } catch (IOException e) {
             throw new SQLException("Erreur lors de la lecture du schéma", e);
-        }
-    }
-
-    private static void executeSchema(Connection conn, String schema) throws SQLException {
-        try (Statement stmt = conn.createStatement()) {
-            String[] statements = schema.split(";");
-            for (String sql : statements) {
-                sql = sql.trim();
-                if (!sql.isEmpty()) {
-                    try {
-                        stmt.execute(sql);
-                    } catch (SQLException e) {
-                        if (!e.getMessage().contains("table already exists")) {
-                            throw e;
-                        }
-                    }
-                }
-            }
-            LOGGER.info("Schéma exécuté avec succès");
         }
     }
 
