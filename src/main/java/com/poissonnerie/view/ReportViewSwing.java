@@ -830,17 +830,17 @@ public class ReportViewSwing {
             }
         };
 
-        TableRowSorter<javax.swing.table.TableModel> sorter = new TableRowSorter<>(table.getModel());
+        TableRowSorter<javax.swing.table.TableModel> sorter = newTableRowSorter<javax.swing.table.TableModel> sorter = new TableRowSorter<>(table.getModel());
         table.setRowSorter(sorter);
 
-        searchField.getDocument().addDocumentListener(new javax`.swing.event.DocumentListener() {
+        searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             public void changedUpdate(javax.swing.event.DocumentEvent e) { filter(); }
             public void removeUpdate(javax.swing.event.DocumentEvent e) { filter(); }
             public void insertUpdate(javax.swing.event.DocumentEvent e) { filter(); }
 
             private void filter() {
                 String text = searchField.getText();
-                if (text.trim().isEmpty()) {
+                if (text.trim().length() == 0) {
                     sorter.setRowFilter(null);
                 } else {
                     sorter.setRowFilter(RowFilter.regexFilter("(?i)" + text));
@@ -904,17 +904,14 @@ public class ReportViewSwing {
         });
         buttonPanel.add(rapportGlobalBtn);
 
-        JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 10));
-        scrollPane.getViewport().setBackground(Color.WHITE);
-
-        JPanel contentPanel = new JPanel(new BorderLayout());
-        contentPanel.add(searchPanel, BorderLayout.NORTH);
-        contentPanel.add(scrollPane, BorderLayout.CENTER);
+        JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        contentPanel.add(new JScrollPane(table), BorderLayout.CENTER);
         contentPanel.add(buttonPanel, BorderLayout.SOUTH);
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
+        dialog.add(searchPanel, BorderLayout.NORTH);
         dialog.add(contentPanel, BorderLayout.CENTER);
+
         return dialog;
     }
 
@@ -943,51 +940,9 @@ public class ReportViewSwing {
 
     private void handleError(String operation, Exception e) {
         LOGGER.log(Level.SEVERE, "Erreur lors de " + operation, e);
-        showErrorMessage("Erreur", MSG_ERREUR_GENERATION + e.getMessage());
+        showErrorMessage("Erreur", "Une erreur est survenue lors de " + operation + ": " + e.getMessage());
     }
 
-    private void afficherDetailCreancesClient(Client client) {
-        try {
-            JDialog dialog = createDetailDialog(client);
-            dialog.setVisible(true);
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de l'affichage des détails", e);
-            showErrorMessage("Erreur", "Impossible d'afficher les détails : " + e.getMessage());
-        }
-    }
-    private JDialog createDetailDialog(Client client) {
-        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(mainPanel),
-            "Détails créances - " + client.getNom(), true);
-        dialog.setLayout(new BorderLayout(10, 10));
-        dialog.setSize(600, 400);
-        dialog.setLocationRelativeTo(null);
-
-        // Panel principal
-        JPanel panel = new JPanel(new BorderLayout(10, 10));
-        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-
-        // Informations client
-        JPanel infoPanel = new JPanel(new GridLayout(3, 2, 5, 5));
-        infoPanel.add(new JLabel("Nom:"));
-        infoPanel.add(new JLabel(client.getNom()));
-        infoPanel.add(new JLabel("Téléphone:"));
-        infoPanel.add(new JLabel(client.getTelephone()));
-        infoPanel.add(new JLabel("Solde actuel:"));
-        infoPanel.add(new JLabel(String.format("%.2f €", client.getSolde())));
-
-        panel.add(infoPanel, BorderLayout.NORTH);
-
-        // Boutons
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton closeButton = createStyledButton("Fermer", MaterialDesign.MDI_CLOSE, Color.GRAY);
-        closeButton.addActionListener(e -> dialog.dispose());
-        buttonPanel.add(closeButton);
-
-        panel.add(buttonPanel, BorderLayout.SOUTH);
-        dialog.add(panel);
-
-        return dialog;
-    }
     private void showInfoMessage(String titre, String message) {
         JOptionPane.showMessageDialog(mainPanel, message, titre, JOptionPane.INFORMATION_MESSAGE);
     }
@@ -1020,5 +975,22 @@ public class ReportViewSwing {
 
         button.addActionListener(e -> action.run());
         return button;
+    }
+    private void addStyledChartPanel(ChartPanel chartPanel, String title) {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(220, 220, 220)),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(SUBTITLE_FONT);
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+
+        panel.add(titleLabel, BorderLayout.NORTH);
+        panel.add(chartPanel, BorderLayout.CENTER);
+
+        statistiquesPanel.add(panel);
     }
 }

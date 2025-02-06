@@ -1,0 +1,241 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------< com.poissonnerie:gestion-poissonnerie >----------------
+[INFO] Building gestion-poissonnerie 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ gestion-poissonnerie ---
+[INFO] Deleting /home/runner/workspace/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ gestion-poissonnerie ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ gestion-poissonnerie ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 45 source files with javac [debug target 11] to target/classes
+[INFO] -------------------------------------------------------------
+[WARNING] COMPILATION WARNING : 
+[INFO] -------------------------------------------------------------
+[WARNING] system modules path not set in conjunction with -source 11
+[INFO] 1 warning
+[INFO] -------------------------------------------------------------
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[836,64] illegal character: '`'
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[836,96] ';' expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[837,13] illegal start of expression
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[849,10] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[851,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[852,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[853,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[854,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[855,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[857,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[858,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[859,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[860,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[862,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[864,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[865,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[866,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[867,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[868,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[869,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[871,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[873,20] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[876,17] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[877,17] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[878,17] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[879,17] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[881,17] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[883,21] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[884,21] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[885,17] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[887,17] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[888,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[891,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[892,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[893,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[894,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[896,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[897,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[898,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[900,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[903,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[904,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[905,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[907,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[908,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[909,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[911,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[912,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[913,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[914,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[915,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[917,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[918,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[919,5] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[926,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[927,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[929,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[930,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[932,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[938,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[940,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[946,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[947,5] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[952,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[953,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[955,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[956,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[961,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[962,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[963,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[966,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[967,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[970,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[971,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[972,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[973,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[974,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[975,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[976,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[978,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[981,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[982,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[983,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[984,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[986,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[987,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[989,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[990,5] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[993,5] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[997,5] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[1001,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[1002,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[1003,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[1004,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[1005,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[1011,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[1012,20] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[1014,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[1016,20] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[1018,13] class, interface, or enum expected
+[INFO] 100 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  1.951 s
+[INFO] Finished at: 2025-02-06T15:23:18Z
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project gestion-poissonnerie: Compilation failure: Compilation failure: 
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[836,64] illegal character: '`'
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[836,96] ';' expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[837,13] illegal start of expression
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[849,10] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[851,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[852,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[853,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[854,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[855,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[857,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[858,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[859,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[860,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[862,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[864,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[865,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[866,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[867,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[868,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[869,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[871,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[873,20] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[876,17] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[877,17] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[878,17] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[879,17] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[881,17] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[883,21] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[884,21] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[885,17] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[887,17] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[888,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[891,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[892,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[893,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[894,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[896,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[897,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[898,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[900,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[903,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[904,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[905,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[907,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[908,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[909,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[911,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[912,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[913,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[914,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[915,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[917,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[918,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[919,5] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[926,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[927,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[929,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[930,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[932,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[938,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[940,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[946,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[947,5] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[952,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[953,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[955,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[956,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[961,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[962,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[963,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[966,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[967,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[970,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[971,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[972,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[973,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[974,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[975,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[976,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[978,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[981,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[982,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[983,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[984,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[986,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[987,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[989,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[990,5] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[993,5] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[997,5] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[1001,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[1002,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[1003,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[1004,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[1005,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[1011,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[1012,20] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[1014,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[1016,20] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[1018,13] class, interface, or enum expected
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
