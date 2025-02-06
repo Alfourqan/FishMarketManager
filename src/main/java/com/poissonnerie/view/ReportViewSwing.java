@@ -31,6 +31,12 @@ import org.apache.pdfbox.rendering.PDFRenderer;
 import javax.imageio.ImageIO;
 import java.util.LinkedHashMap;
 import java.util.stream.Collectors;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.table.TableModel;
+import java.time.format.DateTimeFormatter;
+import javax.swing.ListSelectionModel;
+
 
 public class ReportViewSwing {
     private static final Logger LOGGER = Logger.getLogger(ReportViewSwing.class.getName());
@@ -805,38 +811,43 @@ public class ReportViewSwing {
         dialog.setSize(800, 600);
         dialog.setLocationRelativeTo(null);
 
+        // Search panel
         JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         searchPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 5, 10));
         JTextField searchField = new JTextField(20);
         searchPanel.add(new JLabel("Rechercher: "));
         searchPanel.add(searchField);
 
+        // Table creation and setup
+        String[] columnNames = {"Client", "Téléphone", "Solde (€)", "Date"};
+        Object[][] data = clientsAvecCreances.stream()
+            .map(c -> new Object[]{
+                c.getNom(),
+                c.getTelephone(),
+                String.format("%.2f", c.getSolde()),
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
+            })
+            .toArray(Object[][]::new);
 
-        String[] colonnes = {"Client", "Téléphone", "Solde", "Actions"};
-        Object[][] donnees = new Object[clientsAvecCreances.size()][4];
+        JTable table = new JTable(data, columnNames);
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.setRowHeight(25);
+        table.getTableHeader().setReorderingAllowed(false);
 
-        for (int i = 0; i < clientsAvecCreances.size(); i++) {
-            Client client = clientsAvecCreances.get(i);
-            donnees[i][0] = client.getNom();
-            donnees[i][1] = client.getTelephone();
-            donnees[i][2] = String.format("%.2f €", client.getSolde());
-            donnees[i][3] = client;
-        }
+        // Style the table
+        table.setShowGrid(false);
+        table.setShowHorizontalLines(true);
+        table.setGridColor(new Color(220, 220, 220));
+        table.getTableHeader().setBackground(new Color(245, 245, 245));
+        table.getTableHeader().setFont(SUBTITLE_FONT);
 
-        JTable table = new JTable(donnees, colonnes) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return column == 3;
-            }
-        };
-
-        TableRowSorter<javax.swing.table.TableModel> sorter = newTableRowSorter<javax.swing.table.TableModel> sorter = new TableRowSorter<>(table.getModel());
+        TableRowSorter<TableModel> sorter = new TableRowSorter<>(table.getModel());
         table.setRowSorter(sorter);
 
-        searchField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-            public void changedUpdate(javax.swing.event.DocumentEvent e) { filter(); }
-            public void removeUpdate(javax.swing.event.DocumentEvent e) { filter(); }
-            public void insertUpdate(javax.swing.event.DocumentEvent e) { filter(); }
+        searchField.getDocument().addDocumentListener(new DocumentListener() {
+            public void changedUpdate(DocumentEvent e) { filter(); }
+            public void removeUpdate(DocumentEvent e) {filter(); }
+            public void insertUpdate(DocumentEvent e) { filter(); }
 
             private void filter() {
                 String text = searchField.getText();
@@ -848,69 +859,35 @@ public class ReportViewSwing {
             }
         });
 
-        table.setRowHeight(30);
-        table.setIntercellSpacing(new Dimension(110, 5));
-        table.setShowGrid(false);
-        table.setShowHorizontalLines(true);
-        table.setGridColor(new Color(230, 230, 230));
-
-        table.getTableHeader().setBackground(new Color(240, 240, 240));
-        table.getTableHeader().setForeground(new Color(33, 33, 33));
-        table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 12));
-        table.getTableHeader().setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(200, 200, 200)));
-
-        table.getColumnModel().getColumn(3).setCellRenderer((TableCellRenderer) (table1, value, isSelected, hasFocus, row, column) -> {
-            JButton button = new JButton("Détails");
-            button.setBackground(PRIMARY_COLOR);
-            button.setForeground(Color.WHITE);
-            button.setFocusPainted(false);
-            button.setBorderPainted(false);
-            return button;
-        });
-
-        table.getColumnModel().getColumn(3).setCellEditor(new DefaultCellEditor(new JCheckBox()) {
-            @Override
-            public Component getTableCellEditorComponent(JTable table, Object value,
-                                                        boolean isSelected, int row, int col) {
-                JButton button = new JButton("Détails");
-                button.setBackground(PRIMARY_COLOR);
-                button.setForeground(Color.WHITE);
-                button.setFocusPainted(false);
-                button.setBorderPainted(false);
-
-                button.addActionListener(e -> {
-                    Client client = (Client) value;
-                    afficherDetailCreancesClient(client);
-                    fireEditingStopped();
-                });
-
-                return button;
-            }
-        });
-
-        table.getColumnModel().getColumn(0).setPreferredWidth(200);
-        table.getColumnModel().getColumn(1).setPreferredWidth(150);
-        table.getColumnModel().getColumn(2).setPreferredWidth(100);
-        table.getColumnModel().getColumn(3).setPreferredWidth(100);
-
+        // Button panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 10, 10));
-        JButton rapportGlobalBtn = createStyledButton("Rapport global des créances",
-            MaterialDesign.MDI_FILE_DOCUMENT, PRIMARY_COLOR);
-        rapportGlobalBtn.addActionListener(e -> {
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+
+        JButton rapportBtn = createStyledButton("Générer rapport", MaterialDesign.MDI_FILE_PDF, PRIMARY_COLOR);
+        rapportBtn.addActionListener(e -> {
             genererRapportCreances(clientsAvecCreances,
-                "rapport_creances_global_" + LocalDate.now() + ".pdf");
+                "rapport_creances_" + LocalDate.now() + ".pdf");
             dialog.dispose();
         });
-        buttonPanel.add(rapportGlobalBtn);
 
-        JPanel contentPanel = new JPanel(new BorderLayout(10, 10));
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-        contentPanel.add(new JScrollPane(table), BorderLayout.CENTER);
-        contentPanel.add(buttonPanel, BorderLayout.SOUTH);
+        JButton fermerBtn = createStyledButton("Fermer", MaterialDesign.MDI_CLOSE, Color.GRAY);
+        fermerBtn.addActionListener(e -> dialog.dispose());
+
+        buttonPanel.add(rapportBtn);
+        buttonPanel.add(fermerBtn);
+
+        // Layout assembly
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         dialog.add(searchPanel, BorderLayout.NORTH);
-        dialog.add(contentPanel, BorderLayout.CENTER);
+        dialog.add(mainPanel, BorderLayout.CENTER);
 
         return dialog;
     }
