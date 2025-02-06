@@ -1,0 +1,84 @@
+[WARNING] COMPILATION WARNING : 
+[INFO] -------------------------------------------------------------
+[WARNING] system modules path not set in conjunction with -source 11
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[754,77] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[767,78] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[809,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[812,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[94,41] unchecked cast
+  required: java.util.List<com.poissonnerie.model.Produit>
+  found:    java.util.List<capture#1 of ?>
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[97,41] unchecked cast
+  required: java.util.List<com.poissonnerie.model.Produit>
+  found:    java.util.List<capture#2 of ?>
+[INFO] 7 warnings 
+[INFO] -------------------------------------------------------------
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[136,33] cannot find symbol
+  symbol:   method analyserVentesParPeriode(java.time.LocalDateTime,java.time.LocalDateTime)
+  location: variable reportController of type com.poissonnerie.controller.ReportController
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[143,33] cannot find symbol
+  symbol:   method analyserModePaiement(java.time.LocalDateTime,java.time.LocalDateTime)
+  location: variable reportController of type com.poissonnerie.controller.ReportController
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[149,67] cannot find symbol
+  symbol:   method analyserTendancesVentes(java.time.LocalDateTime,java.time.LocalDateTime)
+  location: variable reportController of type com.poissonnerie.controller.ReportController
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[165,68] cannot find symbol
+  symbol:   method analyserStocksParCategorie()
+  location: variable reportController of type com.poissonnerie.controller.ReportController
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[167,42] incompatible types: cannot infer type-variable(s) T,K,U
+    (argument mismatch; invalid method reference
+      method getKey in interface java.util.Map.Entry<K,V> cannot be applied to given types
+        required: no arguments
+        found:    java.lang.Object
+        reason: actual and formal argument lists differ in length)
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[448,41] cannot find symbol
+  symbol:   method genererRapportFinancierExcel(java.lang.String,java.time.LocalDateTime,java.time.LocalDateTime,java.lang.String)
+  location: variable reportController of type com.poissonnerie.controller.ReportController
+[INFO] 6 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  5.618 s
+[INFO] Finished at: 2025-02-06T15:06:52Z
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project gestion-poissonnerie: Compilation failure: Compilation failure: 
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[136,33] cannot find symbol
+[ERROR]   symbol:   method analyserVentesParPeriode(java.time.LocalDateTime,java.time.LocalDateTime)
+[ERROR]   location: variable reportController of type com.poissonnerie.controller.ReportController
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[143,33] cannot find symbol
+[ERROR]   symbol:   method analyserModePaiement(java.time.LocalDateTime,java.time.LocalDateTime)
+[ERROR]   location: variable reportController of type com.poissonnerie.controller.ReportController
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[149,67] cannot find symbol
+[ERROR]   symbol:   method analyserTendancesVentes(java.time.LocalDateTime,java.time.LocalDateTime)
+[ERROR]   location: variable reportController of type com.poissonnerie.controller.ReportController
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[165,68] cannot find symbol
+[ERROR]   symbol:   method analyserStocksParCategorie()
+[ERROR]   location: variable reportController of type com.poissonnerie.controller.ReportController
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[167,42] incompatible types: cannot infer type-variable(s) T,K,U
+[ERROR]     (argument mismatch; invalid method reference
+[ERROR]       method getKey in interface java.util.Map.Entry<K,V> cannot be applied to given types
+[ERROR]         required: no arguments
+[ERROR]         found:    java.lang.Object
+[ERROR]         reason: actual and formal argument lists differ in length)
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[448,41] cannot find symbol
+[ERROR]   symbol:   method genererRapportFinancierExcel(java.lang.String,java.time.LocalDateTime,java.time.LocalDateTime,java.lang.String)
+[ERROR]   location: variable reportController of type com.poissonnerie.controller.ReportController
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

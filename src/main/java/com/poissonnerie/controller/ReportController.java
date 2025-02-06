@@ -348,4 +348,115 @@ public class ReportController {
             return new HashMap<>();
         }
     }
+
+    public Map<String, Double> analyserVentesParPeriode(LocalDateTime debut, LocalDateTime fin) {
+        try {
+            List<Vente> ventes = venteController.getVentes().stream()
+                .filter(v -> !v.getDate().isBefore(debut) && !v.getDate().isAfter(fin))
+                .collect(Collectors.toList());
+
+            return ventes.stream()
+                .collect(Collectors.groupingBy(
+                    v -> v.getDate().format(java.time.format.DateTimeFormatter.ofPattern("MM/yyyy")),
+                    Collectors.summingDouble(Vente::getTotal)
+                ));
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'analyse des ventes par période", e);
+            return new HashMap<>();
+        }
+    }
+
+    public Map<String, Double> analyserModePaiement(LocalDateTime debut, LocalDateTime fin) {
+        try {
+            List<Vente> ventes = venteController.getVentes().stream()
+                .filter(v -> !v.getDate().isBefore(debut) && !v.getDate().isAfter(fin))
+                .collect(Collectors.toList());
+
+            return ventes.stream()
+                .collect(Collectors.groupingBy(
+                    v -> v.getModePaiement().getLibelle(),
+                    Collectors.summingDouble(Vente::getTotal)
+                ));
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'analyse des modes de paiement", e);
+            return new HashMap<>();
+        }
+    }
+
+    public Map<String, Double> analyserTendancesVentes(LocalDateTime debut, LocalDateTime fin) {
+        Map<String, Double> tendances = new HashMap<>();
+        try {
+            List<Vente> ventes = venteController.getVentes().stream()
+                .filter(v -> !v.getDate().isBefore(debut) && !v.getDate().isAfter(fin))
+                .collect(Collectors.toList());
+
+            // Évolution journalière
+            Map<String, Double> ventesParJour = ventes.stream()
+                .collect(Collectors.groupingBy(
+                    v -> v.getDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                    Collectors.summingDouble(Vente::getTotal)
+                ));
+
+            // Calcul des moyennes
+            double moyenneJournaliere = ventesParJour.values().stream()
+                .mapToDouble(Double::doubleValue)
+                .average()
+                .orElse(0.0);
+            tendances.put("Moyenne journalière", moyenneJournaliere);
+
+            // Analyse des tendances par produit
+            Map<String, Double> ventesParProduit = ventes.stream()
+                .flatMap(v -> v.getLignes().stream())
+                .collect(Collectors.groupingBy(
+                    ligne -> ligne.getProduit().getNom(),
+                    Collectors.summingDouble(ligne -> ligne.getQuantite() * ligne.getPrixUnitaire())
+                ));
+
+            ventesParProduit.entrySet().stream()
+                .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
+                .limit(5)
+                .forEach(entry -> tendances.put("Tendance " + entry.getKey(), entry.getValue()));
+
+            return tendances;
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'analyse des tendances de ventes", e);
+            return tendances;
+        }
+    }
+
+    public Map<String, Double> analyserStocksParCategorie() {
+        try {
+            List<Produit> produits = produitController.getProduits();
+            return produits.stream()
+                .collect(Collectors.groupingBy(
+                    Produit::getCategorie,
+                    Collectors.summingDouble(p -> p.getStock() * p.getPrixVente())
+                ));
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de l'analyse des stocks par catégorie", e);
+            return new HashMap<>();
+        }
+    }
+
+    public void genererRapportFinancierExcel(String username, LocalDateTime debut, LocalDateTime fin, String cheminFichier) {
+        try {
+            Map<String, Double> chiffreAffaires = calculerChiffreAffaires(debut, fin);
+            Map<String, Double> couts = calculerCouts(debut, fin);
+            Map<String, Double> benefices = calculerBenefices(chiffreAffaires, couts);
+            Map<String, Double> marges = calculerMarges(chiffreAffaires, couts);
+
+            ExcelGenerator.genererRapportFinancier(
+                username,
+                chiffreAffaires,
+                couts,
+                benefices,
+                marges,
+                cheminFichier
+            );
+            LOGGER.info("Rapport financier Excel généré avec succès pour " + username);
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Erreur lors de la génération du rapport financier Excel", e);
+            throw new RuntimeException("Erreur lors de la génération du rapport financier Excel", e);
+        }
+    }
 }
