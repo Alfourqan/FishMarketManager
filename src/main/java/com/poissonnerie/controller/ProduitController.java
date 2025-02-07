@@ -63,8 +63,9 @@ public class ProduitController {
                 throw new IllegalArgumentException("Un fournisseur doit être sélectionné pour le produit");
             }
 
-            // Obtenir une connexion
+            // Obtenir une connexion et désactiver l'auto-commit
             conn = DatabaseManager.getConnection();
+            conn.setAutoCommit(false);
 
             // Vérifier l'existence du fournisseur
             String checkFournisseurSql = "SELECT id FROM fournisseurs WHERE id = ? AND supprime = false";
@@ -142,8 +143,9 @@ public class ProduitController {
             if (conn != null) {
                 try {
                     conn.setAutoCommit(true);
+                    conn.close();
                 } catch (SQLException e) {
-                    LOGGER.log(Level.SEVERE, "Erreur lors de la restauration de l'autocommit", e);
+                    LOGGER.log(Level.SEVERE, "Erreur lors de la fermeture de la connexion", e);
                 }
             }
         }
