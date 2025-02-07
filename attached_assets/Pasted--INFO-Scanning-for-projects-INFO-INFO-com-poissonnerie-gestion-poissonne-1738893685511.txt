@@ -1,0 +1,102 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------< com.poissonnerie:gestion-poissonnerie >----------------
+[INFO] Building gestion-poissonnerie 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ gestion-poissonnerie ---
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ gestion-poissonnerie ---
+[INFO] Copying 2 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ gestion-poissonnerie ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 45 source files with javac [debug target 11] to target/classes
+[INFO] -------------------------------------------------------------
+[WARNING] COMPILATION WARNING : 
+[INFO] -------------------------------------------------------------
+[WARNING] system modules path not set in conjunction with -source 11
+[INFO] 1 warning
+[INFO] -------------------------------------------------------------
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[152,9] illegal start of type
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[152,26] <identifier> expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[155,11] illegal start of type
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[165,9] illegal start of type
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[165,37] > or ',' expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[221,12] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[226,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[227,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[229,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[230,14] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[233,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[235,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[244,21] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[245,21] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[247,21] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[248,21] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[250,21] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[253,17] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[256,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[257,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[259,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[260,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[262,12] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[264,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[266,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[267,14] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[270,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[272,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[273,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[275,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[276,9] class, interface, or enum expected
+[INFO] 31 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  13.712 s
+[INFO] Finished at: 2025-02-07T02:00:29Z
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project gestion-poissonnerie: Compilation failure: Compilation failure: 
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[152,9] illegal start of type
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[152,26] <identifier> expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[155,11] illegal start of type
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[165,9] illegal start of type
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[165,37] > or ',' expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[221,12] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[226,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[227,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[229,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[230,14] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[233,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[235,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[244,21] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[245,21] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[247,21] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[248,21] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[250,21] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[253,17] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[256,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[257,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[259,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[260,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[262,12] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[264,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[266,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[267,14] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[270,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[272,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[273,9] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[275,13] class, interface, or enum expected
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[276,9] class, interface, or enum expected
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
