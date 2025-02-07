@@ -70,9 +70,11 @@ public class AuthenticationController {
 
     public void createAdminUser() throws SQLException {
         Connection conn = null;
-        try {
-            conn = DatabaseManager.getConnection();
-            conn.setAutoCommit(false);
+        int retries = 3;
+        while (retries > 0) {
+            try {
+                conn = DatabaseManager.getConnection();
+                conn.setAutoCommit(false);
             // Check if admin user exists
             try (PreparedStatement checkStmt = conn.prepareStatement(
                 "SELECT COUNT(*) FROM users WHERE username = ?")) {

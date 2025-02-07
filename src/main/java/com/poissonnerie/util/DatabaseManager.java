@@ -78,6 +78,7 @@ public class DatabaseManager {
         synchronized (CONNECTION_LOCK) {
             if (singletonConnection == null || singletonConnection.isClosed()) {
                 singletonConnection = createNewConnection();
+                singletonConnection.setAutoCommit(false);
             }
             return singletonConnection;
         }
