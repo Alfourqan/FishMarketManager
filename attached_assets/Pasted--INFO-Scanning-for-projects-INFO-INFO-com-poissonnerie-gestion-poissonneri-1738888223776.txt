@@ -1,0 +1,868 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------< com.poissonnerie:gestion-poissonnerie >----------------
+[INFO] Building gestion-poissonnerie 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ gestion-poissonnerie ---
+[INFO] Deleting /home/runner/workspace/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ gestion-poissonnerie ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ gestion-poissonnerie ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 45 source files with javac [debug target 11] to target/classes
+[WARNING] system modules path not set in conjunction with -source 11
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[754,77] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[767,78] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[809,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[812,86] unchecked cast
+  required: javax.swing.JComboBox<java.lang.String>
+  found:    javax.swing.JComponent
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[102,41] unchecked cast
+  required: java.util.List<com.poissonnerie.model.Produit>
+  found:    java.util.List<capture#1 of ?>
+[WARNING] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[105,41] unchecked cast
+  required: java.util.List<com.poissonnerie.model.Produit>
+  found:    java.util.List<capture#2 of ?>
+[INFO] 
+[INFO] --- exec:3.1.0:java (default-cli) @ gestion-poissonnerie ---
+Feb 07, 2025 12:25:23 AM com.poissonnerie.Main main
+INFO: Configuration système initialisée
+Feb 07, 2025 12:25:23 AM com.poissonnerie.Main lambda$main$0
+INFO: Démarrage de l'application dans l'EDT...
+Feb 07, 2025 12:25:23 AM com.poissonnerie.Main lambda$initializeApplication$1
+INFO: Thème et UI configurés avec succès
+Feb 07, 2025 12:25:23 AM com.poissonnerie.Main lambda$initializeApplication$2
+INFO: SplashScreen créé et affiché
+Feb 07, 2025 12:25:23 AM com.poissonnerie.Main lambda$startBackgroundInitialization$3
+INFO: Début de l'initialisation en arrière-plan
+Feb 07, 2025 12:25:23 AM com.poissonnerie.Main initializeDatabase
+INFO: Début de l'initialisation de la base de données
+Feb 07, 2025 12:25:23 AM com.poissonnerie.util.DatabaseManager <clinit>
+INFO: Configuration SQLite initialisée
+Feb 07, 2025 12:25:23 AM com.poissonnerie.util.DatabaseManager createDatabaseFile
+INFO: Fichier de base de données créé
+Feb 07, 2025 12:25:23 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:23 AM com.poissonnerie.util.DatabaseManager setupDatabase
+INFO: Schéma de base de données créé avec succès
+Feb 07, 2025 12:25:23 AM com.poissonnerie.util.DatabaseManager initializeDatabase
+INFO: Base de données initialisée avec succès
+Feb 07, 2025 12:25:23 AM com.poissonnerie.Main initializeDatabase
+INFO: Base de données initialisée avec succès
+Feb 07, 2025 12:25:23 AM com.poissonnerie.Main loadInitialData
+INFO: Début du chargement des données initiales
+Feb 07, 2025 12:25:23 AM com.poissonnerie.Main loadInitialData
+INFO: Données initiales chargées avec succès
+Feb 07, 2025 12:25:23 AM com.poissonnerie.Main startBackgroundInitialization
+INFO: Initialisation en arrière-plan terminée avec succès
+Feb 07, 2025 12:25:24 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:24 AM com.poissonnerie.controller.AuthenticationController dropExistingTables
+INFO: Existing tables dropped successfully
+Feb 07, 2025 12:25:24 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:24 AM com.poissonnerie.controller.AuthenticationController createSchema
+INFO: Database schema created successfully
+Feb 07, 2025 12:25:24 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:24 AM com.poissonnerie.controller.AuthenticationController createInitialData
+INFO: Created ADMIN role with ID: 1
+Feb 07, 2025 12:25:24 AM com.poissonnerie.controller.AuthenticationController createInitialData
+INFO: Created admin user with ID: 1
+Feb 07, 2025 12:25:24 AM com.poissonnerie.controller.AuthenticationController createInitialData
+INFO: Assigned ADMIN role to admin user
+Feb 07, 2025 12:25:24 AM com.poissonnerie.controller.AuthenticationController createInitialData
+INFO: Initial data created successfully
+Feb 07, 2025 12:25:24 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:24 AM com.poissonnerie.controller.RoleController initializeTables
+INFO: Tables de gestion des rôles créées avec succès
+Feb 07, 2025 12:25:24 AM com.poissonnerie.controller.RoleController <init>
+INFO: RoleController initialisé avec succès
+Feb 07, 2025 12:25:24 AM com.poissonnerie.controller.AuthenticationController <init>
+INFO: AuthenticationController initialized successfully
+Feb 07, 2025 12:25:25 AM com.poissonnerie.Main lambda$showLoginScreen$5
+INFO: Transition vers login effectuée
+Feb 07, 2025 12:25:40 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:40 AM com.poissonnerie.controller.AuthenticationController authenticate
+INFO: Authentification réussie pour: admin
+Feb 07, 2025 12:25:41 AM com.poissonnerie.Main lambda$createAndShowMainFrame$7
+INFO: Création de la fenêtre principale pour l'utilisateur: admin
+Feb 07, 2025 12:25:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.UserActionController migrateTable
+INFO: Migration de la table user_actions effectuée avec succès
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.UserActionController <init>
+INFO: UserActionController initialisé avec succès
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Initialisation des tables de la base de données...
+Feb 07, 2025 12:25:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Base de données optimisée avec succès
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Initialisation des tables de la base de données...
+Feb 07, 2025 12:25:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Base de données optimisée avec succès
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Chargement des fournisseurs...
+Feb 07, 2025 12:25:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Fournisseurs chargés: 0
+Feb 07, 2025 12:25:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Initialisation des tables de la base de données...
+Feb 07, 2025 12:25:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Base de données optimisée avec succès
+Feb 07, 2025 12:25:41 AM com.poissonnerie.view.VenteViewSwing loadData
+INFO: Chargement des données de vente...
+Feb 07, 2025 12:25:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:41 AM com.poissonnerie.view.VenteViewSwing loadData
+INFO: Produits chargés
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.ClientController chargerClients
+INFO: Chargement des clients...
+Feb 07, 2025 12:25:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.ClientController chargerClients
+INFO: Clients chargés avec succès: 0 clients
+Feb 07, 2025 12:25:41 AM com.poissonnerie.view.VenteViewSwing loadData
+INFO: Clients chargés
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Feb 07, 2025 12:25:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 0 ventes
+Feb 07, 2025 12:25:41 AM com.poissonnerie.view.VenteViewSwing loadData
+INFO: Ventes chargées: 0 ventes
+Feb 07, 2025 12:25:41 AM com.poissonnerie.view.VenteViewSwing loadData
+INFO: Données chargées avec succès
+Chargement des clients...
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.ClientController chargerClients
+INFO: Chargement des clients...
+Feb 07, 2025 12:25:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.ClientController chargerClients
+INFO: Clients chargés avec succès: 0 clients
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.ClientController chargerClients
+INFO: Chargement des clients...
+Feb 07, 2025 12:25:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.ClientController chargerClients
+INFO: Clients chargés avec succès: 0 clients
+Clients chargés avec succès
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: Chargement des mouvements de caisse...
+Feb 07, 2025 12:25:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: Mouvements de caisse chargés avec succès: 0 mouvements
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: État actuel de la caisse - Solde: 0.00€, Ouverte: false
+Feb 07, 2025 12:25:41 AM com.poissonnerie.view.InventaireViewSwing <init>
+INFO: Initialisation de InventaireViewSwing
+Feb 07, 2025 12:25:41 AM com.poissonnerie.model.InventaireManager ajouterObserver
+INFO: Observer ajouté. Total observers: 1
+Feb 07, 2025 12:25:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:41 AM com.poissonnerie.view.InventaireViewSwing refreshTable
+INFO: Rafraîchissement de la table d'inventaire
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Chargement des fournisseurs...
+Feb 07, 2025 12:25:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Fournisseurs chargés: 0
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Initialisation des tables de la base de données...
+Feb 07, 2025 12:25:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Base de données optimisée avec succès
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Initialisation des tables de la base de données...
+Feb 07, 2025 12:25:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:41 AM com.poissonnerie.controller.VenteController initializeDatabase
+INFO: Base de données optimisée avec succès
+Feb 07, 2025 12:25:42 AM com.poissonnerie.Main lambda$createAndShowMainFrame$7
+INFO: Fenêtre principale affichée avec succès
+Feb 07, 2025 12:25:42 AM com.poissonnerie.view.AccueilViewSwing loadData
+INFO: Début du chargement des données...
+Feb 07, 2025 12:25:42 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des ventes...
+Feb 07, 2025 12:25:42 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Feb 07, 2025 12:25:42 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:42 AM com.poissonnerie.controller.ClientController chargerClients
+INFO: Chargement des clients...
+Feb 07, 2025 12:25:42 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 0 ventes
+Feb 07, 2025 12:25:42 AM com.poissonnerie.controller.ClientController chargerClients
+INFO: Clients chargés avec succès: 0 clients
+Feb 07, 2025 12:25:42 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de ventes chargées: 0
+Feb 07, 2025 12:25:42 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des produits...
+Feb 07, 2025 12:25:42 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:42 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de produits chargés: 0
+Feb 07, 2025 12:25:42 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des mouvements de caisse...
+Feb 07, 2025 12:25:42 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: Chargement des mouvements de caisse...
+Feb 07, 2025 12:25:42 AM com.poissonnerie.view.VenteViewSwing lambda$refreshVentesTable$7
+INFO: Table des ventes mise à jour avec 0 ventes
+Feb 07, 2025 12:25:42 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:42 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: Mouvements de caisse chargés avec succès: 0 mouvements
+Feb 07, 2025 12:25:42 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: État actuel de la caisse - Solde: 0.00€, Ouverte: false
+Feb 07, 2025 12:25:42 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de mouvements chargés: 0
+Feb 07, 2025 12:25:42 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Calcul des ventes du jour...
+Feb 07, 2025 12:25:42 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Total des ventes du jour: $0.00
+Feb 07, 2025 12:25:42 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Calcul des produits en rupture...
+Feb 07, 2025 12:25:42 AM com.poissonnerie.view.InventaireViewSwing lambda$updateStatus$7
+INFO: Status mis à jour: Chargement des données...
+Feb 07, 2025 12:25:42 AM com.poissonnerie.view.InventaireViewSwing lambda$refreshTable$9
+INFO: Table rafraîchie avec succès
+Feb 07, 2025 12:25:42 AM com.poissonnerie.view.InventaireViewSwing lambda$updateStatus$7
+INFO: Status mis à jour: Données chargées avec succès
+Feb 07, 2025 12:25:42 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Nombre de produits en rupture: 0
+Feb 07, 2025 12:25:42 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Calcul des encaissements du jour...
+Feb 07, 2025 12:25:42 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Total des encaissements du jour: $0.00
+Feb 07, 2025 12:25:42 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Calcul du chiffre d'affaires total...
+Feb 07, 2025 12:25:42 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Chiffre daffaires total: {0,number,currency}
+Feb 07, 2025 12:25:42 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface avec les nouvelles valeurs...
+Feb 07, 2025 12:25:42 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Ventes du jour: $0.00
+Feb 07, 2025 12:25:42 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Produits en rupture: 0
+Feb 07, 2025 12:25:42 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Encaissements du jour: $0.00
+Feb 07, 2025 12:25:42 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Chiffre daffaires: {0,number,currency}
+Feb 07, 2025 12:25:42 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface terminée
+Feb 07, 2025 12:25:42 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:25:42 AM com.poissonnerie.model.ConfigurationParam setValeur
+WARNING: Erreur lors du traitement de la valeur
+java.lang.IllegalArgumentException: Format d'email invalide
+    at com.poissonnerie.model.ConfigurationParam.validateValeur(ConfigurationParam.java:74)
+    at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:185)
+    at com.poissonnerie.model.ConfigurationParam.<init>(ConfigurationParam.java:36)
+    at com.poissonnerie.controller.ConfigurationController.chargerConfigurations(ConfigurationController.java:66)
+    at com.poissonnerie.controller.ConfigurationController.getConfigurations(ConfigurationController.java:40)
+    at com.poissonnerie.view.ConfigurationViewSwing.loadData(ConfigurationViewSwing.java:997)
+    at com.poissonnerie.view.ConfigurationViewSwing$3.doInBackground(ConfigurationViewSwing.java:347)
+    at com.poissonnerie.view.ConfigurationViewSwing$3.doInBackground(ConfigurationViewSwing.java:344)
+    at java.desktop/javax.swing.SwingWorker$1.call(SwingWorker.java:305)
+    at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+    at java.desktop/javax.swing.SwingWorker.run(SwingWorker.java:342)
+    at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+    at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+    at java.base/java.lang.Thread.run(Thread.java:1583)
+
+Feb 07, 2025 12:25:42 AM com.poissonnerie.controller.ConfigurationController chargerConfigurations
+WARNING: Configuration invalide ignorée: Impossible de traiter la valeur: Format d'email invalide
+Feb 07, 2025 12:25:42 AM com.poissonnerie.model.ConfigurationParam decryptValue
+WARNING: Valeur non décryptée car clé de cryptage non configurée ou valeur vide
+Feb 07, 2025 12:25:42 AM com.poissonnerie.model.ConfigurationParam setValeur
+WARNING: Erreur lors du traitement de la valeur
+java.lang.IllegalArgumentException: Format de téléphone invalide
+    at com.poissonnerie.model.ConfigurationParam.validateValeur(ConfigurationParam.java:111)
+    at com.poissonnerie.model.ConfigurationParam.setValeur(ConfigurationParam.java:185)
+    at com.poissonnerie.model.ConfigurationParam.<init>(ConfigurationParam.java:36)
+    at com.poissonnerie.controller.ConfigurationController.chargerConfigurations(ConfigurationController.java:66)
+    at com.poissonnerie.controller.ConfigurationController.getConfigurations(ConfigurationController.java:40)
+    at com.poissonnerie.view.ConfigurationViewSwing.loadData(ConfigurationViewSwing.java:997)
+    at com.poissonnerie.view.ConfigurationViewSwing$3.doInBackground(ConfigurationViewSwing.java:347)
+    at com.poissonnerie.view.ConfigurationViewSwing$3.doInBackground(ConfigurationViewSwing.java:344)
+    at java.desktop/javax.swing.SwingWorker$1.call(SwingWorker.java:305)
+    at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+    at java.desktop/javax.swing.SwingWorker.run(SwingWorker.java:342)
+    at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+    at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+    at java.base/java.lang.Thread.run(Thread.java:1583)
+
+Feb 07, 2025 12:25:42 AM com.poissonnerie.controller.ConfigurationController chargerConfigurations
+WARNING: Configuration invalide ignorée: Impossible de traiter la valeur: Format de téléphone invalide
+Feb 07, 2025 12:25:42 AM com.poissonnerie.controller.ConfigurationController chargerConfigurations
+INFO: Configurations chargées: 5 entrées
+Feb 07, 2025 12:26:11 AM com.poissonnerie.view.AccueilViewSwing loadData
+INFO: Début du chargement des données...
+Feb 07, 2025 12:26:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des ventes...
+Feb 07, 2025 12:26:11 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Feb 07, 2025 12:26:11 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:26:11 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 0 ventes
+Feb 07, 2025 12:26:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de ventes chargées: 0
+Feb 07, 2025 12:26:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des produits...
+Feb 07, 2025 12:26:11 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:26:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de produits chargés: 0
+Feb 07, 2025 12:26:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des mouvements de caisse...
+Feb 07, 2025 12:26:11 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: Chargement des mouvements de caisse...
+Feb 07, 2025 12:26:11 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:26:11 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: Mouvements de caisse chargés avec succès: 0 mouvements
+Feb 07, 2025 12:26:11 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: État actuel de la caisse - Solde: 0.00€, Ouverte: false
+Feb 07, 2025 12:26:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de mouvements chargés: 0
+Feb 07, 2025 12:26:11 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Calcul des ventes du jour...
+Feb 07, 2025 12:26:11 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Total des ventes du jour: $0.00
+Feb 07, 2025 12:26:11 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Calcul des produits en rupture...
+Feb 07, 2025 12:26:11 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Nombre de produits en rupture: 0
+Feb 07, 2025 12:26:11 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Calcul des encaissements du jour...
+Feb 07, 2025 12:26:11 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Total des encaissements du jour: $0.00
+Feb 07, 2025 12:26:11 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Calcul du chiffre d'affaires total...
+Feb 07, 2025 12:26:11 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Chiffre daffaires total: {0,number,currency}
+Feb 07, 2025 12:26:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface avec les nouvelles valeurs...
+Feb 07, 2025 12:26:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Ventes du jour: $0.00
+Feb 07, 2025 12:26:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Produits en rupture: 0
+Feb 07, 2025 12:26:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Encaissements du jour: $0.00
+Feb 07, 2025 12:26:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Chiffre daffaires: {0,number,currency}
+Feb 07, 2025 12:26:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface terminée
+Feb 07, 2025 12:26:12 AM com.poissonnerie.controller.ClientController ajouterClient
+INFO: Tentative d'ajout d'un nouveau client: abbe
+Feb 07, 2025 12:26:12 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:26:12 AM com.poissonnerie.controller.ClientController ajouterClient
+INFO: Client ajouté avec succès, ID: 1
+Feb 07, 2025 12:26:26 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:26:41 AM com.poissonnerie.view.AccueilViewSwing loadData
+INFO: Début du chargement des données...
+Feb 07, 2025 12:26:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des ventes...
+Feb 07, 2025 12:26:41 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Feb 07, 2025 12:26:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:26:41 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 0 ventes
+Feb 07, 2025 12:26:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de ventes chargées: 0
+Feb 07, 2025 12:26:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des produits...
+Feb 07, 2025 12:26:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:26:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de produits chargés: 0
+Feb 07, 2025 12:26:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des mouvements de caisse...
+Feb 07, 2025 12:26:41 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: Chargement des mouvements de caisse...
+Feb 07, 2025 12:26:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:26:41 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: Mouvements de caisse chargés avec succès: 0 mouvements
+Feb 07, 2025 12:26:41 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: État actuel de la caisse - Solde: 0.00€, Ouverte: false
+Feb 07, 2025 12:26:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de mouvements chargés: 0
+Feb 07, 2025 12:26:41 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Calcul des ventes du jour...
+Feb 07, 2025 12:26:41 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Total des ventes du jour: $0.00
+Feb 07, 2025 12:26:41 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Calcul des produits en rupture...
+Feb 07, 2025 12:26:41 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Nombre de produits en rupture: 0
+Feb 07, 2025 12:26:41 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Calcul des encaissements du jour...
+Feb 07, 2025 12:26:41 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Total des encaissements du jour: $0.00
+Feb 07, 2025 12:26:41 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Calcul du chiffre d'affaires total...
+Feb 07, 2025 12:26:41 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Chiffre daffaires total: {0,number,currency}
+Feb 07, 2025 12:26:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface avec les nouvelles valeurs...
+Feb 07, 2025 12:26:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Ventes du jour: $0.00
+Feb 07, 2025 12:26:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Produits en rupture: 0
+Feb 07, 2025 12:26:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Encaissements du jour: $0.00
+Feb 07, 2025 12:26:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Chiffre daffaires: {0,number,currency}
+Feb 07, 2025 12:26:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface terminée
+Feb 07, 2025 12:27:11 AM com.poissonnerie.view.AccueilViewSwing loadData
+INFO: Début du chargement des données...
+Feb 07, 2025 12:27:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des ventes...
+Feb 07, 2025 12:27:11 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Feb 07, 2025 12:27:11 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:27:11 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 0 ventes
+Feb 07, 2025 12:27:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de ventes chargées: 0
+Feb 07, 2025 12:27:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des produits...
+Feb 07, 2025 12:27:11 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:27:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de produits chargés: 0
+Feb 07, 2025 12:27:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des mouvements de caisse...
+Feb 07, 2025 12:27:11 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: Chargement des mouvements de caisse...
+Feb 07, 2025 12:27:11 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:27:11 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: Mouvements de caisse chargés avec succès: 0 mouvements
+Feb 07, 2025 12:27:11 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: État actuel de la caisse - Solde: 0.00€, Ouverte: false
+Feb 07, 2025 12:27:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de mouvements chargés: 0
+Feb 07, 2025 12:27:11 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Calcul des ventes du jour...
+Feb 07, 2025 12:27:11 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Total des ventes du jour: $0.00
+Feb 07, 2025 12:27:11 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Calcul des produits en rupture...
+Feb 07, 2025 12:27:11 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Nombre de produits en rupture: 0
+Feb 07, 2025 12:27:11 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Calcul des encaissements du jour...
+Feb 07, 2025 12:27:11 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Total des encaissements du jour: $0.00
+Feb 07, 2025 12:27:11 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Calcul du chiffre d'affaires total...
+Feb 07, 2025 12:27:11 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Chiffre daffaires total: {0,number,currency}
+Feb 07, 2025 12:27:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface avec les nouvelles valeurs...
+Feb 07, 2025 12:27:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Ventes du jour: $0.00
+Feb 07, 2025 12:27:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Produits en rupture: 0
+Feb 07, 2025 12:27:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Encaissements du jour: $0.00
+Feb 07, 2025 12:27:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Chiffre daffaires: {0,number,currency}
+Feb 07, 2025 12:27:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface terminée
+Feb 07, 2025 12:27:41 AM com.poissonnerie.view.AccueilViewSwing loadData
+INFO: Début du chargement des données...
+Feb 07, 2025 12:27:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des ventes...
+Feb 07, 2025 12:27:41 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Feb 07, 2025 12:27:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:27:41 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 0 ventes
+Feb 07, 2025 12:27:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de ventes chargées: 0
+Feb 07, 2025 12:27:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des produits...
+Feb 07, 2025 12:27:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:27:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de produits chargés: 0
+Feb 07, 2025 12:27:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des mouvements de caisse...
+Feb 07, 2025 12:27:41 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: Chargement des mouvements de caisse...
+Feb 07, 2025 12:27:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:27:41 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: Mouvements de caisse chargés avec succès: 0 mouvements
+Feb 07, 2025 12:27:41 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: État actuel de la caisse - Solde: 0.00€, Ouverte: false
+Feb 07, 2025 12:27:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de mouvements chargés: 0
+Feb 07, 2025 12:27:41 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Calcul des ventes du jour...
+Feb 07, 2025 12:27:41 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Total des ventes du jour: $0.00
+Feb 07, 2025 12:27:41 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Calcul des produits en rupture...
+Feb 07, 2025 12:27:41 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Nombre de produits en rupture: 0
+Feb 07, 2025 12:27:41 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Calcul des encaissements du jour...
+Feb 07, 2025 12:27:41 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Total des encaissements du jour: $0.00
+Feb 07, 2025 12:27:41 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Calcul du chiffre d'affaires total...
+Feb 07, 2025 12:27:41 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Chiffre daffaires total: {0,number,currency}
+Feb 07, 2025 12:27:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface avec les nouvelles valeurs...
+Feb 07, 2025 12:27:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Ventes du jour: $0.00
+Feb 07, 2025 12:27:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Produits en rupture: 0
+Feb 07, 2025 12:27:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Encaissements du jour: $0.00
+Feb 07, 2025 12:27:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Chiffre daffaires: {0,number,currency}
+Feb 07, 2025 12:27:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface terminée
+Feb 07, 2025 12:28:11 AM com.poissonnerie.view.AccueilViewSwing loadData
+INFO: Début du chargement des données...
+Feb 07, 2025 12:28:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des ventes...
+Feb 07, 2025 12:28:11 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Feb 07, 2025 12:28:11 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:28:11 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 0 ventes
+Feb 07, 2025 12:28:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de ventes chargées: 0
+Feb 07, 2025 12:28:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des produits...
+Feb 07, 2025 12:28:11 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:28:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de produits chargés: 0
+Feb 07, 2025 12:28:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des mouvements de caisse...
+Feb 07, 2025 12:28:11 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: Chargement des mouvements de caisse...
+Feb 07, 2025 12:28:11 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:28:11 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: Mouvements de caisse chargés avec succès: 0 mouvements
+Feb 07, 2025 12:28:11 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: État actuel de la caisse - Solde: 0.00€, Ouverte: false
+Feb 07, 2025 12:28:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de mouvements chargés: 0
+Feb 07, 2025 12:28:11 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Calcul des ventes du jour...
+Feb 07, 2025 12:28:11 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Total des ventes du jour: $0.00
+Feb 07, 2025 12:28:11 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Calcul des produits en rupture...
+Feb 07, 2025 12:28:11 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Nombre de produits en rupture: 0
+Feb 07, 2025 12:28:11 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Calcul des encaissements du jour...
+Feb 07, 2025 12:28:11 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Total des encaissements du jour: $0.00
+Feb 07, 2025 12:28:11 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Calcul du chiffre d'affaires total...
+Feb 07, 2025 12:28:11 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Chiffre daffaires total: {0,number,currency}
+Feb 07, 2025 12:28:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface avec les nouvelles valeurs...
+Feb 07, 2025 12:28:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Ventes du jour: $0.00
+Feb 07, 2025 12:28:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Produits en rupture: 0
+Feb 07, 2025 12:28:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Encaissements du jour: $0.00
+Feb 07, 2025 12:28:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Chiffre daffaires: {0,number,currency}
+Feb 07, 2025 12:28:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface terminée
+Feb 07, 2025 12:28:41 AM com.poissonnerie.view.AccueilViewSwing loadData
+INFO: Début du chargement des données...
+Feb 07, 2025 12:28:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des ventes...
+Feb 07, 2025 12:28:41 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Feb 07, 2025 12:28:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:28:41 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 0 ventes
+Feb 07, 2025 12:28:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de ventes chargées: 0
+Feb 07, 2025 12:28:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des produits...
+Feb 07, 2025 12:28:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:28:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de produits chargés: 0
+Feb 07, 2025 12:28:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des mouvements de caisse...
+Feb 07, 2025 12:28:41 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: Chargement des mouvements de caisse...
+Feb 07, 2025 12:28:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:28:41 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: Mouvements de caisse chargés avec succès: 0 mouvements
+Feb 07, 2025 12:28:41 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: État actuel de la caisse - Solde: 0.00€, Ouverte: false
+Feb 07, 2025 12:28:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de mouvements chargés: 0
+Feb 07, 2025 12:28:41 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Calcul des ventes du jour...
+Feb 07, 2025 12:28:41 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Total des ventes du jour: $0.00
+Feb 07, 2025 12:28:41 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Calcul des produits en rupture...
+Feb 07, 2025 12:28:41 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Nombre de produits en rupture: 0
+Feb 07, 2025 12:28:41 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Calcul des encaissements du jour...
+Feb 07, 2025 12:28:41 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Total des encaissements du jour: $0.00
+Feb 07, 2025 12:28:41 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Calcul du chiffre d'affaires total...
+Feb 07, 2025 12:28:41 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Chiffre daffaires total: {0,number,currency}
+Feb 07, 2025 12:28:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface avec les nouvelles valeurs...
+Feb 07, 2025 12:28:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Ventes du jour: $0.00
+Feb 07, 2025 12:28:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Produits en rupture: 0
+Feb 07, 2025 12:28:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Encaissements du jour: $0.00
+Feb 07, 2025 12:28:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Chiffre daffaires: {0,number,currency}
+Feb 07, 2025 12:28:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface terminée
+Feb 07, 2025 12:28:46 AM com.poissonnerie.controller.FournisseurController ajouterFournisseur
+INFO: Ajout fournisseur: abi
+Feb 07, 2025 12:28:46 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:28:46 AM com.poissonnerie.controller.FournisseurController ajouterFournisseur
+INFO: Fournisseur ajouté, ID: 1
+Feb 07, 2025 12:28:58 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:29:03 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:29:04 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:29:04 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:29:04 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:29:05 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:29:05 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:29:11 AM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Chargement des fournisseurs...
+Feb 07, 2025 12:29:11 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:29:11 AM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Fournisseurs chargés: 1
+Feb 07, 2025 12:29:11 AM com.poissonnerie.view.AccueilViewSwing loadData
+INFO: Début du chargement des données...
+Feb 07, 2025 12:29:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des ventes...
+Feb 07, 2025 12:29:11 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Feb 07, 2025 12:29:11 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:29:11 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 0 ventes
+Feb 07, 2025 12:29:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de ventes chargées: 0
+Feb 07, 2025 12:29:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des produits...
+Feb 07, 2025 12:29:11 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:29:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de produits chargés: 0
+Feb 07, 2025 12:29:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des mouvements de caisse...
+Feb 07, 2025 12:29:11 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: Chargement des mouvements de caisse...
+Feb 07, 2025 12:29:11 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:29:11 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: Mouvements de caisse chargés avec succès: 0 mouvements
+Feb 07, 2025 12:29:11 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: État actuel de la caisse - Solde: 0.00€, Ouverte: false
+Feb 07, 2025 12:29:11 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de mouvements chargés: 0
+Feb 07, 2025 12:29:11 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Calcul des ventes du jour...
+Feb 07, 2025 12:29:11 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Total des ventes du jour: $0.00
+Feb 07, 2025 12:29:11 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Calcul des produits en rupture...
+Feb 07, 2025 12:29:11 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Nombre de produits en rupture: 0
+Feb 07, 2025 12:29:11 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Calcul des encaissements du jour...
+Feb 07, 2025 12:29:11 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Total des encaissements du jour: $0.00
+Feb 07, 2025 12:29:11 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Calcul du chiffre d'affaires total...
+Feb 07, 2025 12:29:11 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Chiffre daffaires total: {0,number,currency}
+Feb 07, 2025 12:29:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface avec les nouvelles valeurs...
+Feb 07, 2025 12:29:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Ventes du jour: $0.00
+Feb 07, 2025 12:29:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Produits en rupture: 0
+Feb 07, 2025 12:29:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Encaissements du jour: $0.00
+Feb 07, 2025 12:29:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Chiffre daffaires: {0,number,currency}
+Feb 07, 2025 12:29:11 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface terminée
+Chargement des clients...
+Feb 07, 2025 12:29:16 AM com.poissonnerie.controller.ClientController chargerClients
+INFO: Chargement des clients...
+Feb 07, 2025 12:29:16 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:29:16 AM com.poissonnerie.controller.ClientController chargerClients
+INFO: Clients chargés avec succès: 1 clients
+Clients chargés avec succès
+Feb 07, 2025 12:29:23 AM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Chargement des fournisseurs...
+Feb 07, 2025 12:29:23 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:29:23 AM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Fournisseurs chargés: 1
+Feb 07, 2025 12:29:24 AM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Chargement des fournisseurs...
+Feb 07, 2025 12:29:24 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:29:24 AM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Fournisseurs chargés: 1
+Feb 07, 2025 12:29:26 AM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Chargement des fournisseurs...
+Feb 07, 2025 12:29:26 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:29:26 AM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Fournisseurs chargés: 1
+Feb 07, 2025 12:29:26 AM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Chargement des fournisseurs...
+Feb 07, 2025 12:29:26 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:29:26 AM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Fournisseurs chargés: 1
+Feb 07, 2025 12:29:26 AM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Chargement des fournisseurs...
+Feb 07, 2025 12:29:26 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:29:26 AM com.poissonnerie.controller.FournisseurController chargerFournisseurs
+INFO: Fournisseurs chargés: 1
+Feb 07, 2025 12:29:35 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:29:36 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:29:36 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:29:36 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:29:41 AM com.poissonnerie.view.AccueilViewSwing loadData
+INFO: Début du chargement des données...
+Feb 07, 2025 12:29:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des ventes...
+Feb 07, 2025 12:29:41 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Chargement des ventes en cours...
+Feb 07, 2025 12:29:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:29:41 AM com.poissonnerie.controller.VenteController chargerVentes
+INFO: Ventes chargées avec succès: 0 ventes
+Feb 07, 2025 12:29:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de ventes chargées: 0
+Feb 07, 2025 12:29:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des produits...
+Feb 07, 2025 12:29:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:29:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de produits chargés: 0
+Feb 07, 2025 12:29:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Chargement des mouvements de caisse...
+Feb 07, 2025 12:29:41 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: Chargement des mouvements de caisse...
+Feb 07, 2025 12:29:41 AM com.poissonnerie.util.DatabaseManager createNewConnection
+INFO: Nouvelle connexion créée avec succès
+Feb 07, 2025 12:29:41 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: Mouvements de caisse chargés avec succès: 0 mouvements
+Feb 07, 2025 12:29:41 AM com.poissonnerie.controller.CaisseController chargerMouvements
+INFO: État actuel de la caisse - Solde: 0.00€, Ouverte: false
+Feb 07, 2025 12:29:41 AM com.poissonnerie.view.AccueilViewSwing$1 doInBackground
+INFO: Nombre de mouvements chargés: 0
+Feb 07, 2025 12:29:41 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Calcul des ventes du jour...
+Feb 07, 2025 12:29:41 AM com.poissonnerie.view.AccueilViewSwing calculerVentesJour
+INFO: Total des ventes du jour: $0.00
+Feb 07, 2025 12:29:41 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Calcul des produits en rupture...
+Feb 07, 2025 12:29:41 AM com.poissonnerie.view.AccueilViewSwing calculerProduitsRupture
+INFO: Nombre de produits en rupture: 0
+Feb 07, 2025 12:29:41 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Calcul des encaissements du jour...
+Feb 07, 2025 12:29:41 AM com.poissonnerie.view.AccueilViewSwing calculerEncaissementsJour
+INFO: Total des encaissements du jour: $0.00
+Feb 07, 2025 12:29:41 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Calcul du chiffre d'affaires total...
+Feb 07, 2025 12:29:41 AM com.poissonnerie.view.AccueilViewSwing calculerChiffreAffaires
+INFO: Chiffre daffaires total: {0,number,currency}
+Feb 07, 2025 12:29:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface avec les nouvelles valeurs...
+Feb 07, 2025 12:29:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Ventes du jour: $0.00
+Feb 07, 2025 12:29:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Produits en rupture: 0
+Feb 07, 2025 12:29:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Encaissements du jour: $0.00
+Feb 07, 2025 12:29:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Chiffre daffaires: {0,number,currency}
+Feb 07, 2025 12:29:41 AM com.poissonnerie.view.AccueilViewSwing$1 done
+INFO: Mise à jour de l'interface terminée
+Feb 07, 2025 12:30:11 AM com.poissonnerie.v
