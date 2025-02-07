@@ -4,7 +4,6 @@ import com.poissonnerie.model.UserAction;
 import com.poissonnerie.util.DatabaseManager;
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -48,20 +47,11 @@ public class UserActionController {
 
     private void migrateTable() throws SQLException {
         try (Connection conn = DatabaseManager.getConnection()) {
-            conn.setAutoCommit(false);
-            try {
-                DatabaseMetaData md = conn.getMetaData();
-                ResultSet rs = md.getTables(null, null, TABLE_NAME, null);
+            DatabaseMetaData md = conn.getMetaData();
+            ResultSet rs = md.getTables(null, null, TABLE_NAME, null);
 
-                if (!rs.next()) {
-                    createTable(conn);
-                }
-                conn.commit();
-                LOGGER.info("Migration de la table " + TABLE_NAME + " effectuée avec succès");
-            } catch (SQLException e) {
-                conn.rollback();
-                LOGGER.log(Level.SEVERE, "Erreur lors de la migration de la table " + TABLE_NAME, e);
-                throw e;
+            if (!rs.next()) {
+                createTable(conn);
             }
         }
     }
@@ -78,11 +68,6 @@ public class UserActionController {
                 "entity_id INTEGER NOT NULL," +
                 "user_id INTEGER" +
                 ")");
-
-            stmt.execute("CREATE INDEX IF NOT EXISTS idx_user_actions_date ON " + TABLE_NAME + "(date_time)");
-            stmt.execute("CREATE INDEX IF NOT EXISTS idx_user_actions_type ON " + TABLE_NAME + "(action_type)");
-            stmt.execute("CREATE INDEX IF NOT EXISTS idx_user_actions_entity ON " + TABLE_NAME + "(entity_type, entity_id)");
-            stmt.execute("CREATE INDEX IF NOT EXISTS idx_user_actions_user ON " + TABLE_NAME + "(user_id)");
         }
     }
 
@@ -100,59 +85,58 @@ public class UserActionController {
             action.setUserId(currentUserId);
         }
 
-        int retries = 0;
-        while (retries < MAX_RETRIES) {
+        String sql = "INSERT INTO " + TABLE_NAME + 
+            " (username, action_type, entity_type, entity_id, description, date_time, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+        for (int retry = 0; retry < MAX_RETRIES; retry++) {
             try (Connection conn = DatabaseManager.getConnection()) {
                 conn.setAutoCommit(false);
-                try (PreparedStatement stmt = conn.prepareStatement(
-                    "INSERT INTO " + TABLE_NAME + " (username, action_type, entity_type, entity_id, description, date_time, user_id) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?)")) {
-
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                     stmt.setString(1, action.getUsername());
                     stmt.setString(2, action.getType().getValue());
                     stmt.setString(3, action.getEntityType().getValue());
                     stmt.setInt(4, action.getEntityId());
                     stmt.setString(5, action.getDescription());
-                    stmt.setString(6, action.getDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                    stmt.setString(6, action.getDateTime().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
                     stmt.setObject(7, action.getUserId());
 
-                    int result = stmt.executeUpdate();
+                    stmt.executeUpdate();
                     conn.commit();
-
-                    if (result > 0) {
-                        LOGGER.info("Action utilisateur enregistrée avec succès: " + action);
-                        return;
+                    LOGGER.info("Action utilisateur enregistrée avec succès");
+                    return;
+                } catch (SQLException e) {
+                    try {
+                        conn.rollback();
+                    } catch (SQLException re) {
+                        LOGGER.log(Level.SEVERE, "Erreur lors du rollback", re);
+                    }
+                    if (retry < MAX_RETRIES - 1) {
+                        LOGGER.warning("Tentative " + (retry + 1) + " échouée: " + e.getMessage());
+                        Thread.sleep(RETRY_DELAY_MS * (1L << retry));
+                    } else {
+                        throw new RuntimeException("Échec de l'enregistrement après " + MAX_RETRIES + " tentatives", e);
                     }
                 }
             } catch (SQLException e) {
-                LOGGER.log(Level.WARNING, "Tentative " + (retries + 1) + " échouée: " + e.getMessage());
-                retries++;
-                if (retries < MAX_RETRIES) {
-                    try {
-                        Thread.sleep(RETRY_DELAY_MS * (1 << retries));
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                        throw new RuntimeException("Interruption pendant l'attente entre les tentatives", ie);
-                    }
+                if (retry == MAX_RETRIES - 1) {
+                    throw new RuntimeException("Erreur de connexion à la base de données", e);
                 }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException("Interruption pendant la tentative", e);
             }
         }
-        throw new RuntimeException("Échec de l'enregistrement après " + MAX_RETRIES + " tentatives");
     }
 
     public List<UserAction> getActions(LocalDateTime debut, LocalDateTime fin) {
-        String sql = "SELECT * FROM " + TABLE_NAME +
-            " WHERE date_time BETWEEN ? AND ? " +
-            "ORDER BY date_time DESC";
-
         List<UserAction> actions = new ArrayList<>();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String sql = "SELECT * FROM " + TABLE_NAME + " WHERE date_time BETWEEN ? AND ? ORDER BY date_time DESC";
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
-            pstmt.setString(1, debut.format(formatter));
-            pstmt.setString(2, fin.format(formatter));
+            pstmt.setString(1, debut.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            pstmt.setString(2, fin.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
@@ -163,28 +147,26 @@ public class UserActionController {
                         UserAction.EntityType.valueOf(rs.getString("entity_type")),
                         rs.getInt("entity_id")
                     );
-                    action.setId(rs.getInt("id"));
-                    action.setDateTime(LocalDateTime.parse(rs.getString("date_time"), formatter));
-
+                    action.setDateTime(LocalDateTime.parse(
+                        rs.getString("date_time"), 
+                        java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                    ));
                     Object userId = rs.getObject("user_id");
                     if (userId != null) {
                         action.setUserId((Integer) userId);
                     }
-
                     actions.add(action);
                 }
             }
-            LOGGER.info("Récupération de " + actions.size() + " actions entre " + debut + " et " + fin);
-            return actions;
         } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de la récupération des actions utilisateur", e);
-            throw new RuntimeException("Erreur lors de la récupération des actions utilisateur", e);
+            LOGGER.log(Level.SEVERE, "Erreur lors de la récupération des actions", e);
+            throw new RuntimeException("Erreur lors de la récupération des actions", e);
         }
+        return actions;
     }
-
     public void purgerActions(LocalDateTime dateLimite) {
         String sql = "DELETE FROM " + TABLE_NAME + " WHERE date_time < ?";
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
