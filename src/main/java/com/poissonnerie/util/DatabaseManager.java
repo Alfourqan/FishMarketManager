@@ -120,23 +120,28 @@ public class DatabaseManager {
             String schema = loadSchemaFromResource();
             String[] statements = schema.split(";");
 
-            for (String sql : statements) {
-                sql = sql.trim();
-                if (!sql.isEmpty()) {
-                    try (Statement stmt = conn.createStatement()) {
-                        stmt.execute(sql);
-                    } catch (SQLException e) {
-                        if (!e.getMessage().contains("table already exists")) {
-                            throw e;
+            conn.setAutoCommit(false);
+            try {
+                for (String sql : statements) {
+                    sql = sql.trim();
+                    if (!sql.isEmpty()) {
+                        try (Statement stmt = conn.createStatement()) {
+                            stmt.execute(sql);
+                        } catch (SQLException e) {
+                            if (!e.getMessage().contains("table already exists")) {
+                                throw e;
+                            }
                         }
                     }
                 }
-            }
 
-            LOGGER.info("Schéma de base de données créé avec succès");
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de la base de données", e);
-            throw e;
+                conn.commit();
+                LOGGER.info("Schéma de base de données créé avec succès");
+            } catch (SQLException e) {
+                conn.rollback();
+                LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de la base de données", e);
+                throw e;
+            }
         }
     }
 

@@ -21,6 +21,7 @@ DROP TABLE IF EXISTS fournisseurs;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS configurations;
 
+-- Création des tables
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
@@ -140,7 +141,6 @@ CREATE TABLE lignes_vente (
     CONSTRAINT prix_unitaire_positif CHECK (prix_unitaire > 0)
 );
 
--- Nouvelle table pour les règlements clients
 CREATE TABLE IF NOT EXISTS reglements_clients (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     client_id INTEGER NOT NULL,
@@ -158,13 +158,11 @@ CREATE TABLE IF NOT EXISTS reglements_clients (
     CONSTRAINT commentaire_min_length CHECK (commentaire IS NULL OR length(trim(commentaire)) >= 3)
 );
 
--- Ajout des index pour la nouvelle table
 CREATE INDEX IF NOT EXISTS idx_reglements_clients_client ON reglements_clients(client_id);
 CREATE INDEX IF NOT EXISTS idx_reglements_clients_date ON reglements_clients(date);
 CREATE INDEX IF NOT EXISTS idx_reglements_clients_vente ON reglements_clients(vente_id);
 CREATE INDEX IF NOT EXISTS idx_reglements_clients_user ON reglements_clients(user_id);
 
--- Index optimisés
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 CREATE INDEX IF NOT EXISTS idx_produits_nom ON produits(nom);
 CREATE INDEX IF NOT EXISTS idx_produits_categorie ON produits(categorie);
@@ -181,15 +179,10 @@ CREATE INDEX IF NOT EXISTS idx_user_actions_type ON user_actions(action_type);
 CREATE INDEX IF NOT EXISTS idx_user_actions_entity ON user_actions(entity_type, entity_id);
 CREATE INDEX IF NOT EXISTS idx_user_actions_user ON user_actions(user_id);
 
--- Configurations par défaut
+-- Configurations essentielles uniquement
 INSERT OR IGNORE INTO configurations (cle, valeur, description) VALUES
-('TAUX_TVA', '20.0', 'Taux de TVA en pourcentage'),
 ('TVA_ENABLED', 'true', 'Activation/désactivation de la TVA'),
-('NOM_ENTREPRISE', '', 'Nom de l''entreprise'),
-('ADRESSE_ENTREPRISE', '', 'Adresse de l''entreprise'),
-('TELEPHONE_ENTREPRISE', '', 'Numéro de téléphone de l''entreprise'),
-('EMAIL_ENTREPRISE', '', 'Adresse email de l''entreprise'),
-('SIRET_ENTREPRISE', '12345678901234', 'Numéro SIRET de l''entreprise');
+('TAUX_TVA', '20.0', 'Taux de TVA en pourcentage');
 
 -- Réactivation des foreign keys après la migration
 PRAGMA foreign_keys = ON;
