@@ -1,0 +1,157 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------< com.poissonnerie:gestion-poissonnerie >----------------
+[INFO] Building gestion-poissonnerie 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ gestion-poissonnerie ---
+[INFO] Deleting /home/runner/workspace/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ gestion-poissonnerie ---
+[INFO] Copying 2 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ gestion-poissonnerie ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 45 source files with javac [debug target 11] to target/classes
+[INFO] -------------------------------------------------------------
+[WARNING] COMPILATION WARNING : 
+[INFO] -------------------------------------------------------------
+[WARNING] system modules path not set in conjunction with -source 11
+[INFO] 1 warning
+[INFO] -------------------------------------------------------------
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[76,13] cannot find symbol
+  symbol:   class ConfigurationParam
+  location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[76,48] cannot find symbol
+  symbol:   class ConfigurationParam
+  location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[77,13] cannot find symbol
+  symbol:   class ConfigurationParam
+  location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[77,49] cannot find symbol
+  symbol:   class ConfigurationParam
+  location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[58,13] cannot find symbol
+  symbol:   class ByteArrayOutputStream
+  location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[58,54] cannot find symbol
+  symbol:   class ByteArrayOutputStream
+  location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[59,18] cannot find symbol
+  symbol:   class Produit
+  location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[59,17] type java.awt.List does not take parameters
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[59,54] cannot find symbol
+  symbol:   method getProduits()
+  location: variable reportController of type com.poissonnerie.controller.ReportController
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[65,18] cannot find symbol
+  symbol:   class FileOutputStream
+  location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[65,45] cannot find symbol
+  symbol:   class FileOutputStream
+  location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[81,13] cannot find symbol
+  symbol:   class ByteArrayOutputStream
+  location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[81,54] cannot find symbol
+  symbol:   class ByteArrayOutputStream
+  location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[83,49] cannot find symbol
+  symbol:   variable ChronoUnit
+  location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[88,18] cannot find symbol
+  symbol:   class FileOutputStream
+  location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[88,45] cannot find symbol
+  symbol:   class FileOutputStream
+  location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[104,13] cannot find symbol
+  symbol:   class ByteArrayOutputStream
+  location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[104,54] cannot find symbol
+  symbol:   class ByteArrayOutputStream
+  location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[109,18] cannot find symbol
+  symbol:   class FileOutputStream
+  location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[109,45] cannot find symbol
+  symbol:   class FileOutputStream
+  location: class com.poissonnerie.view.ReportViewSwing
+[INFO] 20 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  40.600 s
+[INFO] Finished at: 2025-02-07T00:55:23Z
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project gestion-poissonnerie: Compilation failure: Compilation failure: 
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[76,13] cannot find symbol
+[ERROR]   symbol:   class ConfigurationParam
+[ERROR]   location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[76,48] cannot find symbol
+[ERROR]   symbol:   class ConfigurationParam
+[ERROR]   location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[77,13] cannot find symbol
+[ERROR]   symbol:   class ConfigurationParam
+[ERROR]   location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java:[77,49] cannot find symbol
+[ERROR]   symbol:   class ConfigurationParam
+[ERROR]   location: class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[58,13] cannot find symbol
+[ERROR]   symbol:   class ByteArrayOutputStream
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[58,54] cannot find symbol
+[ERROR]   symbol:   class ByteArrayOutputStream
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[59,18] cannot find symbol
+[ERROR]   symbol:   class Produit
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[59,17] type java.awt.List does not take parameters
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[59,54] cannot find symbol
+[ERROR]   symbol:   method getProduits()
+[ERROR]   location: variable reportController of type com.poissonnerie.controller.ReportController
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[65,18] cannot find symbol
+[ERROR]   symbol:   class FileOutputStream
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[65,45] cannot find symbol
+[ERROR]   symbol:   class FileOutputStream
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[81,13] cannot find symbol
+[ERROR]   symbol:   class ByteArrayOutputStream
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[81,54] cannot find symbol
+[ERROR]   symbol:   class ByteArrayOutputStream
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[83,49] cannot find symbol
+[ERROR]   symbol:   variable ChronoUnit
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[88,18] cannot find symbol
+[ERROR]   symbol:   class FileOutputStream
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[88,45] cannot find symbol
+[ERROR]   symbol:   class FileOutputStream
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[104,13] cannot find symbol
+[ERROR]   symbol:   class ByteArrayOutputStream
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[104,54] cannot find symbol
+[ERROR]   symbol:   class ByteArrayOutputStream
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[109,18] cannot find symbol
+[ERROR]   symbol:   class FileOutputStream
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java:[109,45] cannot find symbol
+[ERROR]   symbol:   class FileOutputStream
+[ERROR]   location: class com.poissonnerie.view.ReportViewSwing
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
