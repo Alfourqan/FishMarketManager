@@ -1,0 +1,83 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------< com.poissonnerie:gestion-poissonnerie >----------------
+[INFO] Building gestion-poissonnerie 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ gestion-poissonnerie ---
+[INFO] Deleting /home/runner/workspace/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ gestion-poissonnerie ---
+[INFO] Copying 2 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ gestion-poissonnerie ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 43 source files with javac [debug target 11] to target/classes
+[INFO] -------------------------------------------------------------
+[WARNING] COMPILATION WARNING : 
+[INFO] -------------------------------------------------------------
+[WARNING] system modules path not set in conjunction with -source 11
+[INFO] 1 warning
+[INFO] -------------------------------------------------------------
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[130,40] cannot find symbol
+  symbol:   class LocalDateTime
+  location: class com.poissonnerie.controller.UserActionController
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[130,61] cannot find symbol
+  symbol:   class LocalDateTime
+  location: class com.poissonnerie.controller.UserActionController
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[130,12] cannot find symbol
+  symbol:   class List
+  location: class com.poissonnerie.controller.UserActionController
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[166,31] cannot find symbol
+  symbol:   class LocalDateTime
+  location: class com.poissonnerie.controller.UserActionController
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[131,9] cannot find symbol
+  symbol:   class List
+  location: class com.poissonnerie.controller.UserActionController
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[131,40] cannot find symbol
+  symbol:   class ArrayList
+  location: class com.poissonnerie.controller.UserActionController
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[149,40] cannot find symbol
+  symbol:   variable LocalDateTime
+  location: class com.poissonnerie.controller.UserActionController
+[INFO] 7 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  32.013 s
+[INFO] Finished at: 2025-02-07T02:18:40Z
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project gestion-poissonnerie: Compilation failure: Compilation failure: 
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[130,40] cannot find symbol
+[ERROR]   symbol:   class LocalDateTime
+[ERROR]   location: class com.poissonnerie.controller.UserActionController
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[130,61] cannot find symbol
+[ERROR]   symbol:   class LocalDateTime
+[ERROR]   location: class com.poissonnerie.controller.UserActionController
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[130,12] cannot find symbol
+[ERROR]   symbol:   class List
+[ERROR]   location: class com.poissonnerie.controller.UserActionController
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[166,31] cannot find symbol
+[ERROR]   symbol:   class LocalDateTime
+[ERROR]   location: class com.poissonnerie.controller.UserActionController
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[131,9] cannot find symbol
+[ERROR]   symbol:   class List
+[ERROR]   location: class com.poissonnerie.controller.UserActionController
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[131,40] cannot find symbol
+[ERROR]   symbol:   class ArrayList
+[ERROR]   location: class com.poissonnerie.controller.UserActionController
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/controller/UserActionController.java:[149,40] cannot find symbol
+[ERROR]   symbol:   variable LocalDateTime
+[ERROR]   location: class com.poissonnerie.controller.UserActionController
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
