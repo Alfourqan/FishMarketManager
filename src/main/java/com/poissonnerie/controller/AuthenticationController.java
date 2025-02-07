@@ -19,8 +19,8 @@ public class AuthenticationController {
 
     private AuthenticationController() {
         try {
+            setupDatabase();
             this.roleController = RoleController.getInstance();
-            initializeDatabase();
             LOGGER.info("AuthenticationController initialized successfully");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Failed to initialize AuthenticationController", e);
@@ -39,94 +39,140 @@ public class AuthenticationController {
         return instance;
     }
 
-    private void initializeDatabase() throws SQLException {
-        int maxRetries = 3;
-        int retryCount = 0;
-        boolean success = false;
-        SQLException lastException = null;
+    private void setupDatabase() throws SQLException {
+        // Drop existing tables to ensure clean slate
+        dropExistingTables();
 
-        while (!success && retryCount < maxRetries) {
-            try (Connection conn = DatabaseManager.getConnection()) {
-                conn.setAutoCommit(false);
-                try {
-                    createTablesIfNeeded(conn);
-                    createAdminIfNeeded(conn);
-                    conn.commit();
-                    success = true;
-                    LOGGER.info("Database initialization completed successfully");
-                } catch (SQLException e) {
-                    if (conn != null) {
-                        try {
-                            conn.rollback();
-                        } catch (SQLException re) {
-                            LOGGER.log(Level.WARNING, "Error during rollback", re);
+        // Create schema and initialize data
+        createSchema();
+        createInitialData();
+    }
+
+    private void dropExistingTables() {
+        try (Connection conn = DatabaseManager.getConnection();
+             Statement stmt = conn.createStatement()) {
+
+            stmt.execute("PRAGMA foreign_keys = OFF");
+
+            // Drop tables in reverse order of dependencies
+            stmt.execute("DROP TABLE IF EXISTS user_roles");
+            stmt.execute("DROP TABLE IF EXISTS roles");
+            stmt.execute("DROP TABLE IF EXISTS users");
+
+            stmt.execute("PRAGMA foreign_keys = ON");
+
+            LOGGER.info("Existing tables dropped successfully");
+        } catch (SQLException e) {
+            LOGGER.log(Level.WARNING, "Error dropping tables", e);
+        }
+    }
+
+    private void createSchema() throws SQLException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            // Set pragmas for better concurrency and reliability
+            try (Statement pragmaStmt = conn.createStatement()) {
+                pragmaStmt.execute("PRAGMA journal_mode = WAL");
+                pragmaStmt.execute("PRAGMA busy_timeout = 5000");
+                pragmaStmt.execute("PRAGMA synchronous = NORMAL");
+                pragmaStmt.execute("PRAGMA foreign_keys = ON");
+            }
+
+            conn.setAutoCommit(false);
+            try (Statement stmt = conn.createStatement()) {
+                // Create roles table first
+                stmt.execute("CREATE TABLE IF NOT EXISTS roles (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "name TEXT NOT NULL UNIQUE, " +
+                    "description TEXT, " +
+                    "created_at INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000))");
+
+                // Create users table
+                stmt.execute("CREATE TABLE IF NOT EXISTS users (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "username TEXT NOT NULL UNIQUE, " +
+                    "password TEXT NOT NULL, " +
+                    "active BOOLEAN DEFAULT true, " +
+                    "created_at INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000), " +
+                    "last_login INTEGER, " +
+                    "force_password_reset BOOLEAN DEFAULT false)");
+
+                // Create user_roles table last
+                stmt.execute("CREATE TABLE IF NOT EXISTS user_roles (" +
+                    "user_id INTEGER NOT NULL, " +
+                    "role_id INTEGER NOT NULL, " +
+                    "created_at INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000), " +
+                    "PRIMARY KEY (user_id, role_id), " +
+                    "FOREIGN KEY (user_id) REFERENCES users(id), " +
+                    "FOREIGN KEY (role_id) REFERENCES roles(id))");
+
+                conn.commit();
+                LOGGER.info("Database schema created successfully");
+            } catch (SQLException e) {
+                LOGGER.log(Level.SEVERE, "Error creating schema", e);
+                conn.rollback();
+                throw e;
+            }
+        }
+    }
+
+    private void createInitialData() throws SQLException {
+        try (Connection conn = DatabaseManager.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                // Create ADMIN role first
+                int roleId;
+                try (PreparedStatement stmt = conn.prepareStatement(
+                    "INSERT INTO roles (name, description) VALUES (?, ?)",
+                    Statement.RETURN_GENERATED_KEYS)) {
+                    stmt.setString(1, "ADMIN");
+                    stmt.setString(2, "Administrateur système");
+                    stmt.executeUpdate();
+
+                    try (ResultSet rs = stmt.getGeneratedKeys()) {
+                        if (!rs.next()) {
+                            throw new SQLException("Failed to create ADMIN role");
                         }
-                    }
-                    if (e.getMessage().contains("database is locked") && retryCount < maxRetries - 1) {
-                        LOGGER.log(Level.WARNING, "Database locked, retrying... Attempt " + (retryCount + 1));
-                        retryCount++;
-                        Thread.sleep(1000 * (retryCount + 1));
-                        lastException = e;
-                    } else {
-                        throw e;
+                        roleId = rs.getInt(1);
+                        LOGGER.info("Created ADMIN role with ID: " + roleId);
                     }
                 }
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();
-                throw new SQLException("Interrupted while waiting for retry", ie);
-            }
-        }
 
-        if (!success && lastException != null) {
-            throw new SQLException("Failed to initialize database after " + maxRetries + " attempts", lastException);
-        }
-    }
+                // Create admin user
+                String hashedPassword = BCrypt.hashpw(DEFAULT_ADMIN_PASSWORD, BCrypt.gensalt(10));
+                int userId;
 
-    private void createTablesIfNeeded(Connection conn) throws SQLException {
-        try (Statement stmt = conn.createStatement()) {
-            stmt.execute("PRAGMA foreign_keys = ON");
-            stmt.execute("CREATE TABLE IF NOT EXISTS users (" +
-                "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                "username TEXT NOT NULL UNIQUE," +
-                "password TEXT NOT NULL," +
-                "active BOOLEAN DEFAULT true," +
-                "created_at INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000)," +
-                "last_login INTEGER," +
-                "force_password_reset BOOLEAN DEFAULT false)");
-        }
-    }
+                try (PreparedStatement stmt = conn.prepareStatement(
+                    "INSERT INTO users (username, password, active) VALUES (?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS)) {
+                    stmt.setString(1, "admin");
+                    stmt.setString(2, hashedPassword);
+                    stmt.setBoolean(3, true);
+                    stmt.executeUpdate();
 
-    private void createAdminIfNeeded(Connection conn) throws SQLException {
-        try (PreparedStatement checkStmt = conn.prepareStatement(
-            "SELECT id FROM users WHERE username = ?")) {
-            checkStmt.setString(1, "admin");
-            ResultSet rs = checkStmt.executeQuery();
-            if (!rs.next()) {
-                createAdmin(conn);
-            }
-        }
-    }
+                    try (ResultSet rs = stmt.getGeneratedKeys()) {
+                        if (!rs.next()) {
+                            throw new SQLException("Failed to create admin user");
+                        }
+                        userId = rs.getInt(1);
+                        LOGGER.info("Created admin user with ID: " + userId);
+                    }
+                }
 
-    private void createAdmin(Connection conn) throws SQLException {
-        String salt = BCrypt.gensalt(10);
-        String hashedPassword = BCrypt.hashpw(DEFAULT_ADMIN_PASSWORD, salt);
+                // Assign admin role to user
+                try (PreparedStatement stmt = conn.prepareStatement(
+                    "INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)")) {
+                    stmt.setInt(1, userId);
+                    stmt.setInt(2, roleId);
+                    stmt.executeUpdate();
+                    LOGGER.info("Assigned ADMIN role to admin user");
+                }
 
-        try (PreparedStatement insertStmt = conn.prepareStatement(
-            "INSERT INTO users (username, password, active) VALUES (?, ?, ?)",
-            Statement.RETURN_GENERATED_KEYS)) {
-
-            insertStmt.setString(1, "admin");
-            insertStmt.setString(2, hashedPassword);
-            insertStmt.setBoolean(3, true);
-            insertStmt.executeUpdate();
-
-            ResultSet rs = insertStmt.getGeneratedKeys();
-            if (rs.next()) {
-                int userId = rs.getInt(1);
-                LOGGER.info("Admin account created with ID: " + userId);
-
-                Role adminRole = roleController.creerRole(new Role("ADMIN", "Administrateur système"));
-                roleController.attribuerRoleUtilisateur(userId, adminRole.getId());
+                conn.commit();
+                LOGGER.info("Initial data created successfully");
+            } catch (SQLException e) {
+                LOGGER.log(Level.SEVERE, "Error initializing data", e);
+                conn.rollback();
+                throw e;
             }
         }
     }

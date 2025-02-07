@@ -4,6 +4,7 @@ modules = ["java", "java-17", "java-21", "postgresql-16", "maven", "java-11", "p
 channel = "stable-24_05"
 
 [workflows]
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "Project"
@@ -53,6 +54,10 @@ args = "Java VNC App Final"
 [[workflows.workflow.tasks]]
 task = "workflow.run"
 args = "Java Application Test"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Java Application Final"
 
 [[workflows.workflow]]
 name = "Java Application"
@@ -215,6 +220,20 @@ author = 38599826
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "mvn clean compile exec:java -Dexec.mainClass='com.poissonnerie.Main' -Dexec.systemProperties.SKIP_SIRET_VALIDATION=true -Djava.awt.headless=false -Dexec.cleanupDaemonThreads=false"
+
+[[workflows.workflow]]
+name = "Java Application Final"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "mvn clean install && mvn exec:java -Dexec.mainClass='com.poissonnerie.Main' -Dexec.systemProperties.SKIP_SIRET_VALIDATION=true -Djava.awt.headless=false -Dexec.cleanupDaemonThreads=false"
 
 [deployment]
 run = ["sh", "-c", "mvn clean compile && mvn exec:java -Dexec.mainClass=\"com.poissonnerie.Main\" -Dexec.systemProperties.SKIP_SIRET_VALIDATION=true -Djava.awt.headless=false -Dexec.cleanupDaemonThreads=false"]
