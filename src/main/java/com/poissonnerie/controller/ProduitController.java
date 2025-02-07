@@ -65,7 +65,6 @@ public class ProduitController {
 
             // Obtenir une connexion
             conn = DatabaseManager.getConnection();
-            conn.setAutoCommit(false);
 
             // Vérifier l'existence du fournisseur
             String checkFournisseurSql = "SELECT id FROM fournisseurs WHERE id = ? AND supprime = false";
