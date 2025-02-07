@@ -1,14 +1,4 @@
--- Configuration optimisée SQLite avec verrouillage robuste
-PRAGMA journal_mode = WAL;
-PRAGMA synchronous = NORMAL;
-PRAGMA cache_size = 2000;
-PRAGMA page_size = 4096;
-PRAGMA temp_store = MEMORY;
-PRAGMA busy_timeout = 30000;
-PRAGMA locking_mode = EXCLUSIVE;  -- Mode de verrouillage exclusif
-PRAGMA journal_size_limit = 67108864;  -- Limite de 64MB pour le journal WAL
-PRAGMA mmap_size = 268435456;  -- Utilisation de 256MB pour le mapping mémoire
-PRAGMA foreign_keys = OFF;  -- Désactivé temporairement pour la migration
+-- Tables principales dans l'ordre de dépendance
 
 -- Tables principales dans l'ordre de dépendance
 DROP TABLE IF EXISTS reglements_clients;
