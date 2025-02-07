@@ -276,16 +276,4 @@ public class ClientController {
             throw new RuntimeException("Erreur de connexion lors du règlement de la créance: " + e.getMessage(), e);
         }
     }
-
-    public void ajouterClientTest() {
-        LOGGER.info("Ajout d'un client test avec créance...");
-        try {
-            Client clientTest = new Client(0, "Client Test Créance", "0123456789", "1 Rue Test", 150.50);
-            ajouterClient(clientTest);
-            LOGGER.info("Client test ajouté avec succès: " + clientTest.getNom() + ", Solde: " + clientTest.getSolde());
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "Erreur lors de l'ajout du client test", e);
-            throw new RuntimeException("Erreur lors de l'ajout du client test: " + e.getMessage(), e);
-        }
-    }
 }

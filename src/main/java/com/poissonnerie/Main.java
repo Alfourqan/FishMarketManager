@@ -132,8 +132,7 @@ public class Main {
     private static void loadInitialData() throws Exception {
         splash.setProgress(60, "Chargement des données...");
         LOGGER.info("Début du chargement des données initiales");
-        ClientController clientController = new ClientController();
-        clientController.ajouterClientTest();
+        // Removed automatic test client creation
         LOGGER.info("Données initiales chargées avec succès");
     }
 

@@ -59,10 +59,6 @@ CREATE TABLE IF NOT EXISTS fournisseurs (
     CONSTRAINT statut_valide CHECK (statut IN ('Actif', 'Inactif', 'En attente'))
 );
 
--- Créer un fournisseur par défaut
-INSERT INTO fournisseurs (nom, contact, telephone, email, statut) 
-VALUES ('Fournisseur par défaut', 'Contact', '0123456789', 'contact@default.com', 'Actif');
-
 CREATE TABLE IF NOT EXISTS produits (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nom TEXT NOT NULL,
@@ -167,7 +163,6 @@ CREATE INDEX IF NOT EXISTS idx_reglements_clients_client ON reglements_clients(c
 CREATE INDEX IF NOT EXISTS idx_reglements_clients_date ON reglements_clients(date);
 CREATE INDEX IF NOT EXISTS idx_reglements_clients_vente ON reglements_clients(vente_id);
 CREATE INDEX IF NOT EXISTS idx_reglements_clients_user ON reglements_clients(user_id);
-
 
 -- Index optimisés
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
