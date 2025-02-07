@@ -117,9 +117,20 @@ public class DatabaseManager {
 
     private static void setupDatabase() throws SQLException {
         try (Connection conn = createNewConnection()) {
+            // Configuration PRAGMA avant toute transaction
+            try (Statement stmt = conn.createStatement()) {
+                stmt.execute("PRAGMA foreign_keys = OFF");
+                stmt.execute("PRAGMA journal_mode = WAL");
+                stmt.execute("PRAGMA synchronous = NORMAL");
+                stmt.execute("PRAGMA cache_size = 2000");
+                stmt.execute("PRAGMA page_size = 4096");
+                stmt.execute("PRAGMA temp_store = MEMORY");
+            }
+
             String schema = loadSchemaFromResource();
             String[] statements = schema.split(";");
 
+            // Exécution du schéma
             conn.setAutoCommit(false);
             try {
                 for (String sql : statements) {
@@ -135,10 +146,19 @@ public class DatabaseManager {
                     }
                 }
 
+                // Réactivation des clés étrangères après la création du schéma
+                try (Statement stmt = conn.createStatement()) {
+                    stmt.execute("PRAGMA foreign_keys = ON");
+                }
+
                 conn.commit();
                 LOGGER.info("Schéma de base de données créé avec succès");
             } catch (SQLException e) {
-                conn.rollback();
+                try {
+                    conn.rollback();
+                } catch (SQLException re) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors du rollback", re);
+                }
                 LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de la base de données", e);
                 throw e;
             }
