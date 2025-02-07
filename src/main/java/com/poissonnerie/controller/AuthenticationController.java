@@ -75,7 +75,7 @@ public class AuthenticationController {
             try {
                 conn = DatabaseManager.getConnection();
                 conn.setAutoCommit(false);
-            // Check if admin user exists
+                // Check if admin user exists
             try (PreparedStatement checkStmt = conn.prepareStatement(
                 "SELECT COUNT(*) FROM users WHERE username = ?")) {
                 checkStmt.setString(1, "admin");

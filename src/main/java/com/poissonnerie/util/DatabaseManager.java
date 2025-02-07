@@ -45,10 +45,9 @@ public class DatabaseManager {
     }
 
     public static Connection getConnection() throws SQLException {
-        if (!isInitialized.get()) {
-            initializeDatabase();
-        }
-        return getOrCreateConnection();
+        Connection conn = DatabaseConnectionPool.getConnection();
+        conn.setAutoCommit(false);
+        return conn;
     }
 
     private static Connection createNewConnection() throws SQLException {
