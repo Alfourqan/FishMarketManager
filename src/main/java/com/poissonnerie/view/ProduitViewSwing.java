@@ -271,9 +271,17 @@ public class ProduitViewSwing {
         JTextField stockField = createStyledTextField();
         JTextField seuilField = createStyledTextField();
 
-        // Charger et ajouter les fournisseurs au ComboBox
+        // Charger et remplir la liste des fournisseurs
+        fournisseurController.chargerFournisseurs();
         List<Fournisseur> listeFournisseurs = fournisseurController.getFournisseurs();
+
         fournisseurCombo.removeAllItems();
+        if (listeFournisseurs.isEmpty()) {
+            showErrorMessage("Aucun fournisseur n'est disponible. Veuillez d'abord ajouter un fournisseur.");
+            dialog.dispose();
+            return;
+        }
+
         for (Fournisseur f : listeFournisseurs) {
             fournisseurCombo.addItem(f);
         }
