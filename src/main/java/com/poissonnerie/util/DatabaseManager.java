@@ -48,8 +48,14 @@ public class DatabaseManager {
         if (!isInitialized.get()) {
             initializeDatabase();
         }
-        Connection conn = DatabaseConnectionPool.getConnection();
-        conn.setAutoCommit(false);
+        Connection conn = createNewConnection();
+        // Configurer la connexion avant utilisation
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute("PRAGMA journal_mode=WAL");
+            stmt.execute("PRAGMA busy_timeout=5000");
+            stmt.execute("PRAGMA synchronous=NORMAL");
+        }
+        conn.setAutoCommit(true);
         return conn;
     }
 
