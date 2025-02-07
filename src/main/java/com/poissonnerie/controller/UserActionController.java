@@ -5,6 +5,9 @@ import com.poissonnerie.util.DatabaseManager;
 import java.sql.*;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.List;
+import java.util.ArrayList;
+import java.time.LocalDateTime;
 
 public class UserActionController {
     private static final Logger LOGGER = Logger.getLogger(UserActionController.class.getName());
