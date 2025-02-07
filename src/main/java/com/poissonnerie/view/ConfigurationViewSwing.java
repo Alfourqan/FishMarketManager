@@ -73,8 +73,10 @@ public class ConfigurationViewSwing {
 
     private void saveConfigurations(JCheckBox tvaEnabled, JTextField tauxTva) {
         try {
-            configController.updateConfiguration("TVA_ENABLED", String.valueOf(tvaEnabled.isSelected()));
-            configController.updateConfiguration("TAUX_TVA", tauxTva.getText());
+            ConfigurationParam configTVA = new ConfigurationParam(0, "TVA_ENABLED", String.valueOf(tvaEnabled.isSelected()), "");
+            ConfigurationParam configTaux = new ConfigurationParam(0, "TAUX_TVA", tauxTva.getText(), "");
+            configController.mettreAJourConfiguration(configTVA);
+            configController.mettreAJourConfiguration(configTaux);
             
             JOptionPane.showMessageDialog(mainPanel,
                 "Configurations sauvegardées avec succès",

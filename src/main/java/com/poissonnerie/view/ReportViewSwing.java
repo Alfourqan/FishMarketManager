@@ -55,9 +55,17 @@ public class ReportViewSwing {
 
     private void genererRapportStocks() {
         try {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            List<Produit> produits = reportController.getProduits();
+            Map<String, Double> stats = reportController.calculerStatistiquesStocks(produits);
+            reportController.genererRapportStocksPDF(username, produits, stats, outputStream);
+            
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
             String fileName = "rapport_stocks_" + timestamp + ".pdf";
-            reportController.genererRapportStocksPDF(username, fileName);
+            try (FileOutputStream fos = new FileOutputStream(fileName)) {
+                fos.write(outputStream.toByteArray());
+            }
+            
             JOptionPane.showMessageDialog(mainPanel, 
                 "Rapport des stocks généré avec succès : " + fileName,
                 "Succès", JOptionPane.INFORMATION_MESSAGE);
@@ -70,9 +78,17 @@ public class ReportViewSwing {
 
     private void genererRapportVentes() {
         try {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            LocalDateTime fin = LocalDateTime.now();
+            LocalDateTime debut = fin.minus(30, ChronoUnit.DAYS);
+            reportController.genererRapportVentesPDF(username, debut, fin, outputStream);
+            
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
             String fileName = "rapport_ventes_" + timestamp + ".pdf";
-            reportController.genererRapportVentesPDF(username, fileName);
+            try (FileOutputStream fos = new FileOutputStream(fileName)) {
+                fos.write(outputStream.toByteArray());
+            }
+            
             JOptionPane.showMessageDialog(mainPanel,
                 "Rapport des ventes généré avec succès : " + fileName,
                 "Succès", JOptionPane.INFORMATION_MESSAGE);
@@ -85,9 +101,15 @@ public class ReportViewSwing {
 
     private void genererRapportFournisseurs() {
         try {
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            reportController.genererRapportFournisseursPDF(username, outputStream);
+            
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
             String fileName = "rapport_fournisseurs_" + timestamp + ".pdf";
-            reportController.genererRapportFournisseursPDF(username, fileName);
+            try (FileOutputStream fos = new FileOutputStream(fileName)) {
+                fos.write(outputStream.toByteArray());
+            }
+            
             JOptionPane.showMessageDialog(mainPanel,
                 "Rapport des fournisseurs généré avec succès : " + fileName,
                 "Succès", JOptionPane.INFORMATION_MESSAGE);
