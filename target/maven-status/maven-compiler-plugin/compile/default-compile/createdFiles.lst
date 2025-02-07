@@ -17,7 +17,6 @@ com/poissonnerie/controller/UserActionController.class
 com/poissonnerie/model/MouvementCaisse$TypeMouvement.class
 com/poissonnerie/view/LoginSuccessListener.class
 com/poissonnerie/view/AccueilViewSwing$2.class
-schema.sql
 com/poissonnerie/model/UserAction$EntityType.class
 com/poissonnerie/util/TextBillPrinter$1.class
 com/poissonnerie/view/NotificationStockView$1.class
@@ -83,7 +82,6 @@ com/poissonnerie/view/CaisseViewSwing$3.class
 com/poissonnerie/view/FournisseurViewSwing$5.class
 com/poissonnerie/model/ConfigurationParam.class
 com/poissonnerie/view/VenteViewSwing$4.class
-logback.xml
 com/poissonnerie/view/ProduitViewSwing$1.class
 com/poissonnerie/model/Role.class
 com/poissonnerie/util/ExcelGenerator.class
