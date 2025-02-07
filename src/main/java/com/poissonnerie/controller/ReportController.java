@@ -11,6 +11,11 @@ import java.util.logging.Level;
 import java.io.ByteArrayOutputStream;
 
 public class ReportController {
+    
+    public List<Produit> getProduits() {
+        // TODO: Implement product retrieval from database
+        return new ArrayList<>();
+    }
     private static final Logger LOGGER = Logger.getLogger(ReportController.class.getName());
     private final VenteController venteController;
     private final ProduitController produitController;

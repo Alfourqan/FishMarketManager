@@ -4,10 +4,15 @@ package com.poissonnerie.view;
 import javax.swing.*;
 import java.awt.*;
 import com.poissonnerie.controller.ReportController;
+import com.poissonnerie.model.Produit;
+import java.io.ByteArrayOutputStream;
+import java.io.FileOutputStream;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
 
 public class ReportViewSwing {
     private final JPanel mainPanel;

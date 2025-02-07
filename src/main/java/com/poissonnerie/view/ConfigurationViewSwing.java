@@ -4,6 +4,7 @@ package com.poissonnerie.view;
 import javax.swing.*;
 import java.awt.*;
 import com.poissonnerie.controller.ConfigurationController;
+import com.poissonnerie.model.ConfigurationParam;
 import java.util.Map;
 
 public class ConfigurationViewSwing {
