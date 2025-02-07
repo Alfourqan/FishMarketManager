@@ -89,10 +89,64 @@ public class UserActionController {
         }
     }
 
-    public synchronized void logAction(UserAction action) {
+    public void logAction(UserAction action) {
         if (action == null) {
             LOGGER.warning("Tentative de journalisation d'une action null");
             return;
+        }
+        Connection conn = null;
+        int retries = 0;
+        boolean success = false;
+
+        while (!success && retries < MAX_RETRIES) {
+            try {
+                conn = DatabaseManager.getConnection();
+                conn.setAutoCommit(false);
+                
+                try (PreparedStatement stmt = conn.prepareStatement(
+                    "INSERT INTO user_actions (username, action_type, entity_type, entity_id, description, date_time, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
+                    stmt.setString(1, action.getUsername());
+                    stmt.setString(2, action.getType().getValue());
+                    stmt.setString(3, action.getEntityType().getValue());
+                    stmt.setInt(4, action.getEntityId());
+                    stmt.setString(5, action.getDescription());
+                    stmt.setLong(6, action.getDateTime().toInstant().toEpochMilli());
+                    stmt.setObject(7, action.getUserId());
+                    stmt.executeUpdate();
+                    conn.commit();
+                    success = true;
+                }
+            } catch (SQLException e) {
+                if (conn != null) {
+                    try {
+                        conn.rollback();
+                    } catch (SQLException rollbackEx) {
+                        LOGGER.log(Level.SEVERE, "Erreur lors du rollback", rollbackEx);
+                    }
+                }
+                retries++;
+                if (retries < MAX_RETRIES) {
+                    try {
+                        Thread.sleep(100 * (1 << retries));
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException("Interruption pendant l'attente", ie);
+                    }
+                }
+            } finally {
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (SQLException e) {
+                        LOGGER.log(Level.SEVERE, "Erreur lors de la fermeture de la connexion", e);
+                    }
+                }
+            }
+        }
+
+        if (!success) {
+            throw new RuntimeException("Erreur lors de l'enregistrement de l'action utilisateur après " + MAX_RETRIES + " tentatives");
+        }
         }
 
         if (currentUserId == null) {
