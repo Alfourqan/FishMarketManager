@@ -1,0 +1,57 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------< com.poissonnerie:gestion-poissonnerie >----------------
+[INFO] Building gestion-poissonnerie 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ gestion-poissonnerie ---
+[INFO] Deleting /home/runner/workspace/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ gestion-poissonnerie ---
+[INFO] Copying 2 resources from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ gestion-poissonnerie ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 45 source files with javac [debug target 11] to target/classes
+[INFO] -------------------------------------------------------------
+[WARNING] COMPILATION WARNING : 
+[INFO] -------------------------------------------------------------
+[WARNING] system modules path not set in conjunction with -source 11
+[INFO] 1 warning
+[INFO] -------------------------------------------------------------
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/MainViewSwing.java:[167,30] cannot access com.poissonnerie.view.ReportViewSwing
+  bad source file: /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java
+    file does not contain class com.poissonnerie.view.ReportViewSwing
+    Please remove or make sure it appears in the correct subdirectory of the sourcepath.
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/MainViewSwing.java:[168,30] cannot access com.poissonnerie.view.ConfigurationViewSwing
+  bad source file: /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java
+    file does not contain class com.poissonnerie.view.ConfigurationViewSwing
+    Please remove or make sure it appears in the correct subdirectory of the sourcepath.
+[INFO] 2 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  37.001 s
+[INFO] Finished at: 2025-02-07T00:50:40Z
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.11.0:compile (default-compile) on project gestion-poissonnerie: Compilation failure: Compilation failure: 
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/MainViewSwing.java:[167,30] cannot access com.poissonnerie.view.ReportViewSwing
+[ERROR]   bad source file: /home/runner/workspace/src/main/java/com/poissonnerie/view/ReportViewSwing.java
+[ERROR]     file does not contain class com.poissonnerie.view.ReportViewSwing
+[ERROR]     Please remove or make sure it appears in the correct subdirectory of the sourcepath.
+[ERROR] /home/runner/workspace/src/main/java/com/poissonnerie/view/MainViewSwing.java:[168,30] cannot access com.poissonnerie.view.ConfigurationViewSwing
+[ERROR]   bad source file: /home/runner/workspace/src/main/java/com/poissonnerie/view/ConfigurationViewSwing.java
+[ERROR]     file does not contain class com.poissonnerie.view.ConfigurationViewSwing
+[ERROR]     Please remove or make sure it appears in the correct subdirectory of the sourcepath.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException
