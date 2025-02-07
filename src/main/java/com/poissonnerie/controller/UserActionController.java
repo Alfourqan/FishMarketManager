@@ -89,7 +89,7 @@ public class UserActionController {
         }
     }
 
-    public void logAction(UserAction action) {
+    public synchronized void logAction(UserAction action) {
         if (action == null) {
             LOGGER.warning("Tentative de journalisation d'une action null");
             return;
@@ -145,7 +145,7 @@ public class UserActionController {
                         retries++;
                         LOGGER.info("Tentative de réessai " + retries + "/" + MAX_RETRIES + " après verrouillage de la base");
                         try {
-                            Thread.sleep(RETRY_DELAY_MS * retries);
+                            Thread.sleep(RETRY_DELAY_MS * (1 << retries)); // Délai exponentiel
                         } catch (InterruptedException ie) {
                             Thread.currentThread().interrupt();
                             throw new RuntimeException("Interruption pendant l'attente entre les tentatives", ie);
