@@ -46,7 +46,7 @@ public class UserActionController {
         LOGGER.info("Utilisateur courant défini: " + username + " (ID: " + userId + ")");
     }
 
-    private void migrateTable() {
+    private void migrateTable() throws SQLException {
         try (Connection conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(false);
             try {
@@ -63,9 +63,6 @@ public class UserActionController {
                 LOGGER.log(Level.SEVERE, "Erreur lors de la migration de la table " + TABLE_NAME, e);
                 throw e;
             }
-        } catch (SQLException e) {
-            LOGGER.log(Level.SEVERE, "Erreur fatale lors de la migration de la table " + TABLE_NAME, e);
-            throw new RuntimeException("Erreur lors de la migration de la table " + TABLE_NAME, e);
         }
     }
 
@@ -94,60 +91,6 @@ public class UserActionController {
             LOGGER.warning("Tentative de journalisation d'une action null");
             return;
         }
-        Connection conn = null;
-        int retries = 0;
-        boolean success = false;
-
-        while (!success && retries < MAX_RETRIES) {
-            try {
-                conn = DatabaseManager.getConnection();
-                conn.setAutoCommit(false);
-                
-                try (PreparedStatement stmt = conn.prepareStatement(
-                    "INSERT INTO user_actions (username, action_type, entity_type, entity_id, description, date_time, user_id) VALUES (?, ?, ?, ?, ?, ?, ?)")) {
-                    stmt.setString(1, action.getUsername());
-                    stmt.setString(2, action.getType().getValue());
-                    stmt.setString(3, action.getEntityType().getValue());
-                    stmt.setInt(4, action.getEntityId());
-                    stmt.setString(5, action.getDescription());
-                    stmt.setLong(6, action.getDateTime().toInstant().toEpochMilli());
-                    stmt.setObject(7, action.getUserId());
-                    stmt.executeUpdate();
-                    conn.commit();
-                    success = true;
-                }
-            } catch (SQLException e) {
-                if (conn != null) {
-                    try {
-                        conn.rollback();
-                    } catch (SQLException rollbackEx) {
-                        LOGGER.log(Level.SEVERE, "Erreur lors du rollback", rollbackEx);
-                    }
-                }
-                retries++;
-                if (retries < MAX_RETRIES) {
-                    try {
-                        Thread.sleep(100 * (1 << retries));
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                        throw new RuntimeException("Interruption pendant l'attente", ie);
-                    }
-                }
-            } finally {
-                if (conn != null) {
-                    try {
-                        conn.close();
-                    } catch (SQLException e) {
-                        LOGGER.log(Level.SEVERE, "Erreur lors de la fermeture de la connexion", e);
-                    }
-                }
-            }
-        }
-
-        if (!success) {
-            throw new RuntimeException("Erreur lors de l'enregistrement de l'action utilisateur après " + MAX_RETRIES + " tentatives");
-        }
-        }
 
         if (currentUserId == null) {
             LOGGER.warning("Tentative de journalisation sans utilisateur connecté");
@@ -157,65 +100,44 @@ public class UserActionController {
             action.setUserId(currentUserId);
         }
 
-        String sql = "INSERT INTO " + TABLE_NAME +
-            " (action_type, username, date_time, description, entity_type, entity_id, user_id) " +
-            "VALUES (?, ?, ?, ?, ?, ?, ?)";
-
         int retries = 0;
         while (retries < MAX_RETRIES) {
             try (Connection conn = DatabaseManager.getConnection()) {
                 conn.setAutoCommit(false);
-                try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
-                    pstmt.setString(1, action.getType().name());
-                    pstmt.setString(2, action.getUsername());
-                    pstmt.setString(3, action.getDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-                    pstmt.setString(4, action.getDescription());
-                    pstmt.setString(5, action.getEntityType().name());
-                    pstmt.setInt(6, action.getEntityId());
+                try (PreparedStatement stmt = conn.prepareStatement(
+                    "INSERT INTO " + TABLE_NAME + " (username, action_type, entity_type, entity_id, description, date_time, user_id) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)")) {
 
-                    if (currentUserId != null) {
-                        pstmt.setInt(7, currentUserId);
-                    } else {
-                        pstmt.setNull(7, Types.INTEGER);
-                    }
+                    stmt.setString(1, action.getUsername());
+                    stmt.setString(2, action.getType().getValue());
+                    stmt.setString(3, action.getEntityType().getValue());
+                    stmt.setInt(4, action.getEntityId());
+                    stmt.setString(5, action.getDescription());
+                    stmt.setString(6, action.getDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                    stmt.setObject(7, action.getUserId());
 
-                    int result = pstmt.executeUpdate();
+                    int result = stmt.executeUpdate();
                     conn.commit();
 
                     if (result > 0) {
                         LOGGER.info("Action utilisateur enregistrée avec succès: " + action);
                         return;
-                    } else {
-                        LOGGER.warning("Aucune ligne insérée pour l'action: " + action);
                     }
-                } catch (SQLException e) {
-                    try {
-                        conn.rollback();
-                    } catch (SQLException rollbackEx) {
-                        LOGGER.log(Level.SEVERE, "Erreur lors du rollback", rollbackEx);
-                    }
-
-                    if (e.getMessage().contains("database is locked") && retries < MAX_RETRIES - 1) {
-                        retries++;
-                        LOGGER.info("Tentative de réessai " + retries + "/" + MAX_RETRIES + " après verrouillage de la base");
-                        try {
-                            Thread.sleep(RETRY_DELAY_MS * (1 << retries)); // Délai exponentiel
-                        } catch (InterruptedException ie) {
-                            Thread.currentThread().interrupt();
-                            throw new RuntimeException("Interruption pendant l'attente entre les tentatives", ie);
-                        }
-                        continue;
-                    }
-                    throw e;
                 }
             } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "Erreur lors de l'enregistrement de l'action utilisateur: " + action, e);
-                if (retries >= MAX_RETRIES - 1) {
-                    throw new RuntimeException("Erreur lors de l'enregistrement de l'action utilisateur après " + MAX_RETRIES + " tentatives", e);
-                }
+                LOGGER.log(Level.WARNING, "Tentative " + (retries + 1) + " échouée: " + e.getMessage());
                 retries++;
+                if (retries < MAX_RETRIES) {
+                    try {
+                        Thread.sleep(RETRY_DELAY_MS * (1 << retries));
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException("Interruption pendant l'attente entre les tentatives", ie);
+                    }
+                }
             }
         }
+        throw new RuntimeException("Échec de l'enregistrement après " + MAX_RETRIES + " tentatives");
     }
 
     public List<UserAction> getActions(LocalDateTime debut, LocalDateTime fin) {
@@ -259,6 +181,7 @@ public class UserActionController {
             throw new RuntimeException("Erreur lors de la récupération des actions utilisateur", e);
         }
     }
+
     public void purgerActions(LocalDateTime dateLimite) {
         String sql = "DELETE FROM " + TABLE_NAME + " WHERE date_time < ?";
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
