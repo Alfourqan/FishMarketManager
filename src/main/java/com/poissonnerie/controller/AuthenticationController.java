@@ -68,39 +68,49 @@ public class AuthenticationController {
         }
     }
 
-    private void createAdminUser() throws SQLException {
-        try (Connection conn = DatabaseManager.getConnection()) {
+    public void createAdminUser() throws SQLException {
+        Connection conn = null;
+        try {
+            conn = DatabaseManager.getConnection();
             conn.setAutoCommit(false);
-            try {
-                // Check if admin user exists
-                try (PreparedStatement checkStmt = conn.prepareStatement(
-                    "SELECT COUNT(*) FROM users WHERE username = ?")) {
-                    checkStmt.setString(1, "admin");
-                    ResultSet rs = checkStmt.executeQuery();
-                    if (rs.next() && rs.getInt(1) > 0) {
-                        LOGGER.info("Admin user already exists");
-                        return;
-                    }
+            // Check if admin user exists
+            try (PreparedStatement checkStmt = conn.prepareStatement(
+                "SELECT COUNT(*) FROM users WHERE username = ?")) {
+                checkStmt.setString(1, "admin");
+                ResultSet rs = checkStmt.executeQuery();
+                if (rs.next() && rs.getInt(1) > 0) {
+                    LOGGER.info("Admin user already exists");
+                    return;
                 }
+            }
 
-                // Create admin user if doesn't exist
-                String hashedPassword = BCrypt.hashpw(DEFAULT_ADMIN_PASSWORD, BCrypt.gensalt(10));
-                try (PreparedStatement stmt = conn.prepareStatement(
-                    "INSERT INTO users (username, password, active) VALUES (?, ?, ?)",
-                    Statement.RETURN_GENERATED_KEYS)) {
-                    stmt.setString(1, "admin");
-                    stmt.setString(2, hashedPassword);
-                    stmt.setBoolean(3, true);
-                    stmt.executeUpdate();
+            // Create admin user if doesn't exist
+            String hashedPassword = BCrypt.hashpw(DEFAULT_ADMIN_PASSWORD, BCrypt.gensalt(10));
+            try (PreparedStatement stmt = conn.prepareStatement(
+                "INSERT INTO users (username, password, active) VALUES (?, ?, ?)",
+                Statement.RETURN_GENERATED_KEYS)) {
+                stmt.setString(1, "admin");
+                stmt.setString(2, hashedPassword);
+                stmt.setBoolean(3, true);
+                stmt.executeUpdate();
 
-                    LOGGER.info("Created admin user");
-                }
+                LOGGER.info("Created admin user");
+            }
 
-                conn.commit();
-            } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "Error creating admin user", e);
+            conn.commit();
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error creating admin user", e);
+            if (conn != null) {
                 conn.rollback();
-                throw e;
+            }
+            throw e;
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    LOGGER.log(Level.SEVERE, "Error closing connection", e);
+                }
             }
         }
     }

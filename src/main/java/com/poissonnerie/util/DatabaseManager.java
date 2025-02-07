@@ -116,23 +116,23 @@ public class DatabaseManager {
     }
 
     private static void setupDatabase() throws SQLException {
-        try (Connection conn = createNewConnection()) {
+        Connection conn = null;
+        try {
+            conn = createNewConnection();
+
             // Configuration PRAGMA avant toute transaction
             try (Statement stmt = conn.createStatement()) {
-                stmt.execute("PRAGMA foreign_keys = OFF");
                 stmt.execute("PRAGMA journal_mode = WAL");
-                stmt.execute("PRAGMA synchronous = NORMAL");
-                stmt.execute("PRAGMA cache_size = 2000");
-                stmt.execute("PRAGMA page_size = 4096");
-                stmt.execute("PRAGMA temp_store = MEMORY");
+                stmt.execute("PRAGMA busy_timeout = 5000");
+                stmt.execute("PRAGMA foreign_keys = OFF");
             }
 
-            String schema = loadSchemaFromResource();
-            String[] statements = schema.split(";");
-
-            // Exécution du schéma
             conn.setAutoCommit(false);
             try {
+                String schema = loadSchemaFromResource();
+                String[] statements = schema.split(";");
+
+                // Exécution du schéma
                 for (String sql : statements) {
                     sql = sql.trim();
                     if (!sql.isEmpty()) {
@@ -161,6 +161,14 @@ public class DatabaseManager {
                 }
                 LOGGER.log(Level.SEVERE, "Erreur lors de l'initialisation de la base de données", e);
                 throw e;
+            }
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException e) {
+                    LOGGER.log(Level.SEVERE, "Erreur lors de la fermeture de la connexion", e);
+                }
             }
         }
     }
