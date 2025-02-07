@@ -40,53 +40,15 @@ public class AuthenticationController {
     }
 
     private void setupDatabase() throws SQLException {
-        // Drop existing tables to ensure clean slate
-        dropExistingTables();
-
-        // Create schema and initialize data
         createSchema();
-        createInitialData();
-    }
-
-    private void dropExistingTables() {
-        try (Connection conn = DatabaseManager.getConnection();
-             Statement stmt = conn.createStatement()) {
-
-            stmt.execute("PRAGMA foreign_keys = OFF");
-
-            // Drop tables in reverse order of dependencies
-            stmt.execute("DROP TABLE IF EXISTS user_roles");
-            stmt.execute("DROP TABLE IF EXISTS roles");
-            stmt.execute("DROP TABLE IF EXISTS users");
-
-            stmt.execute("PRAGMA foreign_keys = ON");
-
-            LOGGER.info("Existing tables dropped successfully");
-        } catch (SQLException e) {
-            LOGGER.log(Level.WARNING, "Error dropping tables", e);
-        }
+        createAdminUser();
     }
 
     private void createSchema() throws SQLException {
         try (Connection conn = DatabaseManager.getConnection()) {
-            // Set pragmas for better concurrency and reliability
-            try (Statement pragmaStmt = conn.createStatement()) {
-                pragmaStmt.execute("PRAGMA journal_mode = WAL");
-                pragmaStmt.execute("PRAGMA busy_timeout = 5000");
-                pragmaStmt.execute("PRAGMA synchronous = NORMAL");
-                pragmaStmt.execute("PRAGMA foreign_keys = ON");
-            }
-
             conn.setAutoCommit(false);
             try (Statement stmt = conn.createStatement()) {
-                // Create roles table first
-                stmt.execute("CREATE TABLE IF NOT EXISTS roles (" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "name TEXT NOT NULL UNIQUE, " +
-                    "description TEXT, " +
-                    "created_at INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000))");
-
-                // Create users table
+                // Create users table only if it doesn't exist
                 stmt.execute("CREATE TABLE IF NOT EXISTS users (" +
                     "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     "username TEXT NOT NULL UNIQUE, " +
@@ -95,15 +57,6 @@ public class AuthenticationController {
                     "created_at INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000), " +
                     "last_login INTEGER, " +
                     "force_password_reset BOOLEAN DEFAULT false)");
-
-                // Create user_roles table last
-                stmt.execute("CREATE TABLE IF NOT EXISTS user_roles (" +
-                    "user_id INTEGER NOT NULL, " +
-                    "role_id INTEGER NOT NULL, " +
-                    "created_at INTEGER NOT NULL DEFAULT (strftime('%s','now') * 1000), " +
-                    "PRIMARY KEY (user_id, role_id), " +
-                    "FOREIGN KEY (user_id) REFERENCES users(id), " +
-                    "FOREIGN KEY (role_id) REFERENCES roles(id))");
 
                 conn.commit();
                 LOGGER.info("Database schema created successfully");
@@ -115,32 +68,23 @@ public class AuthenticationController {
         }
     }
 
-    private void createInitialData() throws SQLException {
+    private void createAdminUser() throws SQLException {
         try (Connection conn = DatabaseManager.getConnection()) {
             conn.setAutoCommit(false);
             try {
-                // Create ADMIN role first
-                int roleId;
-                try (PreparedStatement stmt = conn.prepareStatement(
-                    "INSERT INTO roles (name, description) VALUES (?, ?)",
-                    Statement.RETURN_GENERATED_KEYS)) {
-                    stmt.setString(1, "ADMIN");
-                    stmt.setString(2, "Administrateur système");
-                    stmt.executeUpdate();
-
-                    try (ResultSet rs = stmt.getGeneratedKeys()) {
-                        if (!rs.next()) {
-                            throw new SQLException("Failed to create ADMIN role");
-                        }
-                        roleId = rs.getInt(1);
-                        LOGGER.info("Created ADMIN role with ID: " + roleId);
+                // Check if admin user exists
+                try (PreparedStatement checkStmt = conn.prepareStatement(
+                    "SELECT COUNT(*) FROM users WHERE username = ?")) {
+                    checkStmt.setString(1, "admin");
+                    ResultSet rs = checkStmt.executeQuery();
+                    if (rs.next() && rs.getInt(1) > 0) {
+                        LOGGER.info("Admin user already exists");
+                        return;
                     }
                 }
 
-                // Create admin user
+                // Create admin user if doesn't exist
                 String hashedPassword = BCrypt.hashpw(DEFAULT_ADMIN_PASSWORD, BCrypt.gensalt(10));
-                int userId;
-
                 try (PreparedStatement stmt = conn.prepareStatement(
                     "INSERT INTO users (username, password, active) VALUES (?, ?, ?)",
                     Statement.RETURN_GENERATED_KEYS)) {
@@ -149,28 +93,12 @@ public class AuthenticationController {
                     stmt.setBoolean(3, true);
                     stmt.executeUpdate();
 
-                    try (ResultSet rs = stmt.getGeneratedKeys()) {
-                        if (!rs.next()) {
-                            throw new SQLException("Failed to create admin user");
-                        }
-                        userId = rs.getInt(1);
-                        LOGGER.info("Created admin user with ID: " + userId);
-                    }
-                }
-
-                // Assign admin role to user
-                try (PreparedStatement stmt = conn.prepareStatement(
-                    "INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)")) {
-                    stmt.setInt(1, userId);
-                    stmt.setInt(2, roleId);
-                    stmt.executeUpdate();
-                    LOGGER.info("Assigned ADMIN role to admin user");
+                    LOGGER.info("Created admin user");
                 }
 
                 conn.commit();
-                LOGGER.info("Initial data created successfully");
             } catch (SQLException e) {
-                LOGGER.log(Level.SEVERE, "Error initializing data", e);
+                LOGGER.log(Level.SEVERE, "Error creating admin user", e);
                 conn.rollback();
                 throw e;
             }
